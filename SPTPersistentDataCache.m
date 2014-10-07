@@ -3,7 +3,7 @@
 #import "SPTPersistentDataHeader.h"
 
 NSString *const SPTPersistentDataCacheErrorDomain = @"persistent.cache.error";
-const NSUInteger SPTPersistentDataCacheDefaultGCIntervalSec = 5 * 60;
+const NSUInteger SPTPersistentDataCacheDefaultGCIntervalSec = 6 * 60;
 const NSUInteger SPTPersistentDataCacheDefaultExpirationTimeSec = 10 * 60;
 static const uint64_t kTTLUpperBoundInSec = 86400 * 31;
 

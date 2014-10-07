@@ -115,6 +115,7 @@ typedef NS_ENUM(NSInteger, SPTDataCacheLoadingError)
 
 typedef void (^SPTDataCacheResponseCallback)(SPTPersistentCacheResponse *response);
 typedef void (^SPTDataCacheDebugCallback)(NSString *string);
+typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 
 /**
  * @brief SPTPersistentDataCacheOptions
@@ -141,6 +142,11 @@ typedef void (^SPTDataCacheDebugCallback)(NSString *string);
  * Callback used to supply debug information usually about errors
  */
 @property (nonatomic, copy) SPTDataCacheDebugCallback debugOutput;
+/**
+ * Callback to provide current time in seconds. This time shouldn't depend on time zone etc. 
+ * So its better to use fixed time scale i.e. UNIX
+ */
+@property (nonatomic, copy) SPTDataCacheCurrentTimeSecCallback currentTimeSec;
 @end
 
 
