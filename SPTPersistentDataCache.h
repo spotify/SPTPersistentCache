@@ -175,14 +175,13 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
                onQueue:(dispatch_queue_t)queue;
 
 /**
- * @brief storeData:forKey:
  * @discussion If data already exist for that key it will be updated. 
- * Its access time will be apdated. Data is expired when current_gc_time - access_time > defaultExpirationPeriodSec.
- * RefCount depends on locked parameter.
+ * Its access time will be updated. RefCount depends on locked parameter.
+ * Data is expired when current_gc_time - access_time > defaultExpirationPeriodSec.
  *
  * @param data Data to store
  * @param key key to associate the data with.
- * @param locked if YES then data refCount is incremented by 1. If NO then remain unchanged.
+ * @param locked if YES then data refCount is incremented by 1. If NO then remain unchanged (for new created file set to 0).
  * @param callback callback to call once data is loaded. It mustn't be nil.
  * @param queue Queue on which to run the callback.
  */
@@ -194,15 +193,15 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 
 
 /**
- * @brief storeData:forKey:
  * @discussion If data already exist for that key it will be updated. 
  * Its access time will be apdated. Its TTL will be updated if applicable.
  * RefCount depends on locked parameter.
+ * Data is expired when current_gc_time - access_time > TTL.
  *
  * @param data Data to store
  * @param key key to associate the data with.
  * @param ttl TTL value for a file. 0 is equivalent to storeData:forKey: behavior.
- * @param locked if YES then data refCount is incremented by 1. If NO then remain unchanged.
+ * @param locked if YES then data refCount is incremented by 1. If NO then remain unchanged (for new created file set to 0).
  * @param callback callback to call once data is loaded. It mustn't be nil.
  * @param queue Queue on which to run the callback.
  */

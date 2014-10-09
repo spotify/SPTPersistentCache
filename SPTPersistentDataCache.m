@@ -295,6 +295,20 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     callback = [callback copy];
     dispatch_barrier_async(self.workQueue, ^{
 
+        NSString *filePath = [self pathForKey:key];
+
+        uint32_t __block oldRefCount = 0;
+
+        // If file already exit satisfy requirement to preserv its refCount for futher possible modification
+        if ([self.fileManager fileExistsAtPath:filePath]) {
+            [self alterHeaderForFileAtPath:filePath
+                                 withBlock:^(SPTPersistentRecordHeaderType *header){
+                                     assert(header != nil);
+                                     oldRefCount = header->refCount;
+                                 }
+                                 writeBack:NO];
+        }
+
         const NSUInteger payloadLen = [data length];
         const CFIndex rawdataLen = kSPTPersistentRecordHeaderSize + payloadLen;
 
@@ -309,7 +323,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
         header->magic = kMagic;
         header->headerSize = kSPTPersistentRecordHeaderSize;
-        header->refCount = (locked ? 1 : 0);
+        header->refCount = oldRefCount + (locked ? 1 : 0);
         header->ttl = ttl;
         header->payloadSizeBytes = payloadLen;
         header->updateTimeSec = (uint64_t)[[NSDate date] timeIntervalSince1970];
@@ -318,7 +332,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         [rawData appendData:data];
 
         NSError *error = nil;
-        NSString *filePath = [self pathForKey:key];
 
         if (![rawData writeToFile:filePath options:NSDataWritingAtomic error:&error]) {
             [self debugOutput:@"PersistentDataCache: Error writting to file:%@ , for key:%@. Removing it...", filePath, key];
