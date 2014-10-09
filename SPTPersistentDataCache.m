@@ -390,24 +390,28 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     });
 }
 
-- (void)isDataLockedForKey:(NSString *)key
-              withCallback:(void(^)(BOOL))callback
-                   onQueue:(dispatch_queue_t)queue
+- (void)touchDataForKeys:(NSArray *)keys
 {
-    dispatch_async(self.workQueue, ^{
-        NSString *filePath = [self pathForKey:key];
-        [self alterHeaderForFileAtPath:filePath
-                             withBlock:^(SPTPersistentRecordHeaderType *header){
-                                 assert(header != nil);
-
-                                 BOOL locked = header->refCount > 0;
-                                 dispatch_async(queue, ^{
-                                     callback(locked);
-                                 });
-                             }
-                             writeBack:NO];
-    });
 }
+
+//- (void)isDataLockedForKey:(NSString *)key
+//              withCallback:(void(^)(BOOL))callback
+//                   onQueue:(dispatch_queue_t)queue
+//{
+//    dispatch_async(self.workQueue, ^{
+//        NSString *filePath = [self pathForKey:key];
+//        [self alterHeaderForFileAtPath:filePath
+//                             withBlock:^(SPTPersistentRecordHeaderType *header){
+//                                 assert(header != nil);
+//
+//                                 BOOL locked = header->refCount > 0;
+//                                 dispatch_async(queue, ^{
+//                                     callback(locked);
+//                                 });
+//                             }
+//                             writeBack:NO];
+//    });
+//}
 
 - (void)runGarbageCollector
 {

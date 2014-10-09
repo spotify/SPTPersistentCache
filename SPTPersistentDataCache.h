@@ -178,11 +178,11 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
  * @brief storeData:forKey:
  * @discussion If data already exist for that key it will be updated. 
  * Its access time will be apdated. Data is expired when current_gc_time - access_time > defaultExpirationPeriodSec.
- * RefCount set to 0
+ * RefCount depends on locked parameter.
  *
  * @param data Data to store
  * @param key key to associate the data with.
- * @param locked Make data locked with refCount = 1
+ * @param locked if YES then data refCount is incremented by 1. If NO then remain unchanged.
  * @param callback callback to call once data is loaded. It mustn't be nil.
  * @param queue Queue on which to run the callback.
  */
@@ -196,13 +196,13 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 /**
  * @brief storeData:forKey:
  * @discussion If data already exist for that key it will be updated. 
- * Its access time will be apdated. Its TTL will be updated.
- * RefCount set to 0
+ * Its access time will be apdated. Its TTL will be updated if applicable.
+ * RefCount depends on locked parameter.
  *
  * @param data Data to store
  * @param key key to associate the data with.
  * @param ttl TTL value for a file. 0 is equivalent to storeData:forKey: behavior.
- * @param locked Make data locked with refCount = 1
+ * @param locked if YES then data refCount is incremented by 1. If NO then remain unchanged.
  * @param callback callback to call once data is loaded. It mustn't be nil.
  * @param queue Queue on which to run the callback.
  */
@@ -230,9 +230,14 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 - (void)unlockDataForKeys:(NSArray *)keys;
 
 /**
+ * @brief Simply update access time on data with given keys
+ */
+- (void)touchDataForKeys:(NSArray *)keys;
+
+/**
  * Return is data is locke for given key
  */
-- (void)isDataLockedForKey:(NSString *)key withCallback:(void(^)(BOOL))calback onQueue:(dispatch_queue_t)queue;
+//- (void)isDataLockedForKey:(NSString *)key withCallback:(void(^)(BOOL))calback onQueue:(dispatch_queue_t)queue;
 
 /**
  * Run ragbage collection. If already running this method does nothing.
