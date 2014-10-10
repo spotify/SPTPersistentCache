@@ -255,7 +255,14 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 
 /**
  * Returns size occupied by cache
+ * WARNING: This method does synchronous calculations
  */
-- (NSUInteger)occupiedCacheSizeInBytes;
+- (NSUInteger)totalUsedSizeInBytes;
+
+/**
+ * Returns size occupied by locked items
+ * WARNING: This method does synchronous calculations
+ */
+- (NSUInteger)lockedItemsSizeInBytes;
 
 @end

@@ -465,22 +465,34 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     });
 }
 
-- (NSUInteger)occupiedCacheSizeInBytes
+- (NSUInteger)totalUsedSizeInBytes
+{
+    NSUInteger size = 0;
+    NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtPath:self.options.cachePath];
+    for (NSString *file in dirEnumerator) {
+        NSString *filePath = [self pathForKey:file];
+        size += [self getFileSizeAtPath:filePath];
+    }
+
+    return size;
+}
+
+- (NSUInteger)lockedItemsSizeInBytes
 {
     NSUInteger size = 0;
     NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtPath:self.options.cachePath];
     for (NSString *file in dirEnumerator) {
         NSString *filePath = [self pathForKey:file];
 
-        NSError *error = nil;
-        NSDictionary *attrs = [self.fileManager attributesOfItemAtPath:filePath error:&error];
-        if (attrs == nil) {
-            [self debugOutput:@"PersistentDataCache: Error getting attributes for file: %@, error: %@", file, error];
+        BOOL __block locked = NO;
+        [self alterHeaderForFileAtPath:filePath withBlock:^(SPTPersistentRecordHeaderType *header) {
+            locked = header->refCount > 0;
         }
-        size += [attrs fileSize];
+                             writeBack:NO];
+        if (locked) {
+            size += [self getFileSizeAtPath:filePath];
+        }
     }
-
-    return size;
 }
 
 - (void)dealloc
@@ -682,6 +694,16 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     dispatch_async(queue, ^{
         callback(response);
     });
+}
+
+- (NSUInteger)getFileSizeAtPath:(NSString *)filePath
+{
+    NSError *error = nil;
+    NSDictionary *attrs = [self.fileManager attributesOfItemAtPath:filePath error:&error];
+    if (attrs == nil) {
+        [self debugOutput:@"PersistentDataCache: Error getting attributes for file: %@, error: %@", filePath, error];
+    }
+    return [attrs fileSize];
 }
 
 - (void)debugOutput:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2)
