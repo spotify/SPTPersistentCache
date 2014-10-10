@@ -430,10 +430,13 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 {
     assert([NSThread isMainThread]);
 
+    [self debugOutput:@"runGarbageCollector:%@", self.gcTimer];
+
     // if gc process already running to nothing
     if (self.gcTimer != nil) {
         return;
     }
+
     SPTTimerProxy *proxy = [SPTTimerProxy new];
     proxy.dataCache = self;
     proxy.queue = self.workQueue;
@@ -448,6 +451,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 - (void)stopGarbageCollector
 {
     assert([NSThread isMainThread]);
+
+    [self debugOutput:@"stopGarbageCollector:%@", self.gcTimer];
 
     [self.gcTimer invalidate];
     self.gcTimer = nil;
