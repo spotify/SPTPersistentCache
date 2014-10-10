@@ -229,16 +229,6 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 - (void)unlockDataForKeys:(NSArray *)keys;
 
 /**
- * @brief Simply update access time on data with given keys
- */
-- (void)touchDataForKeys:(NSArray *)keys;
-
-/**
- * Return is data is locke for given key
- */
-//- (void)isDataLockedForKey:(NSString *)key withCallback:(void(^)(BOOL))calback onQueue:(dispatch_queue_t)queue;
-
-/**
  * Run ragbage collection. If already running this method does nothing.
  */
 - (void)runGarbageCollector;
