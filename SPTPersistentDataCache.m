@@ -94,7 +94,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 @property (nonatomic, strong) NSTimer *gcTimer;
 @property (nonatomic, copy) SPTDataCacheDebugCallback debugOutput;
 
-- (void)collectGarbage:(BOOL)forceExpire;
+- (void)collectGarbageForceExpire:(BOOL)forceExpire forceLocked:(BOOL)forceLocked;
 @end
 
 @interface SPTTimerProxy : NSObject
@@ -105,7 +105,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 - (void)enqueueGC:(NSTimer *)timer
 {
     dispatch_barrier_async(self.queue, ^{
-        [self.dataCache collectGarbage:NO];
+        [self.dataCache collectGarbageForceExpire:NO forceLocked:NO];
     });
 }
 @end
@@ -465,6 +465,19 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     });
 }
 
+- (void)wipeLockedFiles;
+{
+    dispatch_barrier_async(self.workQueue, ^{
+        [self collectGarbageForceExpire:NO forceLocked:YES];
+    });
+}
+
+- (void)wipeNonLockedFiles{
+    dispatch_barrier_async(self.workQueue, ^{
+        [self collectGarbageForceExpire:YES forceLocked:NO];
+    });
+}
+
 - (NSUInteger)totalUsedSizeInBytes
 {
     NSUInteger size = 0;
@@ -628,9 +641,13 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     return (current - header->updateTimeSec) > threshold;
 }
 
-- (void)collectGarbage:(BOOL)forceExpire
+/**
+ * forceExpire = YES treat all unlocked files like they expired
+ * forceLocked = YES ignore lock status
+ */
+- (void)collectGarbageForceExpire:(BOOL)forceExpire forceLocked:(BOOL)forceLocked
 {
-    [self debugOutput:@"PersistentDataCache: Run GC with forceExpire:%d", forceExpire];
+    [self debugOutput:@"PersistentDataCache: Run GC with forceExpire:%d forceLock:%d", forceExpire, forceLocked];
     
     NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtPath:self.options.cachePath];
     for (NSString *file in dirEnumerator) {
@@ -639,8 +656,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         [self alterHeaderForFileAtPath:filePath
                              withBlock:^(SPTPersistentRecordHeaderType *header) {
 
-                                 if ((forceExpire || [self isDataExpiredWithHeader:header]) &&
-                                     header->refCount == 0) {
+                                 if ((([self isDataExpiredWithHeader:header] || forceExpire) && header->refCount == 0) ||
+                                     (forceLocked && header->refCount > 0)) {
                                      needRemove = YES;
                                  }
                              } writeBack:NO];

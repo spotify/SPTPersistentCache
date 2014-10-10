@@ -218,7 +218,7 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 - (void)removeDataForKeys:(NSArray *)keys;
 
 /**
- * @brief Increment ref count for given keys
+ * @brief Increment ref count for given keys.
  */
 - (void)lockDataForKeys:(NSArray *)keys;
 
@@ -249,19 +249,29 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 - (void)stopGarbageCollector;
 
 /**
- * Delete all files except locked regardless of expiration and TTL
+ * Delete all files files in managed folder unconditionaly.
  */
 - (void)prune;
 
 /**
- * Returns size occupied by cache
- * WARNING: This method does synchronous calculations
+ * Wipe only files that locked regardless of refCount value.
+ */
+- (void)wipeLockedFiles;
+
+/**
+ * Wipe only files that are not locked regardles of their expiration time.
+ */
+- (void)wipeNonLockedFiles;
+
+/**
+ * Returns size occupied by cache.
+ * WARNING: This method does synchronous calculations.
  */
 - (NSUInteger)totalUsedSizeInBytes;
 
 /**
- * Returns size occupied by locked items
- * WARNING: This method does synchronous calculations
+ * Returns size occupied by locked items.
+ * WARNING: This method does synchronous calculations.
  */
 - (NSUInteger)lockedItemsSizeInBytes;
 
