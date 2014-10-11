@@ -57,6 +57,10 @@ typedef NS_ENUM(NSInteger, SPTDataCacheResponseCode)
  @constant ERROR_WRONG_PAYLOAD_SIZE Payload size in header is not the same as stored in cache record.
  
  @constant ERROR_INVALID_HEADER_CRC CRC calculated for reader and contained in header missmatch
+ 
+ @constant ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER Binary data size is less then current header size
+ 
+ @constant ERROR_INTERNAL_INCONSISTENCY Something bad has happened that shouldn't
  */
 typedef NS_ENUM(NSInteger, SPTDataCacheLoadingError)
 {
@@ -64,7 +68,9 @@ typedef NS_ENUM(NSInteger, SPTDataCacheLoadingError)
     ERROR_HEADER_ALIGNMENT_MISSMATCH,
     ERROR_WRONG_HEADER_SIZE,
     ERROR_WRONG_PAYLOAD_SIZE,
-    ERROR_INVALID_HEADER_CRC
+    ERROR_INVALID_HEADER_CRC,
+    ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
+    ERROR_INTERNAL_INCONSISTENCY
 };
 
 /**

@@ -7,13 +7,8 @@ const NSUInteger SPTPersistentDataCacheDefaultGCIntervalSec = 6 * 60;
 const NSUInteger SPTPersistentDataCacheDefaultExpirationTimeSec = 10 * 60;
 static const uint64_t kTTLUpperBoundInSec = 86400 * 31;
 
-NS_INLINE BOOL PointerMagicAlignCheck(const void *ptr)
-{
-    const unsigned shift = _Alignof(MagicType)-1;
-    const unsigned long mask = ~(((unsigned long)(-1) >> shift) << shift);
-    assert( !((unsigned long)ptr & mask) );
-    return !((unsigned long)ptr & mask);
-}
+const MagicType kMagic = 0x46545053; // SPTF
+const int kSPTPersistentRecordHeaderSize = sizeof(SPTPersistentRecordHeaderType);
 
 #pragma mark - SPTDataCacheRecord
 @interface SPTDataCacheRecord ()
@@ -201,7 +196,14 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 // File read with error -> inform user
                 [self dispatchError:error result:PDC_DATA_LOADING_ERROR callback:callback onQueue:queue];
             } else {
-                SPTPersistentRecordHeaderType *header = (SPTPersistentRecordHeaderType *)[rawData bytes];
+                SPTPersistentRecordHeaderType *header = pdc_GetHeaderFromData([rawData bytes], [rawData length]);
+
+                // If not enough dat to cast to header its not the file we can process
+                if (header == NULL) {
+                    NSError *headerError = [self nsErrorWithCode:ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER];
+                    [self dispatchError:headerError result:PDC_DATA_LOADING_ERROR callback:callback onQueue:queue];
+                    return;
+                }
 
                 // Check header is valid
                 NSError *headerError = [self checkHeaderValid:header];
@@ -249,7 +251,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 // If data ttl == 0 we apdate access time
                 if (ttl == 0) {
                     header->updateTimeSec = (uint64_t)[[NSDate date] timeIntervalSince1970];
-                    header->crc = spt_crc32((uint8_t*)header, kSPTPersistentRecordHeaderSize - sizeof(header->crc));
+                    header->crc = pdc_CalculateHeaderCRC(header);
 
                     // Write back with update access attributes
                     NSError *werror = nil;
@@ -329,7 +331,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         header->ttl = ttl;
         header->payloadSizeBytes = payloadLen;
         header->updateTimeSec = (uint64_t)[[NSDate date] timeIntervalSince1970];
-        header->crc = spt_crc32((uint8_t*)header, kSPTPersistentRecordHeaderSize - sizeof(header->crc));
+        header->crc = pdc_CalculateHeaderCRC(header);
 
         [rawData appendData:data];
 
@@ -584,28 +586,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
 - (NSError *)checkHeaderValid:(SPTPersistentRecordHeaderType *)header
 {
-    assert(header != NULL);
-
-    // Check that header could be read according to alignment
-    if (!PointerMagicAlignCheck(header)) {
-        return [self nsErrorWithCode:ERROR_HEADER_ALIGNMENT_MISSMATCH];
+    int code = pdc_ValidateHeader(header);
+    if (code == -1) { // No error
+        return nil;
     }
-
-    // Check magic
-    if (header->magic != kMagic) {
-        return [self nsErrorWithCode:ERROR_MAGIC_MISSMATCH];
-    }
-
-    if (header->headerSize != kSPTPersistentRecordHeaderSize) {
-        return [self nsErrorWithCode:ERROR_WRONG_HEADER_SIZE];
-    }
-
-    uint32_t crc = spt_crc32((uint8_t*)header, kSPTPersistentRecordHeaderSize - sizeof(header->crc));
-    if (crc != header->crc) {
-        return [self nsErrorWithCode:ERROR_INVALID_HEADER_CRC];
-    }
-
-    return nil;
+    
+    return [self nsErrorWithCode:code];
 }
 
 - (BOOL)isDataExpiredWithHeader:(SPTPersistentRecordHeaderType *)header
@@ -717,3 +703,59 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
 @end
 
+NS_INLINE BOOL PointerMagicAlignCheck(const void *ptr)
+{
+    const unsigned shift = _Alignof(MagicType)-1;
+    const unsigned long mask = ~(((unsigned long)(-1) >> shift) << shift);
+    assert( !((unsigned long)ptr & mask) );
+    return !((unsigned long)ptr & mask);
+}
+
+SPTPersistentRecordHeaderType* pdc_GetHeaderFromData(const void* data, size_t size)
+{
+    if (size < kSPTPersistentRecordHeaderSize) {
+        return NULL;
+    }
+
+    return (SPTPersistentRecordHeaderType*)data;
+}
+
+int /*SPTDataCacheLoadingError*/ pdc_ValidateHeader(const SPTPersistentRecordHeaderType *header)
+{
+    assert(header != NULL);
+    if (header == NULL) {
+        return ERROR_INTERNAL_INCONSISTENCY;
+    }
+
+    // Check that header could be read according to alignment
+    if (!PointerMagicAlignCheck(header)) {
+        return ERROR_HEADER_ALIGNMENT_MISSMATCH;
+    }
+
+    // Check magic
+    if (header->magic != kMagic) {
+        return ERROR_MAGIC_MISSMATCH;
+    }
+
+    if (header->headerSize != kSPTPersistentRecordHeaderSize) {
+        return ERROR_WRONG_HEADER_SIZE;
+    }
+
+    uint32_t crc = pdc_CalculateHeaderCRC(header);
+
+    if (crc != header->crc) {
+        return ERROR_INVALID_HEADER_CRC;
+    }
+    
+    return -1;
+}
+
+uint32_t pdc_CalculateHeaderCRC(const SPTPersistentRecordHeaderType *header)
+{
+    assert(header != NULL);
+    if (header == NULL) {
+        return 0;
+    }
+
+    return spt_crc32((uint8_t*)header, kSPTPersistentRecordHeaderSize - sizeof(header->crc));
+}

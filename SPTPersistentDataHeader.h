@@ -2,7 +2,7 @@
 #define SPTPERSISTENTDATAHEADER_H
 
 typedef uint32_t MagicType;
-static const MagicType kMagic = 0x46545053; // SPTF
+FOUNDATION_EXPORT const MagicType kMagic;
 
 typedef struct SPTPersistentRecordHeaderType
 {
@@ -20,8 +20,21 @@ typedef struct SPTPersistentRecordHeaderType
     // Version N: Add fields here if required
 } SPTPersistentRecordHeaderType;
 
-static const int kSPTPersistentRecordHeaderSize = sizeof(SPTPersistentRecordHeaderType);
+FOUNDATION_EXPORT const int kSPTPersistentRecordHeaderSize;
+
 _Static_assert(sizeof(SPTPersistentRecordHeaderType) == 48, "Struct SPTPersistentRecordHeaderType has to be packed without padding");
 _Static_assert(sizeof(SPTPersistentRecordHeaderType)%4 == 0, "Struct size has to be multiple of 4");
+
+// Following functions used internally and could be used testing purposes also
+
+// Function return pointer to header if there are enough data otherwise NULL
+FOUNDATION_EXPORT SPTPersistentRecordHeaderType* pdc_GetHeaderFromData(const void* data, size_t size);
+
+// Function validates header accoring to predefined rules used in production code
+// @return -1 if everything is ok, otherwise one of codes from SPTDataCacheLoadingError
+FOUNDATION_EXPORT int /*SPTDataCacheLoadingError*/ pdc_ValidateHeader(const SPTPersistentRecordHeaderType *header);
+
+// Function return calculated CRC for current header.
+FOUNDATION_EXPORT uint32_t pdc_CalculateHeaderCRC(const SPTPersistentRecordHeaderType *header);
 
 #endif // SPTPERSISTENTDATAHEADER_H
