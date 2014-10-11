@@ -485,6 +485,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             size += [self getFileSizeAtPath:filePath];
         }
     }
+
+    return size;
 }
 
 - (void)dealloc
