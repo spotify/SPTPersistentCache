@@ -210,7 +210,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                     return;
                 }
 
-                if ([self isDataExpiredWithHeader:header]) {
+                const NSUInteger refCount = header->refCount;
+                // We return locked files even if they expired, GC doesnt collect them too so they valuable to user
+                if ([self isDataExpiredWithHeader:header] && refCount == 0) {
                     [self dispatchNotFoundCallback:callback onQueue:queue];
                     return;
                 }
@@ -230,7 +232,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 NSRange payloadRange = NSMakeRange(kSPTPersistentRecordHeaderSize, header->payloadSizeBytes);
                 NSData *payload = [rawData subdataWithRange:payloadRange];
                 const NSUInteger ttl = header->ttl;
-                const NSUInteger refCount = header->refCount;
+
 
                 SPTDataCacheRecord *record = [[SPTDataCacheRecord alloc] initWithData:payload
                                                                                   key:key

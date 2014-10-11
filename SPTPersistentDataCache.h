@@ -157,7 +157,8 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
  * It is obligatory that one instanse of that class manages one path branch on disk. In other case behavior is undefined.
  * Cache GC procedure evicts all not locked files for which current_gc_time - access_time > defaultExpirationPeriodSec.
  * Cache GC procedure evicts all not locked files for which current_gc_time - creation_time > fileTTL.
- * Files that are locked not evicted by GC procedure.
+ * Files that are locked not evicted by GC procedure and returned by the cache even if they already expired. 
+ * Once unlocked expired files would be collected by following GC
  */
 @interface SPTPersistentDataCache : NSObject
 
