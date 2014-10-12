@@ -48,29 +48,29 @@ typedef NS_ENUM(NSInteger, SPTDataCacheResponseCode)
  @discussion The SPTDataCacheLoadingError enum defines constants that
  identify NSError's in SPTPersistentDataCacheErrorDomain.
 
- @constant ERROR_MAGIC_MISSMATCH Magic number in record header is not as expected.
+ @constant PDC_ERROR_MAGIC_MISSMATCH Magic number in record header is not as expected.
 
- @constant ERROR_HEADER_ALIGNMENT_MISSMATCH Alignment of pointer which casted to header
+ @constant PDC_ERROR_HEADER_ALIGNMENT_MISSMATCH Alignment of pointer which casted to header
            is not compatible with first header field.
- @constant ERROR_WRONG_HEADER_SIZE Size of header is not as expected. Possibly bcuz of version change.
+ @constant PDC_ERROR_WRONG_HEADER_SIZE Size of header is not as expected. Possibly bcuz of version change.
  
- @constant ERROR_WRONG_PAYLOAD_SIZE Payload size in header is not the same as stored in cache record.
+ @constant PDC_ERROR_WRONG_PAYLOAD_SIZE Payload size in header is not the same as stored in cache record.
  
- @constant ERROR_INVALID_HEADER_CRC CRC calculated for reader and contained in header missmatch
+ @constant PDC_ERROR_INVALID_HEADER_CRC CRC calculated for reader and contained in header missmatch
  
- @constant ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER Binary data size is less then current header size
+ @constant PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER Binary data size is less then current header size
  
- @constant ERROR_INTERNAL_INCONSISTENCY Something bad has happened that shouldn't
+ @constant PDC_ERROR_INTERNAL_INCONSISTENCY Something bad has happened that shouldn't
  */
 typedef NS_ENUM(NSInteger, SPTDataCacheLoadingError)
 {
-    ERROR_MAGIC_MISSMATCH = 100,
-    ERROR_HEADER_ALIGNMENT_MISSMATCH,
-    ERROR_WRONG_HEADER_SIZE,
-    ERROR_WRONG_PAYLOAD_SIZE,
-    ERROR_INVALID_HEADER_CRC,
-    ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
-    ERROR_INTERNAL_INCONSISTENCY
+    PDC_ERROR_MAGIC_MISSMATCH = 100,
+    PDC_ERROR_HEADER_ALIGNMENT_MISSMATCH,
+    PDC_ERROR_WRONG_HEADER_SIZE,
+    PDC_ERROR_WRONG_PAYLOAD_SIZE,
+    PDC_ERROR_INVALID_HEADER_CRC,
+    PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
+    PDC_ERROR_INTERNAL_INCONSISTENCY
 };
 
 /**

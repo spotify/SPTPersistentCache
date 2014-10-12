@@ -219,7 +219,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
                 // If not enough dat to cast to header its not the file we can process
                 if (header == NULL) {
-                    NSError *headerError = [self nsErrorWithCode:ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER];
+                    NSError *headerError = [self nsErrorWithCode:PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER];
                     [self dispatchError:headerError result:PDC_DATA_LOADING_ERROR callback:callback onQueue:queue];
                     return;
                 }
@@ -244,7 +244,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 if (header->payloadSizeBytes != [rawData length] - kSPTPersistentRecordHeaderSize) {
                     [self debugOutput:@"PersistentDataCache: Wrong payload size for key:%@ , Removing file...", key];
                     [self removeDataForKeys:@[key]];
-                    [self dispatchError:[self nsErrorWithCode:ERROR_WRONG_PAYLOAD_SIZE]
+                    [self dispatchError:[self nsErrorWithCode:PDC_ERROR_WRONG_PAYLOAD_SIZE]
                                  result:PDC_DATA_LOADING_ERROR
                                callback:callback onQueue:queue];
                     return;
@@ -743,27 +743,27 @@ int /*SPTDataCacheLoadingError*/ pdc_ValidateHeader(const SPTPersistentRecordHea
 {
     assert(header != NULL);
     if (header == NULL) {
-        return ERROR_INTERNAL_INCONSISTENCY;
+        return PDC_ERROR_INTERNAL_INCONSISTENCY;
     }
 
     // Check that header could be read according to alignment
     if (!PointerMagicAlignCheck(header)) {
-        return ERROR_HEADER_ALIGNMENT_MISSMATCH;
+        return PDC_ERROR_HEADER_ALIGNMENT_MISSMATCH;
     }
 
     // Check magic
     if (header->magic != kMagic) {
-        return ERROR_MAGIC_MISSMATCH;
+        return PDC_ERROR_MAGIC_MISSMATCH;
     }
 
     if (header->headerSize != kSPTPersistentRecordHeaderSize) {
-        return ERROR_WRONG_HEADER_SIZE;
+        return PDC_ERROR_WRONG_HEADER_SIZE;
     }
 
     uint32_t crc = pdc_CalculateHeaderCRC(header);
 
     if (crc != header->crc) {
-        return ERROR_INVALID_HEADER_CRC;
+        return PDC_ERROR_INVALID_HEADER_CRC;
     }
     
     return -1;
