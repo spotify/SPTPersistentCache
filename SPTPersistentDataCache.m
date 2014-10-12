@@ -88,6 +88,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 @property (nonatomic, strong) NSFileManager *fileManager;
 @property (nonatomic, strong) NSTimer *gcTimer;
 @property (nonatomic, copy) SPTDataCacheDebugCallback debugOutput;
+@property (nonatomic, copy) SPTDataCacheCurrentTimeSecCallback currentTime;
 
 - (void)collectGarbageForceExpire:(BOOL)forceExpire forceLocked:(BOOL)forceLocked;
 @end
@@ -118,11 +119,21 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     self.options.defaultExpirationPeriodSec = SPTPersistentDataCacheDefaultExpirationTimeSec;
     self.options.collectionIntervalSec = SPTPersistentDataCacheDefaultGCIntervalSec;
     self.fileManager = [NSFileManager defaultManager];
+    NSString *cachePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"/com.spotify.temppersistent.image.cache"];
+    self.options.cachePath = cachePath;
+    if (self.options.cacheIdentifier == nil) {
+        self.options.cacheIdentifier = @"persistent.cache";
+    }
     NSParameterAssert(self.options.cachePath);
     
-    NSString *name = [NSString stringWithFormat:@"persistent.cache.queue.%ld.%ld.%p",
+    NSString *name = [NSString stringWithFormat:@"%@.queue.%ld.%ld.%p", self.options.cacheIdentifier,
                       (unsigned long)self.options.collectionIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, self];
     _workQueue = dispatch_queue_create([name UTF8String], DISPATCH_QUEUE_CONCURRENT);
+
+    self.currentTime = self.options.currentTimeSec;
+    if (self.currentTime == nil) {
+        self.currentTime = ^NSTimeInterval(){ return [[NSDate date] timeIntervalSince1970]; };
+    }
 
     return self;
 }
@@ -134,12 +145,20 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     }
 
     _options = options;
-    NSString *name = [NSString stringWithFormat:@"persistent.cache.queue.%ld.%ld.%p",
+    if (self.options.cacheIdentifier == nil) {
+        self.options.cacheIdentifier = @"persistent.cache";
+    }
+    NSString *name = [NSString stringWithFormat:@"%@.queue.%ld.%ld.%p", self.options.cacheIdentifier,
                       (unsigned long)self.options.collectionIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, self];
     _workQueue = dispatch_queue_create([name UTF8String], DISPATCH_QUEUE_CONCURRENT);
     assert(_workQueue != nil);
     self.fileManager = [NSFileManager defaultManager];
     _debugOutput = self.options.debugOutput;
+
+    self.currentTime = self.options.currentTimeSec;
+    if (self.currentTime == nil) {
+        self.currentTime = ^NSTimeInterval(){ return [[NSDate date] timeIntervalSince1970]; };
+    }
 
     NSParameterAssert(self.options.cachePath);
 
@@ -250,7 +269,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
                 // If data ttl == 0 we apdate access time
                 if (ttl == 0) {
-                    header->updateTimeSec = (uint64_t)[[NSDate date] timeIntervalSince1970];
+                    header->updateTimeSec = (uint64_t)self.currentTime();
                     header->crc = pdc_CalculateHeaderCRC(header);
 
                     // Write back with update access attributes
@@ -330,7 +349,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         header->refCount = oldRefCount + (locked ? 1 : 0);
         header->ttl = ttl;
         header->payloadSizeBytes = payloadLen;
-        header->updateTimeSec = (uint64_t)[[NSDate date] timeIntervalSince1970];
+        header->updateTimeSec = (uint64_t)self.currentTime();
         header->crc = pdc_CalculateHeaderCRC(header);
 
         [rawData appendData:data];
@@ -598,7 +617,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 {
     assert(header != nil);
     uint64_t ttl = header->ttl;
-    uint64_t current = (uint64_t)[[NSDate date] timeIntervalSince1970];
+    uint64_t current = (uint64_t)self.currentTime();
     uint64_t threshold = (ttl > 0) ? ttl : self.options.defaultExpirationPeriodSec;
 
     if (ttl > kTTLUpperBoundInSec) {

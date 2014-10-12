@@ -153,6 +153,10 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
  * So its better to use fixed time scale i.e. UNIX
  */
 @property (nonatomic, copy) SPTDataCacheCurrentTimeSecCallback currentTimeSec;
+/**
+ * Any string that identifies the cache
+ */
+@property (nonatomic, copy) NSString *cacheIdentifier;
 @end
 
 
