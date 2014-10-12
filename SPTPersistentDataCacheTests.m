@@ -36,7 +36,8 @@
     };
 
     self.cache = [[SPTPersistentDataCache alloc] initWithOptions:options];
-//    NSString *s = [[NSBundle mainBundle] pathForResource:@"b91998ae68b9639cee6243df0886d69bdeb75854" ofType:nil];
+    NSString *s = [[NSBundle bundleForClass:[self class]] pathForResource:@"b91998ae68b9639cee6243df0886d69bdeb75854" ofType:nil];
+    NSLog(@"%@",s);
 }
 
 - (void)tearDown
