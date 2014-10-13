@@ -679,7 +679,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     }
 
     for (NSString *file in files) {
-        if (![self.fileManager removeItemAtPath:file error:&error]) {
+        if (![self.fileManager removeItemAtPath:[self pathForKey:file] error:&error]) {
             [self debugOutput:@"PersistentDataCache: Error cleaning file: %@ , %@", file, error];
         }
     }
