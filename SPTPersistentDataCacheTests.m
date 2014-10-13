@@ -138,7 +138,7 @@ static int params_GetFilesNumber(BOOL locked)
 
 - (void)tearDown
 {
-    [[NSFileManager defaultManager] removeItemAtPath:self.cachePath error:nil];
+//    [[NSFileManager defaultManager] removeItemAtPath:self.cachePath error:nil];
     self.cache = nil;
     self.imageNames = nil;
     [super tearDown];
@@ -151,13 +151,14 @@ static int params_GetFilesNumber(BOOL locked)
 - (void)testCorrectWriteAndReadConcurrent
 {
     SPTPersistentDataCache *cache = [self createCache];
-    SPTAsyncTestHelper *asyncHelper = [SPTAsyncTestHelper new];
 
     int __block calls = 0;
     SPTPersistentDataCache * __weak wcache = cache;
 
+    XCTestExpectation * expect = [self expectationWithDescription:@"All items processed"];
+    const int count = self.imageNames.count;
+
     dispatch_apply(self.imageNames.count, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i) {
-        [asyncHelper startTest];
 
         [wcache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
 
@@ -185,14 +186,22 @@ static int params_GetFilesNumber(BOOL locked)
                 XCTAssert(NO, @"Unexpected result code on LOAD");
             }
 
-            [asyncHelper endTest];
+            if (calls == count) {
+                [expect fulfill];
+            }
+
         } onQueue:dispatch_get_main_queue()];
 
         XCTAssert(kParams[i].last != YES, @"Last param element reached");
     });
 
-    [asyncHelper waitForTestGroupSync];
-    XCTAssertEqual(calls, self.imageNames.count, @"Number of checked files must match");
+    [self waitForExpectationsWithTimeout:2 handler:^(NSError *error) {
+        if (error) {
+            NSLog(@"waitForExpectationsWithTimeout Error: %@", error);
+        }
+    }];
+
+    XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
 }
 
 /*
@@ -205,12 +214,11 @@ static int params_GetFilesNumber(BOOL locked)
 - (void)testLockUnlock
 {
     SPTPersistentDataCache *cache = [self createCache];
-    SPTAsyncTestHelper *asyncHelper = [SPTAsyncTestHelper new];
 
     NSMutableArray *toLock = [NSMutableArray array];
     NSMutableArray *toUnlock = [NSMutableArray array];
 
-    unsigned count = self.imageNames.count;
+    const unsigned count = self.imageNames.count;
     for (unsigned i = 0; i < count; ++i) {
         if (kParams[i].locked) {
             [toUnlock addObject:self.imageNames[i]];
@@ -224,9 +232,9 @@ static int params_GetFilesNumber(BOOL locked)
 
     int __block calls = 0;
     SPTPersistentDataCache * __weak wcache = cache;
+    XCTestExpectation * expect = [self expectationWithDescription:@"All items processed"];
 
     dispatch_apply(self.imageNames.count, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i) {
-        [asyncHelper startTest];
 
         [wcache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
@@ -253,13 +261,21 @@ static int params_GetFilesNumber(BOOL locked)
                 XCTAssert(NO, @"Unexpected result code on LOAD");
             }
 
+            if (count == calls) {
+                [expect fulfill];
+            }
 
-            [asyncHelper endTest];
         } onQueue:dispatch_get_main_queue()];
     });
 
-    [asyncHelper waitForTestGroupSync];
-    XCTAssertEqual(calls, self.imageNames.count, @"Number of checked files must match");
+
+    [self waitForExpectationsWithTimeout:2.0 handler:^(NSError *error) {
+        if (error) {
+            NSLog(@"waitForExpectationsWithTimeout Error: %@", error);
+        }
+    }];
+
+    XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
 }
 
 /*
@@ -271,15 +287,16 @@ static int params_GetFilesNumber(BOOL locked)
 - (void)testRemoveItems
 {
     SPTPersistentDataCache *cache = [self createCache];
-    SPTAsyncTestHelper *asyncHelper = [SPTAsyncTestHelper new];
 
     [cache removeDataForKeys:self.imageNames];
 
     int __block calls = 0;
     SPTPersistentDataCache * __weak wcache = cache;
 
+    XCTestExpectation * expect = [self expectationWithDescription:@"All items processed"];
+    const int count = self.imageNames.count;
+
     dispatch_apply(self.imageNames.count, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i) {
-        [asyncHelper startTest];
 
         // This just give us guarantee that files should be deleted
         [wcache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
@@ -289,12 +306,17 @@ static int params_GetFilesNumber(BOOL locked)
             XCTAssertNil(response.record, @"Expected valid nil record");
             XCTAssertNil(response.error, @"error is not expected to be here");
 
-            [asyncHelper endTest];
+            if (count == calls) {
+                [expect fulfill];
+            }
         } onQueue:dispatch_get_main_queue()];
     });
     
-    [asyncHelper waitForTestGroupSync];
-    XCTAssertEqual(calls, self.imageNames.count, @"Number of checked files must match");
+    [self waitForExpectationsWithTimeout:2.0 handler:^(NSError *error) {
+
+    }];
+
+    XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
 
     // Check file syste, that there are no files left
     NSError *error = nil;
@@ -312,15 +334,15 @@ static int params_GetFilesNumber(BOOL locked)
 - (void)testPureCache
 {
     SPTPersistentDataCache *cache = [self createCache];
-    SPTAsyncTestHelper *asyncHelper = [SPTAsyncTestHelper new];
 
     [cache prune];
 
     int __block calls = 0;
     SPTPersistentDataCache * __weak wcache = cache;
+    XCTestExpectation * expect = [self expectationWithDescription:@"All items processed"];
+    const int count = self.imageNames.count;
 
     dispatch_apply(self.imageNames.count, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i) {
-        [asyncHelper startTest];
 
         // This just give us guarantee that files should be deleted
         [wcache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
@@ -330,12 +352,16 @@ static int params_GetFilesNumber(BOOL locked)
             XCTAssertNil(response.record, @"Expected valid nil record");
             XCTAssertNil(response.error, @"error is not expected to be here");
 
-            [asyncHelper endTest];
+            if (count == calls) {
+                [expect fulfill];
+            }
         } onQueue:dispatch_get_main_queue()];
     });
 
-    [asyncHelper waitForTestGroupSync];
-    XCTAssertEqual(calls, self.imageNames.count, @"Number of checked files must match");
+    [self waitForExpectationsWithTimeout:2.0 handler:^(NSError *error) {
+
+    }];
+    XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
 
     // Check file syste, that there are no files left
     NSError *error = nil;
@@ -357,7 +383,6 @@ static int params_GetFilesNumber(BOOL locked)
 - (void)testWipeLocked
 {
     SPTPersistentDataCache *cache = [self createCache];
-    SPTAsyncTestHelper *asyncHelper = [SPTAsyncTestHelper new];
 
     [cache wipeLockedFiles];
 
@@ -367,9 +392,10 @@ static int params_GetFilesNumber(BOOL locked)
     int reallyLocked = params_GetFilesNumber(YES);
 
     SPTPersistentDataCache * __weak wcache = cache;
+    XCTestExpectation * expect = [self expectationWithDescription:@"All items processed"];
+    const int count = self.imageNames.count;
 
     dispatch_apply(self.imageNames.count, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i) {
-        [asyncHelper startTest];
 
         [wcache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
@@ -397,14 +423,16 @@ static int params_GetFilesNumber(BOOL locked)
                 XCTAssert(NO, @"Unexpected result code on LOAD");
             }
 
-
-            [asyncHelper endTest];
+            if (count == calls) {
+                [expect fulfill];
+            }
         } onQueue:dispatch_get_main_queue()];
     });
 
-    [asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:2.0 handler:^(NSError *error) {
 
-    XCTAssertEqual(calls, self.imageNames.count, @"Number of checked files must match");
+    }];
+    XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
     XCTAssertEqual(notFoundCalls, reallyLocked, @"Number of really locked files files is not the same we deleted");
 
     // Check file syste, that there are no files left
