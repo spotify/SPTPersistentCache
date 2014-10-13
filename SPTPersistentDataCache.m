@@ -263,10 +263,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_LOADED
                                                                                                     error:nil
                                                                                                    record:record];
-                dispatch_async(queue, ^{
-                    callback(response);
-                });
-
                 // If data ttl == 0 we apdate access time
                 if (ttl == 0) {
                     header->updateTimeSec = (uint64_t)self.currentTime();
@@ -278,6 +274,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                         [self debugOutput:@"PersistentDataCache: Error writing back file:%@, error:%@", filePath, werror];
                     }
                 }
+
+                // Callback only after we finished everyhing to avoid situation when user gets notified and we are still writting
+                dispatch_async(queue, ^{
+                    callback(response);
+                });
+
             } // if rawData
         } // file exist
     });
