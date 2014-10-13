@@ -71,6 +71,7 @@ static const StoreParamsType kParams[] = {
 - (void)setUp {
     [super setUp];
 
+    // Form array of images for shuffling
     self.imageNames = [NSMutableArray array];
 
     {
@@ -81,14 +82,13 @@ static const StoreParamsType kParams[] = {
     }
 
     @autoreleasepool {
-        NSMutableArray *tempArray = [self.imageNames mutableCopy];
 
-        int count = tempArray.count-1;
-        int i = 0;
+        int count = self.imageNames.count-1;
         while (count >= 0) {
             uint32_t idx = arc4random_uniform(count+1);
-            self.imageNames[i++] = tempArray[idx];
-            tempArray[idx] = tempArray[count];
+            NSString * tmp = self.imageNames[count];
+            self.imageNames[count] = self.imageNames[idx];
+            self.imageNames[idx] = tmp;
             count--;
         }
     }
@@ -164,6 +164,62 @@ static const StoreParamsType kParams[] = {
         } onQueue:dispatch_get_main_queue()];
 
         XCTAssert(kParams[i].last != YES, @"Last param element reached");
+    });
+
+    [asyncHelper waitForTestGroupSync];
+    XCTAssertEqual(calls, self.imageNames.count, @"Number of checked files must match");
+}
+
+- (void)testLockUnlock
+{
+    SPTPersistentDataCache *cache = [self createCache];
+    SPTAsyncTestHelper *asyncHelper = [SPTAsyncTestHelper new];
+
+    NSMutableArray *toLock = [NSMutableArray array];
+    NSMutableArray *toUnlock = [NSMutableArray array];
+
+    unsigned count = self.imageNames.count;
+    for (unsigned i = 0; i < count; ++i) {
+        if (kParams[i].locked) {
+            [toUnlock addObject:self.imageNames[i]];
+        } else {
+            [toLock addObject:self.imageNames[i]];
+        }
+    }
+
+    [cache lockDataForKeys:toLock];
+    [cache unlockDataForKeys:toUnlock];
+
+    int __block calls = 0;
+    dispatch_apply(self.imageNames.count, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i) {
+        [asyncHelper startTest];
+
+        [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
+
+            if (response.result == PDC_DATA_LOADED) {
+                XCTAssertNotNil(response.record, @"Expected valid not nil record");
+                UIImage *image = [UIImage imageWithData:response.record.data];
+                XCTAssertNotNil(image, @"Expected valid not nil image");
+                XCTAssertNil(response.error, @"error is not expected to be here");
+
+                BOOL locked = response.record.refCount > 0;
+                XCTAssertNotEqual(kParams[i].locked, locked, @"Same files must be locked");
+                XCTAssertEqual(kParams[i].ttl, response.record.ttl, @"Same files must have same TTL");
+                XCTAssertEqualObjects(self.imageNames[i], response.record.key, @"Same files must have same key");
+            } else if (response.result == PDC_DATA_NOT_FOUND) {
+                XCTAssertNil(response.record, @"Expected valid nil record");
+                XCTAssertNil(response.error, @"error is not expected to be here");
+
+            } else if (response.result == PDC_DATA_LOADING_ERROR) {
+                XCTAssertNil(response.record, @"Expected valid nil record");
+                XCTAssertNotNil(response.error, @"Valid error is expected to be here");
+
+            } else {
+                XCTAssert(NO, @"Unexpected result code on LOAD");
+            }
+
+            calls += 1;
+        } onQueue:dispatch_get_main_queue()];
     });
 
     [asyncHelper waitForTestGroupSync];
