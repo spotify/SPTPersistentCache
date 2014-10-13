@@ -527,7 +527,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         [self debugOutput:@"PersistentDataCache: File not exist at path:%@", filePath];
         return;
     } else {
-        int fd = open([filePath UTF8String], O_RDONLY);
+        int fd = open([filePath UTF8String], O_RDWR);
         if (fd == -1) {
             const char* serr = strerror(errno);
             [self debugOutput:@"PersistentDataCache: Error opening file:%@ , error:%s", filePath, serr];
@@ -573,19 +573,29 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
         if (needWriteBack) {
 
-            header.crc = spt_crc32((uint8_t*)&header, kSPTPersistentRecordHeaderSize - sizeof(header.crc));
+            header.crc = pdc_CalculateHeaderCRC(&header);
 
-            ssize_t writtenBytes = write(filedes, &header, kSPTPersistentRecordHeaderSize);
-            if (writtenBytes != kSPTPersistentRecordHeaderSize) {
+            // Set file pointer to the beginning of the file
+            int ret = lseek(filedes, SEEK_SET, 0);
+            if (ret != 0) {
                 const char* serr = strerror(errno);
-                [self debugOutput:@"PersistentDataCache: Error writting header at file path:%@ , error:%s", filePath, serr];
+                [self debugOutput:@"PersistentDataCache: Error seeking to begin of file path:%@ , error:%s", filePath, serr];
                 return;
-            }
 
-            int result = fsync(filedes);
-            if (result == -1) {
-                const char* serr = strerror(errno);
-                [self debugOutput:@"PersistentDataCache: Error flushing file:%@ , error:%s", filePath, serr];
+            } else {
+                ssize_t writtenBytes = write(filedes, &header, kSPTPersistentRecordHeaderSize);
+                if (writtenBytes != kSPTPersistentRecordHeaderSize) {
+                    const char* serr = strerror(errno);
+                    [self debugOutput:@"PersistentDataCache: Error writting header at file path:%@ , error:%s", filePath, serr];
+                    return;
+
+                } else {
+                    int result = fsync(filedes);
+                    if (result == -1) {
+                        const char* serr = strerror(errno);
+                        [self debugOutput:@"PersistentDataCache: Error flushing file:%@ , error:%s", filePath, serr];
+                    }
+                }
             }
         }
     }];
