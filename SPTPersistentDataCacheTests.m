@@ -6,18 +6,6 @@
 
 #import "SPTAsyncTestHelper.h"
 
-//{b91998ae68b9639cee6243df0886d69bdeb75854 : https://i.scdn.co/image/387965e9e126b40e5b2e6158d4c15d78939b7b8c}
-//{c3b19963fc076930dd36ce3968757704bbc97357 : https://i.scdn.co/image/0945a08f2bd84bec6f8b20d38436aa8b209ffda1}
-//{fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c : https://i.scdn.co/image/672173dbd2491301ae8ee83b948a0632b2c41ddc}
-//{c5aec3eef2478bfe47aef16787a6b4df31eb45f2 : https://i.scdn.co/image/696c3753a6fb43a9ffec4e3907321b60348491f5}
-//{ee678d23b8dba2997c52741e88fa7a1fdeaf2863 : https://i.scdn.co/image/5a3eb42b3ffc9d87b806f081f207bfb0f31b07e6}
-//{f7501f27f70162a9a7da196c5d2ece3151a2d80a : https://i.scdn.co/image/db02388b27e91421929546ba260c6aa5233e1669}
-//{e5a1921f8f75d42412e08aff4da33e1132f7ee8a : https://i.scdn.co/image/65d0bea9ffb748f5639850016a1eb62ab3bf98ca}
-//{e5b8abdc091921d49e86687e28b74abb3139df70 : https://i.scdn.co/image/f16b52d2e5883a6b991fbf076162d3ed9ead0594}
-//{ee6b44ab07fa3937a6d37f449355b64c09677295 : https://i.scdn.co/image/2ac519ea92d81ec88e079f70914d25c3ea1a973b}
-//{f50512901688b79a7852999d384d097a71fad788 : https://i.scdn.co/image/c500b4ecda09b2b5ffb5141a98b414213bec90c5}
-//{f1eeb834607dcc2b01909bd740d4356f2abb4cd1 : https://i.scdn.co/image/e5e1a8ae0c28892d86bb9e976583e091238d2deb} //big
-
 static const char* kImages[] = {
     "b91998ae68b9639cee6243df0886d69bdeb75854",
     "c3b19963fc076930dd36ce3968757704bbc97357",
@@ -29,7 +17,12 @@ static const char* kImages[] = {
     "e5b8abdc091921d49e86687e28b74abb3139df70",
     "ee6b44ab07fa3937a6d37f449355b64c09677295",
     "f50512901688b79a7852999d384d097a71fad788",
-    "f1eeb834607dcc2b01909bd740d4356f2abb4cd1",
+    "f1eeb834607dcc2b01909bd740d4356f2abb4cd1", //11
+    "b02c1be08c00bac5f4f1a62c6f353a24487bb024",
+    "b3e04bf446b486412a13659af71e3a333c6152f4",
+    "b53aed36cdc67dd43b496db74843ac32fe1f64bb",
+    "aad0e75ab0a6828d0a9b37a68198cc9d70d84850",
+    "ab3d97d4d7b3df5417490aa726c5a49b9ee98038", //16
     NULL
 };
 typedef struct
@@ -37,6 +30,7 @@ typedef struct
     uint64_t ttl;
     BOOL locked;
     BOOL last;
+    int corruptReason; // -1 not currupted
 } StoreParamsType;
 
 static const uint64_t kTTL1 = 7200;
@@ -45,30 +39,49 @@ static const uint64_t kTTL3 = 600;
 static const uint64_t kTTL4 = 86400;
 
 static const StoreParamsType kParams[] = {
-    {0,     YES, NO},
-    {0,     YES, NO},
-    {0,     NO, NO},
-    {0,     NO, NO},
-    {kTTL1, YES, NO},
-    {kTTL2, YES, NO},
-    {kTTL3, NO, NO},
-    {kTTL4, NO, NO},
-    {0,     NO, NO},
-    {0,     NO, NO},
-    {0,     NO, NO}, // 11
-    {kTTL4, NO, YES}
+    {0,     YES, NO, -1},
+    {0,     YES, NO, -1},
+    {0,     NO, NO, -1},
+    {0,     NO, NO, -1},
+    {kTTL1, YES, NO, -1},
+    {kTTL2, YES, NO, -1},
+    {kTTL3, NO, NO, -1},
+    {kTTL4, NO, NO, -1},
+    {0,     NO, NO, -1},
+    {0,     NO, NO, -1},
+    {0,     NO, NO, -1}, // 11
+    {0,     NO, NO, PDC_ERROR_MAGIC_MISSMATCH},
+    {0,     NO, NO, PDC_ERROR_WRONG_HEADER_SIZE},
+    {0,     NO, NO, PDC_ERROR_WRONG_PAYLOAD_SIZE},
+    {0,     NO, NO, PDC_ERROR_INVALID_HEADER_CRC},
+    {0,     NO, NO, PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER}, // 16
+
+    {kTTL4, NO, YES, -1}
 };
 
 static int params_GetFilesNumber(BOOL locked)
 {
     int c = 0;
     for (unsigned i = 0; kParams[i].last != YES; ++i) {
-        c += (kParams[i].locked == locked) ? 1 : 0;
+        if (kParams[i].corruptReason == -1) {
+            c += (kParams[i].locked == locked) ? 1 : 0;
+        }
     }
     return c;
 }
 
-static const NSTimeInterval kWaitTimeout = 10.0;
+static int params_GetCorruptedFilesNumber()
+{
+    int c = 0;
+    for (unsigned i = 0; kParams[i].last != YES; ++i) {
+        if (kParams[i].corruptReason != -1) {
+            c += 1;
+        }
+    }
+    return c;
+}
+
+static const NSInteger kCorruptedFileSize = 15;
 
 @interface SPTPersistentDataCacheTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentDataCache *cache;
@@ -130,9 +143,19 @@ static const NSTimeInterval kWaitTimeout = 10.0;
         XCTAssert(kParams[i].last != YES, @"Last param element reached");
         NSString *fileName = [b pathForResource:self.imageNames[i] ofType:nil];
         [self putFile:fileName withKey:self.imageNames[i] ttl:kParams[i].ttl locked:kParams[i].locked];
+        NSData *data = [NSData dataWithContentsOfFile:fileName];
+        UIImage *image = [UIImage imageWithData:data];
+        XCTAssertNotNil(image, @"Image is invalid");
     });
 
     [self.asyncHelper waitForTestGroupSync];
+
+    for (unsigned i = 0; !kParams[i].last; ++i) {
+        if (kParams[i].corruptReason > -1) {
+            NSString *filePath = [self.cachePath stringByAppendingPathComponent:self.imageNames[i]];
+            [self corruptFile:filePath pdcError:kParams[i].corruptReason];
+        }
+    }
 
     self.cache = nil;
 }
@@ -155,6 +178,7 @@ static const NSTimeInterval kWaitTimeout = 10.0;
     SPTPersistentDataCache *cache = [self createCache];
 
     int __block calls = 0;
+    int __block errorCalls = 0;
 
     const int count = self.imageNames.count;
 
@@ -183,6 +207,7 @@ static const NSTimeInterval kWaitTimeout = 10.0;
             } else if (response.result == PDC_DATA_LOADING_ERROR) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNotNil(response.error, @"Valid error is expected to be here");
+                errorCalls += 1;
 
             } else {
                 XCTAssert(NO, @"Unexpected result code on LOAD");
@@ -197,6 +222,7 @@ static const NSTimeInterval kWaitTimeout = 10.0;
     [self.asyncHelper waitForTestGroupSync];
 
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
+    XCTAssert(errorCalls == params_GetCorruptedFilesNumber(), @"Number of checked files must match");
 }
 
 /*
@@ -226,6 +252,7 @@ static const NSTimeInterval kWaitTimeout = 10.0;
     [cache unlockDataForKeys:toUnlock];
 
     int __block calls = 0;
+    int __block errorCalls = 0;
 
     for (unsigned i = 0; i < count; ++i) {
 
@@ -251,6 +278,7 @@ static const NSTimeInterval kWaitTimeout = 10.0;
             } else if (response.result == PDC_DATA_LOADING_ERROR) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNotNil(response.error, @"Valid error is expected to be here");
+                errorCalls += 1;
 
             } else {
                 XCTAssert(NO, @"Unexpected result code on LOAD");
@@ -263,6 +291,7 @@ static const NSTimeInterval kWaitTimeout = 10.0;
     [self.asyncHelper waitForTestGroupSync];
 
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
+    XCTAssert(errorCalls == params_GetCorruptedFilesNumber(), @"Number of checked files must match");
 }
 
 /*
@@ -368,6 +397,8 @@ static const NSTimeInterval kWaitTimeout = 10.0;
 
     int __block calls = 0;
     int __block notFoundCalls = 0;
+    int __block errorCalls = 0;
+
     BOOL __block locked = NO;
     const int reallyLocked = params_GetFilesNumber(YES);
 
@@ -397,6 +428,7 @@ static const NSTimeInterval kWaitTimeout = 10.0;
             } else if (response.result == PDC_DATA_LOADING_ERROR) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNotNil(response.error, @"Valid error is expected to be here");
+                errorCalls += 1;
 
             } else {
                 XCTAssert(NO, @"Unexpected result code on LOAD");
@@ -416,6 +448,7 @@ static const NSTimeInterval kWaitTimeout = 10.0;
     NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:self.cachePath error:&error];
     XCTAssertNotNil(files, @"We do not expect error from NSFileManager");
     XCTAssertEqual(files.count, self.imageNames.count-reallyLocked, @"There shouldn't be files left");
+    XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
 }
 
 /*
@@ -433,8 +466,10 @@ static const NSTimeInterval kWaitTimeout = 10.0;
 
     int __block calls = 0;
     int __block notFoundCalls = 0;
+    int __block errorCalls = 0;
     BOOL __block unlocked = YES;
-    const int reallyUnlocked = params_GetFilesNumber(NO);
+    // +1 stands for PDC_ERROR_WRONG_PAYLOAD_SIZE since technically it has corrent header.
+    const int reallyUnlocked = params_GetFilesNumber(NO) + 1;
 
     const int count = self.imageNames.count;
 
@@ -462,6 +497,7 @@ static const NSTimeInterval kWaitTimeout = 10.0;
             } else if (response.result == PDC_DATA_LOADING_ERROR) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNotNil(response.error, @"Valid error is expected to be here");
+                errorCalls += 1;
 
             } else {
                 XCTAssert(NO, @"Unexpected result code on LOAD");
@@ -476,11 +512,12 @@ static const NSTimeInterval kWaitTimeout = 10.0;
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
     XCTAssertEqual(notFoundCalls, reallyUnlocked, @"Number of really locked files files is not the same we deleted");
 
-    // Check file syste, that there are no files left
+    // Check file system, that there are no files left
     NSError *error = nil;
     NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:self.cachePath error:&error];
     XCTAssertNotNil(files, @"We do not expect error from NSFileManager");
     XCTAssertEqual(files.count, self.imageNames.count-reallyUnlocked, @"There shouldn't be files left");
+    XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber()-1, @"Number of checked files must match");
 }
 
 /*
@@ -499,7 +536,11 @@ static const NSTimeInterval kWaitTimeout = 10.0;
         NSString *fileName = [b pathForResource:self.imageNames[i] ofType:nil];
         NSData *data = [NSData dataWithContentsOfFile:fileName];
         XCTAssertNotNil(data, @"Data must be valid");
-        expectedSize += ([data length] + kSPTPersistentRecordHeaderSize);
+        if (kParams[i].corruptReason == PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER) {
+            expectedSize += kCorruptedFileSize;
+        } else {
+            expectedSize += ([data length] + kSPTPersistentRecordHeaderSize);
+        }
     }
     NSUInteger realUsedSize = [cache totalUsedSizeInBytes];
     XCTAssertEqual(realUsedSize, expectedSize);
@@ -556,21 +597,79 @@ static const NSTimeInterval kWaitTimeout = 10.0;
     } onQueue:dispatch_get_main_queue()];
 }
 
-- (void)putFile:(NSString *)file
-        withKey:(NSString *)key
-     expiration:(NSUInteger)expiratoin
-            ttl:(NSUInteger)ttl
-       refCount:(NSUInteger)refCount
-corruptPayloadSize:(BOOL)corruptPayloadSize
-corruptHeaderSize:(BOOL)corruptHeaderSize
+/*
+PDC_ERROR_MAGIC_MISSMATCH,
+PDC_ERROR_WRONG_HEADER_SIZE,
+PDC_ERROR_WRONG_PAYLOAD_SIZE,
+PDC_ERROR_INVALID_HEADER_CRC,
+PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
+*/
+
+- (void)corruptFile:(NSString *)filePath
+           pdcError:(int)pdcError
 {
-    NSData *data = [NSData dataWithContentsOfFile:file];
-    XCTAssertNotNil(data, @"Unable to get data from file:%@", file);
-    XCTAssertNotNil(key, @"Key must be specified");
+    unsigned flags = O_RDWR;
+    if (pdcError == PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER) {
+        flags |= O_TRUNC;
+    }
+
+    int fd = open([filePath UTF8String], flags);
+    if (fd == -1) {
+        XCTAssert(fd != -1, @"Could open file for currupting");
+        return;
+    }
 
     SPTPersistentRecordHeaderType header;
     memset(&header, 0, kSPTPersistentRecordHeaderSize);
 
+    if (pdcError != PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER) {
+
+        int readSize = read(fd, &header, kSPTPersistentRecordHeaderSize);
+        if (readSize != kSPTPersistentRecordHeaderSize) {
+            XCTAssert(readSize == kSPTPersistentRecordHeaderSize, @"Header not read");
+            close(fd);
+            return;
+        }
+    }
+
+    NSUInteger headerSize = kSPTPersistentRecordHeaderSize;
+
+    switch (pdcError) {
+        case PDC_ERROR_MAGIC_MISSMATCH:
+            header.magic = 0xFFFF5454;
+
+            break;
+
+        case PDC_ERROR_WRONG_HEADER_SIZE:
+            header.headerSize = kSPTPersistentRecordHeaderSize + 1 + arc4random_uniform(106);
+            header.crc = pdc_CalculateHeaderCRC(&header);
+
+            break;
+        case PDC_ERROR_WRONG_PAYLOAD_SIZE:
+            header.payloadSizeBytes += (1 + (arc4random_uniform(header.payloadSizeBytes) - (header.payloadSizeBytes-1)/2));
+            header.crc = pdc_CalculateHeaderCRC(&header);
+
+            break;
+        case PDC_ERROR_INVALID_HEADER_CRC:
+            header.crc = header.crc + 5;
+
+            break;
+        case PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER:
+            headerSize = kCorruptedFileSize;
+            break;
+
+        default:
+            assert(!"Gotcha!");
+            break;
+    }
+
+    int ret = lseek(fd, SEEK_SET, 0);
+    XCTAssert(ret != -1);
+    
+    int written = write(fd, &header, headerSize);
+    XCTAssert(written == headerSize, @"header was not written");
+    fsync(fd);
+    close(fd);
 }
 
 - (SPTPersistentDataCache *)createCache
