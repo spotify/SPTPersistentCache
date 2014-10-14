@@ -7,7 +7,7 @@ const NSUInteger SPTPersistentDataCacheDefaultGCIntervalSec = 6 * 60;
 const NSUInteger SPTPersistentDataCacheDefaultExpirationTimeSec = 10 * 60;
 static const uint64_t kTTLUpperBoundInSec = 86400 * 31;
 
-const MagicType kMagic = 0x46545053; // SPTF
+const MagicType kSPTPersistentDataCacheMagic = 0x46545053; // SPTF
 const int kSPTPersistentRecordHeaderSize = sizeof(SPTPersistentRecordHeaderType);
 
 #pragma mark - SPTDataCacheRecord
@@ -238,12 +238,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                     return;
                 }
 
-                assert(header->payloadSizeBytes == [rawData length] - kSPTPersistentRecordHeaderSize);
-
                 // Check that payload is correct size
                 if (header->payloadSizeBytes != [rawData length] - kSPTPersistentRecordHeaderSize) {
-                    [self debugOutput:@"PersistentDataCache: Wrong payload size for key:%@ , Removing file...", key];
-                    [self removeDataForKeys:@[key]];
+                    [self debugOutput:@"PersistentDataCache: Wrong payload size for key:%@ , skipping the file...", key];
                     [self dispatchError:[self nsErrorWithCode:PDC_ERROR_WRONG_PAYLOAD_SIZE]
                                  result:PDC_DATA_LOADING_ERROR
                                callback:callback onQueue:queue];
@@ -346,7 +343,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
         SPTPersistentRecordHeaderType *header = (SPTPersistentRecordHeaderType *)(bytes);
 
-        header->magic = kMagic;
+        header->magic = kSPTPersistentDataCacheMagic;
         header->headerSize = kSPTPersistentRecordHeaderSize;
         header->refCount = oldRefCount + (locked ? 1 : 0);
         header->ttl = ttl;
@@ -561,7 +558,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         ssize_t readBytes = read(filedes, &header, kSPTPersistentRecordHeaderSize);
         if (readBytes != kSPTPersistentRecordHeaderSize) {
             const char* serr = strerror(errno);
-            [self debugOutput:@"PersistentDataCache: Error reading header at file path:%@ , error:%s", filePath, serr];
+            [self debugOutput:@"PersistentDataCache: Error not enough data to read the header of file path:%@ , error:%s", filePath, serr];
             return;
         }
 
@@ -763,21 +760,22 @@ int /*SPTDataCacheLoadingError*/ pdc_ValidateHeader(const SPTPersistentRecordHea
         return PDC_ERROR_HEADER_ALIGNMENT_MISSMATCH;
     }
 
-    // Check magic
-    if (header->magic != kMagic) {
+    // 1. Check magic
+    if (header->magic != kSPTPersistentDataCacheMagic) {
         return PDC_ERROR_MAGIC_MISSMATCH;
     }
 
+    // 2. Check CRC
+    uint32_t crc = pdc_CalculateHeaderCRC(header);
+    if (crc != header->crc) {
+        return PDC_ERROR_INVALID_HEADER_CRC;
+    }
+
+    // 3. Check header size
     if (header->headerSize != kSPTPersistentRecordHeaderSize) {
         return PDC_ERROR_WRONG_HEADER_SIZE;
     }
 
-    uint32_t crc = pdc_CalculateHeaderCRC(header);
-
-    if (crc != header->crc) {
-        return PDC_ERROR_INVALID_HEADER_CRC;
-    }
-    
     return -1;
 }
 

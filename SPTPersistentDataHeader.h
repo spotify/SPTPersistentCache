@@ -2,7 +2,7 @@
 #define SPTPERSISTENTDATAHEADER_H
 
 typedef uint32_t MagicType;
-FOUNDATION_EXPORT const MagicType kMagic;
+FOUNDATION_EXPORT const MagicType kSPTPersistentDataCacheMagic;
 
 typedef struct SPTPersistentRecordHeaderType
 {
