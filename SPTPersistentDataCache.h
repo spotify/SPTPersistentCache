@@ -27,9 +27,9 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentDataCacheDefaultExpirationTimeSe
 
  @constant PDC_DATA_STORED Indicates that data was successfuly stored. error and record would be nil.
 
- @constant PDC_DATA_NOT_FOUND Indicates that no file found for given key. This is also the case if cache item is expired.
+ @constant PDC_DATA_NOT_FOUND Indicates that no file found for given key in cache or is expired.
            record and error field of SPTPersistentCacheResponse is nil in this case.
- 
+
  @constant PDC_DATA_LOADING_ERROR Indicates that file have been found but error occured during its loading.
            record field of SPTPersistentCacheResponse would be nil. error mustn't be nil and specify exact error.
  
@@ -141,6 +141,11 @@ typedef void (^SPTDataCacheResponseCallback)(SPTPersistentCacheResponse *respons
 typedef void (^SPTDataCacheDebugCallback)(NSString *string);
 
 /**
+ *
+ */
+typedef NSString *(^SPTDataCacheChooseKeyCallback)(NSArray *keys);
+
+/**
  * Type of callback that is used to provide current time for that cache. Mainly for testing.
  */
 typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
@@ -201,7 +206,7 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 - (instancetype)initWithOptions:(SPTPersistentDataCacheOptions *)options;
 
 /**
- * @brief loadDataForKey:withCallback:
+ * @discussion Load data from cache for specified key
  * @param key Key used to access the data. It MUST MUST MUST be unique for different data. 
  *            It could be used as a part of file name. It up to a cache user to define algorithm to form a key.
  * @param callback callback to call once data is loaded. It mustn't be nil.
@@ -211,8 +216,23 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
           withCallback:(SPTDataCacheResponseCallback)callback
                onQueue:(dispatch_queue_t)queue;
 
+
 /**
- * @discussion If data already exist for that key it will be updated. 
+ * @discussion Load data for key which has specified prefix. chooseKeyCallback is called with array of matching keys.
+ *             To load the data user needs to pick one key and return it. If non of those are match then return nil.
+ *             chooseKeyCallback is called on any thread and caller should not do any heavy job in it.
+ * @param prefix Prefix which key should have to be candidate for loading.
+ * @param chooseKeyCallback callback to call to define which key to use to load the data. 
+ * @param callback callback to call once data is loaded. It mustn't be nil.
+ * @param queue Queue on which to run the callback.
+ */
+- (void)loadDataForKeysWithPrefix:(NSString *)prefix
+                chooseKeyCallback:(SPTDataCacheChooseKeyCallback)chooseKeyCallback
+                     withCallback:(SPTDataCacheResponseCallback)callback
+                          onQueue:(dispatch_queue_t)queue;
+
+/**
+ * @discussion If data already exist for that key it will be updated.
  * Its access time will be updated. RefCount depends on locked parameter.
  * Data is expired when current_gc_time - access_time > defaultExpirationPeriodSec.
  *
@@ -250,6 +270,12 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
            locked:(BOOL)locked
      withCallback:(SPTDataCacheResponseCallback)callback
           onQueue:(dispatch_queue_t)queue;
+
+/**
+ * Update last access time in header of the record.
+ * @param key Key which record header to update
+ */
+- (void)touchDataForKey:(NSString *)key;
 
 /**
  * @brief Removes data for keys unconditionally.

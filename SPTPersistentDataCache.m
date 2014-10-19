@@ -198,87 +198,76 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     callback = [callback copy];
     dispatch_async(self.workQueue, ^{
+        [self loadDataForKeySync:key withCallback:callback onQueue:queue];
+    });
+}
 
-        NSString *filePath = [self pathForKey:key];
+- (void)loadDataForKeysWithPrefix:(NSString *)prefix
+                chooseKeyCallback:(SPTDataCacheChooseKeyCallback)chooseKeyCallback
+                     withCallback:(SPTDataCacheResponseCallback)callback
+                          onQueue:(dispatch_queue_t)queue
+{
+    NSParameterAssert(callback != nil);
+    NSParameterAssert(chooseKeyCallback != nil);
+    if (callback == nil) {
+        return;
+    }
 
-        // File not exist -> inform user
-        if (![self.fileManager fileExistsAtPath:filePath]) {
-            [self dispatchNotFoundCallback:callback onQueue:queue];
+    if (chooseKeyCallback == nil) {
+        return;
+    }
+
+    dispatch_async(self.workQueue, ^{
+        NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
+
+        NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
+                                                      includingPropertiesForKeys:nil
+                                                                         options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                    errorHandler:nil];
+        NSURL *fileURL = nil;
+        NSMutableArray *keys = [NSMutableArray array];
+        while ((fileURL = [dirEnumerator nextObject])) {
+            NSString *key = fileURL.lastPathComponent;
+
+            if ([key hasPrefix:prefix]) {
+                [keys addObject:key];
+            }
+        }
+
+        NSMutableArray * __block keysToConsider = [NSMutableArray array];
+
+        // Validate keys for expiration before giving it back to caller. Its important since giving expired keys
+        // is wrong since caller can miss data that are no expired by picking expired key.
+        for (NSString *key in keys) {
+            NSString *filePath = [self pathForKey:key];
+
+            [self alterHeaderForFileAtPath:filePath
+                                 withBlock:^(SPTPersistentRecordHeaderType *header) {
+                                     assert(header != nil);
+
+                                     if ([self isDataCanBeReturnedWithHeader:header]) {
+                                         [keysToConsider addObject:key];
+                                     }
+                                 }
+                                 writeBack:NO];
+
+        }
+
+        // If not keys left after validation we are done with not found callback
+        if (keysToConsider.count == 0) {
+            [self dispatchEmptyResponseWithResult:PDC_DATA_NOT_FOUND callback:callback onQueue:queue];
             return;
-        } else {
-            // File exist
-            NSError *error = nil;
-            NSMutableData *rawData = [NSMutableData dataWithContentsOfFile:filePath
-                                                                   options:NSDataReadingMappedIfSafe
-                                                                     error:&error];
-            if (rawData == nil) {
-                // File read with error -> inform user
-                [self dispatchError:error result:PDC_DATA_LOADING_ERROR callback:callback onQueue:queue];
-            } else {
-                SPTPersistentRecordHeaderType *header = pdc_GetHeaderFromData([rawData bytes], [rawData length]);
+        }
 
-                // If not enough dat to cast to header its not the file we can process
-                if (header == NULL) {
-                    NSError *headerError = [self nsErrorWithCode:PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER];
-                    [self dispatchError:headerError result:PDC_DATA_LOADING_ERROR callback:callback onQueue:queue];
-                    return;
-                }
+        NSString *keyToOpen = chooseKeyCallback(keysToConsider);
 
-                // Check header is valid
-                NSError *headerError = [self checkHeaderValid:header];
-                if (headerError != nil) {
-                    [self dispatchError:headerError result:PDC_DATA_LOADING_ERROR callback:callback onQueue:queue];
-                    return;
-                }
+        // If user told us 'nil' he didnt found abything interesting in keys so we are done wiht not found
+        if (keyToOpen == nil) {
+            [self dispatchEmptyResponseWithResult:PDC_DATA_NOT_FOUND callback:callback onQueue:queue];
+            return;
+        }
 
-                const NSUInteger refCount = header->refCount;
-                // We return locked files even if they expired, GC doesnt collect them too so they valuable to user
-                if ([self isDataExpiredWithHeader:header] && refCount == 0) {
-                    [self dispatchNotFoundCallback:callback onQueue:queue];
-                    return;
-                }
-
-                // Check that payload is correct size
-                if (header->payloadSizeBytes != [rawData length] - kSPTPersistentRecordHeaderSize) {
-                    [self debugOutput:@"PersistentDataCache: Wrong payload size for key:%@ , skipping the file...", key];
-                    [self dispatchError:[self nsErrorWithCode:PDC_ERROR_WRONG_PAYLOAD_SIZE]
-                                 result:PDC_DATA_LOADING_ERROR
-                               callback:callback onQueue:queue];
-                    return;
-                }
-
-                NSRange payloadRange = NSMakeRange(kSPTPersistentRecordHeaderSize, header->payloadSizeBytes);
-                NSData *payload = [rawData subdataWithRange:payloadRange];
-                const NSUInteger ttl = header->ttl;
-
-
-                SPTDataCacheRecord *record = [[SPTDataCacheRecord alloc] initWithData:payload
-                                                                                  key:key
-                                                                             refCount:refCount
-                                                                                  ttl:ttl];
-
-                SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_LOADED
-                                                                                                    error:nil
-                                                                                                   record:record];
-                // If data ttl == 0 we apdate access time
-                if (ttl == 0) {
-                    header->updateTimeSec = (uint64_t)self.currentTime();
-                    header->crc = pdc_CalculateHeaderCRC(header);
-
-                    // Write back with update access attributes
-                    NSError *werror = nil;
-                    if (![rawData writeToFile:filePath options:NSDataWritingAtomic error:&werror]) {
-                        [self debugOutput:@"PersistentDataCache: Error writing back file:%@, error:%@", filePath, werror];
-                    }
-                }
-
-                // Callback only after we finished everyhing to avoid situation when user gets notified and we are still writting
-                dispatch_async(queue, ^{
-                    callback(response);
-                });
-
-            } // if rawData
-        } // file exist
+        [self loadDataForKeySync:keyToOpen withCallback:callback onQueue:queue];
     });
 }
 
@@ -370,6 +359,20 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     });
 }
 
+- (void)touchDataForKey:(NSString *)key
+{
+    dispatch_barrier_async(self.workQueue, ^{
+        NSString *filePath = [self pathForKey:key];
+        [self alterHeaderForFileAtPath:filePath
+                             withBlock:^(SPTPersistentRecordHeaderType *header) {
+                                 assert(header != nil);
+
+                                 header->updateTimeSec = self.currentTime();
+                             }
+                             writeBack:YES];
+    });
+}
+
 - (void)removeDataForKeysSync:(NSArray *)keys
 {
     for (NSString *key in keys) {
@@ -398,6 +401,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                      assert(header != nil);
 
                                      ++header->refCount;
+                                     header->updateTimeSec = self.currentTime();
             }
                                  writeBack:YES];
         }
@@ -418,7 +422,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                      } else {
                                          [self debugOutput:@"PersistentDataCache: Error trying to decrement refCount below 0 for file at path:%@", filePath];
                                      }
-                                     
+                                     header->updateTimeSec = self.currentTime();
                                  }
                                  writeBack:YES];
         }
@@ -515,6 +519,90 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 }
 
 #pragma mark - Private methods
+- (void)loadDataForKeySync:(NSString *)key withCallback:(SPTDataCacheResponseCallback)callback onQueue:(dispatch_queue_t)queue
+{
+    NSString *filePath = [self pathForKey:key];
+
+    // File not exist -> inform user
+    if (![self.fileManager fileExistsAtPath:filePath]) {
+        [self dispatchEmptyResponseWithResult:PDC_DATA_NOT_FOUND callback:callback onQueue:queue];
+        return;
+    } else {
+        // File exist
+        NSError *error = nil;
+        NSMutableData *rawData = [NSMutableData dataWithContentsOfFile:filePath
+                                                               options:NSDataReadingMappedIfSafe
+                                                                 error:&error];
+        if (rawData == nil) {
+            // File read with error -> inform user
+            [self dispatchError:error result:PDC_DATA_LOADING_ERROR callback:callback onQueue:queue];
+        } else {
+            SPTPersistentRecordHeaderType *header = pdc_GetHeaderFromData([rawData bytes], [rawData length]);
+
+            // If not enough dat to cast to header its not the file we can process
+            if (header == NULL) {
+                NSError *headerError = [self nsErrorWithCode:PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER];
+                [self dispatchError:headerError result:PDC_DATA_LOADING_ERROR callback:callback onQueue:queue];
+                return;
+            }
+
+            // Check header is valid
+            NSError *headerError = [self checkHeaderValid:header];
+            if (headerError != nil) {
+                [self dispatchError:headerError result:PDC_DATA_LOADING_ERROR callback:callback onQueue:queue];
+                return;
+            }
+
+            const NSUInteger refCount = header->refCount;
+            // We return locked files even if they expired, GC doesnt collect them too so they valuable to user
+            if (![self isDataCanBeReturnedWithHeader:header]) {
+                [self dispatchEmptyResponseWithResult:PDC_DATA_NOT_FOUND callback:callback onQueue:queue];
+                return;
+            }
+
+            // Check that payload is correct size
+            if (header->payloadSizeBytes != [rawData length] - kSPTPersistentRecordHeaderSize) {
+                [self debugOutput:@"PersistentDataCache: Wrong payload size for key:%@ , skipping the file...", key];
+                [self dispatchError:[self nsErrorWithCode:PDC_ERROR_WRONG_PAYLOAD_SIZE]
+                             result:PDC_DATA_LOADING_ERROR
+                           callback:callback onQueue:queue];
+                return;
+            }
+
+            NSRange payloadRange = NSMakeRange(kSPTPersistentRecordHeaderSize, header->payloadSizeBytes);
+            NSData *payload = [rawData subdataWithRange:payloadRange];
+            const NSUInteger ttl = header->ttl;
+
+
+            SPTDataCacheRecord *record = [[SPTDataCacheRecord alloc] initWithData:payload
+                                                                              key:key
+                                                                         refCount:refCount
+                                                                              ttl:ttl];
+
+            SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_LOADED
+                                                                                                error:nil
+                                                                                               record:record];
+            // If data ttl == 0 we apdate access time
+            if (ttl == 0) {
+                header->updateTimeSec = (uint64_t)self.currentTime();
+                header->crc = pdc_CalculateHeaderCRC(header);
+
+                // Write back with update access attributes
+                NSError *werror = nil;
+                if (![rawData writeToFile:filePath options:NSDataWritingAtomic error:&werror]) {
+                    [self debugOutput:@"PersistentDataCache: Error writing back file:%@, error:%@", filePath, werror];
+                }
+            }
+
+            // Callback only after we finished everyhing to avoid situation when user gets notified and we are still writting
+            dispatch_async(queue, ^{
+                callback(response);
+            });
+
+        } // if rawData
+    } // file exist
+}
+
 - (void)guardOpenFileWithPath:(NSString *)filePath jobBlock:(FileProcessingBlockType)jobBlock
 {
     assert(jobBlock != nil);
@@ -575,7 +663,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             header.crc = pdc_CalculateHeaderCRC(&header);
 
             // Set file pointer to the beginning of the file
-            int ret = lseek(filedes, SEEK_SET, 0);
+            off_t ret = lseek(filedes, SEEK_SET, 0);
             if (ret != 0) {
                 const char* serr = strerror(errno);
                 [self debugOutput:@"PersistentDataCache: Error seeking to begin of file path:%@ , error:%s", filePath, serr];
@@ -636,6 +724,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     return (current - header->updateTimeSec) > threshold;
 }
 
+- (BOOL)isDataCanBeReturnedWithHeader:(SPTPersistentRecordHeaderType *)header
+{
+    return !([self isDataExpiredWithHeader:header] && header->refCount == 0);
+}
+
 /**
  * forceExpire = YES treat all unlocked files like they expired
  * forceLocked = YES ignore lock status
@@ -684,10 +777,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     }
 }
 
-- (void)dispatchNotFoundCallback:(SPTDataCacheResponseCallback)callback
-                         onQueue:(dispatch_queue_t)queue
+- (void)dispatchEmptyResponseWithResult:(SPTDataCacheResponseCode)result
+                               callback:(SPTDataCacheResponseCallback)callback
+                                onQueue:(dispatch_queue_t)queue
 {
-    SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_NOT_FOUND
+    SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:result
                                                                                         error:nil
                                                                                        record:nil];
     dispatch_async(queue, ^{
