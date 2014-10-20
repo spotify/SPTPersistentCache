@@ -21,8 +21,9 @@
 @property (nonatomic, strong) NSString *ttl;
 @property (nonatomic, strong) NSString *refCount;
 @property (nonatomic, strong) NSString *hrUpdateTime;
-@property (nonatomic, strong) NSString *objectClass;
+@property (nonatomic, strong) NSString *imageSize;
 
+@property (nonatomic, strong) NSURL *cacheURL;
 @property (nonatomic, strong) NSData *payload;
 @property (nonatomic, strong) id object;
 @property (nonatomic, strong) NSImageView *imageView;
@@ -44,7 +45,11 @@
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
 
-    self.objectClass = NSStringFromClass([NSImage class]);
+    if (self.imageView == nil) {
+        self.imageView = [[NSImageView alloc] initWithFrame:CGRectMake(319, 20, 357, 357)];
+        self.imageView.imageFrameStyle = NSImageFramePhoto;
+        [self.containerView addSubview:self.imageView];
+    }
 }
 
 - (void)dealloc
@@ -61,6 +66,7 @@
     panel.canCreateDirectories = NO;
     panel.showsHiddenFiles = YES;
     panel.message = @"Select cache folder";
+    panel.directoryURL = self.cacheURL;
 
     [panel beginSheetModalForWindow:self.window completionHandler:^(NSInteger result) {
         if (NSFileHandlingPanelCancelButton == result) {
@@ -69,8 +75,22 @@
 
         [panel orderOut:self.window];
 
+        self.cacheURL = panel.URL;
         [self loadFilesAtURL:panel.URL];
     }];
+}
+
+- (void)reload:(id)sender
+{
+    [self loadFilesAtURL:self.cacheURL];
+}
+
+-(BOOL)validateMenuItem:(NSMenuItem *)menuItem
+{
+    if (menuItem.tag == 2)
+        return self.cacheURL != nil;
+
+    return YES;
 }
 
 - (void)loadFilesAtURL:(NSURL *)url
@@ -139,19 +159,10 @@
     NSRange payloadRange = NSMakeRange(kSPTPersistentRecordHeaderSize, _currHeader.payloadSizeBytes);
     self.payload = [rawData subdataWithRange:payloadRange];
 
-    if ([self.objectClass isEqualToString:@"NSImage"]) {
-        self.object = [[NSImage alloc] initWithData:self.payload];
+    self.object = [[NSImage alloc] initWithData:self.payload];
 
-        if (self.imageView == nil) {
-            self.imageView = [[NSImageView alloc] initWithFrame:CGRectMake(319, 20, 357, 357)];
-            self.imageView.imageFrameStyle = NSImageFramePhoto;
-            [self.containerView addSubview:self.imageView];
-        }
-
-        self.imageView.image = self.object;
-    } else {
-        self.imageView.image = nil;
-    }
+    self.imageView.image = self.object;
+    self.imageSize = NSStringFromSize([self.object size]);
 }
 
 @end

@@ -19,7 +19,6 @@
             <rect key="contentRect" x="343" y="171" width="800" height="600"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1440" height="878"/>
             <value key="minSize" type="size" width="800" height="600"/>
-            <value key="maxSize" type="size" width="800" height="600"/>
             <view key="contentView" id="se5-gp-TjO">
                 <rect key="frame" x="0.0" y="0.0" width="800" height="600"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -123,9 +122,9 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="a7y-lI-Eod">
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="OPc-NH-WsT">
                         <rect key="frame" x="317" y="388" width="85" height="17"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Object class:" id="SQ8-h3-WUe">
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Image size:" id="KDs-wm-GPP">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -236,21 +235,6 @@
                             </binding>
                         </connections>
                     </textField>
-                    <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3Oh-SW-r9X">
-                        <rect key="frame" x="408" y="385" width="150" height="22"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="right" drawsBackground="YES" id="4gI-5O-OmZ">
-                            <font key="font" metaFont="system"/>
-                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                        </textFieldCell>
-                        <connections>
-                            <binding destination="-2" name="value" keyPath="self.objectClass" id="sgE-qT-vge">
-                                <dictionary key="options">
-                                    <bool key="NSValidatesImmediately" value="YES"/>
-                                </dictionary>
-                            </binding>
-                        </connections>
-                    </textField>
                     <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="exq-yN-lhy">
                         <rect key="frame" x="566" y="460" width="214" height="22"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="h0c-Dn-BfX">
@@ -260,6 +244,21 @@
                         </textFieldCell>
                         <connections>
                             <binding destination="-2" name="value" keyPath="self.hrUpdateTime" id="3R1-mC-ZnB">
+                                <dictionary key="options">
+                                    <bool key="NSValidatesImmediately" value="YES"/>
+                                </dictionary>
+                            </binding>
+                        </connections>
+                    </textField>
+                    <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hdf-4l-Z7w">
+                        <rect key="frame" x="408" y="385" width="150" height="22"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="right" drawsBackground="YES" id="Pmh-gv-hNK">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                        <connections>
+                            <binding destination="-2" name="value" keyPath="self.imageSize" id="bOM-O3-jkQ">
                                 <dictionary key="options">
                                     <bool key="NSValidatesImmediately" value="YES"/>
                                 </dictionary>
