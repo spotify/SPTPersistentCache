@@ -22,27 +22,20 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentDataCacheDefaultExpirationTimeSe
              is used to identify what kind of response would be given in callback to
              loadDataForKey:withCallback: method.
 
- @constant PDC_DATA_LOADED Indicates that file have been found, been correct and data been loaded.
+ @constant PDC_OPERATION_SUCCEEDED Indicates success of requested operation with data.
            record field of SPTPersistentCacheResponse mustn't be nil. error would be nil.
-
- @constant PDC_DATA_STORED Indicates that data was successfuly stored. error and record would be nil.
 
  @constant PDC_DATA_NOT_FOUND Indicates that no file found for given key in cache or is expired.
            record and error field of SPTPersistentCacheResponse is nil in this case.
 
- @constant PDC_DATA_LOADING_ERROR Indicates that file have been found but error occured during its loading.
+ @constant PDC_OPERATION_ERROR Indicates error occured during requested operation.
            record field of SPTPersistentCacheResponse would be nil. error mustn't be nil and specify exact error.
- 
- @constant PDC_DATA_STORE_ERROR Indicates that error occured while trying to store the data.
-           record would be nil. error mustn't be nil and specify exact error.
- */
+*/
 typedef NS_ENUM(NSInteger, SPTDataCacheResponseCode)
 {
-    PDC_DATA_LOADED,
-    PDC_DATA_STORED,
+    PDC_DATA_OPERATION_SUCCEEDED,
     PDC_DATA_NOT_FOUND,
-    PDC_DATA_LOADING_ERROR,
-    PDC_DATA_STORE_ERROR
+    PDC_DATA_OPERATION_ERROR
 };
 
 
@@ -214,7 +207,7 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
  * @param key Key used to access the data. It MUST MUST MUST be unique for different data. 
  *            It could be used as a part of file name. It up to a cache user to define algorithm to form a key.
  * @param callback callback to call once data is loaded. It mustn't be nil.
- * @param queue Queue on which to run the callback.
+ * @param queue Queue on which to run the callback. Mustn't be bil.
  */
 - (void)loadDataForKey:(NSString *)key
           withCallback:(SPTDataCacheResponseCallback)callback
@@ -228,7 +221,7 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
  * @param prefix Prefix which key should have to be candidate for loading.
  * @param chooseKeyCallback callback to call to define which key to use to load the data. 
  * @param callback callback to call once data is loaded. It mustn't be nil.
- * @param queue Queue on which to run the callback.
+ * @param queue Queue on which to run the callback. Mustn't be bil.
  */
 - (void)loadDataForKeysWithPrefix:(NSString *)prefix
                 chooseKeyCallback:(SPTDataCacheChooseKeyCallback)chooseKeyCallback
@@ -245,7 +238,7 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
  * @param locked If YES then data refCount is incremented by 1. 
           If NO then remain unchanged (for new created file set to 0 and incremented if YES).
  * @param callback Callback to call once data is loaded. It mustn't be nil.
- * @param queue Queue on which to run the callback.
+ * @param queue Queue on which to run the callback. Mustn't be bil.
  */
 - (void)storeData:(NSData *)data
            forKey:(NSString *)key
@@ -266,7 +259,7 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
  * @param locked If YES then data refCount is incremented by 1.
  *        If NO then remain unchanged (for new created file set to 0 and incremented if YES).
  * @param callback Callback to call once data is loaded. It mustn't be nil.
- * @param queue Queue on which to run the callback.
+ * @param queue Queue on which to run the callback. Mustn't be bil.
  */
 - (void)storeData:(NSData *)data
            forKey:(NSString *)key
@@ -278,8 +271,12 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 /**
  * Update last access time in header of the record. Only applies for default expiration policy (ttl == 0)
  * @param key Key which record header to update
+ * @param callback. May be nil if not interested in result.
+ * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
-- (void)touchDataForKey:(NSString *)key;
+- (void)touchDataForKey:(NSString *)key
+               callback:(SPTDataCacheResponseCallback)callback
+                onQueue:(dispatch_queue_t)queue;
 
 /**
  * @brief Removes data for keys unconditionally.
@@ -288,14 +285,22 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 
 /**
  * @brief Increment ref count for given keys.
+ * @param callback. May be nil if not interested in result.
+ * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
-- (void)lockDataForKeys:(NSArray *)keys;
+- (void)lockDataForKeys:(NSArray *)keys
+               callback:(SPTDataCacheResponseCallback)callback
+                onQueue:(dispatch_queue_t)queue;
 
 /**
  * @brief Decrement ref count for given keys.
  * If decrements exceeds increments assertion is given.
+ * @param callback. May be nil if not interested in result.
+ * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
-- (void)unlockDataForKeys:(NSArray *)keys;
+- (void)unlockDataForKeys:(NSArray *)keys
+                 callback:(SPTDataCacheResponseCallback)callback
+                  onQueue:(dispatch_queue_t)queue;
 
 /**
  * Schedule ragbage collection. If already scheduled then this method does nothing.
