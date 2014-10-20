@@ -1,14 +1,22 @@
 #import "SPTPersistentDataCache.h"
 #import "crc32iso3309.h"
 #import "SPTPersistentDataHeader.h"
+#include <sys/stat.h>
 
 NSString *const SPTPersistentDataCacheErrorDomain = @"persistent.cache.error";
 const NSUInteger SPTPersistentDataCacheDefaultGCIntervalSec = 6 * 60;
 const NSUInteger SPTPersistentDataCacheDefaultExpirationTimeSec = 10 * 60;
 static const uint64_t kTTLUpperBoundInSec = 86400 * 31;
+static const NSUInteger SPTPersistentDataCacheGCIntervalLimitSec = 60;
 
 const MagicType kSPTPersistentDataCacheMagic = 0x46545053; // SPTF
 const int kSPTPersistentRecordHeaderSize = sizeof(SPTPersistentRecordHeaderType);
+
+typedef long long SPTDiskSizeType;
+static const double SPTDataCacheMinimumFreeDiskSpace = 0.1;
+
+static NSString * const SPTDataCacheFileNameKey = @"SPTDataCacheFileNameKey";
+static NSString * const SPTDataCacheFileAttributesKey = @"SPTDataCacheFileAttributesKey";
 
 #pragma mark - SPTDataCacheRecord
 @interface SPTDataCacheRecord ()
@@ -91,6 +99,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 @property (nonatomic, copy) SPTDataCacheCurrentTimeSecCallback currentTime;
 
 - (void)collectGarbageForceExpire:(BOOL)forceExpire forceLocked:(BOOL)forceLocked;
+- (void)pruneBySize;
+
 @end
 
 @interface SPTTimerProxy : NSObject
@@ -102,6 +112,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 {
     dispatch_barrier_async(self.queue, ^{
         [self.dataCache collectGarbageForceExpire:NO forceLocked:NO];
+        [self.dataCache pruneBySize];
     });
 }
 @end
@@ -180,8 +191,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         [self debugOutput:@"PersistentDataCache: Forcing defaultExpirationPeriodSec to %ld sec", (unsigned long)SPTPersistentDataCacheDefaultExpirationTimeSec];
     }
 
-    if (self.options.collectionIntervalSec < SPTPersistentDataCacheDefaultGCIntervalSec) {
-        [self debugOutput:@"PersistentDataCache: Forcing collectionIntervalSec to %ld sec", (unsigned long)SPTPersistentDataCacheDefaultGCIntervalSec];
+    if (self.options.collectionIntervalSec < SPTPersistentDataCacheGCIntervalLimitSec) {
+        [self debugOutput:@"PersistentDataCache: Forcing collectionIntervalSec to %ld sec", (unsigned long)SPTPersistentDataCacheGCIntervalLimitSec];
     }
 
     return self;
@@ -367,7 +378,10 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                              withBlock:^(SPTPersistentRecordHeaderType *header) {
                                  assert(header != nil);
 
-                                 header->updateTimeSec = self.currentTime();
+                                 // Touch files that have default expiration policy
+                                 if (header->ttl == 0) {
+                                     header->updateTimeSec = self.currentTime();
+                                 }
                              }
                              writeBack:YES];
     });
@@ -401,7 +415,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                      assert(header != nil);
 
                                      ++header->refCount;
-                                     header->updateTimeSec = self.currentTime();
+                                     // Do not update access time since file is locked
             }
                                  writeBack:YES];
         }
@@ -422,7 +436,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                      } else {
                                          [self debugOutput:@"PersistentDataCache: Error trying to decrement refCount below 0 for file at path:%@", filePath];
                                      }
-                                     header->updateTimeSec = self.currentTime();
                                  }
                                  writeBack:YES];
         }
@@ -660,7 +673,13 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
         if (needWriteBack) {
 
+            uint32_t oldCRC = header.crc;
             header.crc = pdc_CalculateHeaderCRC(&header);
+
+            // If nothing has changed we do nothing then
+            if (oldCRC == header.crc) {
+                return;
+            }
 
             // Set file pointer to the beginning of the file
             off_t ret = lseek(filedes, SEEK_SET, 0);
@@ -821,6 +840,137 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     if (self.debugOutput) {
         self.debugOutput(str);
     }
+}
+
+- (void)pruneBySize
+{
+    if (self.options.sizeConstraintBytes == 0) {
+        return;
+    }
+
+    // Find all the image names and attributes and sort oldest last
+    NSMutableArray *images = [self storedImageNamesAndAttributes];
+
+    // Find the free space on the disk
+    SPTDiskSizeType currentCacheSize = 0;
+    for (NSDictionary *image in images) {
+        currentCacheSize += [image[SPTDataCacheFileAttributesKey][NSFileSize] integerValue];
+    }
+
+    SPTDiskSizeType optimalCacheSize = [self optimalSizeForCache:currentCacheSize];
+
+    // Remove oldest images until we reach acceptable cache size
+    while (currentCacheSize > optimalCacheSize && images.count) {
+        NSDictionary *image = [images lastObject];
+        [images removeLastObject];
+        NSError *localError = nil;
+        if (![self.fileManager removeItemAtPath:image[SPTDataCacheFileNameKey] error:&localError]) {
+            [self debugOutput:@"PersistentDataCache: %s ERROR %@", __PRETTY_FUNCTION__, [localError localizedDescription]];
+            continue;
+        }
+
+        currentCacheSize -= [image[SPTDataCacheFileAttributesKey][NSFileSize] integerValue];
+    }
+}
+
+- (SPTDiskSizeType)optimalSizeForCache:(SPTDiskSizeType)currentCacheSize
+{
+    SPTDiskSizeType tempCacheSize = self.options.sizeConstraintBytes;
+
+    NSError *error = nil;
+    NSDictionary *fileSystemAttributes = [self.fileManager attributesOfFileSystemForPath:self.options.cachePath
+                                                                                   error:&error];
+    if (fileSystemAttributes) {
+        // Never use the last SPTImageLoaderMinimumFreeDiskSpace of the disk for caching
+        NSNumber *fileSystemSize = fileSystemAttributes[NSFileSystemSize];
+        NSNumber *fileSystemFreeSpace = fileSystemAttributes[NSFileSystemFreeSize];
+
+        SPTDiskSizeType totalSpace = fileSystemSize.longLongValue;
+        SPTDiskSizeType freeSpace = fileSystemFreeSpace.longLongValue + currentCacheSize;
+
+//        SPTDiskSizeType proposedCacheSize = (totalSpace * (1.0 - SPTDataCacheMinimumFreeDiskSpace)) - (totalSpace - freeSpace);
+        SPTDiskSizeType proposedCacheSize = freeSpace - totalSpace * SPTDataCacheMinimumFreeDiskSpace;
+
+        tempCacheSize = MAX(0, proposedCacheSize);
+
+    } else {
+        [self debugOutput:@"PersistentDataCache: %s ERROR %@", __PRETTY_FUNCTION__, [error localizedDescription]];
+    }
+
+    return MIN(tempCacheSize, self.options.sizeConstraintBytes);
+}
+
+- (NSMutableArray *)storedImageNamesAndAttributes
+{
+    NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
+
+    // Enumerate the directory (specified elsewhere in your code)
+    // Ignore hidden files
+    // The errorHandler: parameter is set to nil. Typically you'd want to present a panel
+    NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
+                                                  includingPropertiesForKeys:@[NSURLNameKey, NSURLIsDirectoryKey]
+                                                                     options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                errorHandler:nil];
+
+    // An array to store the all the enumerated file names in
+    NSMutableArray *images = [NSMutableArray array];
+
+    // Enumerate the dirEnumerator results, each value is stored in allURLs
+    for (NSURL *theURL in dirEnumerator) {
+
+        // We skip locked files always
+        BOOL __block locked = NO;
+
+        [self alterHeaderForFileAtPath:[NSString stringWithUTF8String:theURL.fileSystemRepresentation]
+                             withBlock:^(SPTPersistentRecordHeaderType *header) {
+                                 locked = (header->refCount > 0);
+                             } writeBack:NO];
+
+        if (locked) {
+            continue;
+        }
+
+        // Retrieve the file name. From NSURLNameKey, cached during the enumeration.
+        NSString *fileName;
+        if ([theURL getResourceValue:&fileName forKey:NSURLNameKey error:NULL]) {
+            NSNumber *isDirectory;
+            if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
+
+                if ([isDirectory boolValue] == NO) {
+
+                    /* We use this since this is most reliable method to get file info and URL stuff fails sometimes
+                       which is described in apple doc and its our case here */
+
+                    struct stat fileStat;
+                    int ret = stat([theURL fileSystemRepresentation], &fileStat);
+                    if (ret == -1)
+                        continue;
+
+                    /*
+                     Use modification time ven for files with TTL
+                     File with TTL have updateTime set once on creation.
+                     */
+                    NSDate *mdate = [NSDate dateWithTimeIntervalSince1970:fileStat.st_mtimespec.tv_sec];
+                    NSNumber *fsize = [NSNumber numberWithLongLong:fileStat.st_size];
+                    NSDictionary *values = @{NSFileModificationDate : mdate, NSFileSize: fsize};
+
+                    [images addObject:@{ SPTDataCacheFileNameKey : [NSString stringWithUTF8String:[theURL fileSystemRepresentation]],
+                                         SPTDataCacheFileAttributesKey : values }];
+                }
+            }
+        }
+    }
+
+    // Oldest goes last
+    NSComparisonResult(^SPTSortFilesByModificationDate)(id, id) = ^NSComparisonResult(NSDictionary *file1, NSDictionary *file2) {
+        NSDate *date1 = file1[SPTDataCacheFileAttributesKey][NSFileModificationDate];
+        NSDate *date2 = file2[SPTDataCacheFileAttributesKey][NSFileModificationDate];
+        return [date2 compare:date1];
+    };
+
+    NSArray *sortedImages = [images sortedArrayUsingComparator:SPTSortFilesByModificationDate];
+
+    return [sortedImages mutableCopy];
 }
 
 @end

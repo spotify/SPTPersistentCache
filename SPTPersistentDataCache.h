@@ -175,6 +175,10 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
  */
 @property (nonatomic, assign) NSUInteger defaultExpirationPeriodSec;
 /**
+ * Size in bytes to which cache should adjust itself when performing GC. 0 - no size constraint (default)
+ */
+@property (nonatomic, assign) NSUInteger sizeConstraintBytes;
+/**
  * Callback used to supply debug/internal information usually about errors.
  */
 @property (nonatomic, copy) SPTDataCacheDebugCallback debugOutput;
@@ -272,7 +276,7 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
           onQueue:(dispatch_queue_t)queue;
 
 /**
- * Update last access time in header of the record.
+ * Update last access time in header of the record. Only applies for default expiration policy (ttl == 0)
  * @param key Key which record header to update
  */
 - (void)touchDataForKey:(NSString *)key;
