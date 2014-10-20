@@ -232,16 +232,25 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
 
         NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
-                                                      includingPropertiesForKeys:nil
+                                                      includingPropertiesForKeys:@[NSURLIsDirectoryKey]
                                                                          options:NSDirectoryEnumerationSkipsHiddenFiles
                                                                     errorHandler:nil];
-        NSURL *fileURL = nil;
         NSMutableArray *keys = [NSMutableArray array];
-        while ((fileURL = [dirEnumerator nextObject])) {
-            NSString *key = fileURL.lastPathComponent;
+        for (NSURL *theURL in dirEnumerator) {
 
-            if ([key hasPrefix:prefix]) {
-                [keys addObject:key];
+            // Retrieve the file name. From cached during the enumeration.
+            NSNumber *isDirectory;
+            if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
+                if ([isDirectory boolValue] == NO) {
+
+                    NSString *key = theURL.lastPathComponent;
+
+                    if ([key hasPrefix:prefix]) {
+                        [keys addObject:key];
+                    }
+                }
+            } else {
+                [self debugOutput:@"Unable to fetch isDir#1 attribute:%@", theURL];
             }
         }
 
@@ -538,10 +547,25 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 - (NSUInteger)totalUsedSizeInBytes
 {
     NSUInteger size = 0;
-    NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtPath:self.options.cachePath];
-    for (NSString *file in dirEnumerator) {
-        NSString *filePath = [self pathForKey:file];
-        size += [self getFileSizeAtPath:filePath];
+    NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
+    NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
+                                                  includingPropertiesForKeys:@[NSURLIsDirectoryKey]
+                                                                     options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                errorHandler:nil];
+
+    // Enumerate the dirEnumerator results, each value is stored in allURLs
+    for (NSURL *theURL in dirEnumerator) {
+
+        // Retrieve the file name. From cached during the enumeration.
+        NSNumber *isDirectory;
+        if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
+            if ([isDirectory boolValue] == NO) {
+                NSString *filePath = [self pathForKey:theURL.lastPathComponent];
+                size += [self getFileSizeAtPath:filePath];
+            }
+        } else {
+            [self debugOutput:@"Unable to fetch isDir#2 attribute:%@", theURL];
+        }
     }
 
     return size;
@@ -550,17 +574,34 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 - (NSUInteger)lockedItemsSizeInBytes
 {
     NSUInteger size = 0;
-    NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtPath:self.options.cachePath];
-    for (NSString *file in dirEnumerator) {
-        NSString *filePath = [self pathForKey:file];
+    NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
+    NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
+                                                  includingPropertiesForKeys:@[NSURLIsDirectoryKey]
+                                                                     options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                errorHandler:nil];
 
-        BOOL __block locked = NO;
-        [self alterHeaderForFileAtPath:filePath withBlock:^(SPTPersistentRecordHeaderType *header) {
-            locked = header->refCount > 0;
-        }
-                             writeBack:NO];
-        if (locked) {
-            size += [self getFileSizeAtPath:filePath];
+    // Enumerate the dirEnumerator results, each value is stored in allURLs
+    for (NSURL *theURL in dirEnumerator) {
+
+        // Retrieve the file name. From cached during the enumeration.
+        NSNumber *isDirectory;
+        if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
+            if ([isDirectory boolValue] == NO) {
+
+                NSString *filePath = [self pathForKey:theURL.lastPathComponent];
+
+                BOOL __block locked = NO;
+                [self alterHeaderForFileAtPath:filePath withBlock:^(SPTPersistentRecordHeaderType *header) {
+                    locked = header->refCount > 0;
+                }
+                                     writeBack:NO];
+                if (locked) {
+                    size += [self getFileSizeAtPath:filePath];
+                }
+
+            }
+        } else {
+            [self debugOutput:@"Unable to fetch isDir#3 attribute:%@", theURL];
         }
     }
 
@@ -768,7 +809,14 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
 - (NSString *)pathForKey:(NSString *)key
 {
-    return [self.options.cachePath stringByAppendingPathComponent:key];
+    // make folder tree: xx/  zx/  xy/  yz/ etc.
+    NSString *subDir = self.options.cachePath;
+    if ([key length] > 2) {
+        subDir = [self.options.cachePath stringByAppendingPathComponent:[key substringToIndex:2]];
+        [self.fileManager createDirectoryAtPath:subDir withIntermediateDirectories:YES attributes:nil error:nil];
+    }
+
+    return [subDir stringByAppendingPathComponent:key];
 }
 
 - (NSError *)nsErrorWithCode:(SPTDataCacheLoadingError)errorCode
@@ -815,27 +863,42 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 {
     [self debugOutput:@"PersistentDataCache: Run GC with forceExpire:%d forceLock:%d", forceExpire, forceLocked];
     
-    NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtPath:self.options.cachePath];
-    for (NSString *file in dirEnumerator) {
-        NSString *filePath = [self pathForKey:file];
-        BOOL __block needRemove = NO;
-        [self alterHeaderForFileAtPath:filePath
-                             withBlock:^(SPTPersistentRecordHeaderType *header) {
+    NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
+    NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
+                                                  includingPropertiesForKeys:@[NSURLIsDirectoryKey]
+                                                                     options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                errorHandler:nil];
 
-                                 if ((([self isDataExpiredWithHeader:header] || forceExpire) && header->refCount == 0) ||
-                                     (forceLocked && header->refCount > 0)) {
-                                     needRemove = YES;
-                                 }
-                             } writeBack:NO];
-        if (needRemove) {
-            [self debugOutput:@"PersistentDataCache: gc removing file: %@", filePath];
+    // Enumerate the dirEnumerator results, each value is stored in allURLs
+    for (NSURL *theURL in dirEnumerator) {
 
-            NSError *error= nil;
-            if (![self.fileManager removeItemAtPath:filePath error:&error]) {
-                [self debugOutput:@"PersistentDataCache: Error gc file:%@ ,error:%@", filePath, error];
-            }
+        // Retrieve the file name. From cached during the enumeration.
+        NSNumber *isDirectory;
+        if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
+            if ([isDirectory boolValue] == NO) {
+                NSString *filePath = [self pathForKey:theURL.lastPathComponent];
+                BOOL __block needRemove = NO;
+                [self alterHeaderForFileAtPath:filePath
+                                     withBlock:^(SPTPersistentRecordHeaderType *header) {
+
+                                         if ((([self isDataExpiredWithHeader:header] || forceExpire) && header->refCount == 0) ||
+                                             (forceLocked && header->refCount > 0)) {
+                                             needRemove = YES;
+                                         }
+                                     } writeBack:NO];
+                if (needRemove) {
+                    [self debugOutput:@"PersistentDataCache: gc removing file: %@", filePath];
+
+                    NSError *error= nil;
+                    if (![self.fileManager removeItemAtPath:filePath error:&error]) {
+                        [self debugOutput:@"PersistentDataCache: Error gc file:%@ ,error:%@", filePath, error];
+                    }
+                }
+            } // is dir
+        } else {
+            [self debugOutput:@"Unable to fetch isDir#4 attribute:%@", theURL];
         }
-    }
+    } // for
 }
 
 - (void)cleanCacheData
@@ -911,7 +974,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     NSMutableArray *images = [self storedImageNamesAndAttributes];
 
     // Find the free space on the disk
-    SPTDiskSizeType currentCacheSize = 0;
+    SPTDiskSizeType currentCacheSize = [self lockedItemsSizeInBytes];
     for (NSDictionary *image in images) {
         currentCacheSize += [image[SPTDataCacheFileAttributesKey][NSFileSize] integerValue];
     }
@@ -967,7 +1030,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     // Ignore hidden files
     // The errorHandler: parameter is set to nil. Typically you'd want to present a panel
     NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
-                                                  includingPropertiesForKeys:@[NSURLNameKey, NSURLIsDirectoryKey]
+                                                  includingPropertiesForKeys:@[NSURLIsDirectoryKey]
                                                                      options:NSDirectoryEnumerationSkipsHiddenFiles
                                                                 errorHandler:nil];
 
@@ -977,46 +1040,45 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     // Enumerate the dirEnumerator results, each value is stored in allURLs
     for (NSURL *theURL in dirEnumerator) {
 
-        // We skip locked files always
-        BOOL __block locked = NO;
+        // Retrieve the file name. From cached during the enumeration.
+        NSNumber *isDirectory;
+        if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
 
-        [self alterHeaderForFileAtPath:[NSString stringWithUTF8String:theURL.fileSystemRepresentation]
-                             withBlock:^(SPTPersistentRecordHeaderType *header) {
-                                 locked = (header->refCount > 0);
-                             } writeBack:NO];
+            if ([isDirectory boolValue] == NO) {
 
-        if (locked) {
-            continue;
-        }
+                // We skip locked files always
+                BOOL __block locked = NO;
 
-        // Retrieve the file name. From NSURLNameKey, cached during the enumeration.
-        NSString *fileName;
-        if ([theURL getResourceValue:&fileName forKey:NSURLNameKey error:NULL]) {
-            NSNumber *isDirectory;
-            if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
+                [self alterHeaderForFileAtPath:[NSString stringWithUTF8String:theURL.fileSystemRepresentation]
+                                     withBlock:^(SPTPersistentRecordHeaderType *header) {
+                                         locked = (header->refCount > 0);
+                                     } writeBack:NO];
 
-                if ([isDirectory boolValue] == NO) {
-
-                    /* We use this since this is most reliable method to get file info and URL stuff fails sometimes
-                       which is described in apple doc and its our case here */
-
-                    struct stat fileStat;
-                    int ret = stat([theURL fileSystemRepresentation], &fileStat);
-                    if (ret == -1)
-                        continue;
-
-                    /*
-                     Use modification time ven for files with TTL
-                     File with TTL have updateTime set once on creation.
-                     */
-                    NSDate *mdate = [NSDate dateWithTimeIntervalSince1970:fileStat.st_mtimespec.tv_sec];
-                    NSNumber *fsize = [NSNumber numberWithLongLong:fileStat.st_size];
-                    NSDictionary *values = @{NSFileModificationDate : mdate, NSFileSize: fsize};
-
-                    [images addObject:@{ SPTDataCacheFileNameKey : [NSString stringWithUTF8String:[theURL fileSystemRepresentation]],
-                                         SPTDataCacheFileAttributesKey : values }];
+                if (locked) {
+                    continue;
                 }
+
+                /* We use this since this is most reliable method to get file info and URL stuff fails sometimes
+                 which is described in apple doc and its our case here */
+
+                struct stat fileStat;
+                int ret = stat([theURL fileSystemRepresentation], &fileStat);
+                if (ret == -1)
+                    continue;
+
+                /*
+                 Use modification time ven for files with TTL
+                 File with TTL have updateTime set once on creation.
+                 */
+                NSDate *mdate = [NSDate dateWithTimeIntervalSince1970:fileStat.st_mtimespec.tv_sec];
+                NSNumber *fsize = [NSNumber numberWithLongLong:fileStat.st_size];
+                NSDictionary *values = @{NSFileModificationDate : mdate, NSFileSize: fsize};
+
+                [images addObject:@{ SPTDataCacheFileNameKey : [NSString stringWithUTF8String:[theURL fileSystemRepresentation]],
+                                     SPTDataCacheFileAttributesKey : values }];
             }
+        } else {
+            [self debugOutput:@"Unable to fetch isDir#5 attribute:%@", theURL];
         }
     }
 
