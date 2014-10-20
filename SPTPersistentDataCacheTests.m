@@ -190,7 +190,7 @@ static const NSInteger kCorruptedFileSize = 15;
 
             calls += 1;
 
-            if (response.result == PDC_DATA_LOADED) {
+            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
                 UIImage *image = [UIImage imageWithData:response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
@@ -204,7 +204,7 @@ static const NSInteger kCorruptedFileSize = 15;
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNil(response.error, @"error is not expected to be here");
 
-            } else if (response.result == PDC_DATA_LOADING_ERROR) {
+            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNotNil(response.error, @"Valid error is expected to be here");
                 errorCalls += 1;
@@ -248,8 +248,8 @@ static const NSInteger kCorruptedFileSize = 15;
         }
     }
 
-    [cache lockDataForKeys:toLock];
-    [cache unlockDataForKeys:toUnlock];
+    [cache lockDataForKeys:toLock callback:nil onQueue:nil];
+    [cache unlockDataForKeys:toUnlock callback:nil onQueue:nil];
 
     int __block calls = 0;
     int __block errorCalls = 0;
@@ -261,7 +261,7 @@ static const NSInteger kCorruptedFileSize = 15;
         [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
-            if (response.result == PDC_DATA_LOADED) {
+            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
                 UIImage *image = [UIImage imageWithData:response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
@@ -275,7 +275,7 @@ static const NSInteger kCorruptedFileSize = 15;
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNil(response.error, @"error is not expected to be here");
 
-            } else if (response.result == PDC_DATA_LOADING_ERROR) {
+            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNotNil(response.error, @"Valid error is expected to be here");
                 errorCalls += 1;
@@ -410,7 +410,7 @@ static const NSInteger kCorruptedFileSize = 15;
         [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
-            if (response.result == PDC_DATA_LOADED) {
+            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
                 UIImage *image = [UIImage imageWithData:response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
@@ -425,7 +425,7 @@ static const NSInteger kCorruptedFileSize = 15;
                 XCTAssertNil(response.error, @"error is not expected to be here");
                 notFoundCalls += 1;
 
-            } else if (response.result == PDC_DATA_LOADING_ERROR) {
+            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNotNil(response.error, @"Valid error is expected to be here");
                 errorCalls += 1;
@@ -479,7 +479,7 @@ static const NSInteger kCorruptedFileSize = 15;
         [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
-            if (response.result == PDC_DATA_LOADED) {
+            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
                 UIImage *image = [UIImage imageWithData:response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
@@ -494,7 +494,7 @@ static const NSInteger kCorruptedFileSize = 15;
                 XCTAssertNil(response.error, @"error is not expected to be here");
                 notFoundCalls += 1;
 
-            } else if (response.result == PDC_DATA_LOADING_ERROR) {
+            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNotNil(response.error, @"Valid error is expected to be here");
                 errorCalls += 1;
@@ -583,10 +583,10 @@ static const NSInteger kCorruptedFileSize = 15;
     XCTAssertNotNil(key, @"Key must be specified");
 
     [self.cache storeData:data forKey:key ttl:ttl locked:locked withCallback:^(SPTPersistentCacheResponse *response) {
-        if (response.result == PDC_DATA_STORED) {
+        if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
             XCTAssertNil(response.record, @"record expected to be nil");
             XCTAssertNil(response.error, @"error xpected to be nil");
-        } else if (response.result == PDC_DATA_STORE_ERROR) {
+        } else if (response.result == PDC_DATA_OPERATION_ERROR) {
             XCTAssertNil(response.record, @"record expected to be nil");
             XCTAssertNotNil(response.error, @"error must exist for when STORE failed");
         } else {
