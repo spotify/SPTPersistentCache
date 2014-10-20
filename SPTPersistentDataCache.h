@@ -269,7 +269,8 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
           onQueue:(dispatch_queue_t)queue;
 
 /**
- * Update last access time in header of the record. Only applies for default expiration policy (ttl == 0)
+ * Update last access time in header of the record. Only applies for default expiration policy (ttl == 0).
+ * Success callback is given if file was found and no errors occured even though nothing was changed due to ttl == 0.
  * @param key Key which record header to update
  * @param callback. May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
