@@ -83,6 +83,10 @@ static int params_GetCorruptedFilesNumber()
 
 static const NSInteger kCorruptedFileSize = 15;
 
+@interface SPTPersistentDataCache (Testing)
+- (NSString *)pathForKey:(NSString *)key;
+@end
+
 @interface SPTPersistentDataCacheTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentDataCache *cache;
 @property (nonatomic, strong) NSMutableArray *imageNames;
@@ -152,7 +156,7 @@ static const NSInteger kCorruptedFileSize = 15;
 
     for (unsigned i = 0; !kParams[i].last; ++i) {
         if (kParams[i].corruptReason > -1) {
-            NSString *filePath = [self.cachePath stringByAppendingPathComponent:self.imageNames[i]];
+            NSString *filePath = [self.cache pathForKey:self.imageNames[i]];
             [self corruptFile:filePath pdcError:kParams[i].corruptReason];
         }
     }
@@ -221,8 +225,8 @@ static const NSInteger kCorruptedFileSize = 15;
 
     [self.asyncHelper waitForTestGroupSync];
 
-    XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
-    XCTAssert(errorCalls == params_GetCorruptedFilesNumber(), @"Number of checked files must match");
+    XCTAssertEqual(calls, self.imageNames.count, @"Number of checked files must match");
+    XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
 }
 
 /*
@@ -290,8 +294,8 @@ static const NSInteger kCorruptedFileSize = 15;
 
     [self.asyncHelper waitForTestGroupSync];
 
-    XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
-    XCTAssert(errorCalls == params_GetCorruptedFilesNumber(), @"Number of checked files must match");
+    XCTAssertEqual(calls, self.imageNames.count, @"Number of checked files must match");
+    XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
 }
 
 /*
@@ -331,10 +335,8 @@ static const NSInteger kCorruptedFileSize = 15;
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
 
     // Check file syste, that there are no files left
-    NSError *error = nil;
-    NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:self.cachePath error:&error];
-    XCTAssertNotNil(files, @"We do not expect error from NSFileManager");
-    XCTAssertEqual(files.count, 0, @"There shouldn't be files left");
+    NSUInteger files = [self getFilesNumberAtPath:self.cachePath];
+    XCTAssertEqual(files, 0, @"There shouldn't be files left");
 }
 
 /*
@@ -375,10 +377,8 @@ static const NSInteger kCorruptedFileSize = 15;
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
 
     // Check file syste, that there are no files left
-    NSError *error = nil;
-    NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:self.cachePath error:&error];
-    XCTAssertNotNil(files, @"We do not expect error from NSFileManager");
-    XCTAssertEqual(files.count, 0, @"There shouldn't be files left");
+    NSUInteger files = [self getFilesNumberAtPath:self.cachePath];
+    XCTAssertEqual(files, 0, @"There shouldn't be files left");
 }
 
 
@@ -444,10 +444,8 @@ static const NSInteger kCorruptedFileSize = 15;
     XCTAssertEqual(notFoundCalls, reallyLocked, @"Number of really locked files files is not the same we deleted");
 
     // Check file syste, that there are no files left
-    NSError *error = nil;
-    NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:self.cachePath error:&error];
-    XCTAssertNotNil(files, @"We do not expect error from NSFileManager");
-    XCTAssertEqual(files.count, self.imageNames.count-reallyLocked, @"There shouldn't be files left");
+    NSUInteger files = [self getFilesNumberAtPath:self.cachePath];
+    XCTAssertEqual(files, self.imageNames.count-reallyLocked, @"There shouldn't be files left");
     XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
 }
 
@@ -513,10 +511,8 @@ static const NSInteger kCorruptedFileSize = 15;
     XCTAssertEqual(notFoundCalls, reallyUnlocked, @"Number of really locked files files is not the same we deleted");
 
     // Check file system, that there are no files left
-    NSError *error = nil;
-    NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:self.cachePath error:&error];
-    XCTAssertNotNil(files, @"We do not expect error from NSFileManager");
-    XCTAssertEqual(files.count, self.imageNames.count-reallyUnlocked, @"There shouldn't be files left");
+    NSUInteger files = [self getFilesNumberAtPath:self.cachePath];
+    XCTAssertEqual(files, self.imageNames.count-reallyUnlocked, @"There shouldn't be files left");
     XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber()-1, @"Number of checked files must match");
 }
 
@@ -681,6 +677,30 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
     };
 
     return [[SPTPersistentDataCache alloc] initWithOptions:options];
+}
+
+- (NSUInteger)getFilesNumberAtPath:(NSString *)path
+{
+    NSUInteger count = 0;
+    NSURL *urlPath = [NSURL URLWithString:path];
+    NSDirectoryEnumerator *dirEnumerator = [[NSFileManager defaultManager] enumeratorAtURL:urlPath
+                                                                includingPropertiesForKeys:@[NSURLIsDirectoryKey]
+                                                                                   options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                              errorHandler:nil];
+
+    // Enumerate the dirEnumerator results, each value is stored in allURLs
+    for (NSURL *theURL in dirEnumerator) {
+
+        // Retrieve the file name. From cached during the enumeration.
+        NSNumber *isDirectory;
+        if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
+            if ([isDirectory boolValue] == NO) {
+                ++count;
+            }
+        }
+    }
+
+    return count;
 }
 
 @end
