@@ -136,7 +136,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     if (self.options.cacheIdentifier == nil) {
         self.options.cacheIdentifier = @"persistent.cache";
     }
-    NSParameterAssert(self.options.cachePath);
+    assert(self.options.cachePath != nil);
     
     NSString *name = [NSString stringWithFormat:@"%@.queue.%ld.%ld.%p", self.options.cacheIdentifier,
                       (unsigned long)self.options.collectionIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, self];
@@ -172,7 +172,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         self.currentTime = ^NSTimeInterval(){ return [[NSDate date] timeIntervalSince1970]; };
     }
 
-    NSParameterAssert(self.options.cachePath);
+    assert(self.options.cachePath != nil);
 
     BOOL isDir = NO;
     BOOL exist = [self.fileManager fileExistsAtPath:self.options.cachePath isDirectory:&isDir];
@@ -203,8 +203,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
           withCallback:(SPTDataCacheResponseCallback)callback
                onQueue:(dispatch_queue_t)queue
 {
-    NSParameterAssert(callback != nil);
-    if (callback == nil) {
+    assert(callback != nil);
+    assert(queue != nil);
+    if (callback == nil || queue == nil) {
         return;
     }
 
@@ -219,9 +220,10 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                      withCallback:(SPTDataCacheResponseCallback)callback
                           onQueue:(dispatch_queue_t)queue
 {
-    NSParameterAssert(callback != nil);
-    NSParameterAssert(chooseKeyCallback != nil);
-    if (callback == nil) {
+    assert(callback != nil);
+    assert(chooseKeyCallback != nil);
+    assert(queue != nil);
+    if (callback == nil || queue == nil) {
         return;
     }
 
@@ -314,14 +316,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     assert(data != nil);
     assert(key != nil);
     assert(callback != nil);
+    assert(queue != nil);
 
-    if (data == nil) {
+    if (data == nil || key == nil) {
         return;
     }
-    if (key == nil) {
-        return;
-    }
-    if (callback == nil) {
+    if (callback == nil || queue == nil) {
         return;
     }
 
@@ -641,7 +641,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         } else {
             SPTPersistentRecordHeaderType *header = pdc_GetHeaderFromData([rawData bytes], [rawData length]);
 
-            // If not enough dat to cast to header its not the file we can process
+            // If not enough data to cast to header, its not the file we can process
             if (header == NULL) {
                 NSError *headerError = [self nsErrorWithCode:PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER];
                 [self dispatchError:headerError result:PDC_DATA_OPERATION_ERROR callback:callback onQueue:queue];
