@@ -8,6 +8,7 @@ const NSUInteger SPTPersistentDataCacheDefaultGCIntervalSec = 6 * 60;
 const NSUInteger SPTPersistentDataCacheDefaultExpirationTimeSec = 10 * 60;
 static const uint64_t kTTLUpperBoundInSec = 86400 * 31;
 static const NSUInteger SPTPersistentDataCacheGCIntervalLimitSec = 60;
+static const NSUInteger SPTPersistentDataCacheDefaultExpirationLimitSec = 60;
 
 const MagicType kSPTPersistentDataCacheMagic = 0x46545053; // SPTF
 const int kSPTPersistentRecordHeaderSize = sizeof(SPTPersistentRecordHeaderType);
@@ -187,8 +188,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         }
     }
 
-    if (self.options.defaultExpirationPeriodSec < SPTPersistentDataCacheDefaultExpirationTimeSec) {
-        [self debugOutput:@"PersistentDataCache: Forcing defaultExpirationPeriodSec to %ld sec", (unsigned long)SPTPersistentDataCacheDefaultExpirationTimeSec];
+    if (self.options.defaultExpirationPeriodSec < SPTPersistentDataCacheDefaultExpirationLimitSec) {
+        [self debugOutput:@"PersistentDataCache: Forcing defaultExpirationPeriodSec to %ld sec", (unsigned long)SPTPersistentDataCacheDefaultExpirationLimitSec];
     }
 
     if (self.options.collectionIntervalSec < SPTPersistentDataCacheGCIntervalLimitSec) {
@@ -229,7 +230,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     }
 
     dispatch_async(self.workQueue, ^{
-        NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
+        NSURL *urlPath = [NSURL URLWithString:[self subDirectoryPathForKey:prefix]];
 
         NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
                                                       includingPropertiesForKeys:@[NSURLIsDirectoryKey]
@@ -807,7 +808,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     }];
 }
 
-- (NSString *)pathForKey:(NSString *)key
+- (NSString *)subDirectoryPathForKey:(NSString *)key
 {
     // make folder tree: xx/  zx/  xy/  yz/ etc.
     NSString *subDir = self.options.cachePath;
@@ -816,6 +817,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         [self.fileManager createDirectoryAtPath:subDir withIntermediateDirectories:YES attributes:nil error:nil];
     }
 
+    return subDir;
+}
+
+- (NSString *)pathForKey:(NSString *)key
+{
+    NSString *subDir = [self subDirectoryPathForKey:key];
     return [subDir stringByAppendingPathComponent:key];
 }
 
