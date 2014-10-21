@@ -230,30 +230,34 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     }
 
     dispatch_async(self.workQueue, ^{
+
         NSURL *urlPath = [NSURL URLWithString:[self subDirectoryPathForKey:prefix]];
+        NSMutableArray * __block keys = [NSMutableArray array];
 
-        NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
-                                                      includingPropertiesForKeys:@[NSURLIsDirectoryKey]
-                                                                         options:NSDirectoryEnumerationSkipsHiddenFiles
-                                                                    errorHandler:nil];
-        NSMutableArray *keys = [NSMutableArray array];
-        for (NSURL *theURL in dirEnumerator) {
+        // WARNING: Do not use enumeratorAtURL nerver ever. Its unsafe and gets locked forever
+        NSError *error = nil;
+        NSArray *content = [self.fileManager contentsOfDirectoryAtURL:urlPath
+                                           includingPropertiesForKeys:@[NSURLIsDirectoryKey]
+                                                              options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                error:&error];
 
-            // Retrieve the file name. From cached during the enumeration.
-            NSNumber *isDirectory;
-            if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
-                if ([isDirectory boolValue] == NO) {
-
-                    NSString *key = theURL.lastPathComponent;
-
-                    if ([key hasPrefix:prefix]) {
-                        [keys addObject:key];
-                    }
-                }
+        if (content == nil) {
+            // If no directory is exist its fine, say not found to user
+            if (error.code == NSFileReadNoSuchFileError || error.code == NSFileNoSuchFileError) {
+                [self dispatchEmptyResponseWithResult:PDC_DATA_NOT_FOUND callback:callback onQueue:queue];
             } else {
-                [self debugOutput:@"Unable to fetch isDir#1 attribute:%@", theURL];
+                [self debugOutput:@"PersistentDataCache: Unable to get dir contents: %@, error: %@", urlPath, [error localizedDescription]];
+                [self dispatchError:error result:PDC_DATA_OPERATION_ERROR callback:callback onQueue:queue];
             }
+            return;
         }
+
+        [content enumerateObjectsUsingBlock:^(NSURL *key, NSUInteger idx, BOOL *stop) {
+            NSString *file = [key filePathURL].lastPathComponent;
+            if ([file hasPrefix:prefix]) {
+                [keys addObject:file];
+            }
+        }];
 
         NSMutableArray * __block keysToConsider = [NSMutableArray array];
 
@@ -328,6 +332,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     dispatch_barrier_async(self.workQueue, ^{
 
         NSString *filePath = [self pathForKey:key];
+
+        NSString *subDir = [self subDirectoryPathForKey:key];
+        [self.fileManager createDirectoryAtPath:subDir withIntermediateDirectories:YES attributes:nil error:nil];
 
         uint32_t __block oldRefCount = 0;
 
@@ -555,7 +562,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                                                 errorHandler:nil];
 
     // Enumerate the dirEnumerator results, each value is stored in allURLs
-    for (NSURL *theURL in dirEnumerator) {
+    NSURL *theURL = nil;
+    while ((theURL = [dirEnumerator nextObject])) {
 
         // Retrieve the file name. From cached during the enumeration.
         NSNumber *isDirectory;
@@ -582,7 +590,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                                                 errorHandler:nil];
 
     // Enumerate the dirEnumerator results, each value is stored in allURLs
-    for (NSURL *theURL in dirEnumerator) {
+    NSURL *theURL = nil;
+    while ((theURL = [dirEnumerator nextObject])) {
 
         // Retrieve the file name. From cached during the enumeration.
         NSNumber *isDirectory;
@@ -814,7 +823,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     NSString *subDir = self.options.cachePath;
     if ([key length] > 2) {
         subDir = [self.options.cachePath stringByAppendingPathComponent:[key substringToIndex:2]];
-        [self.fileManager createDirectoryAtPath:subDir withIntermediateDirectories:YES attributes:nil error:nil];
     }
 
     return subDir;
@@ -877,7 +885,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                                                 errorHandler:nil];
 
     // Enumerate the dirEnumerator results, each value is stored in allURLs
-    for (NSURL *theURL in dirEnumerator) {
+    NSURL *theURL = nil;
+    while ((theURL = [dirEnumerator nextObject])) {
 
         // Retrieve the file name. From cached during the enumeration.
         NSNumber *isDirectory;
@@ -1045,7 +1054,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     NSMutableArray *images = [NSMutableArray array];
 
     // Enumerate the dirEnumerator results, each value is stored in allURLs
-    for (NSURL *theURL in dirEnumerator) {
+    NSURL *theURL = nil;
+    while ((theURL = [dirEnumerator nextObject])) {
 
         // Retrieve the file name. From cached during the enumeration.
         NSNumber *isDirectory;
