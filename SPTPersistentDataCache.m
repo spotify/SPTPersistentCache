@@ -231,29 +231,26 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     dispatch_async(self.workQueue, ^{
 
-        NSURL *urlPath = [NSURL URLWithString:[self subDirectoryPathForKey:prefix]];
+        NSString *path = [self subDirectoryPathForKey:prefix];
         NSMutableArray * __block keys = [NSMutableArray array];
 
         // WARNING: Do not use enumeratorAtURL nerver ever. Its unsafe and gets locked forever
         NSError *error = nil;
-        NSArray *content = [self.fileManager contentsOfDirectoryAtURL:urlPath
-                                           includingPropertiesForKeys:@[NSURLIsDirectoryKey]
-                                                              options:NSDirectoryEnumerationSkipsHiddenFiles
-                                                                error:&error];
+        NSArray *content = [self.fileManager contentsOfDirectoryAtPath:path error:&error];
 
         if (content == nil) {
             // If no directory is exist its fine, say not found to user
             if (error.code == NSFileReadNoSuchFileError || error.code == NSFileNoSuchFileError) {
                 [self dispatchEmptyResponseWithResult:PDC_DATA_NOT_FOUND callback:callback onQueue:queue];
             } else {
-                [self debugOutput:@"PersistentDataCache: Unable to get dir contents: %@, error: %@", urlPath, [error localizedDescription]];
+                [self debugOutput:@"PersistentDataCache: Unable to get dir contents: %@, error: %@", path, [error localizedDescription]];
                 [self dispatchError:error result:PDC_DATA_OPERATION_ERROR callback:callback onQueue:queue];
             }
             return;
         }
 
-        [content enumerateObjectsUsingBlock:^(NSURL *key, NSUInteger idx, BOOL *stop) {
-            NSString *file = [key filePathURL].lastPathComponent;
+        [content enumerateObjectsUsingBlock:^(NSString *key, NSUInteger idx, BOOL *stop) {
+            NSString *file = key;
             if ([file hasPrefix:prefix]) {
                 [keys addObject:file];
             }
