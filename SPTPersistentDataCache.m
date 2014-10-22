@@ -439,7 +439,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     if (callback != nil) {
         assert(queue);
     }
-
+    assert([keys count] > 0);
+    
     dispatch_barrier_async(self.workQueue, ^{
         for (NSString *key in keys) {
             NSString *filePath = [self pathForKey:key];
@@ -470,6 +471,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     if (callback != nil) {
         assert(queue);
     }
+    assert([keys count] > 0);
 
     dispatch_barrier_async(self.workQueue, ^{
         for (NSString *key in keys) {

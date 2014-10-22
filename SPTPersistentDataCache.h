@@ -271,7 +271,7 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 /**
  * Update last access time in header of the record. Only applies for default expiration policy (ttl == 0).
  * Success callback is given if file was found and no errors occured even though nothing was changed due to ttl == 0.
- * @param key Key which record header to update
+ * @param key Key which record header to update. Mustn't be nil.
  * @param callback. May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
@@ -286,6 +286,7 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 
 /**
  * @brief Increment ref count for given keys.
+ * @param keys Non nil non empty array of keys.
  * @param callback. May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
@@ -296,6 +297,7 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 /**
  * @brief Decrement ref count for given keys.
  * If decrements exceeds increments assertion is given.
+ * @param keys Non nil non empty array of keys.
  * @param callback. May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
