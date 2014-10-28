@@ -285,7 +285,7 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 - (void)removeDataForKeys:(NSArray *)keys;
 
 /**
- * @brief Increment ref count for given keys.
+ * @brief Increment ref count for given keys. Give callback with result for each key in input array.
  * @param keys Non nil non empty array of keys.
  * @param callback. May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
@@ -295,7 +295,7 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
                 onQueue:(dispatch_queue_t)queue;
 
 /**
- * @brief Decrement ref count for given keys.
+ * @brief Decrement ref count for given keys. Give callback with result for each key in input array.
  * If decrements exceeds increments assertion is given.
  * @param keys Non nil non empty array of keys.
  * @param callback. May be nil if not interested in result.

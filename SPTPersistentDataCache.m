@@ -3,6 +3,9 @@
 #import "SPTPersistentDataHeader.h"
 #include <sys/stat.h>
 
+// Enable for more precise logging
+//#define DEBUG_OUTPUT_ENABLED
+
 NSString *const SPTPersistentDataCacheErrorDomain = @"persistent.cache.error";
 const NSUInteger SPTPersistentDataCacheDefaultGCIntervalSec = 6 * 60;
 const NSUInteger SPTPersistentDataCacheDefaultExpirationTimeSec = 10 * 60;
@@ -660,13 +663,16 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             const NSUInteger refCount = header->refCount;
             // We return locked files even if they expired, GC doesnt collect them too so they valuable to user
             if (![self isDataCanBeReturnedWithHeader:header]) {
+#ifdef DEBUG_OUTPUT_ENABLED
+                [self debugOutput:@"Record with key: %@ expired", key];
+#endif
                 [self dispatchEmptyResponseWithResult:PDC_DATA_NOT_FOUND callback:callback onQueue:queue];
                 return;
             }
 
             // Check that payload is correct size
             if (header->payloadSizeBytes != [rawData length] - kSPTPersistentRecordHeaderSize) {
-                [self debugOutput:@"PersistentDataCache: Wrong payload size for key:%@ , skipping the file...", key];
+                [self debugOutput:@"PersistentDataCache: Error: Wrong payload size for key:%@ , will return error", key];
                 [self dispatchError:[self nsErrorWithCode:PDC_ERROR_WRONG_PAYLOAD_SIZE]
                              result:PDC_DATA_OPERATION_ERROR
                            callback:callback onQueue:queue];
@@ -694,7 +700,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 // Write back with update access attributes
                 NSError *werror = nil;
                 if (![rawData writeToFile:filePath options:NSDataWritingAtomic error:&werror]) {
-                    [self debugOutput:@"PersistentDataCache: Error writing back file:%@, error:%@", filePath, werror];
+                    [self debugOutput:@"PersistentDataCache: Error writing back record:%@, error:%@", filePath.lastPathComponent, werror];
+                } else {
+#ifdef DEBUG_OUTPUT_ENABLED
+                    [self debugOutput:@"PersistentDataCache: Writing back record:%@ OK", filePath.lastPathComponent];
+#endif
                 }
             }
 
@@ -715,7 +725,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     }
 
     if (![self.fileManager fileExistsAtPath:filePath]) {
-        [self debugOutput:@"PersistentDataCache: File not exist at path:%@", filePath];
+        [self debugOutput:@"PersistentDataCache: Record not exist at path:%@", filePath];
         return [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_NOT_FOUND error:nil record:nil];
     } else {
         int fd = open([filePath UTF8String], O_RDWR);
@@ -876,7 +886,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 - (void)collectGarbageForceExpire:(BOOL)forceExpire forceLocked:(BOOL)forceLocked
 {
     [self debugOutput:@"PersistentDataCache: Run GC with forceExpire:%d forceLock:%d", forceExpire, forceLocked];
-    
+
     NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
     NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
                                                   includingPropertiesForKeys:@[NSURLIsDirectoryKey]
@@ -892,21 +902,38 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
             if ([isDirectory boolValue] == NO) {
                 NSString *filePath = [self pathForKey:theURL.lastPathComponent];
+
                 BOOL __block needRemove = NO;
+                int __block reason = 0;
                 [self alterHeaderForFileAtPath:filePath
                                      withBlock:^(SPTPersistentRecordHeaderType *header) {
 
-                                         if ((([self isDataExpiredWithHeader:header] || forceExpire) && header->refCount == 0) ||
-                                             (forceLocked && header->refCount > 0)) {
+                                         if (forceExpire && forceLocked) {
+                                             // delete all
                                              needRemove = YES;
+                                             reason = 1;
+                                         } else if (forceExpire && !forceLocked) {
+                                             // delete those: header->refCount == 0
+                                             needRemove = header->refCount == 0;
+                                             reason = 2;
+                                         } else if (!forceExpire && forceLocked) {
+                                             // delete those: header->refCount > 0
+                                             needRemove = header->refCount > 0;
+                                             reason = 3;
+                                         } else {
+                                             // delete those: [self isDataExpiredWithHeader:header] && header->refCount == 0
+                                             needRemove = ([self isDataExpiredWithHeader:header] && header->refCount == 0);
+                                             reason = 4;
                                          }
+
                                      } writeBack:NO];
+
                 if (needRemove) {
-                    [self debugOutput:@"PersistentDataCache: gc removing file: %@", filePath];
+                    [self debugOutput:@"PersistentDataCache: gc removing record: %@, reason:%d", filePath.lastPathComponent, reason];
 
                     NSError *error= nil;
                     if (![self.fileManager removeItemAtPath:filePath error:&error]) {
-                        [self debugOutput:@"PersistentDataCache: Error gc file:%@ ,error:%@", filePath, error];
+                        [self debugOutput:@"PersistentDataCache: GC error removing record:%@ ,error:%@", filePath.lastPathComponent, error];
                     }
                 }
             } // is dir
@@ -928,7 +955,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     for (NSString *file in files) {
         if (![self.fileManager removeItemAtPath:[self pathForKey:file] error:&error]) {
-            [self debugOutput:@"PersistentDataCache: Error cleaning file: %@ , %@", file, error];
+            [self debugOutput:@"PersistentDataCache: Error cleaning record: %@ , %@", file.lastPathComponent, error];
         }
     }
 }
