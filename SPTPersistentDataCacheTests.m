@@ -35,8 +35,10 @@ typedef struct
 
 static const uint64_t kTTL1 = 7200;
 static const uint64_t kTTL2 = 604800;
-static const uint64_t kTTL3 = 600;
+static const uint64_t kTTL3 = 1489;
 static const uint64_t kTTL4 = 86400;
+static const NSInteger kCorruptedFileSize = 15;
+static const uint64_t kTestEpochTime = 1488;
 
 static const StoreParamsType kParams[] = {
     {0,     YES, NO, -1},
@@ -81,7 +83,7 @@ static int params_GetCorruptedFilesNumber()
     return c;
 }
 
-static const NSInteger kCorruptedFileSize = 15;
+static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentRecordHeaderType *header);
 
 @interface SPTPersistentDataCache (Testing)
 - (NSString *)pathForKey:(NSString *)key;
@@ -135,7 +137,7 @@ static const NSInteger kCorruptedFileSize = 15;
 
     NSLog(@"%@", self.cachePath);
 
-    self.cache = [self createCache];
+    self.cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return kTestEpochTime; }];
 
     NSBundle *b = [NSBundle bundleForClass:[self class]];
 
@@ -179,7 +181,7 @@ static const NSInteger kCorruptedFileSize = 15;
  */
 - (void)testCorrectWriteAndRead
 {
-    SPTPersistentDataCache *cache = [self createCache];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil];
 
     int __block calls = 0;
     int __block errorCalls = 0;
@@ -193,6 +195,8 @@ static const NSInteger kCorruptedFileSize = 15;
         [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
 
             calls += 1;
+
+            NSLog(@"Key:%@ ttl:%lu", response.record.key, (unsigned long)response.record.ttl);
 
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
@@ -225,6 +229,18 @@ static const NSInteger kCorruptedFileSize = 15;
 
     [self.asyncHelper waitForTestGroupSync];
 
+    // Check that updat time was modified when access cache (both case ttl==0, ttl>0)
+    for (unsigned i = 0; i < count; ++i) {
+        NSString *path = [cache pathForKey:self.imageNames[i]];
+        [self checkUpdateTimeForFileAtPath:path validate:kParams[i].corruptReason == -1 referenceTimeCheck:^(uint64_t updateTime) {
+            if (kParams[i].ttl > 0) {
+                XCTAssertEqual(updateTime, kTestEpochTime, @"Time must not be altered for records with TTL > 0 on cache access");
+            } else {
+                XCTAssertNotEqual(updateTime, kTestEpochTime, @"Time must be altered since cache was accessed");
+            }
+        }];
+    }
+
     XCTAssertEqual(calls, self.imageNames.count, @"Number of checked files must match");
     XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
 }
@@ -238,7 +254,7 @@ static const NSInteger kCorruptedFileSize = 15;
  */
 - (void)testLockUnlock
 {
-    SPTPersistentDataCache *cache = [self createCache];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil];
 
     NSMutableArray *toLock = [NSMutableArray array];
     NSMutableArray *toUnlock = [NSMutableArray array];
@@ -252,8 +268,34 @@ static const NSInteger kCorruptedFileSize = 15;
         }
     }
 
-    [cache lockDataForKeys:toLock callback:nil onQueue:nil];
-    [cache unlockDataForKeys:toUnlock callback:nil onQueue:nil];
+    // Wait untill all lock/unlock is done
+    [self.asyncHelper startTest];
+    int __block toLockCount = [toLock count];
+    [cache lockDataForKeys:toLock callback:^(SPTPersistentCacheResponse *response) {
+        if (--toLockCount == 0) {
+            [self.asyncHelper endTest];
+        }
+    }
+                   onQueue:dispatch_get_main_queue()];
+
+    [self.asyncHelper startTest];
+    int __block toUnlockCount = [toUnlock count];
+    [cache unlockDataForKeys:toUnlock callback:^(SPTPersistentCacheResponse *response) {
+        if (--toUnlockCount == 0){
+            [self.asyncHelper endTest];
+        }
+    }
+                     onQueue:dispatch_get_main_queue()];
+
+    [self.asyncHelper waitForTestGroupSync];
+
+    // Now check that updateTime is not altered by lock unlock calls for all not corrupted files
+    for (unsigned i = 0; i < count; ++i) {
+        NSString *path = [cache pathForKey:self.imageNames[i]];
+        [self checkUpdateTimeForFileAtPath:path validate:kParams[i].corruptReason == -1 referenceTimeCheck:^(uint64_t updateTime) {
+            XCTAssertEqual(updateTime, kTestEpochTime, @"Time must match for initial value i.e. not altering");
+        }];
+    }
 
     int __block calls = 0;
     int __block errorCalls = 0;
@@ -306,7 +348,7 @@ static const NSInteger kCorruptedFileSize = 15;
  */
 - (void)testRemoveItems
 {
-    SPTPersistentDataCache *cache = [self createCache];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil];
 
     [cache removeDataForKeys:self.imageNames];
 
@@ -347,7 +389,7 @@ static const NSInteger kCorruptedFileSize = 15;
  */
 - (void)testPureCache
 {
-    SPTPersistentDataCache *cache = [self createCache];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil];
 
     [cache prune];
 
@@ -391,7 +433,11 @@ static const NSInteger kCorruptedFileSize = 15;
  */
 - (void)testWipeLocked
 {
-    SPTPersistentDataCache *cache = [self createCache];
+    // We consider that no expiration occure in this test
+    // If pass nil in time callback then files with TTL would be expired
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+        return kTestEpochTime;
+    }];
 
     [cache wipeLockedFiles];
 
@@ -458,7 +504,7 @@ static const NSInteger kCorruptedFileSize = 15;
 */
 - (void)testWipeUnlocked
 {
-    SPTPersistentDataCache *cache = [self createCache];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil];
 
     [cache wipeNonLockedFiles];
 
@@ -523,7 +569,7 @@ static const NSInteger kCorruptedFileSize = 15;
  */
 - (void)testUsedSize
 {
-    SPTPersistentDataCache *cache = [self createCache];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil];
 
     NSUInteger expectedSize = 0;
     NSBundle *b = [NSBundle bundleForClass:[self class]];
@@ -549,7 +595,7 @@ static const NSInteger kCorruptedFileSize = 15;
  */
 - (void)testLockedSize
 {
-    SPTPersistentDataCache *cache = [self createCache];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil];
 
     NSUInteger expectedSize = 0;
     NSBundle *b = [NSBundle bundleForClass:[self class]];
@@ -668,13 +714,16 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
     close(fd);
 }
 
-- (SPTPersistentDataCache *)createCache
+- (SPTPersistentDataCache *)createCacheWithTimeCallback:(SPTDataCacheCurrentTimeSecCallback)currentTime
 {
     SPTPersistentDataCacheOptions *options = [SPTPersistentDataCacheOptions new];
     options.cachePath = self.cachePath;
     options.debugOutput = ^(NSString *str) {
         NSLog(@"%@", str);
     };
+    options.currentTimeSec = currentTime;
+    // Set very long expiration
+    options.defaultExpirationPeriodSec = [NSDate dateWithTimeIntervalSince1970:0];
 
     return [[SPTPersistentDataCache alloc] initWithOptions:options];
 }
@@ -703,4 +752,42 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
     return count;
 }
 
+- (void)checkUpdateTimeForFileAtPath:(NSString *)path validate:(BOOL)validate referenceTimeCheck:(void(^)(uint64_t updateTime))timeCheck
+{
+    XCTAssertNotNil(path, @"Path is nil");
+    SPTPersistentRecordHeaderType header;
+    if (validate) {
+        XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, validate, &header), @"Unable to read and validate header");
+        timeCheck(header.updateTimeSec);
+    }
+}
+
 @end
+
+static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentRecordHeaderType *header)
+{
+    unsigned flags = O_RDONLY;
+
+    int fd = open(path, flags);
+    if (fd == -1) {
+        return NO;
+    }
+
+    assert(header != NULL);
+    memset(header, 0, kSPTPersistentRecordHeaderSize);
+
+    int readSize = read(fd, header, kSPTPersistentRecordHeaderSize);
+    close(fd);
+
+    if (readSize != kSPTPersistentRecordHeaderSize) {
+        return NO;
+    }
+
+    if (validate && pdc_ValidateHeader(header) != -1) {
+        return NO;
+    }
+
+    uint32_t crc = pdc_CalculateHeaderCRC(header);
+    return crc == header->crc;
+}
+
