@@ -184,6 +184,10 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
  * Any string that identifies the cache and used in naming of internal queue.
  */
 @property (nonatomic, copy) NSString *cacheIdentifier;
+/**
+ * Use 2 first letter of key for folder names to separate recodrs into. Default: YES
+ */
+@property (nonatomic, assign) BOOL folderSeparationEnabled;
 @end
 
 

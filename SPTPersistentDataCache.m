@@ -85,6 +85,8 @@ static NSString * const SPTDataCacheFileAttributesKey = @"SPTDataCacheFileAttrib
 
     _defaultExpirationPeriodSec = SPTPersistentDataCacheDefaultExpirationTimeSec;
     _collectionIntervalSec = SPTPersistentDataCacheDefaultGCIntervalSec;
+    _folderSeparationEnabled = YES;
+    
     return self;
 }
 @end
@@ -835,7 +837,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 {
     // make folder tree: xx/  zx/  xy/  yz/ etc.
     NSString *subDir = self.options.cachePath;
-    if ([key length] >= 2) {
+
+    if (self.options.folderSeparationEnabled && [key length] >= 2) {
         subDir = [self.options.cachePath stringByAppendingPathComponent:[key substringToIndex:2]];
     }
 
@@ -956,17 +959,25 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
 - (void)cleanCacheData
 {
-    NSError *error = nil;
-    NSArray *files = [self.fileManager contentsOfDirectoryAtPath:self.options.cachePath
-                                                           error:&error];
-    if (!files) {
-        [self debugOutput:@"PersistentDataCache: Error cleaning cache: %@", error];
-        return;
-    }
+    NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
+    NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
+                                                  includingPropertiesForKeys:@[NSURLIsDirectoryKey]
+                                                                     options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                errorHandler:nil];
 
-    for (NSString *file in files) {
-        if (![self.fileManager removeItemAtPath:[self pathForKey:file] error:&error]) {
-            [self debugOutput:@"PersistentDataCache: Error cleaning record: %@ , %@", file.lastPathComponent, error];
+    // Enumerate the dirEnumerator results, each value is stored in allURLs
+    NSURL *theURL = nil;
+    while ((theURL = [dirEnumerator nextObject])) {
+        // Retrieve the file name. From cached during the enumeration.
+        NSNumber *isDirectory;
+        if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
+            if ([isDirectory boolValue] == NO) {
+                NSString *filePath = [self pathForKey:theURL.lastPathComponent];
+                NSError *error = nil;
+                if (![self.fileManager removeItemAtPath:filePath error:&error]) {
+                    [self debugOutput:@"PersistentDataCache: Error cleaning record: %@ , %@", filePath.lastPathComponent, error];
+                }
+            }
         }
     }
 }
