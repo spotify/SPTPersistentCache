@@ -237,6 +237,102 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
 }
 
+/* WARNING: This test depend on hardcoded data
+- Do 1
+- find keys with same prefix
+- load and check
+*/
+- (void)testLoadWithPrefixesSuccess
+{
+    // No expiration
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+        return [NSDate timeIntervalSinceReferenceDate];
+    }
+                                                       expirationTime:[NSDate timeIntervalSinceReferenceDate]];
+
+
+    [self.asyncHelper startTest];
+
+    // Thas hardcode logic: 10th element should be safe to get
+    const int index = 10;
+    NSString *prefix = self.imageNames[index];
+    prefix = [prefix substringToIndex:2];
+    NSString * __block key = nil;
+
+    [cache loadDataForKeysWithPrefix:prefix chooseKeyCallback:^NSString *(NSArray *keys) {
+        XCTAssertGreaterThanOrEqual([keys count], 1);
+        key = keys.firstObject;
+        XCTAssertTrue([key hasPrefix:prefix]);
+        return key;
+
+    } withCallback:^(SPTPersistentCacheResponse *response) {
+
+        if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+            XCTAssertNotNil(response.record, @"Expected valid not nil record");
+            UIImage *image = [UIImage imageWithData:response.record.data];
+            XCTAssertNotNil(image, @"Expected valid not nil image");
+            XCTAssertNil(response.error, @"error is not expected to be here");
+
+            BOOL locked = response.record.refCount > 0;
+            XCTAssertEqual(kParams[index].locked, locked, @"Same files must be locked");
+            XCTAssertEqual(kParams[index].ttl, response.record.ttl, @"Same files must have same TTL");
+            XCTAssertEqualObjects(self.imageNames[index], response.record.key, @"Same files must have same key");
+            XCTAssertEqualObjects(key, response.record.key, @"Same files must have same key");
+
+        } else {
+            XCTAssert(NO, @"This shouldnt happen");
+        }
+
+        [self.asyncHelper endTest];
+    } onQueue:dispatch_get_main_queue()];
+
+    [self.asyncHelper waitForTestGroupSync];
+
+}
+
+- (void)testLoadWithPrefixesFail
+{
+    // No expiration
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+        return [NSDate timeIntervalSinceReferenceDate];
+    }
+                                                       expirationTime:[NSDate timeIntervalSinceReferenceDate]];
+
+
+    [self.asyncHelper startTest];
+
+    // Thas hardcode logic: 10th element should be safe to get
+    const int index = 9;
+    NSString *prefix = self.imageNames[index];
+    prefix = [prefix substringToIndex:2];
+    NSString * __block key = nil;
+
+    [cache loadDataForKeysWithPrefix:prefix chooseKeyCallback:^NSString *(NSArray *keys) {
+        XCTAssertGreaterThanOrEqual([keys count], 1);
+        key = keys.firstObject;
+        XCTAssertTrue([key hasPrefix:prefix]);
+
+        // Refuse to open
+        return nil;
+
+    } withCallback:^(SPTPersistentCacheResponse *response) {
+
+        if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+            XCTAssert(NO, @"This shouldnt happen");
+        } else if (response.result == PDC_DATA_NOT_FOUND) {
+            XCTAssertNil(response.record, @"Expected valid nil record");
+            XCTAssertNil(response.error, @"Valid nil error is expected to be here");
+        } else {
+            XCTAssert(NO, @"This shouldnt happen");
+        }
+
+        [self.asyncHelper endTest];
+    } onQueue:dispatch_get_main_queue()];
+    
+    [self.asyncHelper waitForTestGroupSync];
+    
+}
+
 /*
  - Do 1
  - Lock unlocked files
@@ -398,7 +494,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
             calls += 1;
 
-            XCTAssert(response.result == PDC_DATA_NOT_FOUND, @"We expect file wouldn't be found after removing");
+            XCTAssertEqual(response.result, PDC_DATA_NOT_FOUND, @"We expect file wouldn't be found after removing");
             XCTAssertNil(response.record, @"Expected valid nil record");
             XCTAssertNil(response.error, @"error is not expected to be here");
 
