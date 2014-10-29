@@ -648,6 +648,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     int __block calls = 0;
     int __block notFoundCalls = 0;
     int __block errorCalls = 0;
+    int __block successCalls = 0;
     BOOL __block unlocked = YES;
 
     for (unsigned i = 0; i < count; ++i) {
@@ -657,6 +658,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             calls += 1;
 
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+                ++successCalls;
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
                 UIImage *image = [UIImage imageWithData:response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
@@ -687,8 +689,72 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [self.asyncHelper waitForTestGroupSync];
 
     const int normalFilesCount = params_GetDefaultExpireFilesNumber();
+    const int corrupted = params_GetCorruptedFilesNumber();
 
     XCTAssert(calls == count, @"Number of checked files must match");
+    XCTAssertEqual(successCalls, count-normalFilesCount-corrupted, @"There should be exact number of locked files");
+    // -1 stands for payload error since technically header is correct and returned as Not found
+    XCTAssertEqual(notFoundCalls-1, normalFilesCount, @"Number of not found files must match");
+    // -1 stands for payload error since technically header is correct
+    XCTAssertEqual(errorCalls, corrupted-1, @"Number of not found files must match");
+}
+
+- (void)testExpirationWithTTL
+{
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+        // Take largest TTL of non locked + 1 sec
+        return kTestEpochTime + kTTL4 + 1;
+    }
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+    const int count = self.imageNames.count;
+    int __block calls = 0;
+    int __block notFoundCalls = 0;
+    int __block errorCalls = 0;
+    int __block successCalls = 0;
+    BOOL __block unlocked = YES;
+
+    for (unsigned i = 0; i < count; ++i) {
+        [self.asyncHelper startTest];
+
+        [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
+            calls += 1;
+
+            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+                ++successCalls;
+                XCTAssertNotNil(response.record, @"Expected valid not nil record");
+                UIImage *image = [UIImage imageWithData:response.record.data];
+                XCTAssertNotNil(image, @"Expected valid not nil image");
+                XCTAssertNil(response.error, @"error is not expected to be here");
+
+                unlocked = response.record.refCount == 0;
+                XCTAssertEqual(kParams[i].locked, !unlocked, @"Same files must be locked");
+                XCTAssertEqual(kParams[i].ttl, response.record.ttl, @"Same files must have same TTL");
+                XCTAssertEqualObjects(self.imageNames[i], response.record.key, @"Same files must have same key");
+            } else if (response.result == PDC_DATA_NOT_FOUND) {
+                XCTAssertNil(response.record, @"Expected valid nil record");
+                XCTAssertNil(response.error, @"error is not expected to be here");
+                notFoundCalls += 1;
+
+            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
+                XCTAssertNil(response.record, @"Expected valid nil record");
+                XCTAssertNotNil(response.error, @"Valid error is expected to be here");
+                errorCalls += 1;
+
+            } else {
+                XCTAssert(NO, @"Unexpected result code on LOAD");
+            }
+
+            [self.asyncHelper endTest];
+        } onQueue:dispatch_get_main_queue()];
+    }
+
+    [self.asyncHelper waitForTestGroupSync];
+
+    const int normalFilesCount = params_GetFilesNumber(NO);
+
+    XCTAssert(calls == count, @"Number of checked files must match");
+    XCTAssertEqual(successCalls, params_GetFilesNumber(YES), @"There should be exact number of locked files");
     // -1 stands for payload error since technically header is correct and returned as Not found
     XCTAssertEqual(notFoundCalls-1, normalFilesCount, @"Number of not found files must match");
     // -1 stands for payload error since technically header is correct
