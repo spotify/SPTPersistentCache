@@ -61,40 +61,10 @@ static const StoreParamsType kParams[] = {
     {kTTL4, NO, YES, -1}
 };
 
-static int params_GetFilesNumber(BOOL locked)
-{
-    int c = 0;
-    for (unsigned i = 0; kParams[i].last != YES; ++i) {
-        if (kParams[i].corruptReason == -1) {
-            c += (kParams[i].locked == locked) ? 1 : 0;
-        }
-    }
-    return c;
-}
-
-static int params_GetCorruptedFilesNumber(void)
-{
-    int c = 0;
-    for (unsigned i = 0; kParams[i].last != YES; ++i) {
-        if (kParams[i].corruptReason != -1) {
-            c += 1;
-        }
-    }
-    return c;
-}
-
-static int params_GetDefaultExpireFilesNumber(void)
-{
-    int c = 0;
-    for (unsigned i = 0; kParams[i].last != YES; ++i) {
-        if (kParams[i].ttl == 0 &&
-            kParams[i].corruptReason == -1 &&
-            kParams[i].locked == NO) {
-            c += 1;
-        }
-    }
-    return c;
-}
+static int params_GetFilesNumber(BOOL locked);
+static int params_GetCorruptedFilesNumber(void);
+static int params_GetDefaultExpireFilesNumber(void);
+static int params_GetFilesWithTTLNumber(BOOL locked);
 
 static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentRecordHeaderType *header);
 
@@ -761,6 +731,89 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber()-1, @"Number of not found files must match");
 }
 
+- (void)testTouchOnlyRecordsWithDefaultExpirtion
+{
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+    const int count = self.imageNames.count;
+
+    for (unsigned i = 0; i < count; ++i) {
+        [self.asyncHelper startTest];
+
+        [cache touchDataForKey:self.imageNames[i] callback:^(SPTPersistentCacheResponse *response) {
+            [self.asyncHelper endTest];
+        } onQueue:dispatch_get_main_queue()];
+    }
+
+    [self.asyncHelper waitForTestGroupSync];
+
+    // Now check that updateTime is not altered for files with TTL
+    for (unsigned i = 0; i < count; ++i) {
+        NSString *path = [cache pathForKey:self.imageNames[i]];
+        [self checkUpdateTimeForFileAtPath:path validate:kParams[i].corruptReason == -1 referenceTimeCheck:^(uint64_t updateTime) {
+            if (kParams[i].ttl == 0) {
+                XCTAssertNotEqual(updateTime, kTestEpochTime, @"Time must not match for initial value i.e. touched");
+            } else {
+                XCTAssertEqual(updateTime, kTestEpochTime, @"Time must match for initial value i.e. not touched");
+            }
+        }];
+    }
+
+    // Now do regular check of data integrity after touch
+    int __block calls = 0;
+    int __block notFoundCalls = 0;
+    int __block errorCalls = 0;
+    int __block successCalls = 0;
+    BOOL __block unlocked = YES;
+
+    for (unsigned i = 0; i < count; ++i) {
+        [self.asyncHelper startTest];
+
+        [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
+            calls += 1;
+
+            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+                ++successCalls;
+                XCTAssertNotNil(response.record, @"Expected valid not nil record");
+                UIImage *image = [UIImage imageWithData:response.record.data];
+                XCTAssertNotNil(image, @"Expected valid not nil image");
+                XCTAssertNil(response.error, @"error is not expected to be here");
+
+                unlocked = response.record.refCount == 0;
+                XCTAssertEqual(kParams[i].locked, !unlocked, @"Same files must be locked");
+                XCTAssertEqual(kParams[i].ttl, response.record.ttl, @"Same files must have same TTL");
+                XCTAssertEqualObjects(self.imageNames[i], response.record.key, @"Same files must have same key");
+            } else if (response.result == PDC_DATA_NOT_FOUND) {
+                XCTAssertNil(response.record, @"Expected valid nil record");
+                XCTAssertNil(response.error, @"error is not expected to be here");
+                notFoundCalls += 1;
+
+            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
+                XCTAssertNil(response.record, @"Expected valid nil record");
+                XCTAssertNotNil(response.error, @"Valid error is expected to be here");
+                errorCalls += 1;
+
+            } else {
+                XCTAssert(NO, @"Unexpected result code on LOAD");
+            }
+
+            [self.asyncHelper endTest];
+        } onQueue:dispatch_get_main_queue()];
+    }
+
+    [self.asyncHelper waitForTestGroupSync];
+
+    // Get locked files with TTL>0
+    const int lockedFilesCount = params_GetFilesWithTTLNumber(YES);
+    const int corrupted = params_GetCorruptedFilesNumber();
+
+    XCTAssert(calls == count, @"Number of checked files must match");
+    XCTAssertEqual(successCalls, count-corrupted-lockedFilesCount, @"There should be exact number of locked files");
+    XCTAssertEqual(notFoundCalls, lockedFilesCount, @"Number of not found files must match");
+    XCTAssertEqual(errorCalls, corrupted, @"Number of not found files must match");
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
@@ -939,3 +992,50 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     return crc == header->crc;
 }
 
+static int params_GetFilesNumber(BOOL locked)
+{
+    int c = 0;
+    for (unsigned i = 0; kParams[i].last != YES; ++i) {
+        if (kParams[i].corruptReason == -1) {
+            c += (kParams[i].locked == locked) ? 1 : 0;
+        }
+    }
+    return c;
+}
+
+static int params_GetCorruptedFilesNumber(void)
+{
+    int c = 0;
+    for (unsigned i = 0; kParams[i].last != YES; ++i) {
+        if (kParams[i].corruptReason != -1) {
+            c += 1;
+        }
+    }
+    return c;
+}
+
+static int params_GetDefaultExpireFilesNumber(void)
+{
+    int c = 0;
+    for (unsigned i = 0; kParams[i].last != YES; ++i) {
+        if (kParams[i].ttl == 0 &&
+            kParams[i].corruptReason == -1 &&
+            kParams[i].locked == NO) {
+            c += 1;
+        }
+    }
+    return c;
+}
+
+static int params_GetFilesWithTTLNumber(BOOL locked)
+{
+    int c = 0;
+    for (unsigned i = 0; kParams[i].last != YES; ++i) {
+        if (kParams[i].ttl > 0 &&
+            kParams[i].corruptReason == -1 &&
+            kParams[i].locked == locked) {
+            c += 1;
+        }
+    }
+    return c;
+}
