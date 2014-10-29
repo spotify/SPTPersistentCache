@@ -102,7 +102,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 @property (nonatomic, copy) SPTDataCacheDebugCallback debugOutput;
 @property (nonatomic, copy) SPTDataCacheCurrentTimeSecCallback currentTime;
 
-- (void)collectGarbageForceExpire:(BOOL)forceExpire forceLocked:(BOOL)forceLocked;
+- (void)runRegularGC;
 - (void)pruneBySize;
 
 @end
@@ -115,7 +115,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 - (void)enqueueGC:(NSTimer *)timer
 {
     dispatch_barrier_async(self.queue, ^{
-        [self.dataCache collectGarbageForceExpire:NO forceLocked:NO];
+        [self.dataCache runRegularGC];
         [self.dataCache pruneBySize];
     });
 }
@@ -879,6 +879,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 - (BOOL)isDataCanBeReturnedWithHeader:(SPTPersistentRecordHeaderType *)header
 {
     return !([self isDataExpiredWithHeader:header] && header->refCount == 0);
+}
+
+- (void)runRegularGC
+{
+    [self collectGarbageForceExpire:NO forceLocked:NO];
 }
 
 /**
