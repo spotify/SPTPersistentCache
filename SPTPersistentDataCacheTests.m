@@ -70,6 +70,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 @interface SPTPersistentDataCache (Testing)
 - (NSString *)pathForKey:(NSString *)key;
+- (void)runRegularGC;
+- (void)pruneBySize;
 @end
 
 @interface SPTPersistentDataCacheTests : XCTestCase
@@ -562,19 +564,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 {
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
-    NSUInteger expectedSize = 0;
-    NSBundle *b = [NSBundle bundleForClass:[self class]];
-
-    for (unsigned i = 0; i < self.imageNames.count; ++i) {
-        NSString *fileName = [b pathForResource:self.imageNames[i] ofType:nil];
-        NSData *data = [NSData dataWithContentsOfFile:fileName];
-        XCTAssertNotNil(data, @"Data must be valid");
-        if (kParams[i].corruptReason == PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER) {
-            expectedSize += kCorruptedFileSize;
-        } else {
-            expectedSize += ([data length] + kSPTPersistentRecordHeaderSize);
-        }
-    }
+    NSUInteger expectedSize = [self calculateExpectedSize];
     NSUInteger realUsedSize = [cache totalUsedSizeInBytes];
     XCTAssertEqual(realUsedSize, expectedSize);
 }
@@ -814,6 +804,133 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(errorCalls, corrupted, @"Number of not found files must match");
 }
 
+- (void)testRegularGC
+{
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+    const int count = self.imageNames.count;
+
+    [cache runRegularGC];
+
+    // After GC we have to have only locked files and corrupted
+    int lockedCount = 0;
+    int removedCount = 0;
+
+    for (unsigned i = 0; i < count; ++i) {
+        NSString *path = [cache pathForKey:self.imageNames[i]];
+
+        SPTPersistentRecordHeaderType header;
+        BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
+        if (kParams[i].locked) {
+            ++lockedCount;
+            XCTAssertTrue(opened, @"Locked files expected to be at place");
+        } else {
+            ++removedCount;
+            XCTAssertFalse(opened, @"Not locked files expected to removed thus unable to be opened");
+        }
+    }
+
+    XCTAssertEqual(lockedCount, params_GetFilesNumber(YES), @"Locked files count must match");
+    // We add number of corrupted since we couldn't open them anyway
+    XCTAssertEqual(removedCount, params_GetFilesNumber(NO)+params_GetCorruptedFilesNumber(), @"Removed files count must match");
+}
+
+// WARNING: This test is dependent on hardcoded data TTL4
+- (void)testRegularGCWithTTL
+{
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+        // Take largest TTL4 of non locked
+        return kTestEpochTime + kTTL4;
+    }
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+    const int count = self.imageNames.count;
+
+    [cache runRegularGC];
+
+    // After GC we have to have only locked files and corrupted
+    int lockedCount = 0;
+    int removedCount = 0;
+
+    for (unsigned i = 0; i < count; ++i) {
+        NSString *path = [cache pathForKey:self.imageNames[i]];
+
+        SPTPersistentRecordHeaderType header;
+        BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
+        if (kParams[i].locked) {
+            ++lockedCount;
+            XCTAssertTrue(opened, @"Locked files expected to be at place");
+        } else if (kParams[i].ttl == kTTL4) {
+            XCTAssertTrue(opened, @"TTL4 file expected to be at place");
+        } else {
+            ++removedCount;
+            XCTAssertFalse(opened, @"Not locked files expected to removed thus unable to be opened");
+        }
+    }
+
+    XCTAssertEqual(lockedCount, params_GetFilesNumber(YES), @"Locked files count must match");
+    // We add number of corrupted since we couldn't open them anyway
+    XCTAssertEqual(removedCount, params_GetFilesNumber(NO)+params_GetCorruptedFilesNumber() -1, @"Removed files count must match");
+}
+
+- (void)testPruneWithSizeRestriction
+{
+    NSUInteger expectedSize = [self calculateExpectedSize];
+    const int count = self.imageNames.count;
+
+    // Just dummy cache to get path to items
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:0];
+
+    // Alter update time for our data set so it monotonically increase from the past starting at index 0 to count-1
+    for (unsigned i = 0; i < count; ++i) {
+        NSString *path = [cache pathForKey:self.imageNames[i]];
+        [self alterUpdateTime:kTestEpochTime - 5*(i+1) forFileAtPath:path];
+    }
+
+    NSMutableArray *removedItems = [NSMutableArray array];
+
+    // Define size contstrain by looking into params table and figure our what can be dropped by cache
+    const int dropCount = 4;
+    for (unsigned i = 0; i < count && i < dropCount; ++i) {
+        if (kParams[i].locked) {
+            NSUInteger size = [self dataSizeForItem:self.imageNames[i]];
+            expectedSize -= (size + kSPTPersistentRecordHeaderSize);
+            [removedItems addObject:self.imageNames[i]];
+        }
+    }
+
+    SPTPersistentDataCacheOptions *options = [SPTPersistentDataCacheOptions new];
+    options.cachePath = self.cachePath;
+    options.debugOutput = ^(NSString *str) {
+        NSLog(@"%@", str);
+    };
+    options.sizeConstraintBytes = expectedSize;
+
+    cache = [[SPTPersistentDataCache alloc] initWithOptions:options];
+
+    [cache pruneBySize];
+
+    // Check that size reached its required level
+    NSUInteger realSize = [cache totalUsedSizeInBytes];
+    XCTAssertLessThanOrEqual(realSize, expectedSize);
+
+    // Check that files supposed to be deleted was actually removed
+    for (unsigned i = 0; i < removedItems.count; ++i) {
+        NSString *path = [cache pathForKey:removedItems[i]];
+
+        SPTPersistentRecordHeaderType header;
+        BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
+        XCTAssertFalse(opened, @"Not locked files expected to removed thus unable to be opened");
+    }
+
+    // Call once more to make sure nothing will be droped
+    [cache pruneBySize];
+
+    NSUInteger realSize2 = [cache totalUsedSizeInBytes];
+    XCTAssertEqual(realSize, realSize2);
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
@@ -915,6 +1032,34 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
     close(fd);
 }
 
+- (void)alterUpdateTime:(uint64_t)updateTime forFileAtPath:(NSString *)filePath
+{
+    int fd = open([filePath UTF8String], O_RDWR);
+    if (fd == -1) {
+        XCTAssert(fd != -1, @"Could open file for altering");
+        return;
+    }
+
+    SPTPersistentRecordHeaderType header;
+    memset(&header, 0, kSPTPersistentRecordHeaderSize);
+
+    int readSize = read(fd, &header, kSPTPersistentRecordHeaderSize);
+    if (readSize != kSPTPersistentRecordHeaderSize) {
+        close(fd);
+        return;
+    }
+
+    header.updateTimeSec = updateTime;
+
+    int ret = lseek(fd, SEEK_SET, 0);
+    XCTAssert(ret != -1);
+
+    int written = write(fd, &header, kSPTPersistentRecordHeaderSize);
+    XCTAssert(written == kSPTPersistentRecordHeaderSize, @"header was not written");
+    fsync(fd);
+    close(fd);
+}
+
 - (SPTPersistentDataCache *)createCacheWithTimeCallback:(SPTDataCacheCurrentTimeSecCallback)currentTime
                                          expirationTime:(NSTimeInterval)expirationTimeSec
 {
@@ -961,6 +1106,30 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
         XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, validate, &header), @"Unable to read and validate header");
         timeCheck(header.updateTimeSec);
     }
+}
+
+- (NSUInteger)dataSizeForItem:(NSString *)item
+{
+    NSBundle *b = [NSBundle bundleForClass:[self class]];
+    NSString *fileName = [b pathForResource:item ofType:nil];
+    NSData *data = [NSData dataWithContentsOfFile:fileName];
+    XCTAssertNotNil(data, @"Data must be valid");
+    return [data length];
+}
+
+- (NSUInteger)calculateExpectedSize
+{
+    NSUInteger expectedSize = 0;
+
+    for (unsigned i = 0; i < self.imageNames.count; ++i) {
+        if (kParams[i].corruptReason == PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER) {
+            expectedSize += kCorruptedFileSize;
+        } else {
+            expectedSize += ([self dataSizeForItem:self.imageNames[i]] + kSPTPersistentRecordHeaderSize);
+        }
+    }
+
+    return expectedSize;
 }
 
 @end
