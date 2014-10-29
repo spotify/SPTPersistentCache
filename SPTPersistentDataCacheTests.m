@@ -35,7 +35,7 @@ typedef struct
 
 static const uint64_t kTTL1 = 7200;
 static const uint64_t kTTL2 = 604800;
-static const uint64_t kTTL3 = 1489;
+static const uint64_t kTTL3 = 1495;
 static const uint64_t kTTL4 = 86400;
 static const NSInteger kCorruptedFileSize = 15;
 static const uint64_t kTestEpochTime = 1488;
@@ -72,11 +72,24 @@ static int params_GetFilesNumber(BOOL locked)
     return c;
 }
 
-static int params_GetCorruptedFilesNumber()
+static int params_GetCorruptedFilesNumber(void)
 {
     int c = 0;
     for (unsigned i = 0; kParams[i].last != YES; ++i) {
         if (kParams[i].corruptReason != -1) {
+            c += 1;
+        }
+    }
+    return c;
+}
+
+static int params_GetDefaultExpireFilesNumber(void)
+{
+    int c = 0;
+    for (unsigned i = 0; kParams[i].last != YES; ++i) {
+        if (kParams[i].ttl == 0 &&
+            kParams[i].corruptReason == -1 &&
+            kParams[i].locked == NO) {
             c += 1;
         }
     }
@@ -137,13 +150,16 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     NSLog(@"%@", self.cachePath);
 
-    self.cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return kTestEpochTime; }];
+    self.cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return kTestEpochTime; }
+                                    expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
     NSBundle *b = [NSBundle bundleForClass:[self class]];
 
     self.asyncHelper = [SPTAsyncTestHelper new];
 
-    dispatch_apply(self.imageNames.count, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i) {
+    const int count = self.imageNames.count;
+
+    for (unsigned i = 0; i < count; ++i) {
         [self.asyncHelper startTest];
 
         XCTAssert(kParams[i].last != YES, @"Last param element reached");
@@ -152,7 +168,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         NSData *data = [NSData dataWithContentsOfFile:fileName];
         UIImage *image = [UIImage imageWithData:data];
         XCTAssertNotNil(image, @"Image is invalid");
-    });
+    }
 
     [self.asyncHelper waitForTestGroupSync];
 
@@ -181,7 +197,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testCorrectWriteAndRead
 {
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil];
+    // No expiration
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+        return [NSDate timeIntervalSinceReferenceDate];
+    }
+                                                       expirationTime:[NSDate timeIntervalSinceReferenceDate]];
 
     int __block calls = 0;
     int __block errorCalls = 0;
@@ -254,7 +274,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testLockUnlock
 {
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
     NSMutableArray *toLock = [NSMutableArray array];
     NSMutableArray *toUnlock = [NSMutableArray array];
@@ -348,7 +368,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testRemoveItems
 {
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
     [cache removeDataForKeys:self.imageNames];
 
@@ -389,7 +409,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testPureCache
 {
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
     [cache prune];
 
@@ -437,7 +457,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     // If pass nil in time callback then files with TTL would be expired
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
         return kTestEpochTime;
-    }];
+    }
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
     [cache wipeLockedFiles];
 
@@ -504,7 +525,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 */
 - (void)testWipeUnlocked
 {
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
     [cache wipeNonLockedFiles];
 
@@ -569,7 +590,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testUsedSize
 {
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
     NSUInteger expectedSize = 0;
     NSBundle *b = [NSBundle bundleForClass:[self class]];
@@ -595,7 +616,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testLockedSize
 {
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
     NSUInteger expectedSize = 0;
     NSBundle *b = [NSBundle bundleForClass:[self class]];
@@ -614,6 +635,67 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     NSUInteger realUsedSize = [cache lockedItemsSizeInBytes];
     XCTAssertEqual(realUsedSize, expectedSize);
 }
+
+- (void)testExpirationWithDefaultTimeout
+{
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+        // Exceed expiration interval by 1 sec
+        return kTestEpochTime + SPTPersistentDataCacheDefaultExpirationTimeSec + 1;
+    }
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+    const int count = self.imageNames.count;
+    int __block calls = 0;
+    int __block notFoundCalls = 0;
+    int __block errorCalls = 0;
+    BOOL __block unlocked = YES;
+
+    for (unsigned i = 0; i < count; ++i) {
+        [self.asyncHelper startTest];
+
+        [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
+            calls += 1;
+
+            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+                XCTAssertNotNil(response.record, @"Expected valid not nil record");
+                UIImage *image = [UIImage imageWithData:response.record.data];
+                XCTAssertNotNil(image, @"Expected valid not nil image");
+                XCTAssertNil(response.error, @"error is not expected to be here");
+
+                unlocked = response.record.refCount == 0;
+                XCTAssertEqual(kParams[i].locked, !unlocked, @"Same files must be locked");
+                XCTAssertEqual(kParams[i].ttl, response.record.ttl, @"Same files must have same TTL");
+                XCTAssertEqualObjects(self.imageNames[i], response.record.key, @"Same files must have same key");
+            } else if (response.result == PDC_DATA_NOT_FOUND) {
+                XCTAssertNil(response.record, @"Expected valid nil record");
+                XCTAssertNil(response.error, @"error is not expected to be here");
+                notFoundCalls += 1;
+
+            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
+                XCTAssertNil(response.record, @"Expected valid nil record");
+                XCTAssertNotNil(response.error, @"Valid error is expected to be here");
+                errorCalls += 1;
+
+            } else {
+                XCTAssert(NO, @"Unexpected result code on LOAD");
+            }
+
+            [self.asyncHelper endTest];
+        } onQueue:dispatch_get_main_queue()];
+    }
+    
+    [self.asyncHelper waitForTestGroupSync];
+
+    const int normalFilesCount = params_GetDefaultExpireFilesNumber();
+
+    XCTAssert(calls == count, @"Number of checked files must match");
+    // -1 stands for payload error since technically header is correct and returned as Not found
+    XCTAssertEqual(notFoundCalls-1, normalFilesCount, @"Number of not found files must match");
+    // -1 stands for payload error since technically header is correct
+    XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber()-1, @"Number of not found files must match");
+}
+
+#pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
         withKey:(NSString *)key
@@ -715,6 +797,7 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
 }
 
 - (SPTPersistentDataCache *)createCacheWithTimeCallback:(SPTDataCacheCurrentTimeSecCallback)currentTime
+                                         expirationTime:(NSTimeInterval)expirationTimeSec
 {
     SPTPersistentDataCacheOptions *options = [SPTPersistentDataCacheOptions new];
     options.cachePath = self.cachePath;
@@ -722,8 +805,7 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
         NSLog(@"%@", str);
     };
     options.currentTimeSec = currentTime;
-    // Set very long expiration
-    options.defaultExpirationPeriodSec = [NSDate dateWithTimeIntervalSince1970:0];
+    options.defaultExpirationPeriodSec = expirationTimeSec;
 
     return [[SPTPersistentDataCache alloc] initWithOptions:options];
 }
