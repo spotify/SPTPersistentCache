@@ -241,7 +241,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         NSString *path = [self subDirectoryPathForKey:prefix];
         NSMutableArray * __block keys = [NSMutableArray array];
 
-        // WARNING: Do not use enumeratorAtURL nerver ever. Its unsafe and gets locked forever
+        // WARNING: Do not use enumeratorAtURL never ever. Its unsafe bcuz gets locked forever
         NSError *error = nil;
         NSArray *content = [self.fileManager contentsOfDirectoryAtPath:path error:&error];
 
@@ -270,6 +270,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         for (NSString *key in keys) {
             NSString *filePath = [self pathForKey:key];
 
+            // WARNING: We may skip return result here bcuz in that case we will skip the key as invalid
             [self alterHeaderForFileAtPath:filePath
                                  withBlock:^(SPTPersistentRecordHeaderType *header) {
                                      assert(header != nil);
@@ -342,6 +343,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
         // If file already exit satisfy requirement to preserv its refCount for futher possible modification
         if ([self.fileManager fileExistsAtPath:filePath]) {
+            // WARNING: We may skip return result here bcuz in that case we will rewrite bad file with new one
             [self alterHeaderForFileAtPath:filePath
                                  withBlock:^(SPTPersistentRecordHeaderType *header){
                                      assert(header != nil);
@@ -605,6 +607,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 NSString *filePath = [self pathForKey:theURL.lastPathComponent];
 
                 BOOL __block locked = NO;
+                // WARNING: We may skip return result here bcuz in that case we will not count file as locked
                 [self alterHeaderForFileAtPath:filePath withBlock:^(SPTPersistentRecordHeaderType *header) {
                     locked = header->refCount > 0;
                 }
@@ -912,6 +915,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
                 BOOL __block needRemove = NO;
                 int __block reason = 0;
+                // WARNING: We may skip return result here bcuz in that case we won't remove file we do not know what is it
                 [self alterHeaderForFileAtPath:filePath
                                      withBlock:^(SPTPersistentRecordHeaderType *header) {
 
@@ -1099,6 +1103,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 // We skip locked files always
                 BOOL __block locked = NO;
 
+                // WARNING: We may skip return result here bcuz in that case we will remove unknown file as unlocked trash
                 [self alterHeaderForFileAtPath:[NSString stringWithUTF8String:theURL.fileSystemRepresentation]
                                      withBlock:^(SPTPersistentRecordHeaderType *header) {
                                          locked = (header->refCount > 0);
