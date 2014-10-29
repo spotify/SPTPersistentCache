@@ -193,10 +193,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     if (self.options.defaultExpirationPeriodSec < SPTPersistentDataCacheDefaultExpirationLimitSec) {
         [self debugOutput:@"PersistentDataCache: Forcing defaultExpirationPeriodSec to %ld sec", (unsigned long)SPTPersistentDataCacheDefaultExpirationLimitSec];
+        self.options.defaultExpirationPeriodSec = SPTPersistentDataCacheDefaultExpirationLimitSec;
     }
 
     if (self.options.collectionIntervalSec < SPTPersistentDataCacheGCIntervalLimitSec) {
         [self debugOutput:@"PersistentDataCache: Forcing collectionIntervalSec to %ld sec", (unsigned long)SPTPersistentDataCacheGCIntervalLimitSec];
+        self.options.collectionIntervalSec = SPTPersistentDataCacheGCIntervalLimitSec;
     }
 
     return self;
