@@ -664,7 +664,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             // We return locked files even if they expired, GC doesnt collect them too so they valuable to user
             if (![self isDataCanBeReturnedWithHeader:header]) {
 #ifdef DEBUG_OUTPUT_ENABLED
-                [self debugOutput:@"Record with key: %@ expired", key];
+                [self debugOutput:@"PersistentDataCache: Record with key: %@ expired, t:%llu, TTL:%llu", key, header->updateTimeSec, header->ttl];
 #endif
                 [self dispatchEmptyResponseWithResult:PDC_DATA_NOT_FOUND callback:callback onQueue:queue];
                 return;
