@@ -84,7 +84,7 @@ static NSString * const SPTDataCacheFileAttributesKey = @"SPTDataCacheFileAttrib
     }
 
     _defaultExpirationPeriodSec = SPTPersistentDataCacheDefaultExpirationTimeSec;
-    _collectionIntervalSec = SPTPersistentDataCacheDefaultGCIntervalSec;
+    _gcIntervalSec = SPTPersistentDataCacheDefaultGCIntervalSec;
     _folderSeparationEnabled = YES;
     
     return self;
@@ -134,7 +134,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     _options = [SPTPersistentDataCacheOptions new];
     self.options.defaultExpirationPeriodSec = SPTPersistentDataCacheDefaultExpirationTimeSec;
-    self.options.collectionIntervalSec = SPTPersistentDataCacheDefaultGCIntervalSec;
+    self.options.gcIntervalSec = SPTPersistentDataCacheDefaultGCIntervalSec;
     self.fileManager = [NSFileManager defaultManager];
     NSString *cachePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"/com.spotify.temppersistent.image.cache"];
     self.options.cachePath = cachePath;
@@ -144,7 +144,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     assert(self.options.cachePath != nil);
     
     NSString *name = [NSString stringWithFormat:@"%@.queue.%ld.%ld.%p", self.options.cacheIdentifier,
-                      (unsigned long)self.options.collectionIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, self];
+                      (unsigned long)self.options.gcIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, self];
     _workQueue = dispatch_queue_create([name UTF8String], DISPATCH_QUEUE_CONCURRENT);
 
     self.currentTime = self.options.currentTimeSec;
@@ -166,7 +166,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         self.options.cacheIdentifier = @"persistent.cache";
     }
     NSString *name = [NSString stringWithFormat:@"%@.queue.%ld.%ld.%p", self.options.cacheIdentifier,
-                      (unsigned long)self.options.collectionIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, self];
+                      (unsigned long)self.options.gcIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, self];
     _workQueue = dispatch_queue_create([name UTF8String], DISPATCH_QUEUE_CONCURRENT);
     assert(_workQueue != nil);
     self.fileManager = [NSFileManager defaultManager];
@@ -198,9 +198,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         self.options.defaultExpirationPeriodSec = SPTPersistentDataCacheDefaultExpirationLimitSec;
     }
 
-    if (self.options.collectionIntervalSec < SPTPersistentDataCacheGCIntervalLimitSec) {
-        [self debugOutput:@"PersistentDataCache: Forcing collectionIntervalSec to %ld sec", (unsigned long)SPTPersistentDataCacheGCIntervalLimitSec];
-        self.options.collectionIntervalSec = SPTPersistentDataCacheGCIntervalLimitSec;
+    if (self.options.gcIntervalSec < SPTPersistentDataCacheGCIntervalLimitSec) {
+        [self debugOutput:@"PersistentDataCache: Forcing gcIntervalSec to %ld sec", (unsigned long)SPTPersistentDataCacheGCIntervalLimitSec];
+        self.options.gcIntervalSec = SPTPersistentDataCacheGCIntervalLimitSec;
     }
 
     return self;
@@ -523,7 +523,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     proxy.dataCache = self;
     proxy.queue = self.workQueue;
 
-    NSTimeInterval interval = self.options.collectionIntervalSec;
+    NSTimeInterval interval = self.options.gcIntervalSec;
     self.gcTimer = [NSTimer timerWithTimeInterval:interval target:proxy selector:@selector(enqueueGC:) userInfo:nil repeats:YES];
     self.gcTimer.tolerance = 300;
     

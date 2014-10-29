@@ -160,7 +160,7 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
  * Its recommended to use SPTPersistentDataCacheDefaultGCIntervalSec constant if not sure.
  * Internal guarding is applied to this value.
  */
-@property (nonatomic, assign) NSUInteger collectionIntervalSec;
+@property (nonatomic, assign) NSUInteger gcIntervalSec;
 /**
  * Default time which have to pass since last file access so file could be candidate for pruning on next GC.
  * Its recommended to use SPTPersistentDataCacheDefaultExpirationTimeSec if not sure.
