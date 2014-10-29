@@ -865,13 +865,13 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     assert(header != nil);
     uint64_t ttl = header->ttl;
     uint64_t current = (uint64_t)self.currentTime();
-    uint64_t threshold = (ttl > 0) ? ttl : self.options.defaultExpirationPeriodSec;
+    int64_t threshold = (ttl > 0) ? ttl : self.options.defaultExpirationPeriodSec;
 
     if (ttl > kTTLUpperBoundInSec) {
         [self debugOutput:@"PersistentDataCache: WARNING: TTL seems too big: %llu > %llu sec", ttl, kTTLUpperBoundInSec];
     }
 
-    return (current - header->updateTimeSec) > threshold;
+    return (int64_t)(current - header->updateTimeSec) > threshold;
 }
 
 - (BOOL)isDataCanBeReturnedWithHeader:(SPTPersistentRecordHeaderType *)header
