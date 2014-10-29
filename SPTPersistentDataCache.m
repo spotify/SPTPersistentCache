@@ -835,7 +835,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 {
     // make folder tree: xx/  zx/  xy/  yz/ etc.
     NSString *subDir = self.options.cachePath;
-    if ([key length] > 2) {
+    if ([key length] >= 2) {
         subDir = [self.options.cachePath stringByAppendingPathComponent:[key substringToIndex:2]];
     }
 
