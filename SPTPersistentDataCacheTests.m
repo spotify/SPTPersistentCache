@@ -260,7 +260,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     NSString * __block key = nil;
 
     [cache loadDataForKeysWithPrefix:prefix chooseKeyCallback:^NSString *(NSArray *keys) {
-        XCTAssertGreaterThanOrEqual([keys count], 1);
+        XCTAssert([keys count] >= 1, @"We expect at least 1 key here");
         key = keys.firstObject;
         XCTAssertTrue([key hasPrefix:prefix]);
         return key;
@@ -308,7 +308,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     NSString * __block key = nil;
 
     [cache loadDataForKeysWithPrefix:prefix chooseKeyCallback:^NSString *(NSArray *keys) {
-        XCTAssertGreaterThanOrEqual([keys count], 1);
+        XCTAssert([keys count] >= 1, @"We expect at least 1 key here");
         key = keys.firstObject;
         XCTAssertTrue([key hasPrefix:prefix]);
 
