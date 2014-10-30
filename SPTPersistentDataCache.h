@@ -177,11 +177,13 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 @property (nonatomic, copy) SPTDataCacheDebugCallback debugOutput;
 /**
  * Callback to provide current time in seconds. This time shouldn't depend on time zone etc. 
- * So its better to use fixed time scale i.e. UNIX.
+ * So its better to use fixed time scale i.e. UNIX. If not specified then current unix time is used.
  */
 @property (nonatomic, copy) SPTDataCacheCurrentTimeSecCallback currentTimeSec;
 /**
- * Any string that identifies the cache and used in naming of internal queue.
+ * Any string that identifies the cache and used in naming of internal queue. 
+ * It is important to put sane string to be able identify queue during debug and in crash dumps.
+ * Default is "persistent.cache".
  */
 @property (nonatomic, copy) NSString *cacheIdentifier;
 /**
