@@ -508,7 +508,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     });
 }
 
-- (void)runGarbageCollector
+- (void)scheduleGarbageCollector
 {
     assert([NSThread isMainThread]);
 
@@ -530,7 +530,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     [[NSRunLoop mainRunLoop] addTimer:self.gcTimer forMode:NSDefaultRunLoopMode];
 }
 
-- (void)stopGarbageCollector
+- (void)unscheduleGarbageCollector
 {
     assert([NSThread isMainThread]);
 
@@ -629,7 +629,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
 - (void)dealloc
 {
-    [self stopGarbageCollector];
+    [self unscheduleGarbageCollector];
 }
 
 #pragma mark - Private methods

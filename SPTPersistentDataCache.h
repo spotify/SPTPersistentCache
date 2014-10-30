@@ -312,12 +312,12 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 /**
  * Schedule ragbage collection. If already scheduled then this method does nothing.
  */
-- (void)runGarbageCollector;
+- (void)scheduleGarbageCollector;
 
 /**
  * Stop ragbage collection. If already stopped this method does nothing.
  */
-- (void)stopGarbageCollector;
+- (void)unscheduleGarbageCollector;
 
 /**
  * Delete all files files in managed folder unconditionaly.
