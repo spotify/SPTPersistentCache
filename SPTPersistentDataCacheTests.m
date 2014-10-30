@@ -1009,7 +1009,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     // Check that size reached its required level
     NSUInteger realSize = [cache totalUsedSizeInBytes];
-    XCTAssertLessThanOrEqual(realSize, expectedSize, @"real cache size has to be less or equal to what we expect");
+    XCTAssert(realSize <= expectedSize, @"real cache size has to be less or equal to what we expect");
 
     // Check that files supposed to be deleted was actually removed
     for (unsigned i = 0; i < removedItems.count; ++i) {
