@@ -1164,10 +1164,10 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
 NS_INLINE BOOL PointerMagicAlignCheck(const void *ptr)
 {
-    const unsigned shift = _Alignof(MagicType)-1;
-    const unsigned long mask = ~(((unsigned long)(-1) >> shift) << shift);
-    assert( !((unsigned long)ptr & mask) );
-    return !((unsigned long)ptr & mask);
+    const unsigned align = _Alignof(MagicType);
+    uint64_t v = (uint64_t)(ptr);
+    assert(v%align == 0);
+    return (v%align == 0);
 }
 
 SPTPersistentRecordHeaderType* pdc_GetHeaderFromData(const void* data, size_t size)
