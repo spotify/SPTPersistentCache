@@ -281,7 +281,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                          [keysToConsider addObject:key];
                                      }
                                  }
-                                 writeBack:NO];
+                                 writeBack:NO
+                                  complain:YES];
 
         }
 
@@ -353,7 +354,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                      assert(header != nil);
                                      oldRefCount = header->refCount;
                                  }
-                                 writeBack:NO];
+                                 writeBack:NO
+                                  complain:YES];
         }
 
         const NSUInteger payloadLen = [data length];
@@ -418,7 +420,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                      header->updateTimeSec = self.currentTime();
                                  }
                              }
-                             writeBack:YES];
+                             writeBack:YES
+                              complain:NO];
         if (callback) {
             dispatch_async(queue, ^{
                 callback(response);
@@ -466,7 +469,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                      ++header->refCount;
                                      // Do not update access time since file is locked
             }
-                                 writeBack:YES];
+                                 writeBack:YES
+                                  complain:YES];
 
             if (callback) {
                 dispatch_async(queue, ^{
@@ -501,7 +505,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                          [self debugOutput:@"PersistentDataCache: Error trying to decrement refCount below 0 for file at path:%@", filePath];
                                      }
                                  }
-                                 writeBack:YES];
+                                 writeBack:YES
+                                  complain:YES];
 
             if (callback) {
                 dispatch_async(queue, ^{
@@ -617,7 +622,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 [self alterHeaderForFileAtPath:filePath withBlock:^(SPTPersistentRecordHeaderType *header) {
                     locked = header->refCount > 0;
                 }
-                                     writeBack:NO];
+                                     writeBack:NO
+                                      complain:YES];
                 if (locked) {
                     size += [self getFileSizeAtPath:filePath];
                 }
@@ -732,7 +738,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     } // file exist
 }
 
-- (SPTPersistentCacheResponse *)guardOpenFileWithPath:(NSString *)filePath jobBlock:(FileProcessingBlockType)jobBlock
+- (SPTPersistentCacheResponse *)guardOpenFileWithPath:(NSString *)filePath
+                                             jobBlock:(FileProcessingBlockType)jobBlock
+                                             complain:(BOOL)needComplains
 {
     assert(jobBlock != nil);
     if (jobBlock == nil) {
@@ -740,7 +748,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     }
 
     if (![self.fileManager fileExistsAtPath:filePath]) {
-        [self debugOutput:@"PersistentDataCache: Record not exist at path:%@", filePath];
+        if (needComplains) {
+            [self debugOutput:@"PersistentDataCache: Record not exist at path:%@", filePath];
+        }
         return [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_NOT_FOUND error:nil record:nil];
     } else {
         int fd = open([filePath UTF8String], O_RDWR);
@@ -770,6 +780,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 - (SPTPersistentCacheResponse *)alterHeaderForFileAtPath:(NSString *)filePath
                                                withBlock:(RecordHeaderGetCallbackType)modifyBlock
                                                writeBack:(BOOL)needWriteBack
+                                                complain:(BOOL)needComplains
 {
     assert(modifyBlock != nil);
     if (modifyBlock == nil) {
@@ -838,7 +849,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         }
 
         return [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_OPERATION_SUCCEEDED error:nil record:nil];
-    }];
+    }
+                              complain:needComplains];
 }
 
 - (NSString *)subDirectoryPathForKey:(NSString *)key
@@ -948,7 +960,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                              reason = 4;
                                          }
 
-                                     } writeBack:NO];
+                                     } writeBack:NO
+                                      complain:YES];
 
                 if (needRemove) {
                     [self debugOutput:@"PersistentDataCache: gc removing record: %@, reason:%d", filePath.lastPathComponent, reason];
@@ -1131,7 +1144,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 [self alterHeaderForFileAtPath:[NSString stringWithUTF8String:theURL.fileSystemRepresentation]
                                      withBlock:^(SPTPersistentRecordHeaderType *header) {
                                          locked = (header->refCount > 0);
-                                     } writeBack:NO];
+                                     } writeBack:NO
+                                      complain:YES];
 
                 if (locked) {
                     continue;
