@@ -323,13 +323,15 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 {
     assert(data != nil);
     assert(key != nil);
-    assert(callback != nil);
-    assert(queue != nil);
+
+    if (callback != nil) {
+        assert(queue != nil);
+    }
 
     if (data == nil || key == nil) {
         return;
     }
-    if (callback == nil || queue == nil) {
+    if (callback != nil && queue == nil) {
         return;
     }
 
@@ -386,9 +388,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_OPERATION_SUCCEEDED
                                                                                                 error:nil
                                                                                                record:nil];
-            dispatch_async(queue, ^{
-                callback(response);
-            });
+            if (callback != nil) {
+                dispatch_async(queue, ^{
+                    callback(response);
+                });
+            }
         }
     });
 }
@@ -993,9 +997,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:result
                                                                                         error:nil
                                                                                        record:nil];
-    dispatch_async(queue, ^{
-        callback(response);
-    });
+    if (callback != nil) {
+        dispatch_async(queue, ^{
+            callback(response);
+        });
+    }
 }
 
 - (void)dispatchError:(NSError *)error
@@ -1006,9 +1012,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:result
                                                                                         error:error
                                                                                        record:nil];
-    dispatch_async(queue, ^{
-        callback(response);
-    });
+
+    if (callback != nil) {
+        dispatch_async(queue, ^{
+            callback(response);
+        });
+    }
 }
 
 - (NSUInteger)getFileSizeAtPath:(NSString *)filePath

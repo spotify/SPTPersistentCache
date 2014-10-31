@@ -213,7 +213,7 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
  * @param key Key used to access the data. It MUST MUST MUST be unique for different data. 
  *            It could be used as a part of file name. It up to a cache user to define algorithm to form a key.
  * @param callback callback to call once data is loaded. It mustn't be nil.
- * @param queue Queue on which to run the callback. Mustn't be bil.
+ * @param queue Queue on which to run the callback. Mustn't be nil.
  */
 - (void)loadDataForKey:(NSString *)key
           withCallback:(SPTDataCacheResponseCallback)callback
@@ -227,7 +227,7 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
  * @param prefix Prefix which key should have to be candidate for loading.
  * @param chooseKeyCallback callback to call to define which key to use to load the data. 
  * @param callback callback to call once data is loaded. It mustn't be nil.
- * @param queue Queue on which to run the callback. Mustn't be bil.
+ * @param queue Queue on which to run the callback. Mustn't be nil.
  */
 - (void)loadDataForKeysWithPrefix:(NSString *)prefix
                 chooseKeyCallback:(SPTDataCacheChooseKeyCallback)chooseKeyCallback
@@ -243,8 +243,8 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
  * @param key Key to associate the data with.
  * @param locked If YES then data refCount is incremented by 1. 
           If NO then remain unchanged (for new created file set to 0 and incremented if YES).
- * @param callback Callback to call once data is loaded. It mustn't be nil.
- * @param queue Queue on which to run the callback. Mustn't be bil.
+ * @param callback Callback to call once data is loaded. Could be nil.
+ * @param queue Queue on which to run the callback. Couldn't be nil if callback is specified.
  */
 - (void)storeData:(NSData *)data
            forKey:(NSString *)key
@@ -264,8 +264,8 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
  * @param ttl TTL value for a file. 0 is equivalent to storeData:forKey: behavior.
  * @param locked If YES then data refCount is incremented by 1.
  *        If NO then remain unchanged (for new created file set to 0 and incremented if YES).
- * @param callback Callback to call once data is loaded. It mustn't be nil.
- * @param queue Queue on which to run the callback. Mustn't be bil.
+ * @param callback Callback to call once data is loaded. Could be nil.
+ * @param queue Queue on which to run the callback. Couldn't be nil if callback is specified.
  */
 - (void)storeData:(NSData *)data
            forKey:(NSString *)key
