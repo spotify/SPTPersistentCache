@@ -660,25 +660,28 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 return;
             }
 
+            SPTPersistentRecordHeaderType localHeader;
+            memcpy(&localHeader, header, sizeof(localHeader));
+
             // Check header is valid
-            NSError *headerError = [self checkHeaderValid:header];
+            NSError *headerError = [self checkHeaderValid:&localHeader];
             if (headerError != nil) {
                 [self dispatchError:headerError result:PDC_DATA_OPERATION_ERROR callback:callback onQueue:queue];
                 return;
             }
 
-            const NSUInteger refCount = header->refCount;
+            const NSUInteger refCount = localHeader.refCount;
             // We return locked files even if they expired, GC doesnt collect them too so they valuable to user
-            if (![self isDataCanBeReturnedWithHeader:header]) {
+            if (![self isDataCanBeReturnedWithHeader:&localHeader]) {
 #ifdef DEBUG_OUTPUT_ENABLED
-                [self debugOutput:@"PersistentDataCache: Record with key: %@ expired, t:%llu, TTL:%llu", key, header->updateTimeSec, header->ttl];
+                [self debugOutput:@"PersistentDataCache: Record with key: %@ expired, t:%llu, TTL:%llu", key, localHeader.updateTimeSec, localHeader.ttl];
 #endif
                 [self dispatchEmptyResponseWithResult:PDC_DATA_NOT_FOUND callback:callback onQueue:queue];
                 return;
             }
 
             // Check that payload is correct size
-            if (header->payloadSizeBytes != [rawData length] - kSPTPersistentRecordHeaderSize) {
+            if (localHeader.payloadSizeBytes != [rawData length] - kSPTPersistentRecordHeaderSize) {
                 [self debugOutput:@"PersistentDataCache: Error: Wrong payload size for key:%@ , will return error", key];
                 [self dispatchError:[self nsErrorWithCode:PDC_ERROR_WRONG_PAYLOAD_SIZE]
                              result:PDC_DATA_OPERATION_ERROR
@@ -686,9 +689,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 return;
             }
 
-            NSRange payloadRange = NSMakeRange(kSPTPersistentRecordHeaderSize, header->payloadSizeBytes);
+            NSRange payloadRange = NSMakeRange(kSPTPersistentRecordHeaderSize, localHeader.payloadSizeBytes);
             NSData *payload = [rawData subdataWithRange:payloadRange];
-            const NSUInteger ttl = header->ttl;
+            const NSUInteger ttl = localHeader.ttl;
 
 
             SPTDataCacheRecord *record = [[SPTDataCacheRecord alloc] initWithData:payload
@@ -701,8 +704,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                                                                                record:record];
             // If data ttl == 0 we apdate access time
             if (ttl == 0) {
-                header->updateTimeSec = (uint64_t)self.currentTime();
-                header->crc = pdc_CalculateHeaderCRC(header);
+                localHeader.updateTimeSec = (uint64_t)self.currentTime();
+                localHeader.crc = pdc_CalculateHeaderCRC(&localHeader);
+                memcpy(header, &localHeader, sizeof(localHeader));
 
                 // Write back with update access attributes
                 NSError *werror = nil;
