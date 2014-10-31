@@ -273,12 +273,13 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             XCTAssertNotNil(image, @"Expected valid not nil image");
             XCTAssertNil(response.error, @"error is not expected to be here");
 
-            BOOL locked = response.record.refCount > 0;
-            XCTAssertEqual(kParams[index].locked, locked, @"Same files must be locked");
-            XCTAssertEqual(kParams[index].ttl, response.record.ttl, @"Same files must have same TTL");
-            XCTAssertEqualObjects(self.imageNames[index], response.record.key, @"Same files must have same key");
-            XCTAssertEqualObjects(key, response.record.key, @"Same files must have same key");
+            NSInteger idx = [self.imageNames indexOfObject:key];
+            XCTAssertNotEqual(idx, NSNotFound);
 
+            BOOL locked = response.record.refCount > 0;
+            XCTAssertEqual(kParams[idx].locked, locked, @"Same files must be locked");
+            XCTAssertEqual(kParams[idx].ttl, response.record.ttl, @"Same files must have same TTL");
+            XCTAssertEqualObjects(key, response.record.key, @"Same files must have same key");
         } else {
             XCTAssert(NO, @"This shouldnt happen");
         }
