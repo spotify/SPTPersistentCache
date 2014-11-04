@@ -280,8 +280,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             XCTAssertEqual(kParams[idx].locked, locked, @"Same files must be locked");
             XCTAssertEqual(kParams[idx].ttl, response.record.ttl, @"Same files must have same TTL");
             XCTAssertEqualObjects(key, response.record.key, @"Same files must have same key");
-        } else {
+
+        } else if (response.result == PDC_DATA_NOT_FOUND) {
             XCTAssert(NO, @"This shouldnt happen");
+
+        } else if (response.result == PDC_DATA_OPERATION_ERROR ){
+            XCTAssertNotNil(response.error, @"error is not expected to be here");
         }
 
         [self.asyncHelper endTest];
