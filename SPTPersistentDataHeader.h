@@ -10,19 +10,22 @@ typedef struct SPTPersistentRecordHeaderType
     MagicType magic;
     uint32_t headerSize;
     uint32_t refCount;
-    uint32_t reserved;
+    uint32_t reserved1;
     uint64_t ttl;
     // Time of last update i.e. creation or access
     uint64_t updateTimeSec; // unix time scale
     uint64_t payloadSizeBytes;
-    uint32_t reserved1;
+    uint64_t reserved2;
+    uint32_t reserved3;
+    uint32_t reserved4;
+    uint32_t flags;        // See SPTPersistentRecordHeaderFlags
     uint32_t crc;
-    // Version N: Add fields here if required
+    // Version 2: Add fields here if required
 } SPTPersistentRecordHeaderType;
 
 FOUNDATION_EXPORT const int kSPTPersistentRecordHeaderSize;
 
-_Static_assert(sizeof(SPTPersistentRecordHeaderType) == 48, "Struct SPTPersistentRecordHeaderType has to be packed without padding");
+_Static_assert(sizeof(SPTPersistentRecordHeaderType) == 64, "Struct SPTPersistentRecordHeaderType has to be packed without padding");
 _Static_assert(sizeof(SPTPersistentRecordHeaderType)%4 == 0, "Struct size has to be multiple of 4");
 
 // Following functions used internally and could be used testing purposes also
