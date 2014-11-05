@@ -7,7 +7,7 @@
 //#define DEBUG_OUTPUT_ENABLED
 
 NSString *const SPTPersistentDataCacheErrorDomain = @"persistent.cache.error";
-const NSUInteger SPTPersistentDataCacheDefaultGCIntervalSec = 6 * 60;
+const NSUInteger SPTPersistentDataCacheDefaultGCIntervalSec = 6 * 60 + 3;
 const NSUInteger SPTPersistentDataCacheDefaultExpirationTimeSec = 10 * 60;
 static const uint64_t kTTLUpperBoundInSec = 86400 * 31;
 static const NSUInteger SPTPersistentDataCacheGCIntervalLimitSec = 60;
