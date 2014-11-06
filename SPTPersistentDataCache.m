@@ -639,7 +639,10 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
 - (void)dealloc
 {
-    [self unscheduleGarbageCollector];
+    NSTimer *timer = self.gcTimer;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [timer invalidate];
+    });
 }
 
 #pragma mark - Private methods

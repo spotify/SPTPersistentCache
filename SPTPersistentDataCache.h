@@ -75,6 +75,7 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
  * @brief SPTPersistentDataCache
  *
  * @discussion Class defines persistent cache that manage files on disk. This class is threadsafe.
+ * Except methods for scheduling/unscheduling GC which must be called on main thread.
  * It is obligatory that one instanse of that class manage one path branch on disk. In other case behavior is undefined.
  * Cache uses own queue for all operations.
  * Cache GC procedure evicts all not locked files for which current_gc_time - access_time > defaultExpirationPeriodSec.
@@ -191,11 +192,13 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 
 /**
  * Schedule ragbage collection. If already scheduled then this method does nothing.
+ * WARNING: This method has to be called on main thread.
  */
 - (void)scheduleGarbageCollector;
 
 /**
  * Stop ragbage collection. If already stopped this method does nothing.
+ * WARNING: This method has to be called on main thread.
  */
 - (void)unscheduleGarbageCollector;
 
