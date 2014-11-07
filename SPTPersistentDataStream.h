@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.h>
 
 typedef void(^DataWriteCallback)(NSError *error);
-typedef void(^DataReadCallback)(NSData *continousData);
+typedef void(^DataReadCallback)(NSData *continousData, NSError *error);
 
 @protocol SPTPersistentDataStream <NSObject>
 
@@ -15,7 +15,10 @@ typedef void(^DataReadCallback)(NSData *continousData);
            callback:(DataWriteCallback)callback
               queue:(dispatch_queue_t)queue;
 
-// SIZE_MAX
+/**
+ * // SIZE_MAX
+ *
+ */
 - (void)readDataWithOffset:(off_t)offset
                     length:(NSUInteger)length
                   callback:(DataReadCallback)callback
@@ -24,8 +27,14 @@ typedef void(^DataReadCallback)(NSData *continousData);
 - (void)readAllDataWithCallback:(DataReadCallback)callback
                           queue:(dispatch_queue_t)queue;
 
+/**
+ * 
+ */
 - (BOOL)isComplete;
 
+/**
+ *
+ */
 - (void)finalize;
 
 @end

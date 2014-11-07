@@ -79,7 +79,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
                 return [NSError errorWithDomain:NSPOSIXErrorDomain code:intError userInfo:@{NSLocalizedDescriptionKey : @(strErr)}];
             }
 
-            self.source = dispatch_io_create (DISPATCH_IO_RANDOM, filedes, self.cleanupQueue, ^(int posix_error) {
+            self.source = dispatch_io_create(DISPATCH_IO_RANDOM, filedes, self.cleanupQueue, ^(int posix_error) {
                 if (posix_error != 0) {
                     const char *strErr = strerror(posix_error);
                     [self debugOutput:@"PersistentDataCache: Error in handler for key:%@, %s", self.key, strErr];
@@ -127,18 +127,30 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
            callback:(DataWriteCallback)callback
               queue:(dispatch_queue_t)queue
 {
-    dispatch_data_t data = dispatch_data_create(bytes, length, self.workQueue, DISPATCH_DATA_DESTRUCTOR_DEFAULT);
+    off_t offset = 0;
+//    @synchronized(self.source) {
+        offset = self.writeOffset;
+        self.writeOffset += length;
+//    }
 
-    dispatch_io_write(self.source, self.writeOffset, data, self.workQueue, ^(bool done, dispatch_data_t dataRemained, int error) {
+    dispatch_data_t data = dispatch_data_create(bytes, length, self.workQueue, DISPATCH_DATA_DESTRUCTOR_DEFAULT);
+    dispatch_io_write(self.source, offset, data, self.workQueue, ^(bool done, dispatch_data_t dataRemained, int error) {
 
         NSError *nsError = nil;
         if (done == YES && error == 0) {
-            self.writeOffset += length;
-        } else if (error > 0) {
+            // Success: Mark record as incomplete
+//            @synchronized(self.source) {
+                _header.flags |= PDC_HEADER_FLAGS_STREAM_INCOMPLETE;
+//            }
+
+        } else if (done == YES && error > 0) {
             const char *strerr = strerror(error);
             nsError = [NSError errorWithDomain:SPTPersistentDataCacheErrorDomain
                                           code:PDC_ERROR_STREAM_WRITE_FAILED
                                       userInfo:@{NSLocalizedDescriptionKey : @(strerr)}];
+        } else if (done == NO) {
+            // We do not expect it
+            assert(!"Not expected");
         }
 
         if (callback != nil) {
@@ -149,26 +161,83 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
     });
 }
 
-//SIZE_MAX
 - (void)readDataWithOffset:(off_t)offset
                     length:(NSUInteger)length
                   callback:(DataReadCallback)callback
                      queue:(dispatch_queue_t)queue
 {
+    assert(callback != nil);
+    assert(queue != nil);
+    if (callback == nil || queue == nil) {
+        return;
+    }
+
+    dispatch_io_read(self.source, offset, length, self.workQueue, ^(bool done, dispatch_data_t dataRead, int error) {
+
+        NSError *nsError = nil;
+        NSMutableData * __block payload = nil;
+
+        if (done == YES && error == 0) {
+            payload = [NSMutableData data];
+
+            dispatch_data_apply(dataRead, ^bool(dispatch_data_t region, size_t regionOffset, const void *buffer, size_t size) {
+                [payload appendBytes:buffer length:size];
+                return YES;
+            });
+
+        } else if (done == YES && error > 0) {
+            const char *strerr = strerror(error);
+            nsError = [NSError errorWithDomain:SPTPersistentDataCacheErrorDomain
+                                          code:PDC_ERROR_STREAM_WRITE_FAILED
+                                      userInfo:@{NSLocalizedDescriptionKey : @(strerr)}];
+        } else if (done == NO) {
+            // Partial data read which we do not expect
+            assert(!"Not expected");
+        }
+
+        dispatch_async(queue, ^{
+            callback(payload, nsError);
+        });
+    });
 }
 
 - (void)readAllDataWithCallback:(DataReadCallback)callback
                           queue:(dispatch_queue_t)queue
 {
+    [self readDataWithOffset:0 length:SIZE_MAX callback:callback queue:queue];
 }
 
 - (BOOL)isComplete
 {
-    return (self.header.flags & PDC_HEADER_FLAGS_STREAM_INCOMPLETE) > 0;
+    uint32_t flags = 0;
+//    @synchronized(self.source) {
+        flags = self.header.flags;
+//    }
+
+    return (flags & PDC_HEADER_FLAGS_STREAM_INCOMPLETE) > 0;
 }
 
+// WARNING: This operation is not thread safe against append methods
 - (void)finalize
 {
+    assert(self.writeOffset > 0);
+    _header.payloadSizeBytes = (uint64_t)self.writeOffset;
+    _header.flags = 0;
+    _header.crc = pdc_CalculateHeaderCRC(&_header);
+
+    dispatch_data_t data = dispatch_data_create(&_header, kSPTPersistentRecordHeaderSize, self.workQueue, DISPATCH_DATA_DESTRUCTOR_DEFAULT);
+    off_t offset = -kSPTPersistentRecordHeaderSize;
+    dispatch_io_write(self.source, offset, data, self.workQueue, ^(bool done, dispatch_data_t dataRemained, int error) {
+        if (done == YES && error == 0) {
+            // Success: done
+        } else if (done == YES && error > 0) {
+            const char *strerr = strerror(error);
+            [self debugOutput:@"PersistentDataStream: Error finilizing file: (%d) %s", error, strerr];
+        } else if (done == NO) {
+            // Partial data read which we do not expect
+            assert(!"Not expected");
+        }
+    });
 }
 
 #pragma mark - Private Methods
