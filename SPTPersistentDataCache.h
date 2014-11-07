@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import "SPTPersistentCacheTypes.h"
+#import "SPTPersistentDataStream.h"
 
 /**
  * Type off callback for load/store calls
@@ -7,12 +8,7 @@
 typedef void (^SPTDataCacheResponseCallback)(SPTPersistentCacheResponse *response);
 
 /**
- * Type of callback that can be used ot get debug messages from cache.
- */
-typedef void (^SPTDataCacheDebugCallback)(NSString *string);
-
-/**
- *
+ * Type of callback that is used to give caller a chance to choose which key to open if any.
  */
 typedef NSString *(^SPTDataCacheChooseKeyCallback)(NSArray *keys);
 
@@ -20,6 +16,11 @@ typedef NSString *(^SPTDataCacheChooseKeyCallback)(NSArray *keys);
  * Type of callback that is used to provide current time for that cache. Mainly for testing.
  */
 typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
+
+/**
+ * Type of callback that is used  to provide a stream access for particular cache record.
+ */
+typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error);
 
 
 /**
@@ -152,6 +153,27 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
            locked:(BOOL)locked
      withCallback:(SPTDataCacheResponseCallback)callback
           onQueue:(dispatch_queue_t)queue;
+
+
+/**
+ * @discussion Open cache record for appending data. If record is not exist and createIfNotExist is YES then record will
+ *             be created. TLL could be specified if known, otherwise put 0 as TTL meaning default expiration rule applies.
+ *             Record could be created as locked initially specifying YES to locked: argument. If record already exist, it's refCount
+ *             is used if locked is YES, if locked is NO refCount is unchanged. TLL is set to new ttl value.
+ * @param key Key to associate the data with.
+ * @param needCreate If YES file is created, otherwise just opened.
+ * @param ttl TTL value for a file. 0 is equivalent to storeData:forKey:locked:... behavior.
+ * @param locked If YES then data refCount is incremented by 1.
+ *        If NO then remain unchanged (for new created file set to 0 and incremented if YES).
+ * @param callback Callback to call once data is loaded. Could not be nil.
+ * @param queue Queue on which to run the callback. Could not be nil .
+ */
+- (void)openDataStreamForKey:(NSString *)key
+            createIfNotExist:(BOOL)needCreate
+                         ttl:(NSUInteger)ttl
+                      locked:(BOOL)locked
+                withCallback:(SPTDataCacheStreamCallback)callback
+                     onQueue:(dispatch_queue_t)queue;
 
 /**
  * Update last access time in header of the record. Only applies for default expiration policy (ttl == 0).

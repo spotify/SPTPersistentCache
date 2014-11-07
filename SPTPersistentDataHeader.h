@@ -4,6 +4,21 @@
 typedef uint32_t MagicType;
 FOUNDATION_EXPORT const MagicType kSPTPersistentDataCacheMagic;
 
+/**
+ * Describes different flags for record
+ */
+typedef enum SPTPersistentRecordHeaderFlags
+{
+    // 0x0 means regular file
+    /*
+     * Indicates that record might not be completed last time it was written.
+     * This is not an error state but more Application logic.
+     */
+    PDC_HEADER_FLAGS_STREAM_INCOMPLETE = 0x1,
+
+
+} SPTPersistentRecordHeaderFlags;
+
 typedef struct SPTPersistentRecordHeaderType
 {
     // Version 1:
@@ -18,7 +33,7 @@ typedef struct SPTPersistentRecordHeaderType
     uint64_t reserved2;
     uint32_t reserved3;
     uint32_t reserved4;
-    uint32_t flags;        // See SPTPersistentRecordHeaderFlags
+    uint32_t flags;         // See SPTPersistentRecordHeaderFlags
     uint32_t crc;
     // Version 2: Add fields here if required
 } SPTPersistentRecordHeaderType;
@@ -28,7 +43,7 @@ FOUNDATION_EXPORT const int kSPTPersistentRecordHeaderSize;
 _Static_assert(sizeof(SPTPersistentRecordHeaderType) == 64, "Struct SPTPersistentRecordHeaderType has to be packed without padding");
 _Static_assert(sizeof(SPTPersistentRecordHeaderType)%4 == 0, "Struct size has to be multiple of 4");
 
-// Following functions used internally and could be used testing purposes also
+// Following functions used internally and could be used for testing purposes also
 
 // Function return pointer to header if there are enough data otherwise NULL
 FOUNDATION_EXPORT SPTPersistentRecordHeaderType* pdc_GetHeaderFromData(const void* data, size_t size);

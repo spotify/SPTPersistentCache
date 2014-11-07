@@ -22,7 +22,7 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentDataCacheDefaultExpirationTimeSe
  loadDataForKey:withCallback: method.
 
  @constant PDC_OPERATION_SUCCEEDED Indicates success of requested operation with data.
- record field of SPTPersistentCacheResponse mustn't be nil. error would be nil.
+ record field of SPTPersistentCacheResponse mustn't be nil if it was load operation otherwise it could be. error would be nil.
 
  @constant PDC_DATA_NOT_FOUND Indicates that no file found for given key in cache or is expired.
  record and error field of SPTPersistentCacheResponse is nil in this case.
@@ -59,6 +59,12 @@ typedef NS_ENUM(NSInteger, SPTDataCacheResponseCode)
  @constant PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER Binary data size read as header is less then current header size
  which means we can't proceed further with this file.
 
+ @constant PDC_ERROR_UNABLE_TO_CREATE_IO_SOURCE Cache was not able to create dispatch_io_t source for requested stream.
+
+ @constant PDC_ERROR_STREAM_WRITE_FAILED
+
+ @constant PDC_ERROR_STREAM_READ_FAILED
+
  @constant PDC_ERROR_INTERNAL_INCONSISTENCY Something bad has happened that shouldn't.
  */
 typedef NS_ENUM(NSInteger, SPTDataCacheLoadingError)
@@ -69,6 +75,9 @@ typedef NS_ENUM(NSInteger, SPTDataCacheLoadingError)
     PDC_ERROR_WRONG_PAYLOAD_SIZE,
     PDC_ERROR_INVALID_HEADER_CRC,
     PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
+    PDC_ERROR_UNABLE_TO_CREATE_IO_SOURCE,
+    PDC_ERROR_STREAM_WRITE_FAILED,
+    PDC_ERROR_STREAM_READ_FAILED,
     PDC_ERROR_INTERNAL_INCONSISTENCY
 };
 
@@ -120,4 +129,9 @@ typedef NS_ENUM(NSInteger, SPTDataCacheLoadingError)
  */
 @property (nonatomic, strong, readonly) SPTDataCacheRecord *record;
 @end
+
+/**
+ * Type of callback that can be used ot get debug messages from cache.
+ */
+typedef void (^SPTDataCacheDebugCallback)(NSString *string);
 
