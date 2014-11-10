@@ -17,12 +17,13 @@ static const char* kImages[] = {
     "e5b8abdc091921d49e86687e28b74abb3139df70",
     "ee6b44ab07fa3937a6d37f449355b64c09677295",
     "f50512901688b79a7852999d384d097a71fad788",
-    "f1eeb834607dcc2b01909bd740d4356f2abb4cd1", //11
+    "eee9747e967c4440eb90bb812d148aa3d0056700",
+    "f1eeb834607dcc2b01909bd740d4356f2abb4cd1", //12
     "b02c1be08c00bac5f4f1a62c6f353a24487bb024",
     "b3e04bf446b486412a13659af71e3a333c6152f4",
     "b53aed36cdc67dd43b496db74843ac32fe1f64bb",
     "aad0e75ab0a6828d0a9b37a68198cc9d70d84850",
-    "ab3d97d4d7b3df5417490aa726c5a49b9ee98038", //16
+    "ab3d97d4d7b3df5417490aa726c5a49b9ee98038", //17
     NULL
 };
 typedef struct
@@ -51,12 +52,13 @@ static const StoreParamsType kParams[] = {
     {kTTL4, NO, NO, -1},
     {0,     NO, NO, -1},
     {0,     NO, NO, -1},
-    {0,     NO, NO, -1}, // 11
+    {0,     NO, NO, -1},
+    {0,     NO, NO, -1}, // 12
     {0,     NO, NO, PDC_ERROR_MAGIC_MISSMATCH},
     {0,     NO, NO, PDC_ERROR_WRONG_HEADER_SIZE},
     {0,     NO, NO, PDC_ERROR_WRONG_PAYLOAD_SIZE},
     {0,     NO, NO, PDC_ERROR_INVALID_HEADER_CRC},
-    {0,     NO, NO, PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER}, // 16
+    {0,     NO, NO, PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER}, // 17
 
     {kTTL4, NO, YES, -1}
 };
@@ -160,6 +162,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     self.cache = nil;
     self.imageNames = nil;
     self.asyncHelper = nil;
+
     [super tearDown];
 }
 
