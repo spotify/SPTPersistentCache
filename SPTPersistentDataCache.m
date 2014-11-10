@@ -627,10 +627,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
             if ([isDirectory boolValue] == NO) {
                 NSString *key = theURL.lastPathComponent;
-                if (![self.busyKeys containsObject:key]) {
-                    NSString *filePath = [self pathForKey:key];
-                    size += [self getFileSizeAtPath:filePath];
-                }
+
+                NSString *filePath = [self pathForKey:key];
+                size += [self getFileSizeAtPath:filePath];
             }
         } else {
             [self debugOutput:@"Unable to fetch isDir#2 attribute:%@", theURL];
@@ -1213,7 +1212,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     SPTDiskSizeType optimalCacheSize = [self optimalSizeForCache:currentCacheSize];
 
-    // Remove oldest images until we reach acceptable cache size
+    // Remove oldest data until we reach acceptable cache size
     while (currentCacheSize > optimalCacheSize && images.count) {
         NSDictionary *image = [images lastObject];
         [images removeLastObject];
@@ -1281,6 +1280,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
                 // We skip locked files always
                 BOOL __block locked = NO;
+
+                // Here we skip streams
+                NSString *key = [NSString stringWithUTF8String:theURL.fileSystemRepresentation].lastPathComponent;
+                if ([self.busyKeys containsObject:key]) {
+                    continue;
+                }
 
                 // WARNING: We may skip return result here bcuz in that case we will remove unknown file as unlocked trash
                 [self alterHeaderForFileAtPath:[NSString stringWithUTF8String:theURL.fileSystemRepresentation]

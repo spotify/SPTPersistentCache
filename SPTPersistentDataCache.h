@@ -244,12 +244,14 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
 /**
  * Returns size occupied by cache.
  * WARNING: This method does synchronous calculations.
+ * WARNING: Files opened as streams are accounted in this calculations.
  */
 - (NSUInteger)totalUsedSizeInBytes;
 
 /**
  * Returns size occupied by locked items.
  * WARNING: This method does synchronous calculations.
+ * WARNING: Files opened as streams are NOT accounted in this calculations.
  */
 - (NSUInteger)lockedItemsSizeInBytes;
 
