@@ -81,6 +81,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 @property (nonatomic, strong) NSMutableArray *imageNames;
 @property (nonatomic, strong) NSString *cachePath;
 @property (nonatomic, strong) SPTAsyncTestHelper *asyncHelper;
+@property (nonatomic, strong) NSBundle *thisBundle;
 @end
 
 @implementation SPTPersistentDataCacheTests
@@ -127,7 +128,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     self.cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return kTestEpochTime; }
                                     expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
-    NSBundle *b = [NSBundle bundleForClass:[self class]];
+    self.thisBundle = [NSBundle bundleForClass:[self class]];
 
     self.asyncHelper = [SPTAsyncTestHelper new];
 
@@ -137,8 +138,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [self.asyncHelper startTest];
 
         XCTAssert(kParams[i].last != YES, @"Last param element reached");
-        NSString *fileName = [b pathForResource:self.imageNames[i] ofType:nil];
-        [self putFile:fileName withKey:self.imageNames[i] ttl:kParams[i].ttl locked:kParams[i].locked];
+        NSString *fileName = [self.thisBundle pathForResource:self.imageNames[i] ofType:nil];
+        [self putFile:fileName inCache:self.cache withKey:self.imageNames[i] ttl:kParams[i].ttl locked:kParams[i].locked];
         NSData *data = [NSData dataWithContentsOfFile:fileName];
         UIImage *image = [UIImage imageWithData:data];
         XCTAssertNotNil(image, @"Image is invalid");
@@ -162,6 +163,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     self.cache = nil;
     self.imageNames = nil;
     self.asyncHelper = nil;
+    self.thisBundle = nil;
 
     [super tearDown];
 }
@@ -249,7 +251,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(errorCalls -1, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
 }
 
-/* WARNING: This test depend on hardcoded data
+/**
+ * This test also checks Req.#1.1a of cache API
+ WARNING: This test depend on hardcoded data
 - Do 1
 - find keys with same prefix
 - load and check
@@ -306,6 +310,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 }
 
+/**
+ * This test also checks Req.#1.1b of cache API
+ */
 - (void)testLoadWithPrefixesFail
 {
     // No expiration
@@ -751,7 +758,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     (void)(stream);
 
     NSUInteger expectedSize = 0;
-    NSBundle *b = [NSBundle bundleForClass:[self class]];
 
     for (unsigned i = 0; !kParams[i].last; ++i) {
 
@@ -761,7 +767,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
         if (kParams[i].locked) {
 
-            NSString *fileName = [b pathForResource:self.imageNames[i] ofType:nil];
+            NSString *fileName = [self.thisBundle pathForResource:self.imageNames[i] ofType:nil];
             NSData *data = [NSData dataWithContentsOfFile:fileName];
             XCTAssertNotNil(data, @"Data must be valid");
             expectedSize += ([data length] + kSPTPersistentRecordHeaderSize);
@@ -1135,6 +1141,60 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(realSize, realSize2);
 }
 
+/**
+ * At least 2 serial stores with lock for same key doesn't increment refCount.
+ * Detect change in TTL and in refCount when parameters changed.
+ * This is for Req.#1.0 of cache API
+ */
+- (void)testSerialStoreWithLockDoesntIncrementRefCount
+{
+    const NSTimeInterval refTime = kTestEpochTime + 1.0;
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+    // Index of file to put. It should be file without any problems.
+    const int putIndex = 2;
+    NSString *key = self.imageNames[putIndex];
+    NSString *fileName = [self.thisBundle pathForResource:key ofType:nil];
+    NSString *path = [cache pathForKey:key];
+
+    // Check that image is valid just in case
+    NSData *data = [NSData dataWithContentsOfFile:fileName];
+    UIImage *image = [UIImage imageWithData:data];
+    XCTAssertNotNil(image, @"Image is invalid");
+
+    // Put file for existing name and expect new ttl and lock status
+    [self.asyncHelper startTest];
+    [self putFile:fileName inCache:cache withKey:key ttl:kTTL1 locked:YES];
+    [self.asyncHelper waitForTestGroupSync];
+
+    // Check data
+    SPTPersistentRecordHeaderType header;
+    XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, YES, &header), @"Expect valid record");
+    XCTAssertEqual(header.ttl, kTTL1, @"TTL must match");
+    XCTAssertEqual(header.refCount, 1, @"refCount must match");
+
+    // Now same call with new ttl and same lock status. Expect no change in refCount according to API Req.#1.0
+    [self.asyncHelper startTest];
+    [self putFile:fileName inCache:cache withKey:key ttl:kTTL2 locked:YES];
+    [self.asyncHelper waitForTestGroupSync];
+
+    // Check data
+    XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, YES, &header), @"Expect valid record");
+    XCTAssertEqual(header.ttl, kTTL2, @"TTL must match");
+    XCTAssertEqual(header.refCount, 1, @"refCount must match");
+
+    // Now same call with new ttl and new lock status. Expect no change in refCount according to API Req.#1.0
+    [self.asyncHelper startTest];
+    [self putFile:fileName inCache:cache withKey:key ttl:kTTL1 locked:NO];
+    [self.asyncHelper waitForTestGroupSync];
+
+    // Check data
+    XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, YES, &header), @"Expect valid record");
+    XCTAssertEqual(header.ttl, kTTL1, @"TTL must match");
+    XCTAssertEqual(header.refCount, 0, @"refCount must match");
+}
+
 - (void)testStreamOpenSuccessNoCreate
 {
 }
@@ -1163,7 +1223,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 {
 }
 
-- (void)testStreamWriteMoreChunksWihtFinalize
+- (void)testStreamWriteMoreChunksWithFinalize
 {
 }
 
@@ -1174,6 +1234,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
+        inCache:(SPTPersistentDataCache *)cache
         withKey:(NSString *)key
             ttl:(NSUInteger)ttl
          locked:(BOOL)locked
@@ -1182,7 +1243,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertNotNil(data, @"Unable to get data from file:%@", file);
     XCTAssertNotNil(key, @"Key must be specified");
 
-    [self.cache storeData:data forKey:key ttl:ttl locked:locked withCallback:^(SPTPersistentCacheResponse *response) {
+    [cache storeData:data forKey:key ttl:ttl locked:locked withCallback:^(SPTPersistentCacheResponse *response) {
         if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
             XCTAssertNil(response.record, @"record expected to be nil");
             XCTAssertNil(response.error, @"error xpected to be nil");
@@ -1350,8 +1411,7 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
 
 - (NSUInteger)dataSizeForItem:(NSString *)item
 {
-    NSBundle *b = [NSBundle bundleForClass:[self class]];
-    NSString *fileName = [b pathForResource:item ofType:nil];
+    NSString *fileName = [self.thisBundle pathForResource:item ofType:nil];
     NSData *data = [NSData dataWithContentsOfFile:fileName];
     XCTAssertNotNil(data, @"Data must be valid");
     return [data length];
@@ -1392,9 +1452,7 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
 
 static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentRecordHeaderType *header)
 {
-    unsigned flags = O_RDONLY;
-
-    int fd = open(path, flags);
+    int fd = open(path, O_RDONLY);
     if (fd == -1) {
         return NO;
     }
