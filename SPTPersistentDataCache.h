@@ -102,7 +102,8 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
 
 /**
  * @discussion Load data for key which has specified prefix. chooseKeyCallback is called with array of matching keys.
- *             To load the data user needs to pick one key and return it. If non of those are match then return nil.
+ *             To load the data user needs to pick one key and return it. Req.#1.1a
+ *             If non of those are match then return nil and cache will return not found error. Req.#1.1b
  *             chooseKeyCallback is called on any thread and caller should not do any heavy job in it.
  * @param prefix Prefix which key should have to be candidate for loading.
  * @param chooseKeyCallback callback to call to define which key to use to load the data. 
@@ -115,14 +116,13 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
                           onQueue:(dispatch_queue_t)queue;
 
 /**
- * @discussion If data already exist for that key it will be updated.
+ * @discussion If data already exist for that key it will be overwritten otherwise created. Req.#1.0
  * Its access time will be updated. RefCount depends on locked parameter.
  * Data is expired when current_gc_time - access_time > defaultExpirationPeriodSec.
  *
  * @param data Data to store. Mustn't be nil
  * @param key Key to associate the data with.
- * @param locked If YES then data refCount is incremented by 1. 
-          If NO then remain unchanged (for new created file set to 0 and incremented if YES).
+ * @param locked If YES then data refCount is set to 1. If NO then set to 0.
  * @param callback Callback to call once data is loaded. Could be nil.
  * @param queue Queue on which to run the callback. Couldn't be nil if callback is specified.
  */
@@ -134,7 +134,7 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
 
 
 /**
- * @discussion If data already exist for that key it will be updated. 
+ * @discussion If data already exist for that key it will be overwritten otherwise created. Req.#1.0
  * Its access time will be apdated. Its TTL will be updated if applicable.
  * RefCount depends on locked parameter.
  * Data is expired when current_gc_time - access_time > TTL.
@@ -142,8 +142,7 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
  * @param data Data to store. Mustn't be nil.
  * @param key Key to associate the data with.
  * @param ttl TTL value for a file. 0 is equivalent to storeData:forKey: behavior.
- * @param locked If YES then data refCount is incremented by 1.
- *        If NO then remain unchanged (for new created file set to 0 and incremented if YES).
+ * @param locked If YES then data refCount is set to 1. If NO then set to 0.
  * @param callback Callback to call once data is loaded. Could be nil.
  * @param queue Queue on which to run the callback. Couldn't be nil if callback is specified.
  */
@@ -157,11 +156,11 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
 
 /**
  * @discussion Open cache record for appending data. If record is not exist and createIfNotExist is YES then record will
- *             be created. In that case ttl and locked is taken into accout, otherwise is ignored.
+ *             be created, if already exist and createIfNotExist is YES will be overwritten. Req.#1.0
+ *             In that case ttl and locked is taken into accout, otherwise is ignored.
  *             TLL could be specified if known, otherwise put 0 as TTL meaning default expiration rule applies.
- *             Record could be created as locked initially specifying YES to locked: argument. If record already exist 
- *             and createIfNotExist=YES, it's refCount is used if locked is YES, if locked is NO refCount is unchanged. 
- *             TLL is set to new ttl value.
+ *             Record could be created as locked initially specifying YES to locked: argument. refCount is set according to rules
+ *             specified for -storeData:. TLL is set to new ttl value.
  * @param key Key to associate the data with.
  * @param needCreate If YES file is created, otherwise just opened.
  * @param ttl TTL value for a file. 0 is equivalent to storeData:forKey:locked:... behavior.

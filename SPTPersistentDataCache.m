@@ -690,6 +690,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 }
 
 #pragma mark - Private methods
+/**
+ * Load method used internally to load data. Called on work queue.
+ */
 - (void)loadDataForKeySync:(NSString *)key withCallback:(SPTDataCacheResponseCallback)callback onQueue:(dispatch_queue_t)queue
 {
     NSString *filePath = [self pathForKey:key];
@@ -790,6 +793,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     } // file exist
 }
 
+/**
+ * Store method used internaly. Called on work queue.
+ */
 - (NSError *)storeDataSync:(NSData *)data
                     forKey:(NSString *)key
                        ttl:(NSUInteger)ttl
@@ -804,6 +810,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     uint32_t __block oldRefCount = 0;
 
+    // Maybe we would need it
+#if 0
+
     // If file already exit satisfy requirement to preserv its refCount for futher possible modification
     if ([self.fileManager fileExistsAtPath:filePath]) {
         // WARNING: We may skip return result here bcuz in that case we will rewrite bad file with new one
@@ -815,18 +824,16 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                              writeBack:NO
                               complain:YES];
     }
+#endif
 
     const NSUInteger payloadLen = [data length];
     const CFIndex rawdataLen = kSPTPersistentRecordHeaderSize + payloadLen;
 
     NSMutableData *rawData = [NSMutableData dataWithCapacity:rawdataLen];
-    const uint8_t *bytes = (uint8_t *)[rawData bytes];
 
     SPTPersistentRecordHeaderType dummy;
     memset(&dummy, 0, kSPTPersistentRecordHeaderSize);
-    [rawData appendBytes:&dummy length:kSPTPersistentRecordHeaderSize];
-
-    SPTPersistentRecordHeaderType *header = (SPTPersistentRecordHeaderType *)(bytes);
+    SPTPersistentRecordHeaderType *header = &dummy;
 
     header->magic = kSPTPersistentDataCacheMagic;
     header->headerSize = kSPTPersistentRecordHeaderSize;
@@ -836,6 +843,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     header->updateTimeSec = (uint64_t)self.currentTime();
     header->crc = pdc_CalculateHeaderCRC(header);
 
+    [rawData appendBytes:&dummy length:kSPTPersistentRecordHeaderSize];
     [rawData appendData:data];
 
     NSError *error = nil;
@@ -861,6 +869,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     return error;
 }
 
+/**
+ * Method to work safely with opened file referenced by file descriptor. 
+ * Method handles file closing properly in case of errors.
+ * Descriptor is passed to a jobBlock for further usage.
+ */
 - (SPTPersistentCacheResponse *)guardOpenFileWithPath:(NSString *)filePath
                                              jobBlock:(FileProcessingBlockType)jobBlock
                                              complain:(BOOL)needComplains
@@ -876,8 +889,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             [self debugOutput:@"PersistentDataCache: Record not exist at path:%@", filePath];
         }
         return [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_NOT_FOUND error:nil record:nil];
+
     } else {
-        int flags = (writeBack ? O_RDWR : O_RDONLY);
+        const int flags = (writeBack ? O_RDWR : O_RDONLY);
 
         int fd = open([filePath UTF8String], flags);
         if (fd == -1) {
@@ -903,6 +917,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     }
 }
 
+/**
+ * Method used to read/write file header.
+ */
 - (SPTPersistentCacheResponse *)alterHeaderForFileAtPath:(NSString *)filePath
                                                withBlock:(RecordHeaderGetCallbackType)modifyBlock
                                                writeBack:(BOOL)needWriteBack
@@ -986,6 +1003,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                              writeBack:needWriteBack];
 }
 
+/**
+ * 2 letter separation is handled only by this method. All other code is agnostic to this fact.
+ */
 - (NSString *)subDirectoryPathForKey:(NSString *)key
 {
     // make folder tree: xx/  zx/  xy/  yz/ etc.
@@ -1021,6 +1041,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     return [self nsErrorWithCode:code];
 }
 
+/**
+ * Only this method check data expiration. Past check is also supported.
+ */
 - (BOOL)isDataExpiredWithHeader:(SPTPersistentRecordHeaderType *)header
 {
     assert(header != nil);
@@ -1035,6 +1058,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     return (int64_t)(current - header->updateTimeSec) > threshold;
 }
 
+/**
+ * Methos checks whether data can be given to caller with accordance to API.
+ */
 - (BOOL)isDataCanBeReturnedWithHeader:(SPTPersistentRecordHeaderType *)header
 {
     return !([self isDataExpiredWithHeader:header] && header->refCount == 0);
@@ -1093,7 +1119,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                                  reason = 3;
                                              } else {
                                                  // delete those: [self isDataExpiredWithHeader:header] && header->refCount == 0
-                                                 needRemove = ([self isDataExpiredWithHeader:header] && header->refCount == 0);
+                                                 needRemove = (![self isDataCanBeReturnedWithHeader:header]);
                                                  reason = 4;
                                              }
 
