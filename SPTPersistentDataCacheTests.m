@@ -178,6 +178,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
                                                        expirationTime:[NSDate timeIntervalSinceReferenceDate]];
 
+    const int streamIndex = 2;
+    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
+    (void)(stream);
+
     int __block calls = 0;
     int __block errorCalls = 0;
 
@@ -231,13 +235,18 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             if (kParams[i].ttl > 0) {
                 XCTAssertEqual(updateTime, kTestEpochTime, @"Time must not be altered for records with TTL > 0 on cache access");
             } else {
-                XCTAssertNotEqual(updateTime, kTestEpochTime, @"Time must be altered since cache was accessed");
+                if (i == streamIndex) {
+                    XCTAssertEqual(updateTime, kTestEpochTime, @"Time must not be altered for records with TTL > 0 on cache access");
+                } else {
+                    XCTAssertNotEqual(updateTime, kTestEpochTime, @"Time must be altered since cache was accessed");
+                }
             }
         }];
     }
 
     XCTAssertEqual(calls, self.imageNames.count, @"Number of checked files must match");
-    XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
+    // -1 for opened stream
+    XCTAssertEqual(errorCalls -1, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
 }
 
 /* WARNING: This test depend on hardcoded data
@@ -252,7 +261,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         return [NSDate timeIntervalSinceReferenceDate];
     }
                                                        expirationTime:[NSDate timeIntervalSinceReferenceDate]];
-
 
     [self.asyncHelper startTest];
 
@@ -306,7 +314,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
                                                        expirationTime:[NSDate timeIntervalSinceReferenceDate]];
 
-
     [self.asyncHelper startTest];
 
     // Thas hardcode logic: 10th element should be safe to get
@@ -351,6 +358,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 - (void)testLockUnlock
 {
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+    const int streamIndex = 2;
+    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
+    (void)(stream);
 
     NSMutableArray *toLock = [NSMutableArray array];
     NSMutableArray *toUnlock = [NSMutableArray array];
@@ -433,7 +444,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [self.asyncHelper waitForTestGroupSync];
 
     XCTAssertEqual(calls, self.imageNames.count, @"Number of checked files must match");
-    XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
+    // -1 stands for stream
+    XCTAssertEqual(errorCalls -1, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
 }
 
 /*
@@ -445,6 +457,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 - (void)testRemoveItems
 {
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+    const int streamIndex = 2;
+    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
+    (void)(stream);
 
     [cache removeDataForKeys:self.imageNames];
 
@@ -460,9 +476,15 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
-            XCTAssert(response.result == PDC_DATA_NOT_FOUND, @"We expect file wouldn't be found after removing");
-            XCTAssertNil(response.record, @"Expected valid nil record");
-            XCTAssertNil(response.error, @"error is not expected to be here");
+            if (i == streamIndex) {
+                XCTAssert(response.result == PDC_DATA_OPERATION_ERROR, @"We expect file wouldn't be found after removing");
+                XCTAssertNil(response.record, @"Expected valid nil record");
+                XCTAssertEqual(response.error.code, PDC_ERROR_RECORD_IS_STREAM_AND_BUSY, @"error code is not as expected to be here");
+            } else {
+                XCTAssertEqual(response.result, PDC_DATA_NOT_FOUND, @"We expect file wouldn't be found after removing");
+                XCTAssertNil(response.record, @"Expected valid nil record");
+                XCTAssertNil(response.error, @"error is not expected to be here");
+            }
 
             [self.asyncHelper endTest];
         } onQueue:dispatch_get_main_queue()];
@@ -474,7 +496,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     // Check file syste, that there are no files left
     NSUInteger files = [self getFilesNumberAtPath:self.cachePath];
-    XCTAssertEqual(files, 0, @"There shouldn't be files left");
+    // 1 for opened stream
+    XCTAssertEqual(files, 1, @"There shouldn't be files left");
 }
 
 /*
@@ -486,6 +509,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 - (void)testPureCache
 {
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+    const int streamIndex = 2;
+    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
+    (void)(stream);
 
     [cache prune];
 
@@ -502,9 +529,15 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
             calls += 1;
 
-            XCTAssertEqual(response.result, PDC_DATA_NOT_FOUND, @"We expect file wouldn't be found after removing");
-            XCTAssertNil(response.record, @"Expected valid nil record");
-            XCTAssertNil(response.error, @"error is not expected to be here");
+            if (i == streamIndex) {
+                XCTAssert(response.result == PDC_DATA_OPERATION_ERROR, @"We expect file wouldn't be found after removing");
+                XCTAssertNil(response.record, @"Expected valid nil record");
+                XCTAssertEqual(response.error.code, PDC_ERROR_RECORD_IS_STREAM_AND_BUSY, @"error code is not as expected to be here");
+            } else {
+                XCTAssertEqual(response.result, PDC_DATA_NOT_FOUND, @"We expect file wouldn't be found after removing");
+                XCTAssertNil(response.record, @"Expected valid nil record");
+                XCTAssertNil(response.error, @"error is not expected to be here");
+            }
 
             [self.asyncHelper endTest];
         } onQueue:dispatch_get_main_queue()];
@@ -516,7 +549,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     // Check file syste, that there are no files left
     NSUInteger files = [self getFilesNumberAtPath:self.cachePath];
-    XCTAssertEqual(files, 0, @"There shouldn't be files left");
+    // 1 for opened streams
+    XCTAssertEqual(files, 1, @"There shouldn't be files left");
 }
 
 
@@ -535,6 +569,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         return kTestEpochTime;
     }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+    const int streamIndex = 1;
+    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
+    (void)(stream);
 
     [cache wipeLockedFiles];
 
@@ -569,8 +606,14 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 notFoundCalls += 1;
 
             } else if (response.result == PDC_DATA_OPERATION_ERROR) {
-                XCTAssertNil(response.record, @"Expected valid nil record");
-                XCTAssertNotNil(response.error, @"Valid error is expected to be here");
+
+                if (i == streamIndex) {
+                    XCTAssertNil(response.record, @"Expected valid nil record");
+                    XCTAssertEqual(response.error.code, PDC_ERROR_RECORD_IS_STREAM_AND_BUSY, @"Valid error is expected to be here");
+                } else {
+                    XCTAssertNil(response.record, @"Expected valid nil record");
+                    XCTAssertNotNil(response.error, @"Valid error is expected to be here");
+                }
                 errorCalls += 1;
 
             } else {
@@ -584,12 +627,15 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [self.asyncHelper waitForTestGroupSync];
 
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
-    XCTAssertEqual(notFoundCalls, reallyLocked, @"Number of really locked files files is not the same we deleted");
+    // -1 stand for locked file opened as stream
+    XCTAssertEqual(notFoundCalls, reallyLocked-1, @"Number of really locked files files is not the same we deleted");
 
     // Check file syste, that there are no files left
     NSUInteger files = [self getFilesNumberAtPath:self.cachePath];
-    XCTAssertEqual(files, self.imageNames.count-reallyLocked, @"There shouldn't be files left");
-    XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
+    // -1 stand for locked file opened as stream
+    XCTAssertEqual(files -1, self.imageNames.count-reallyLocked, @"There shouldn't be files left");
+    // -1 stand for locked file opened as stream
+    XCTAssertEqual(errorCalls -1, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
 }
 
 /*
@@ -602,6 +648,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 - (void)testWipeUnlocked
 {
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+    const int streamIndex = 2;
+    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
+    (void)(stream);
 
     [cache wipeNonLockedFiles];
 
@@ -636,8 +686,15 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 notFoundCalls += 1;
 
             } else if (response.result == PDC_DATA_OPERATION_ERROR) {
-                XCTAssertNil(response.record, @"Expected valid nil record");
-                XCTAssertNotNil(response.error, @"Valid error is expected to be here");
+
+                if (i == streamIndex) {
+                    XCTAssertNil(response.record, @"Expected valid nil record");
+                    XCTAssertEqual(response.error.code, PDC_ERROR_RECORD_IS_STREAM_AND_BUSY, @"Valid error is expected to be here");
+                } else {
+                    XCTAssertNil(response.record, @"Expected valid nil record");
+                    XCTAssertNotNil(response.error, @"Valid error is expected to be here");
+                }
+
                 errorCalls += 1;
 
             } else {
@@ -651,12 +708,15 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [self.asyncHelper waitForTestGroupSync];
 
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
-    XCTAssertEqual(notFoundCalls, reallyUnlocked, @"Number of really locked files files is not the same we deleted");
+    // -1 stands for opened stream
+    XCTAssertEqual(notFoundCalls, reallyUnlocked -1, @"Number of really locked files files is not the same we deleted");
 
     // Check file system, that there are no files left
     NSUInteger files = [self getFilesNumberAtPath:self.cachePath];
-    XCTAssertEqual(files, self.imageNames.count-reallyUnlocked, @"There shouldn't be files left");
-    XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber()-1, @"Number of checked files must match");
+    // -1 stands for opened stream
+    XCTAssertEqual(files -1, self.imageNames.count-reallyUnlocked, @"There shouldn't be files left");
+    // -1 stands for opened stream
+    XCTAssertEqual(errorCalls -1, params_GetCorruptedFilesNumber()-1, @"Number of checked files must match");
 }
 
 /*
@@ -667,6 +727,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 - (void)testUsedSize
 {
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+    const int streamIndex = 2;
+    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
+    (void)(stream);
 
     NSUInteger expectedSize = [self calculateExpectedSize];
     NSUInteger realUsedSize = [cache totalUsedSizeInBytes];
@@ -682,10 +746,18 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 {
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
+    const int streamIndex = 1;
+    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
+    (void)(stream);
+
     NSUInteger expectedSize = 0;
     NSBundle *b = [NSBundle bundleForClass:[self class]];
 
     for (unsigned i = 0; !kParams[i].last; ++i) {
+
+        if (i == streamIndex) {
+            continue;
+        }
 
         if (kParams[i].locked) {
 
@@ -829,8 +901,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 {
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+    const NSUInteger streamIndex = 2;
+    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
+    (void)(stream);
 
-    const NSUInteger count = self.imageNames.count;
+    const int count = self.imageNames.count;
 
     for (unsigned i = 0; i < count; ++i) {
         [self.asyncHelper startTest];
@@ -847,7 +922,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         NSString *path = [cache pathForKey:self.imageNames[i]];
         [self checkUpdateTimeForFileAtPath:path validate:kParams[i].corruptReason == -1 referenceTimeCheck:^(uint64_t updateTime) {
             if (kParams[i].ttl == 0) {
-                XCTAssertNotEqual(updateTime, kTestEpochTime, @"Time must not match for initial value i.e. touched");
+                if (i == streamIndex) {
+                    XCTAssertEqual(updateTime, kTestEpochTime, @"Time must match for initial value i.e. touched");
+                } else {
+                    XCTAssertNotEqual(updateTime, kTestEpochTime, @"Time must not match for initial value i.e. touched");
+                }
             } else {
                 XCTAssertEqual(updateTime, kTestEpochTime, @"Time must match for initial value i.e. not touched");
             }
@@ -903,15 +982,21 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     const int corrupted = params_GetCorruptedFilesNumber();
 
     XCTAssert(calls == count, @"Number of checked files must match");
-    XCTAssertEqual(successCalls, count-corrupted-lockedFilesCount, @"There should be exact number of locked files");
+    // -1 stands for opened stream
+    XCTAssertEqual(successCalls, count-corrupted-lockedFilesCount -1, @"There should be exact number of locked files");
     XCTAssertEqual(notFoundCalls, lockedFilesCount, @"Number of not found files must match");
-    XCTAssertEqual(errorCalls, corrupted, @"Number of not found files must match");
+    // -1 stands for opened stream
+    XCTAssertEqual(errorCalls -1, corrupted, @"Number of not found files must match");
 }
 
 - (void)testRegularGC
 {
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+    const NSUInteger streamIndex = 2;
+    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
+    (void)(stream);
 
     const NSUInteger count = self.imageNames.count;
 
@@ -923,6 +1008,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     for (unsigned i = 0; i < count; ++i) {
         NSString *path = [cache pathForKey:self.imageNames[i]];
+
+        if (i == streamIndex) {
+            continue;
+        }
 
         SPTPersistentRecordHeaderType header;
         BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
@@ -937,7 +1026,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     XCTAssertEqual(lockedCount, params_GetFilesNumber(YES), @"Locked files count must match");
     // We add number of corrupted since we couldn't open them anyway
-    XCTAssertEqual(removedCount, params_GetFilesNumber(NO)+params_GetCorruptedFilesNumber(), @"Removed files count must match");
+    // -1 stand for opened stream, its not deleted
+    XCTAssertEqual(removedCount, params_GetFilesNumber(NO)+params_GetCorruptedFilesNumber() -1, @"Removed files count must match");
 }
 
 // WARNING: This test is dependent on hardcoded data TTL4
@@ -949,6 +1039,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
+    const int streamIndex = 2;
+    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
+    (void)(stream);
+
     const NSUInteger count = self.imageNames.count;
 
     [cache runRegularGC];
@@ -959,6 +1053,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     for (unsigned i = 0; i < count; ++i) {
         NSString *path = [cache pathForKey:self.imageNames[i]];
+
+        if (i == streamIndex) {
+            continue;
+        }
 
         SPTPersistentRecordHeaderType header;
         BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
@@ -975,7 +1073,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     XCTAssertEqual(lockedCount, params_GetFilesNumber(YES), @"Locked files count must match");
     // We add number of corrupted since we couldn't open them anyway
-    XCTAssertEqual(removedCount, params_GetFilesNumber(NO)+params_GetCorruptedFilesNumber() -1, @"Removed files count must match");
+    // -1 stands for wrong payload
+    // -1 stands for opened stream
+    XCTAssertEqual(removedCount, params_GetFilesNumber(NO)+params_GetCorruptedFilesNumber() -1 -1, @"Removed files count must match");
 }
 
 - (void)testPruneWithSizeRestriction
@@ -1234,6 +1334,22 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
     }
 
     return expectedSize;
+}
+
+- (id<SPTPersistentDataStream>)openStreamWithIndex:(NSInteger)index onCache:(SPTPersistentDataCache *)cache
+{
+    [self.asyncHelper startTest];
+    id<SPTPersistentDataStream> __block stream = nil;
+    [cache openDataStreamForKey:self.imageNames[index] createIfNotExist:NO ttl:0 locked:NO
+                   withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
+                       stream = s;
+                       XCTAssertNotNil(s);
+                       XCTAssertNil(error);
+                       [self.asyncHelper endTest];
+                   } onQueue:dispatch_get_main_queue()];
+
+    [self.asyncHelper waitForTestGroupSync];
+    return stream;
 }
 
 @end
