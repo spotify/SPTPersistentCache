@@ -43,7 +43,10 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 
 - (void)dealloc
 {
-    dispatch_io_close(self.source, 0);
+    if (self.source) {
+        dispatch_io_close(self.source, 0);
+        self.source = nil;
+    }
 }
 
 - (NSError *)open
@@ -61,7 +64,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
             }
 
             // Get write offset right after last byte of file
-            self.writeOffset = lseek(filedes, SEEK_END, 0) - kSPTPersistentRecordHeaderSize;
+            self.writeOffset = lseek(filedes, 0, SEEK_END) - kSPTPersistentRecordHeaderSize;
             if (self.writeOffset < 0) {
                 intError = errno;
                 const char *strErr = strerror(intError);
@@ -70,7 +73,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
                 return [NSError errorWithDomain:NSPOSIXErrorDomain code:intError userInfo:@{NSLocalizedDescriptionKey : @(strErr)}];
             }
 
-            off_t offset = lseek(filedes, SEEK_SET, kSPTPersistentRecordHeaderSize);
+            off_t offset = lseek(filedes, kSPTPersistentRecordHeaderSize, SEEK_SET);
             if (offset < 0) {
                 intError = errno;
                 const char *strErr = strerror(intError);
@@ -79,17 +82,20 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
                 return [NSError errorWithDomain:NSPOSIXErrorDomain code:intError userInfo:@{NSLocalizedDescriptionKey : @(strErr)}];
             }
 
+            __typeof(self) __weak wself = self;
             self.source = dispatch_io_create(DISPATCH_IO_RANDOM, filedes, self.cleanupQueue, ^(int posix_error) {
+                __typeof(self) sself = wself;
+
                 if (posix_error != 0) {
                     const char *strErr = strerror(posix_error);
-                    [self debugOutput:@"PersistentDataCache: Error in handler for key:%@, %s", self.key, strErr];
+                    [sself debugOutput:@"PersistentDataCache: Error in handler for key:%@, %s", sself.key, strErr];
                 }
 
                 fsync(filedes);
                 close(filedes);
 
-                if (self.cleanupHandler)
-                    self.cleanupHandler();
+                if (sself.cleanupHandler)
+                    sself.cleanupHandler();
             });
 
             if (self.source != NULL) {
@@ -227,6 +233,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 
     dispatch_data_t data = dispatch_data_create(&_header, kSPTPersistentRecordHeaderSize, self.workQueue, DISPATCH_DATA_DESTRUCTOR_DEFAULT);
     off_t offset = -kSPTPersistentRecordHeaderSize;
+    
     dispatch_io_write(self.source, offset, data, self.workQueue, ^(bool done, dispatch_data_t dataRemained, int error) {
         if (done == YES && error == 0) {
             // Success: done

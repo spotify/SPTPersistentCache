@@ -157,9 +157,11 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
 
 /**
  * @discussion Open cache record for appending data. If record is not exist and createIfNotExist is YES then record will
- *             be created. TLL could be specified if known, otherwise put 0 as TTL meaning default expiration rule applies.
- *             Record could be created as locked initially specifying YES to locked: argument. If record already exist, it's refCount
- *             is used if locked is YES, if locked is NO refCount is unchanged. TLL is set to new ttl value.
+ *             be created. In that case ttl and locked is taken into accout, otherwise is ignored.
+ *             TLL could be specified if known, otherwise put 0 as TTL meaning default expiration rule applies.
+ *             Record could be created as locked initially specifying YES to locked: argument. If record already exist 
+ *             and createIfNotExist=YES, it's refCount is used if locked is YES, if locked is NO refCount is unchanged. 
+ *             TLL is set to new ttl value.
  * @param key Key to associate the data with.
  * @param needCreate If YES file is created, otherwise just opened.
  * @param ttl TTL value for a file. 0 is equivalent to storeData:forKey:locked:... behavior.

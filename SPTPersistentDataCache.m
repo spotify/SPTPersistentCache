@@ -344,6 +344,10 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     callback = [callback copy];
     dispatch_barrier_async(self.workQueue, ^{
+        if ([self processKeyIfBusy:key callback:callback queue:queue]) {
+            return;
+        }
+
         [self storeDataSync:data forKey:key ttl:ttl locked:locked withCallback:callback onQueue:queue];
     });
 }
@@ -362,6 +366,15 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     }
 
     dispatch_barrier_async(self.workQueue, ^{
+
+        // YES if key is process and was busy
+        if ([self.busyKeys containsObject:key]) {
+            NSError *nsError = [self nsErrorWithCode:PDC_ERROR_RECORD_IS_STREAM_AND_BUSY];
+            dispatch_async(queue, ^{
+                callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
+            });
+            return;
+        }
 
         NSError *nsError = nil;
         if (needCreate) {
@@ -382,15 +395,18 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                                                                    cleanupQueue:self.workQueue
                                                                                  cleanupHandler:^{
 
-                                                                                     [self.busyKeys removeObject:key];
+                                                                                     dispatch_barrier_async(self.workQueue, ^{
+                                                                                         [self.busyKeys removeObject:key];
+                                                                                     });
 
                                                                                  } debugCallback:self.debugOutput];
 
         nsError = [stream open];
 
         if (nsError == nil) {
-            
+
             [self.busyKeys addObject:key];
+
             dispatch_async(queue, ^{
                 callback(PDC_DATA_OPERATION_SUCCEEDED, stream, nil);
             });
@@ -411,7 +427,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         assert(queue);
     }
 
+
     dispatch_barrier_async(self.workQueue, ^{
+        if ([self processKeyIfBusy:key callback:callback queue:queue]) {
+            return;
+        }
+
         NSString *filePath = [self pathForKey:key];
 
         SPTPersistentCacheResponse *response =
@@ -437,6 +458,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 - (void)removeDataForKeysSync:(NSArray *)keys
 {
     for (NSString *key in keys) {
+
+        if ([self processKeyIfBusy:key callback:nil queue:nil]) {
+            continue;
+        }
+
         NSError *error = nil;
         NSString *filePath = [self pathForKey:key];
         if (![self.fileManager removeItemAtPath:filePath error:&error]) {
@@ -463,6 +489,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     
     dispatch_barrier_async(self.workQueue, ^{
         for (NSString *key in keys) {
+
+            if ([self processKeyIfBusy:key callback:callback queue:queue]) {
+                continue;
+            }
+
             NSString *filePath = [self pathForKey:key];
 
             SPTPersistentCacheResponse *response =
@@ -496,6 +527,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     dispatch_barrier_async(self.workQueue, ^{
         for (NSString *key in keys) {
+
+            if ([self processKeyIfBusy:key callback:callback queue:queue]) {
+                continue;
+            }
+
             NSString *filePath = [self pathForKey:key];
 
             SPTPersistentCacheResponse *response =
@@ -590,8 +626,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         NSNumber *isDirectory;
         if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
             if ([isDirectory boolValue] == NO) {
-                NSString *filePath = [self pathForKey:theURL.lastPathComponent];
-                size += [self getFileSizeAtPath:filePath];
+                NSString *key = theURL.lastPathComponent;
+                if (![self.busyKeys containsObject:key]) {
+                    NSString *filePath = [self pathForKey:key];
+                    size += [self getFileSizeAtPath:filePath];
+                }
             }
         } else {
             [self debugOutput:@"Unable to fetch isDir#2 attribute:%@", theURL];
@@ -619,19 +658,21 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
             if ([isDirectory boolValue] == NO) {
 
-                NSString *filePath = [self pathForKey:theURL.lastPathComponent];
+                NSString *key = theURL.lastPathComponent;
+                if (![self.busyKeys containsObject:key]) {
+                    NSString *filePath = [self pathForKey:key];
 
-                BOOL __block locked = NO;
-                // WARNING: We may skip return result here bcuz in that case we will not count file as locked
-                [self alterHeaderForFileAtPath:filePath withBlock:^(SPTPersistentRecordHeaderType *header) {
-                    locked = header->refCount > 0;
+                    BOOL __block locked = NO;
+                    // WARNING: We may skip return result here bcuz in that case we will not count file as locked
+                    [self alterHeaderForFileAtPath:filePath withBlock:^(SPTPersistentRecordHeaderType *header) {
+                        locked = header->refCount > 0;
+                    }
+                                         writeBack:NO
+                                          complain:YES];
+                    if (locked) {
+                        size += [self getFileSizeAtPath:filePath];
+                    }
                 }
-                                     writeBack:NO
-                                      complain:YES];
-                if (locked) {
-                    size += [self getFileSizeAtPath:filePath];
-                }
-
             }
         } else {
             [self debugOutput:@"Unable to fetch isDir#3 attribute:%@", theURL];
@@ -659,6 +700,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         [self dispatchEmptyResponseWithResult:PDC_DATA_NOT_FOUND callback:callback onQueue:queue];
         return;
     } else {
+
+        if ([self processKeyIfBusy:key callback:callback queue:queue]) {
+            return;
+        }
+
         // File exist
         NSError *error = nil;
         NSMutableData *rawData = [NSMutableData dataWithContentsOfFile:filePath
@@ -1022,41 +1068,46 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         NSNumber *isDirectory;
         if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
             if ([isDirectory boolValue] == NO) {
-                NSString *filePath = [self pathForKey:theURL.lastPathComponent];
 
-                BOOL __block needRemove = NO;
-                int __block reason = 0;
-                // WARNING: We may skip return result here bcuz in that case we won't remove file we do not know what is it
-                [self alterHeaderForFileAtPath:filePath
-                                     withBlock:^(SPTPersistentRecordHeaderType *header) {
+                NSString *key = theURL.lastPathComponent;
+                if (![self.busyKeys containsObject:key]) {
 
-                                         if (forceExpire && forceLocked) {
-                                             // delete all
-                                             needRemove = YES;
-                                             reason = 1;
-                                         } else if (forceExpire && !forceLocked) {
-                                             // delete those: header->refCount == 0
-                                             needRemove = header->refCount == 0;
-                                             reason = 2;
-                                         } else if (!forceExpire && forceLocked) {
-                                             // delete those: header->refCount > 0
-                                             needRemove = header->refCount > 0;
-                                             reason = 3;
-                                         } else {
-                                             // delete those: [self isDataExpiredWithHeader:header] && header->refCount == 0
-                                             needRemove = ([self isDataExpiredWithHeader:header] && header->refCount == 0);
-                                             reason = 4;
-                                         }
+                    NSString *filePath = [self pathForKey:key];
 
-                                     } writeBack:NO
-                                      complain:YES];
+                    BOOL __block needRemove = NO;
+                    int __block reason = 0;
+                    // WARNING: We may skip return result here bcuz in that case we won't remove file we do not know what is it
+                    [self alterHeaderForFileAtPath:filePath
+                                         withBlock:^(SPTPersistentRecordHeaderType *header) {
 
-                if (needRemove) {
-                    [self debugOutput:@"PersistentDataCache: gc removing record: %@, reason:%d", filePath.lastPathComponent, reason];
+                                             if (forceExpire && forceLocked) {
+                                                 // delete all
+                                                 needRemove = YES;
+                                                 reason = 1;
+                                             } else if (forceExpire && !forceLocked) {
+                                                 // delete those: header->refCount == 0
+                                                 needRemove = header->refCount == 0;
+                                                 reason = 2;
+                                             } else if (!forceExpire && forceLocked) {
+                                                 // delete those: header->refCount > 0
+                                                 needRemove = header->refCount > 0;
+                                                 reason = 3;
+                                             } else {
+                                                 // delete those: [self isDataExpiredWithHeader:header] && header->refCount == 0
+                                                 needRemove = ([self isDataExpiredWithHeader:header] && header->refCount == 0);
+                                                 reason = 4;
+                                             }
 
-                    NSError *error= nil;
-                    if (![self.fileManager removeItemAtPath:filePath error:&error]) {
-                        [self debugOutput:@"PersistentDataCache: GC error removing record:%@ ,error:%@", filePath.lastPathComponent, error];
+                                         } writeBack:NO
+                                          complain:YES];
+
+                    if (needRemove) {
+                        [self debugOutput:@"PersistentDataCache: gc removing record: %@, reason:%d", filePath.lastPathComponent, reason];
+
+                        NSError *error= nil;
+                        if (![self.fileManager removeItemAtPath:filePath error:&error]) {
+                            [self debugOutput:@"PersistentDataCache: GC error removing record:%@ ,error:%@", filePath.lastPathComponent, error];
+                        }
                     }
                 }
             } // is dir
@@ -1081,10 +1132,14 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         NSNumber *isDirectory;
         if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
             if ([isDirectory boolValue] == NO) {
-                NSString *filePath = [self pathForKey:theURL.lastPathComponent];
-                NSError *error = nil;
-                if (![self.fileManager removeItemAtPath:filePath error:&error]) {
-                    [self debugOutput:@"PersistentDataCache: Error cleaning record: %@ , %@", filePath.lastPathComponent, error];
+                NSString *key = theURL.lastPathComponent;
+
+                if (![self.busyKeys containsObject:key]) {
+                    NSString *filePath = [self pathForKey:key];
+                    NSError *error = nil;
+                    if (![self.fileManager removeItemAtPath:filePath error:&error]) {
+                        [self debugOutput:@"PersistentDataCache: Error cleaning record: %@ , %@", filePath.lastPathComponent, error];
+                    }
                 }
             }
         }
@@ -1272,6 +1327,17 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     NSArray *sortedImages = [images sortedArrayUsingComparator:SPTSortFilesByModificationDate];
 
     return [sortedImages mutableCopy];
+}
+
+- (BOOL)processKeyIfBusy:(NSString *)key callback:(SPTDataCacheResponseCallback)callback queue:(dispatch_queue_t)queue
+{
+    if ([self.busyKeys containsObject:key]) {
+        NSError *nsError = [self nsErrorWithCode:PDC_ERROR_RECORD_IS_STREAM_AND_BUSY];
+        [self dispatchError:nsError result:PDC_DATA_OPERATION_ERROR callback:callback onQueue:queue];
+        return YES;
+    }
+
+    return NO;
 }
 
 @end
