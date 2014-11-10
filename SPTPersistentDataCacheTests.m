@@ -1135,6 +1135,42 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(realSize, realSize2);
 }
 
+- (void)testStreamOpenSuccessNoCreate
+{
+}
+
+- (void)testStreamOpenFailNoCreate
+{
+}
+
+- (void)testStreamOpenSuccessWithCreate
+{
+}
+
+- (void)testStreamOpenFailWithCreate
+{
+}
+
+- (void)testStreamReadPart
+{
+}
+
+- (void)testStreamReadWhole
+{
+}
+
+- (void)testStreamWriteChunks
+{
+}
+
+- (void)testStreamWriteMoreChunksWihtFinalize
+{
+}
+
+- (void)testStreamOpenFinalizedFile
+{
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
