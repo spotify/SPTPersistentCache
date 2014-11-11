@@ -197,8 +197,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
             calls += 1;
 
-            NSLog(@"Key:%@ ttl:%lu", response.record.key, (unsigned long)response.record.ttl);
-
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
                 UIImage *image = [UIImage imageWithData:response.record.data];
