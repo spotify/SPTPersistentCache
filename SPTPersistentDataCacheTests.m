@@ -1422,8 +1422,96 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(errorCalls, (corrupted -1), @"Error calls must match");
 }
 
+- (void)testCantGetSameStreamMoreThanOneTime
+{
+    const NSTimeInterval refTime = kTestEpochTime + 1.0;
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+    [self.asyncHelper startTest];
+    id<SPTPersistentDataStream> __block s1 = nil;
+    [cache openDataStreamForKey:self.imageNames[2] createIfNotExist:NO ttl:0 locked:NO
+                   withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
+                       XCTAssertEqual(result, PDC_DATA_OPERATION_SUCCEEDED);
+                       XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
+                       XCTAssertNil(error, @"error is not expected to be here");
+                       s1 = stream;
+                       [self.asyncHelper endTest];
+                   }
+                        onQueue:dispatch_get_main_queue()];
+
+    [self.asyncHelper waitForTestGroupSync];
+
+    [self.asyncHelper startTest];
+    [cache openDataStreamForKey:self.imageNames[2] createIfNotExist:NO ttl:0 locked:NO
+                   withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
+                       XCTAssertEqual(result, PDC_DATA_OPERATION_ERROR);
+                       XCTAssertNil(stream, @"Must be valid non nil stream on success");
+                       XCTAssertNotNil(error, @"error is not expected to be here");
+                       XCTAssertEqual(error.code, PDC_ERROR_RECORD_IS_STREAM_AND_BUSY, @"Error code must match");
+                       [self.asyncHelper endTest];
+                   }
+                        onQueue:dispatch_get_main_queue()];
+
+    [self.asyncHelper waitForTestGroupSync];
+}
+
 - (void)testStreamOpenFailNoCreate
 {
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+
+    const int count = self.imageNames.count;
+
+    // Now do regular check of data integrity after touch
+    int __block calls = 0;
+    int __block notFoundCalls = 0;
+    int __block errorCalls = 0;
+    int __block successCalls = 0;
+
+    for (unsigned i = 0; i < count; ++i) {
+        [self.asyncHelper startTest];
+
+        [cache openDataStreamForKey:self.imageNames[i] createIfNotExist:NO ttl:0 locked:NO
+                       withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
+
+                           calls += 1;
+
+                           if (result == PDC_DATA_OPERATION_SUCCEEDED) {
+                               ++successCalls;
+
+                               XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
+                               XCTAssertNil(error, @"error is not expected to be here");
+
+                           } else if (result == PDC_DATA_NOT_FOUND) {
+                               XCTAssertNil(stream, @"Must be nil stream on not found");
+                               XCTAssertNil(error, @"error is not expected to be here");
+                               notFoundCalls += 1;
+
+                           } else if (result == PDC_DATA_OPERATION_ERROR) {
+                               XCTAssertNil(stream, @"Must be nil stream on not found");
+                               XCTAssertNotNil(error, @"Valid error is expected to be here");
+                               errorCalls += 1;
+
+                           } else {
+                               XCTAssert(NO, @"Unexpected result code on LOAD");
+                           }
+
+                           [self.asyncHelper endTest];
+
+                       } onQueue:dispatch_get_main_queue()];
+    }
+
+    [self.asyncHelper waitForTestGroupSync];
+
+    const int corrupted = params_GetCorruptedFilesNumber();
+    XCTAssertEqual(calls, count, @"Number of files and callbacks must match");
+    // -1 for wrong payload
+    XCTAssertEqual(successCalls , 0, @"Success calls must match");
+    XCTAssertEqual(notFoundCalls, count - (corrupted -1));
+    // -1 for wrong payload
+    XCTAssertEqual(errorCalls, (corrupted -1), @"Error calls must match");
 }
 
 - (void)testStreamOpenSuccessWithCreate
@@ -1434,7 +1522,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 {
 }
 
-- (void)testStreamReadPart
+- (void)testStreamReadImageWithParts
 {
 }
 
