@@ -778,6 +778,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(realUsedSize, expectedSize);
 }
 
+/**
+ * This test also checks Req.#1.2 of cache API.
+ */
 - (void)testExpirationWithDefaultTimeout
 {
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
@@ -1197,6 +1200,54 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 - (void)testStreamOpenSuccessNoCreate
 {
+    const NSTimeInterval refTime = kTestEpochTime + 1.0;
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+
+    const int count = self.imageNames.count;
+
+    // Now do regular check of data integrity after touch
+    int __block calls = 0;
+    int __block notFoundCalls = 0;
+    int __block errorCalls = 0;
+    int __block successCalls = 0;
+
+    for (unsigned i = 0; i < count; ++i) {
+        [self.asyncHelper startTest];
+
+        [cache openDataStreamForKey:self.imageNames[i] createIfNotExist:NO ttl:0 locked:NO
+                       withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
+
+                           calls += 1;
+
+                           if (result == PDC_DATA_OPERATION_SUCCEEDED) {
+                               ++successCalls;
+
+                               XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
+                               XCTAssertNil(error, @"error is not expected to be here");
+
+                           } else if (result == PDC_DATA_NOT_FOUND) {
+                               XCTAssertNil(stream, @"Must be nil stream on not found");
+                               XCTAssertNil(error, @"error is not expected to be here");
+                               notFoundCalls += 1;
+
+                           } else if (result == PDC_DATA_OPERATION_ERROR) {
+                               XCTAssertNil(stream, @"Must be nil stream on not found");
+                               XCTAssertNotNil(error, @"Valid error is expected to be here");
+                               errorCalls += 1;
+                               
+                           } else {
+                               XCTAssert(NO, @"Unexpected result code on LOAD");
+                           }
+                           
+                           [self.asyncHelper endTest];
+                           
+                       } onQueue:dispatch_get_main_queue()];
+    }
+    
+    [self.asyncHelper waitForTestGroupSync];
+
 }
 
 - (void)testStreamOpenFailNoCreate
