@@ -364,7 +364,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testLockUnlock
 {
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+        return kTestEpochTime + SPTPersistentDataCacheDefaultExpirationTimeSec - 1;
+    }
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
     const int streamIndex = 2;
     id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
@@ -463,7 +466,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testRemoveItems
 {
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+        return kTestEpochTime + SPTPersistentDataCacheDefaultExpirationTimeSec - 1;
+    }
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
     const int streamIndex = 2;
     id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
@@ -515,7 +521,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testPureCache
 {
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+        return kTestEpochTime + SPTPersistentDataCacheDefaultExpirationTimeSec - 1;
+    }
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
     const int streamIndex = 2;
     id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
@@ -654,7 +663,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 */
 - (void)testWipeUnlocked
 {
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+        return kTestEpochTime + SPTPersistentDataCacheDefaultExpirationTimeSec - 1;
+    }
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
     const int streamIndex = 2;
     id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
@@ -733,7 +745,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testUsedSize
 {
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+        return kTestEpochTime + SPTPersistentDataCacheDefaultExpirationTimeSec - 1;
+    }
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
     const int streamIndex = 2;
     id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
@@ -751,7 +766,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testLockedSize
 {
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+        return kTestEpochTime + SPTPersistentDataCacheDefaultExpirationTimeSec - 1;
+    }
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
     const int streamIndex = 1;
     id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
@@ -906,9 +924,14 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber()-1, @"Number of not found files must match");
 }
 
+/**
+ * This test also checks Req.#1.2 for cache API
+ */
 - (void)testTouchOnlyRecordsWithDefaultExpirtion
 {
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+        return kTestEpochTime + SPTPersistentDataCacheDefaultExpirationTimeSec - 1;
+    }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
     const NSUInteger streamIndex = 2;
     id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
@@ -986,24 +1009,154 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     [self.asyncHelper waitForTestGroupSync];
 
-    // Get locked files with TTL>0
-    const int lockedFilesCount = params_GetFilesWithTTLNumber(YES);
     const int corrupted = params_GetCorruptedFilesNumber();
 
     XCTAssert(calls == count, @"Number of checked files must match");
     // -1 stands for opened stream
-    XCTAssertEqual(successCalls, count-corrupted-lockedFilesCount -1, @"There should be exact number of locked files");
-    XCTAssertEqual(notFoundCalls, lockedFilesCount, @"Number of not found files must match");
+    XCTAssertEqual(successCalls, count-corrupted -1, @"There should be exact number of locked files");
+    XCTAssertEqual(notFoundCalls, 0, @"Number of not found files must match");
     // -1 stands for opened stream
     XCTAssertEqual(errorCalls -1, corrupted, @"Number of not found files must match");
 }
+
+
+/**
+ * This test also checks Req.#1.2 for cache API
+ */
+- (void)testCantTouchRecordsWithDefaultExpirtionThatAreExpiredAlready
+{
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+    // Try to get stream for expired object
+    [self.asyncHelper startTest];
+    [cache openDataStreamForKey:self.imageNames[2] createIfNotExist:NO ttl:0 locked:NO
+                   withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
+                       XCTAssertEqual(result, PDC_DATA_NOT_FOUND);
+                       XCTAssertNil(s);
+                       XCTAssertNil(error);
+                       [self.asyncHelper endTest];
+                   } onQueue:dispatch_get_main_queue()];
+
+    [self.asyncHelper waitForTestGroupSync];
+
+    // Try to touch the data that is expired
+    const int count = self.imageNames.count;
+
+    int __block calls = 0;
+    int __block notFoundCalls = 0;
+    int __block errorCalls = 0;
+    int __block successCalls = 0;
+
+    for (unsigned i = 0; i < count; ++i) {
+        [self.asyncHelper startTest];
+
+        [cache touchDataForKey:self.imageNames[i] callback:^(SPTPersistentCacheResponse *response) {
+            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+                successCalls += 1;
+
+            } else if (response.result == PDC_DATA_NOT_FOUND) {
+                notFoundCalls += 1;
+
+            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
+                errorCalls += 1;
+            }
+
+            [self.asyncHelper endTest];
+        } onQueue:dispatch_get_main_queue()];
+    }
+
+    [self.asyncHelper waitForTestGroupSync];
+
+    const int lockedFilesCount = params_GetFilesNumber(YES);
+    const int corrupted = params_GetCorruptedFilesNumber();
+
+    XCTAssertEqual(successCalls, lockedFilesCount);
+    // -1 for payload error
+    XCTAssertEqual(notFoundCalls -1, count-lockedFilesCount-corrupted);
+    // -1 for payload error
+    XCTAssertEqual(errorCalls, corrupted -1);
+
+
+    // Now check that updateTime is not altered for files with TTL
+    for (unsigned i = 0; i < count; ++i) {
+        NSString *path = [cache pathForKey:self.imageNames[i]];
+
+        [self checkUpdateTimeForFileAtPath:path validate:kParams[i].corruptReason == -1 referenceTimeCheck:^(uint64_t updateTime) {
+
+            if (kParams[i].ttl > 0 && kParams[i].locked == YES) {
+                XCTAssertEqual(updateTime, kTestEpochTime, @"Time must match for initial value i.e. touched");
+            } else if (kParams[i].ttl == 0 && kParams[i].locked == YES) {
+                XCTAssertNotEqual(updateTime, kTestEpochTime, @"Time must match for initial value i.e. not touched");
+            } else if (kParams[i].locked == NO) {
+                XCTAssertEqual(updateTime, kTestEpochTime, @"Time must match for initial value i.e. touched");
+            } else {
+                XCTAssert(NO);
+            }
+        }];
+    }
+
+    // Now do regular check of data integrity after touch
+    calls = 0;
+    successCalls = 0;
+    notFoundCalls = 0;
+    errorCalls = 0;
+
+    for (unsigned i = 0; i < count; ++i) {
+        [self.asyncHelper startTest];
+
+        [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
+            calls += 1;
+
+            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+                ++successCalls;
+                XCTAssertNotNil(response.record, @"Expected valid not nil record");
+                UIImage *image = [UIImage imageWithData:response.record.data];
+                XCTAssertNotNil(image, @"Expected valid not nil image");
+                XCTAssertNil(response.error, @"error is not expected to be here");
+
+                BOOL unlocked = response.record.refCount == 0;
+                XCTAssertEqual(kParams[i].locked, !unlocked, @"Same files must be locked");
+                XCTAssertEqual(kParams[i].ttl, response.record.ttl, @"Same files must have same TTL");
+                XCTAssertEqualObjects(self.imageNames[i], response.record.key, @"Same files must have same key");
+            } else if (response.result == PDC_DATA_NOT_FOUND) {
+                XCTAssertNil(response.record, @"Expected valid nil record");
+                XCTAssertNil(response.error, @"error is not expected to be here");
+                notFoundCalls += 1;
+
+            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
+                XCTAssertNil(response.record, @"Expected valid nil record");
+                XCTAssertNotNil(response.error, @"Valid error is expected to be here");
+                errorCalls += 1;
+
+            } else {
+                XCTAssert(NO, @"Unexpected result code on LOAD");
+            }
+
+            [self.asyncHelper endTest];
+        } onQueue:dispatch_get_main_queue()];
+    }
+
+    [self.asyncHelper waitForTestGroupSync];
+
+    XCTAssert(calls == count, @"Number of checked files must match");
+
+    XCTAssertEqual(successCalls, lockedFilesCount, @"There should be exact number of locked files");
+    // -1 for payload error
+    XCTAssertEqual(notFoundCalls -1, count-lockedFilesCount-corrupted, @"Number of not found files must match");
+    // -1 for payload error
+    XCTAssertEqual(errorCalls, corrupted -1, @"Number of not found files must match");
+}
+
 
 - (void)testRegularGC
 {
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
-    const NSUInteger streamIndex = 2;
+    const int streamIndex = 2;
+    NSString *path2 = [cache pathForKey:self.imageNames[streamIndex]];
+    [self alterUpdateTime:[[NSDate date] timeIntervalSince1970] forFileAtPath:path2];
     id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
     (void)(stream);
 
@@ -1049,6 +1202,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
     const int streamIndex = 2;
+    NSString *path2 = [cache pathForKey:self.imageNames[streamIndex]];
+    [self alterUpdateTime:[[NSDate date] timeIntervalSince1970] forFileAtPath:path2];
     id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
     (void)(stream);
 
@@ -1103,7 +1258,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     NSMutableArray *removedItems = [NSMutableArray array];
 
-    // Define size contstrain by looking into params table and figure our what can be dropped by cache
+    // Define size contstrain by looking into params table and figure our what can't be dropped by cache
     const int dropCount = 4;
     for (unsigned i = 0; i < count && i < dropCount; ++i) {
         if (kParams[i].locked) {
@@ -1130,11 +1285,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     // Check that files supposed to be deleted was actually removed
     for (unsigned i = 0; i < removedItems.count; ++i) {
-        NSString *path = [cache pathForKey:removedItems[i]];
 
+        NSString *path = [cache pathForKey:removedItems[i]];
         SPTPersistentRecordHeaderType header;
         BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
-        XCTAssertFalse(opened, @"Not locked files expected to removed thus unable to be opened");
+        XCTAssertTrue(opened, @"Locked files expected to in place");
     }
 
     // Call once more to make sure nothing will be droped
@@ -1402,6 +1557,7 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
     }
 
     header.updateTimeSec = updateTime;
+    header.crc = pdc_CalculateHeaderCRC(&header);
 
     off_t ret = lseek(fd, SEEK_SET, 0);
     XCTAssert(ret != -1);
