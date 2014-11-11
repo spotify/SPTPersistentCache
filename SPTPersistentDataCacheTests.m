@@ -1413,6 +1413,13 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     
     [self.asyncHelper waitForTestGroupSync];
 
+    const int corrupted = params_GetCorruptedFilesNumber();
+    XCTAssertEqual(calls, count, @"Number of files and callbacks must match");
+    // -1 for wrong payload
+    XCTAssertEqual(successCalls , count - (corrupted -1), @"Success calls must match");
+    XCTAssertEqual(notFoundCalls, 0);
+    // -1 for wrong payload
+    XCTAssertEqual(errorCalls, (corrupted -1), @"Error calls must match");
 }
 
 - (void)testStreamOpenFailNoCreate
