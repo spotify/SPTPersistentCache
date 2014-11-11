@@ -9,7 +9,6 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 @property (nonatomic, strong) NSString *key;
 @property (nonatomic, strong) dispatch_io_t source;
 @property (nonatomic, strong) dispatch_queue_t workQueue;
-@property (nonatomic, strong) dispatch_queue_t cleanupQueue;
 @property (nonatomic, copy) CleanupHeandlerCallback cleanupHandler;
 @property (nonatomic, copy) SPTDataCacheDebugCallback debugOutput;
 @property (nonatomic, assign) SPTPersistentRecordHeaderType header;
@@ -20,7 +19,6 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 
 - (instancetype)initWithPath:(NSString *)filePath
                          key:(NSString *)key
-                cleanupQueue:(dispatch_queue_t)cleanupQueue
               cleanupHandler:(CleanupHeandlerCallback)cleanupHandler
                debugCallback:(SPTDataCacheDebugCallback)debugCalback
 {
@@ -28,13 +26,11 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
         return nil;
     }
 
-    assert(cleanupQueue != nil);
     assert(cleanupHandler != nil);
 
     _filePath = filePath;
     _key = key;
     _workQueue = dispatch_queue_create(key.UTF8String, DISPATCH_QUEUE_SERIAL);
-    _cleanupQueue = cleanupQueue;
     _cleanupHandler = cleanupHandler;
     _debugOutput = debugCalback;
 
@@ -49,9 +45,14 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
     }
 }
 
-- (NSError *)open
+- (void)open:(SPTDataCacheStreamCallback)callback
 {
-    return [self guardOpenFileWithPath:self.filePath jobBlock:^NSError *(int filedes) {
+    assert(callback != nil);
+    if (callback == nil) {
+        return;
+    }
+
+    [self guardOpenFileWithPath:self.filePath jobBlock:^NSError *(int filedes) {
 
         int intError = 0;
 
@@ -60,6 +61,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 
             NSError *nsError = [self checkHeaderValid:&_header];
             if (nsError != nil) {
+                callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
                 return nsError;
             }
 
@@ -70,7 +72,9 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
                 const char *strErr = strerror(intError);
                 [self debugOutput:@"PersistentDataCache: Error getting file size key:%@, (%d) %s", self.key, intError, strErr];
 
-                return [NSError errorWithDomain:NSPOSIXErrorDomain code:intError userInfo:@{NSLocalizedDescriptionKey : @(strErr)}];
+                nsError = [NSError errorWithDomain:NSPOSIXErrorDomain code:intError userInfo:@{NSLocalizedDescriptionKey : @(strErr)}];
+                callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
+                return nsError;
             }
 
             off_t offset = lseek(filedes, kSPTPersistentRecordHeaderSize, SEEK_SET);
@@ -79,11 +83,13 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
                 const char *strErr = strerror(intError);
                 [self debugOutput:@"PersistentDataCache: Error setting header offset for file key:%@, %s", self.key, strErr];
 
-                return [NSError errorWithDomain:NSPOSIXErrorDomain code:intError userInfo:@{NSLocalizedDescriptionKey : @(strErr)}];
+                nsError = [NSError errorWithDomain:NSPOSIXErrorDomain code:intError userInfo:@{NSLocalizedDescriptionKey : @(strErr)}];
+                callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
+                return nsError;
             }
 
             __typeof(self) __weak wself = self;
-            self.source = dispatch_io_create(DISPATCH_IO_RANDOM, filedes, self.cleanupQueue, ^(int posix_error) {
+            self.source = dispatch_io_create(DISPATCH_IO_RANDOM, filedes, self.workQueue, ^(int posix_error) {
                 __typeof(self) sself = wself;
 
                 if (posix_error != 0) {
@@ -101,15 +107,20 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
             if (self.source != NULL) {
                 // Prevent getting partial result in read/write callbacks to make life easier
                 dispatch_io_set_low_water(self.source, SIZE_MAX);
+                callback(PDC_DATA_OPERATION_SUCCEEDED, self, nil);
                 return nil;
             }
 
-            return [self nsErrorWithCode:PDC_ERROR_UNABLE_TO_CREATE_IO_SOURCE];
+            nsError = [self nsErrorWithCode:PDC_ERROR_UNABLE_TO_CREATE_IO_SOURCE];
+            callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
+            return nsError;
 
         } else if (bytesRead != -1 && bytesRead < kSPTPersistentRecordHeaderSize) {
             // Migration in future
 
-            return [self nsErrorWithCode:PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER];
+            NSError *nsError = [self nsErrorWithCode:PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER];
+            callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
+            return nsError;
         } else {
             // -1 error
             intError = errno;
@@ -117,7 +128,10 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 
         assert(intError != 0);
         const char *strErr = strerror(intError);
-        return [NSError errorWithDomain:NSPOSIXErrorDomain code:intError userInfo:@{NSLocalizedDescriptionKey : @(strErr)}];
+
+        NSError *nsError = [NSError errorWithDomain:NSPOSIXErrorDomain code:intError userInfo:@{NSLocalizedDescriptionKey : @(strErr)}];
+        callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
+        return nsError;
     }];
 }
 

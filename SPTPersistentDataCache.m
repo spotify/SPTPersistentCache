@@ -283,6 +283,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                  withBlock:^(SPTPersistentRecordHeaderType *header) {
                                      assert(header != nil);
 
+                                     // Satisfy Req.#1.2
                                      if ([self isDataCanBeReturnedWithHeader:header]) {
                                          [keysToConsider addObject:key];
                                      }
@@ -344,6 +345,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     callback = [callback copy];
     dispatch_barrier_async(self.workQueue, ^{
+        // That satisfies Req.#1.3
         if ([self processKeyIfBusy:key callback:callback queue:queue]) {
             return;
         }
@@ -367,7 +369,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     dispatch_barrier_async(self.workQueue, ^{
 
-        // YES if key is process and was busy
+        // That satisfies Req.#1.3
         if ([self.busyKeys containsObject:key]) {
             NSError *nsError = [self nsErrorWithCode:PDC_ERROR_RECORD_IS_STREAM_AND_BUSY];
             dispatch_async(queue, ^{
@@ -390,9 +392,36 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
         NSString *filePath = [self pathForKey:key];
 
+        // Try to satisfy Req.#1.2 only for file we created earlier
+        if (!needCreate) {
+            BOOL __block expired = NO;
+            // WARNING: we can't ignore return result here
+            SPTPersistentCacheResponse *response =
+            [self alterHeaderForFileAtPath:filePath
+                                 withBlock:^(SPTPersistentRecordHeaderType *header) {
+                                     assert(header != nil);
+                                     // Satisfy Req.#1.2
+                                     expired = [self isDataExpiredWithHeader:header];
+                                 }
+                                 writeBack:NO
+                                  complain:NO];
+
+            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+                if (expired) {
+                    dispatch_async(queue, ^{
+                        callback(PDC_DATA_NOT_FOUND, nil, nil);
+                    });
+                    return;
+                }
+            } else {
+                dispatch_async(queue, ^{
+                    callback(response.result, nil, response.error);
+                });
+            }
+        }
+
         SPTPersistentDataStreamImpl *stream = [[SPTPersistentDataStreamImpl alloc] initWithPath:filePath
                                                                                             key:key
-                                                                                   cleanupQueue:self.workQueue
                                                                                  cleanupHandler:^{
 
                                                                                      dispatch_barrier_async(self.workQueue, ^{
@@ -401,24 +430,24 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
                                                                                  } debugCallback:self.debugOutput];
 
-        nsError = [stream open];
+        // WARNING: Callback must be and is synchronous here
+        [stream open:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
 
-        if (nsError == nil) {
+            if (result == PDC_DATA_OPERATION_SUCCEEDED) {
+                assert(s != nil);
+                assert(error == nil);
 
-            [self.busyKeys addObject:key];
+                [self.busyKeys addObject:key];
+            }
 
             dispatch_async(queue, ^{
-                callback(PDC_DATA_OPERATION_SUCCEEDED, stream, nil);
+                callback(result, s, error);
             });
-        } else {
-
-            dispatch_async(queue, ^{
-                callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
-            });
-        }
+        }];
     });
 }
 
+// TODO: return NOT_PERMITTED on try to touch TLL>0
 - (void)touchDataForKey:(NSString *)key
                callback:(SPTDataCacheResponseCallback)callback
                 onQueue:(dispatch_queue_t)queue
@@ -429,16 +458,24 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
 
     dispatch_barrier_async(self.workQueue, ^{
+        // That satisfies Req.#1.3
         if ([self processKeyIfBusy:key callback:callback queue:queue]) {
             return;
         }
 
         NSString *filePath = [self pathForKey:key];
 
+        BOOL __block expired = NO;
         SPTPersistentCacheResponse *response =
         [self alterHeaderForFileAtPath:filePath
                              withBlock:^(SPTPersistentRecordHeaderType *header) {
                                  assert(header != nil);
+
+                                 // Satisfy Req.#1.2 and Req.#1.3
+                                 if (![self isDataCanBeReturnedWithHeader:header]) {
+                                     expired = YES;
+                                     return;
+                                 }
 
                                  // Touch files that have default expiration policy
                                  if (header->ttl == 0) {
@@ -447,6 +484,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                              }
                              writeBack:YES
                               complain:NO];
+
+        // Satisfy Req.#1.2
+        if (expired) {
+            response = [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_NOT_FOUND error:nil record:nil];
+        }
+
         if (callback) {
             dispatch_async(queue, ^{
                 callback(response);
@@ -459,6 +502,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 {
     for (NSString *key in keys) {
 
+        // That satisfies Req.#1.3
         if ([self processKeyIfBusy:key callback:nil queue:nil]) {
             continue;
         }
@@ -490,28 +534,42 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     dispatch_barrier_async(self.workQueue, ^{
         for (NSString *key in keys) {
 
+            // That satisfies Req.#1.3
             if ([self processKeyIfBusy:key callback:callback queue:queue]) {
                 continue;
             }
 
             NSString *filePath = [self pathForKey:key];
 
+            BOOL __block expired = NO;
             SPTPersistentCacheResponse *response =
             [self alterHeaderForFileAtPath:filePath
                                  withBlock:^(SPTPersistentRecordHeaderType *header) {
                                      assert(header != nil);
 
+                                     // Satisfy Req.#1.2
+                                     if ([self isDataExpiredWithHeader:header]) {
+                                         expired = YES;
+                                         return;
+                                     }
+                                     
                                      ++header->refCount;
                                      // Do not update access time since file is locked
             }
                                  writeBack:YES
                                   complain:YES];
 
+            // Satisfy Req.#1.2
+            if (expired) {
+                response = [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_NOT_FOUND error:nil record:nil];
+            }
+
             if (callback) {
                 dispatch_async(queue, ^{
                     callback(response);
                 });
             }
+
         } // for
     });
 }
@@ -528,6 +586,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     dispatch_barrier_async(self.workQueue, ^{
         for (NSString *key in keys) {
 
+            // That satisfies Req.#1.3
             if ([self processKeyIfBusy:key callback:callback queue:queue]) {
                 continue;
             }
@@ -658,6 +717,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             if ([isDirectory boolValue] == NO) {
 
                 NSString *key = theURL.lastPathComponent;
+                // That satisfies Req.#1.3
                 if (![self.busyKeys containsObject:key]) {
                     NSString *filePath = [self pathForKey:key];
 
@@ -703,6 +763,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         return;
     } else {
 
+        // That satisfies Req.#1.3
         if ([self processKeyIfBusy:key callback:callback queue:queue]) {
             return;
         }
@@ -736,7 +797,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             }
 
             const NSUInteger refCount = localHeader.refCount;
+
             // We return locked files even if they expired, GC doesnt collect them too so they valuable to user
+            // Satisfy Req.#1.2
             if (![self isDataCanBeReturnedWithHeader:&localHeader]) {
 #ifdef DEBUG_OUTPUT_ENABLED
                 [self debugOutput:@"PersistentDataCache: Record with key: %@ expired, t:%llu, TTL:%llu", key, localHeader.updateTimeSec, localHeader.ttl];
@@ -1095,6 +1158,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             if ([isDirectory boolValue] == NO) {
 
                 NSString *key = theURL.lastPathComponent;
+                // That satisfies Req.#1.3
                 if (![self.busyKeys containsObject:key]) {
 
                     NSString *filePath = [self pathForKey:key];
@@ -1159,6 +1223,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             if ([isDirectory boolValue] == NO) {
                 NSString *key = theURL.lastPathComponent;
 
+                // That satisfies Req.#1.3
                 if (![self.busyKeys containsObject:key]) {
                     NSString *filePath = [self pathForKey:key];
                     NSError *error = nil;
@@ -1246,6 +1311,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         if (![self.fileManager removeItemAtPath:image[SPTDataCacheFileNameKey] error:&localError]) {
             [self debugOutput:@"PersistentDataCache: %s ERROR %@", __PRETTY_FUNCTION__, [localError localizedDescription]];
             continue;
+        } else {
+            [self debugOutput:@"PersistentDataCache: evicting by size key:%@", [image[SPTDataCacheFileNameKey] lastPathComponent]];
         }
 
         currentCacheSize -= [image[SPTDataCacheFileAttributesKey][NSFileSize] integerValue];
@@ -1309,6 +1376,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
                 // Here we skip streams
                 NSString *key = [NSString stringWithUTF8String:theURL.fileSystemRepresentation].lastPathComponent;
+                // That satisfies Req.#1.3
                 if ([self.busyKeys containsObject:key]) {
                     continue;
                 }
@@ -1336,7 +1404,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                  Use modification time ven for files with TTL
                  File with TTL have updateTime set once on creation.
                  */
-                NSDate *mdate = [NSDate dateWithTimeIntervalSince1970:fileStat.st_mtimespec.tv_sec];
+                NSDate *mdate = [NSDate dateWithTimeIntervalSince1970:(fileStat.st_mtimespec.tv_sec + fileStat.st_mtimespec.tv_nsec*1e9)];
                 NSNumber *fsize = [NSNumber numberWithLongLong:fileStat.st_size];
                 NSDictionary *values = @{NSFileModificationDate : mdate, NSFileSize: fsize};
 
@@ -1360,6 +1428,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     return [sortedImages mutableCopy];
 }
 
+// That satisfies Req.#1.3
 - (BOOL)processKeyIfBusy:(NSString *)key callback:(SPTDataCacheResponseCallback)callback queue:(dispatch_queue_t)queue
 {
     if ([self.busyKeys containsObject:key]) {

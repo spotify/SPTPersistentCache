@@ -9,10 +9,9 @@ typedef dispatch_block_t CleanupHeandlerCallback;
 
 - (instancetype)initWithPath:(NSString *)filePath
                          key:(NSString *)key
-                cleanupQueue:(dispatch_queue_t)cleanupQueue
               cleanupHandler:(CleanupHeandlerCallback)cleanupHandler
                debugCallback:(SPTDataCacheDebugCallback)debugCalback;
 
-- (NSError *)open;
+- (void)open:(SPTDataCacheStreamCallback)callback;
 
 @end

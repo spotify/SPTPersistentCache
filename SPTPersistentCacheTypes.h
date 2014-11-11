@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import "SPTPersistentDataStream.h"
 
 FOUNDATION_EXPORT NSString *const SPTPersistentDataCacheErrorDomain;
 
@@ -139,3 +140,7 @@ typedef NS_ENUM(NSInteger, SPTDataCacheLoadingError)
  */
 typedef void (^SPTDataCacheDebugCallback)(NSString *string);
 
+/**
+ * Type of callback that is used  to provide a stream access for particular cache record.
+ */
+typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error);

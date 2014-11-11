@@ -17,11 +17,6 @@ typedef NSString *(^SPTDataCacheChooseKeyCallback)(NSArray *keys);
  */
 typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
 
-/**
- * Type of callback that is used  to provide a stream access for particular cache record.
- */
-typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error);
-
 
 /**
  * @brief SPTPersistentDataCacheOptions
@@ -83,6 +78,7 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
  * Cache GC procedure evicts all not locked files for which current_gc_time - creation_time > fileTTL.
  * Files that are locked not evicted by GC procedure and returned by the cache even if they already expired. 
  * Once unlocked, expired files would be collected by following GC
+ * Req.#1.3 record opened as stream couldn't be altered by usual cache methods and doesn't take part in locked size calculation.
  */
 @interface SPTPersistentDataCache : NSObject
 
@@ -107,6 +103,7 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
  *             Req.#1.1a. To load the data user needs to pick one key and return it.
  *             Req.#1.1b. If non of those are match then return nil and cache will return not found error.
  *             chooseKeyCallback is called on any thread and caller should not do any heavy job in it.
+ *             Req.#1.2. Expired records treated as not found on load. (And open stream)
  *
  * @param prefix Prefix which key should have to be candidate for loading.
  * @param chooseKeyCallback callback to call to define which key to use to load the data. 
@@ -184,6 +181,7 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
 
 /**
  * @discussion Update last access time in header of the record. Only applies for default expiration policy (ttl == 0).
+ *             Locked files could be touched even if they are expired.
  *             Success callback is given if file was found and no errors occured even though nothing was changed due to ttl == 0.
  *             Req.#1.2. Expired records treated as not found on touch.
  *
