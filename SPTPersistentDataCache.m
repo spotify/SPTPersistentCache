@@ -1401,8 +1401,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                     continue;
 
                 /*
-                 Use modification time ven for files with TTL
-                 File with TTL have updateTime set once on creation.
+                 Use modification time even for files with TTL
+                 Files with TTL have updateTime set once on creation.
                  */
                 NSDate *mdate = [NSDate dateWithTimeIntervalSince1970:(fileStat.st_mtimespec.tv_sec + fileStat.st_mtimespec.tv_nsec*1e9)];
                 NSNumber *fsize = [NSNumber numberWithLongLong:fileStat.st_size];
