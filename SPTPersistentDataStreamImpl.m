@@ -107,8 +107,9 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
             return [self nsErrorWithCode:PDC_ERROR_UNABLE_TO_CREATE_IO_SOURCE];
 
         } else if (bytesRead != -1 && bytesRead < kSPTPersistentRecordHeaderSize) {
-            // Migration
+            // Migration in future
 
+            return [self nsErrorWithCode:PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER];
         } else {
             // -1 error
             intError = errno;

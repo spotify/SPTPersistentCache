@@ -89,7 +89,9 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
 - (instancetype)initWithOptions:(SPTPersistentDataCacheOptions *)options;
 
 /**
- * @discussion Load data from cache for specified key
+ * @discussion Load data from cache for specified key. 
+ *             Req.#1.2. Expired records treated as not found on load. (And open stream)
+ *
  * @param key Key used to access the data. It MUST MUST MUST be unique for different data. 
  *            It could be used as a part of file name. It up to a cache user to define algorithm to form a key.
  * @param callback callback to call once data is loaded. It mustn't be nil.
@@ -102,9 +104,10 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
 
 /**
  * @discussion Load data for key which has specified prefix. chooseKeyCallback is called with array of matching keys.
- *             To load the data user needs to pick one key and return it. Req.#1.1a
- *             If non of those are match then return nil and cache will return not found error. Req.#1.1b
+ *             Req.#1.1a. To load the data user needs to pick one key and return it.
+ *             Req.#1.1b. If non of those are match then return nil and cache will return not found error.
  *             chooseKeyCallback is called on any thread and caller should not do any heavy job in it.
+ *
  * @param prefix Prefix which key should have to be candidate for loading.
  * @param chooseKeyCallback callback to call to define which key to use to load the data. 
  * @param callback callback to call once data is loaded. It mustn't be nil.
@@ -116,7 +119,7 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
                           onQueue:(dispatch_queue_t)queue;
 
 /**
- * @discussion If data already exist for that key it will be overwritten otherwise created. Req.#1.0
+ * @discussion Req.#1.0. If data already exist for that key it will be overwritten otherwise created.
  * Its access time will be updated. RefCount depends on locked parameter.
  * Data is expired when current_gc_time - access_time > defaultExpirationPeriodSec.
  *
@@ -134,7 +137,7 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
 
 
 /**
- * @discussion If data already exist for that key it will be overwritten otherwise created. Req.#1.0
+ * @discussion Req.#1.0. If data already exist for that key it will be overwritten otherwise created.
  * Its access time will be apdated. Its TTL will be updated if applicable.
  * RefCount depends on locked parameter.
  * Data is expired when current_gc_time - access_time > TTL.
@@ -155,12 +158,15 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
 
 
 /**
- * @discussion Open cache record for appending data. If record is not exist and createIfNotExist is YES then record will
- *             be created, if already exist and createIfNotExist is YES will be overwritten. Req.#1.0
+ * @discussion Open cache record for appending data. 
+ *             Req.#1.2. Expired records treated as not found on open stream, if createIfNotExist=NO.
+ *             Req.#1.0. If record is not exist and createIfNotExist is YES then record will
+ *             be created, if already exist and createIfNotExist is YES will be overwritten.
  *             In that case ttl and locked is taken into accout, otherwise is ignored.
  *             TLL could be specified if known, otherwise put 0 as TTL meaning default expiration rule applies.
  *             Record could be created as locked initially specifying YES to locked: argument. refCount is set according to rules
  *             specified for -storeData:. TLL is set to new ttl value.
+ *
  * @param key Key to associate the data with.
  * @param needCreate If YES file is created, otherwise just opened.
  * @param ttl TTL value for a file. 0 is equivalent to storeData:forKey:locked:... behavior.
@@ -177,8 +183,10 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
                      onQueue:(dispatch_queue_t)queue;
 
 /**
- * Update last access time in header of the record. Only applies for default expiration policy (ttl == 0).
- * Success callback is given if file was found and no errors occured even though nothing was changed due to ttl == 0.
+ * @discussion Update last access time in header of the record. Only applies for default expiration policy (ttl == 0).
+ *             Success callback is given if file was found and no errors occured even though nothing was changed due to ttl == 0.
+ *             Req.#1.2. Expired records treated as not found on touch.
+ *
  * @param key Key which record header to update. Mustn't be nil.
  * @param callback. May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
@@ -188,12 +196,14 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
                 onQueue:(dispatch_queue_t)queue;
 
 /**
- * @brief Removes data for keys unconditionally.
+ * @brief Removes data for keys unconditionally even if expired.
  */
 - (void)removeDataForKeys:(NSArray *)keys;
 
 /**
- * @brief Increment ref count for given keys. Give callback with result for each key in input array.
+ * @discussion Increment ref count for given keys. Give callback with result for each key in input array.
+ *             Req.#1.2. Expired records treated as not found on lock.
+ *
  * @param keys Non nil non empty array of keys.
  * @param callback. May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
@@ -203,8 +213,9 @@ typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<S
                 onQueue:(dispatch_queue_t)queue;
 
 /**
- * @brief Decrement ref count for given keys. Give callback with result for each key in input array.
- * If decrements exceeds increments assertion is given.
+ * @discussion Decrement ref count for given keys. Give callback with result for each key in input array.
+ *             If decrements exceeds increments assertion is given.
+ *
  * @param keys Non nil non empty array of keys.
  * @param callback. May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
