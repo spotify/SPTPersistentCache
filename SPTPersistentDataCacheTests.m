@@ -1,6 +1,8 @@
 
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
+#include <sys/time.h>
+
 #import "SPTPersistentDataHeader.h"
 #import "SPTPersistentDataCache.h"
 
@@ -98,6 +100,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 - (void)setUp {
     [super setUp];
 
+    time_t seed = time(NULL);
+    NSLog(@"Seed:%ld", seed);
+    srand(seed);
+
     // Form array of images for shuffling
     self.imageNames = [NSMutableArray array];
 
@@ -112,7 +118,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
         NSInteger count = self.imageNames.count-1;
         while (count >= 0) {
-            uint32_t idx = arc4random_uniform((uint32_t)count+1);
+            uint32_t idx = rand() % ((uint32_t)(count+1));
             NSString * tmp = self.imageNames[count];
             self.imageNames[count] = self.imageNames[idx];
             self.imageNames[idx] = tmp;
@@ -1251,7 +1257,13 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     // Alter update time for our data set so it monotonically increase from the past starting at index 0 to count-1
     for (unsigned i = 0; i < count; ++i) {
         NSString *path = [cache pathForKey:self.imageNames[i]];
-        [self alterUpdateTime:kTestEpochTime - 5*(i+1) forFileAtPath:path];
+
+        struct timeval t[2];
+        t[0].tv_sec = kTestEpochTime - 5*(i+1);
+        t[0].tv_usec = 0;
+        t[1] = t[0];
+        int ret = utimes(path.UTF8String, t);
+        XCTAssertNotEqual(ret, -1, @"Failed to set file access time");
     }
 
     NSMutableArray *removedItems = [NSMutableArray array];
