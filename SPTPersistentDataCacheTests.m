@@ -1667,10 +1667,189 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 - (void)testStreamReadImageWithParts
 {
+    const NSTimeInterval refTime = kTestEpochTime + 17.0;
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+    const int count = self.imageNames.count;
+
+
+    NSUInteger maxDataSize = 0;
+    int idx = 0;
+    for (unsigned i = 0; i < count; ++i) {
+        NSUInteger size = [self dataSizeForItem:self.imageNames[i]];
+        if (size > maxDataSize) {
+            maxDataSize = size;
+            idx = i;
+        }
+    }
+
+    NSString *key = self.imageNames[idx];
+    id<SPTPersistentDataStream> __block stream = nil;
+
+    [self.asyncHelper startTest];
+    [cache openDataStreamForKey:key createIfNotExist:NO ttl:0 locked:NO
+                   withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
+
+                       stream = s;
+                       XCTAssertEqual(result, PDC_DATA_OPERATION_SUCCEEDED, @"Result must be success");
+                       XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
+                       XCTAssertNil(error, @"error is not expected to be here");
+
+                       [self.asyncHelper endTest];
+
+                   } onQueue:dispatch_get_main_queue()];
+
+    [self.asyncHelper waitForTestGroupSync];
+
+    NSUInteger expectedLen = maxDataSize /3;
+
+    // Get ranges we want to get from stream
+    NSRange r1 = NSMakeRange(0, expectedLen);
+    NSRange r2 = NSMakeRange(expectedLen, expectedLen);
+    NSRange r3 = NSMakeRange(2*expectedLen, maxDataSize - 2*expectedLen);
+
+    XCTAssertEqual(r1.length+r2.length+r3.length, maxDataSize);
+
+    [self.asyncHelper startTest];
+    [self.asyncHelper startTest];
+    [self.asyncHelper startTest];
+
+    NSData * __block data1 = nil;
+    NSData * __block data2 = nil;
+    NSData * __block data3 = nil;
+
+    [stream readDataWithOffset:r1.location length:r1.length callback:^(NSData *continousData, NSError *error) {
+        XCTAssertNotNil(continousData);
+        XCTAssertNil(error);
+        data1 = continousData;
+
+        [self.asyncHelper endTest];
+    } queue:dispatch_get_main_queue()];
+
+    [stream readDataWithOffset:r2.location length:r2.length callback:^(NSData *continousData, NSError *error) {
+        XCTAssertNotNil(continousData);
+        XCTAssertNil(error);
+        data2 = continousData;
+
+        [self.asyncHelper endTest];
+    } queue:dispatch_get_main_queue()];
+
+    [stream readDataWithOffset:r3.location length:r3.length callback:^(NSData *continousData, NSError *error) {
+        XCTAssertNotNil(continousData);
+        XCTAssertNil(error);
+        data3 = continousData;
+
+        [self.asyncHelper endTest];
+    } queue:dispatch_get_main_queue()];
+
+    [self.asyncHelper waitForTestGroupSync];
+
+    NSMutableData *imageData = [NSMutableData dataWithData:data1];
+    [imageData appendData:data2];
+    [imageData appendData:data3];
+
+    UIImage *image = [UIImage imageWithData:imageData];
+    XCTAssertNotNil(image, @"Image must be non nil");
+
+    NSString *fileName = [self.thisBundle pathForResource:key ofType:nil];
+    NSData *originalData = [NSData dataWithContentsOfFile:fileName];
+    XCTAssertEqualObjects(imageData, originalData, @"Read and original data must match");
 }
 
 - (void)testStreamReadWhole
 {
+    const NSTimeInterval refTime = kTestEpochTime + 17.0;
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+    const int count = self.imageNames.count;
+
+
+    NSUInteger maxDataSize = 0;
+    int idx = 0;
+    for (unsigned i = 0; i < count; ++i) {
+        NSUInteger size = [self dataSizeForItem:self.imageNames[i]];
+        if (size > maxDataSize) {
+            maxDataSize = size;
+            idx = i;
+        }
+    }
+
+    NSString *key = self.imageNames[idx];
+    id<SPTPersistentDataStream> __block stream = nil;
+
+    [self.asyncHelper startTest];
+    [cache openDataStreamForKey:key createIfNotExist:NO ttl:0 locked:NO
+                   withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
+
+                       stream = s;
+                       XCTAssertEqual(result, PDC_DATA_OPERATION_SUCCEEDED, @"Result must be success");
+                       XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
+                       XCTAssertNil(error, @"error is not expected to be here");
+
+                       [self.asyncHelper endTest];
+
+                   } onQueue:dispatch_get_main_queue()];
+
+    [self.asyncHelper waitForTestGroupSync];
+
+    NSUInteger expectedLen = maxDataSize /2;
+
+    // Get ranges we want to get from stream
+    NSRange r1 = NSMakeRange(0, expectedLen);
+    NSRange r2 = NSMakeRange(expectedLen, maxDataSize - expectedLen);
+
+    XCTAssertEqual(r1.length+r2.length, maxDataSize);
+
+    [self.asyncHelper startTest];
+    [self.asyncHelper startTest];
+    [self.asyncHelper startTest];
+
+    NSData * __block data1 = nil;
+    NSData * __block data2 = nil;
+    NSData * __block wholeData = nil;
+
+    [stream readDataWithOffset:r1.location length:r1.length callback:^(NSData *continousData, NSError *error) {
+        XCTAssertNotNil(continousData);
+        XCTAssertNil(error);
+        data1 = continousData;
+
+        [self.asyncHelper endTest];
+    } queue:dispatch_get_main_queue()];
+
+    [stream readDataWithOffset:r2.location length:r2.length callback:^(NSData *continousData, NSError *error) {
+        XCTAssertNotNil(continousData);
+        XCTAssertNil(error);
+        data2 = continousData;
+
+        [self.asyncHelper endTest];
+    } queue:dispatch_get_main_queue()];
+
+    // Read whole data
+    [stream readAllDataWithCallback:^(NSData *continousData, NSError *error) {
+        XCTAssertNotNil(continousData);
+        XCTAssertNil(error);
+        wholeData = continousData;
+
+        [self.asyncHelper endTest];
+    } queue:dispatch_get_main_queue()];
+
+    [self.asyncHelper waitForTestGroupSync];
+
+    NSMutableData *imageData = [NSMutableData dataWithData:data1];
+    [imageData appendData:data2];
+
+    UIImage *image = [UIImage imageWithData:imageData];
+    XCTAssertNotNil(image, @"Image must be non nil");
+
+    UIImage *wholeImage = [UIImage imageWithData:wholeData];
+    XCTAssertNotNil(wholeImage, @"Image must be non nil");
+
+    NSString *fileName = [self.thisBundle pathForResource:key ofType:nil];
+    NSData *originalData = [NSData dataWithContentsOfFile:fileName];
+    XCTAssertEqualObjects(imageData, originalData, @"Read and original data must match");
+    XCTAssertEqualObjects(wholeData, originalData, @"Read and wholeData data must match");
 }
 
 - (void)testStreamWriteChunks
