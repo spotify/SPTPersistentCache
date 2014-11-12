@@ -1516,6 +1516,78 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 - (void)testStreamOpenSuccessWithCreate
 {
+    const NSTimeInterval refTime = kTestEpochTime + 17.0;
+    const uint64_t refTTL = kTTL1 + kTTL3;
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+
+
+    const int count = self.imageNames.count;
+
+    // Now do regular check of data integrity after touch
+    int __block calls = 0;
+    int __block notFoundCalls = 0;
+    int __block errorCalls = 0;
+    int __block successCalls = 0;
+
+    for (unsigned i = 0; i < count; ++i) {
+        [self.asyncHelper startTest];
+
+        const uint64_t ttl = (kParams[i].ttl > 0 ? refTTL : 0);
+        const BOOL locked = !kParams[i].locked;
+
+        [cache openDataStreamForKey:self.imageNames[i] createIfNotExist:YES ttl:ttl locked:locked
+                       withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
+
+                           calls += 1;
+
+                           if (result == PDC_DATA_OPERATION_SUCCEEDED) {
+                               ++successCalls;
+
+                               XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
+                               XCTAssertNil(error, @"error is not expected to be here");
+
+                           } else if (result == PDC_DATA_NOT_FOUND) {
+                               XCTAssertNil(stream, @"Must be nil stream on not found");
+                               XCTAssertNil(error, @"error is not expected to be here");
+                               notFoundCalls += 1;
+
+                           } else if (result == PDC_DATA_OPERATION_ERROR) {
+                               XCTAssertNil(stream, @"Must be nil stream on not found");
+                               XCTAssertNotNil(error, @"Valid error is expected to be here");
+                               errorCalls += 1;
+
+                           } else {
+                               XCTAssert(NO, @"Unexpected result code on LOAD");
+                           }
+
+                           [self.asyncHelper endTest];
+
+                       } onQueue:dispatch_get_main_queue()];
+    }
+
+    [self.asyncHelper waitForTestGroupSync];
+
+    XCTAssertEqual(calls, count, @"Number of files and callbacks must match");
+    XCTAssertEqual(successCalls , count, @"Success calls must match");
+    XCTAssertEqual(notFoundCalls, 0);
+    XCTAssertEqual(errorCalls, 0, @"Error calls must match");
+
+    for (unsigned i = 0; i < count; ++i) {
+        NSString *path = [cache pathForKey:self.imageNames[i]];
+
+        SPTPersistentRecordHeaderType header;
+        BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
+        XCTAssertTrue(opened, @"Files must be at place");
+
+        const uint32_t refCount = (kParams[i].locked ? 0 : 1);
+        XCTAssertEqual(header.refCount, refCount, @"RefCoutn must match");
+        const uint64_t ttl = (kParams[i].ttl > 0 ? refTTL : 0);
+        XCTAssertEqual(header.ttl, ttl, @"TTL must match");
+        XCTAssertEqual(header.payloadSizeBytes, 0, @"Payload must be 0 initially");
+        XCTAssertEqual(header.flags, 0, @"Flags must be 0 initially");
+        XCTAssertEqual(header.updateTimeSec, refTime, @"Update time must match");
+    }
 }
 
 - (void)testStreamOpenFailWithCreate
