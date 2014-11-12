@@ -417,6 +417,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 dispatch_async(queue, ^{
                     callback(response.result, nil, response.error);
                 });
+                return;
             }
         }
 

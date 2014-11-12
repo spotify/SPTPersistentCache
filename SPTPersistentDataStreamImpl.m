@@ -52,7 +52,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
         return;
     }
 
-    [self guardOpenFileWithPath:self.filePath jobBlock:^NSError *(int filedes) {
+    NSError *openError = [self guardOpenFileWithPath:self.filePath jobBlock:^NSError *(int filedes) {
 
         int intError = 0;
 
@@ -88,20 +88,26 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
                 return nsError;
             }
 
+
+            // Let block capture this parameters
+            CleanupHeandlerCallback cleanupHandler = self.cleanupHandler;
+            NSString *key = self.key;
+
             __typeof(self) __weak wself = self;
             self.source = dispatch_io_create(DISPATCH_IO_RANDOM, filedes, self.workQueue, ^(int posix_error) {
                 __typeof(self) sself = wself;
 
                 if (posix_error != 0) {
                     const char *strErr = strerror(posix_error);
-                    [sself debugOutput:@"PersistentDataCache: Error in handler for key:%@, %s", sself.key, strErr];
+                    // TODO: Fix nil here dealloc
+                    [sself debugOutput:@"PersistentDataCache: Error in handler for key:%@, %s", key, strErr];
                 }
 
                 fsync(filedes);
                 close(filedes);
 
-                if (sself.cleanupHandler)
-                    sself.cleanupHandler();
+                if (cleanupHandler)
+                    cleanupHandler();
             });
 
             if (self.source != NULL) {
@@ -133,6 +139,10 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
         callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
         return nsError;
     }];
+
+    if (openError != nil) {
+        callback(PDC_DATA_OPERATION_ERROR, nil, openError);
+    }
 }
 
 #pragma mrk - Public API
