@@ -55,7 +55,6 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
     NSError *openError = [self guardOpenFileWithPath:self.filePath jobBlock:^NSError *(int filedes) {
 
         int intError = 0;
-
         int bytesRead = read(filedes, &_header, kSPTPersistentRecordHeaderSize);
         if (bytesRead == kSPTPersistentRecordHeaderSize) {
 
@@ -158,11 +157,11 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
            callback:(DataWriteCallback)callback
               queue:(dispatch_queue_t)queue
 {
+#if 1
+#else
     off_t offset = 0;
-//    @synchronized(self.source) {
-        offset = self.writeOffset;
-        self.writeOffset += length;
-//    }
+    offset = self.writeOffset;
+    self.writeOffset += length;
 
     dispatch_data_t data = dispatch_data_create(bytes, length, self.workQueue, DISPATCH_DATA_DESTRUCTOR_DEFAULT);
     dispatch_io_write(self.source, offset, data, self.workQueue, ^(bool done, dispatch_data_t dataRemained, int error) {
@@ -170,9 +169,8 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
         NSError *nsError = nil;
         if (done == YES && error == 0) {
             // Success: Mark record as incomplete
-//            @synchronized(self.source) {
-                _header.flags |= PDC_HEADER_FLAGS_STREAM_INCOMPLETE;
-//            }
+            _header.flags |= PDC_HEADER_FLAGS_STREAM_INCOMPLETE;
+
 
         } else if (done == YES && error > 0) {
             const char *strerr = strerror(error);
@@ -190,6 +188,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
             });
         }
     });
+#endif
 }
 
 - (void)readDataWithOffset:(off_t)offset
@@ -202,6 +201,9 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
     if (callback == nil || queue == nil) {
         return;
     }
+
+#if 1
+#else
 
     dispatch_io_read(self.source, offset, length, self.workQueue, ^(bool done, dispatch_data_t dataRead, int error) {
 
@@ -230,6 +232,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
             callback(payload, nsError);
         });
     });
+#endif
 }
 
 - (void)readAllDataWithCallback:(DataReadCallback)callback
