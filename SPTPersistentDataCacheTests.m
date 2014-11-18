@@ -107,9 +107,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     @autoreleasepool {
 
-        int count = self.imageNames.count-1;
+        NSInteger count = self.imageNames.count-1;
         while (count >= 0) {
-            uint32_t idx = arc4random_uniform(count+1);
+            uint32_t idx = arc4random_uniform((uint32_t)count+1);
             NSString * tmp = self.imageNames[count];
             self.imageNames[count] = self.imageNames[idx];
             self.imageNames[idx] = tmp;
@@ -129,7 +129,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     self.asyncHelper = [SPTAsyncTestHelper new];
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     for (unsigned i = 0; i < count; ++i) {
         [self.asyncHelper startTest];
@@ -178,7 +178,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     int __block calls = 0;
     int __block errorCalls = 0;
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     for (unsigned i = 0; i < count; ++i) {
 
@@ -352,7 +352,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     NSMutableArray *toLock = [NSMutableArray array];
     NSMutableArray *toUnlock = [NSMutableArray array];
 
-    const unsigned count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
     for (unsigned i = 0; i < count; ++i) {
         if (kParams[i].locked) {
             [toUnlock addObject:self.imageNames[i]];
@@ -363,7 +363,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     // Wait untill all lock/unlock is done
     [self.asyncHelper startTest];
-    int __block toLockCount = [toLock count];
+    NSInteger __block toLockCount = [toLock count];
     [cache lockDataForKeys:toLock callback:^(SPTPersistentCacheResponse *response) {
         if (--toLockCount == 0) {
             [self.asyncHelper endTest];
@@ -372,7 +372,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                    onQueue:dispatch_get_main_queue()];
 
     [self.asyncHelper startTest];
-    int __block toUnlockCount = [toUnlock count];
+    NSInteger __block toUnlockCount = [toUnlock count];
     [cache unlockDataForKeys:toUnlock callback:^(SPTPersistentCacheResponse *response) {
         if (--toUnlockCount == 0){
             [self.asyncHelper endTest];
@@ -447,7 +447,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     int __block calls = 0;
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     for (unsigned i = 0; i < count; ++i) {
 
@@ -488,7 +488,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     int __block calls = 0;
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     for (unsigned i = 0; i < count; ++i) {
 
@@ -542,7 +542,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     BOOL __block locked = NO;
     const int reallyLocked = params_GetFilesNumber(YES);
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     for (unsigned i = 0; i < count; ++i) {
         [self.asyncHelper startTest];
@@ -609,7 +609,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     // +1 stands for PDC_ERROR_WRONG_PAYLOAD_SIZE since technically it has corrent header.
     const int reallyUnlocked = params_GetFilesNumber(NO) + 1;
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     for (unsigned i = 0; i < count; ++i) {
         [self.asyncHelper startTest];
@@ -705,7 +705,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
     int __block calls = 0;
     int __block notFoundCalls = 0;
     int __block errorCalls = 0;
@@ -768,7 +768,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
     int __block calls = 0;
     int __block notFoundCalls = 0;
     int __block errorCalls = 0;
@@ -827,7 +827,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     for (unsigned i = 0; i < count; ++i) {
         [self.asyncHelper startTest];
@@ -910,7 +910,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     [cache runRegularGC];
 
@@ -946,7 +946,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     [cache runRegularGC];
 
@@ -978,7 +978,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 - (void)testPruneWithSizeRestriction
 {
     NSUInteger expectedSize = [self calculateExpectedSize];
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     // Just dummy cache to get path to items
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:0];
@@ -1085,7 +1085,7 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
 
     if (pdcError != PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER) {
 
-        int readSize = read(fd, &header, kSPTPersistentRecordHeaderSize);
+        ssize_t readSize = read(fd, &header, kSPTPersistentRecordHeaderSize);
         if (readSize != kSPTPersistentRecordHeaderSize) {
             XCTAssert(readSize == kSPTPersistentRecordHeaderSize, @"Header not read");
             close(fd);
@@ -1107,7 +1107,7 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
 
             break;
         case PDC_ERROR_WRONG_PAYLOAD_SIZE:
-            header.payloadSizeBytes += (1 + (arc4random_uniform(header.payloadSizeBytes) - (header.payloadSizeBytes-1)/2));
+            header.payloadSizeBytes += (1 + (arc4random_uniform((uint32_t)header.payloadSizeBytes) - (header.payloadSizeBytes-1)/2));
             header.crc = pdc_CalculateHeaderCRC(&header);
 
             break;
@@ -1124,10 +1124,10 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
             break;
     }
 
-    int ret = lseek(fd, SEEK_SET, 0);
+    off_t ret = lseek(fd, SEEK_SET, 0);
     XCTAssert(ret != -1);
     
-    int written = write(fd, &header, headerSize);
+    ssize_t written = write(fd, &header, headerSize);
     XCTAssert(written == headerSize, @"header was not written");
     fsync(fd);
     close(fd);
@@ -1144,7 +1144,7 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
     SPTPersistentRecordHeaderType header;
     memset(&header, 0, kSPTPersistentRecordHeaderSize);
 
-    int readSize = read(fd, &header, kSPTPersistentRecordHeaderSize);
+    ssize_t readSize = read(fd, &header, kSPTPersistentRecordHeaderSize);
     if (readSize != kSPTPersistentRecordHeaderSize) {
         close(fd);
         return;
@@ -1152,10 +1152,10 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
 
     header.updateTimeSec = updateTime;
 
-    int ret = lseek(fd, SEEK_SET, 0);
+    off_t ret = lseek(fd, SEEK_SET, 0);
     XCTAssert(ret != -1);
 
-    int written = write(fd, &header, kSPTPersistentRecordHeaderSize);
+    ssize_t written = write(fd, &header, kSPTPersistentRecordHeaderSize);
     XCTAssert(written == kSPTPersistentRecordHeaderSize, @"header was not written");
     fsync(fd);
     close(fd);
@@ -1247,7 +1247,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     assert(header != NULL);
     memset(header, 0, kSPTPersistentRecordHeaderSize);
 
-    int readSize = read(fd, header, kSPTPersistentRecordHeaderSize);
+    ssize_t readSize = read(fd, header, kSPTPersistentRecordHeaderSize);
     close(fd);
 
     if (readSize != kSPTPersistentRecordHeaderSize) {
