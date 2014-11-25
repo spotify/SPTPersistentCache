@@ -1678,7 +1678,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     int idx = 0;
     for (unsigned i = 0; i < count; ++i) {
         NSUInteger size = [self dataSizeForItem:self.imageNames[i]];
-        if (size > maxDataSize) {
+        if (size > maxDataSize && kParams[i].corruptReason == -1) {
             maxDataSize = size;
             idx = i;
         }
@@ -1765,12 +1765,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     const int count = self.imageNames.count;
 
-
+    // Get index of most large data
     NSUInteger maxDataSize = 0;
     int idx = 0;
     for (unsigned i = 0; i < count; ++i) {
         NSUInteger size = [self dataSizeForItem:self.imageNames[i]];
-        if (size > maxDataSize) {
+        if (size > maxDataSize && kParams[i].corruptReason == -1) {
             maxDataSize = size;
             idx = i;
         }
@@ -1854,6 +1854,107 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 - (void)testStreamWriteChunks
 {
+    const NSTimeInterval refTime = kTestEpochTime + 17.0;
+    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
+                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+    const int count = self.imageNames.count;
+
+    NSUInteger maxDataSize = 0;
+    int idx = 0;
+    for (unsigned i = 0; i < count; ++i) {
+        NSUInteger size = [self dataSizeForItem:self.imageNames[i]];
+        // Exclude corrupted files
+        if (size > maxDataSize && kParams[i].corruptReason == -1) {
+            maxDataSize = size;
+            idx = i;
+        }
+    }
+
+    NSString *key = self.imageNames[idx];
+    id<SPTPersistentDataStream> __block stream = nil;
+
+    [self.asyncHelper startTest];
+    [cache openDataStreamForKey:key createIfNotExist:YES ttl:0 locked:NO
+                   withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
+
+                       stream = s;
+                       XCTAssertEqual(result, PDC_DATA_OPERATION_SUCCEEDED, @"Result must be success");
+                       XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
+                       XCTAssertNil(error, @"error is not expected to be here");
+
+                       [self.asyncHelper endTest];
+
+                   } onQueue:dispatch_get_main_queue()];
+
+    [self.asyncHelper waitForTestGroupSync];
+
+    NSUInteger expectedLen = maxDataSize /5;
+
+    // Get ranges we want to get from stream
+    NSRange r1 = NSMakeRange(0, expectedLen);
+    NSRange r2 = NSMakeRange(1*expectedLen, expectedLen);
+    NSRange r3 = NSMakeRange(2*expectedLen, expectedLen);
+    NSRange r4 = NSMakeRange(3*expectedLen, expectedLen);
+    NSRange r5 = NSMakeRange(4*expectedLen, maxDataSize - 4*expectedLen);
+
+    XCTAssertEqual(r1.length+r2.length+r3.length+r4.length+r5.length, maxDataSize);
+
+    NSString *fileName = [self.thisBundle pathForResource:key ofType:nil];
+    NSData *data = [NSData dataWithContentsOfFile:fileName];
+
+    XCTestExpectation *exp1 = [self expectationWithDescription:@"d1 write"];
+    NSData *d1 = [data subdataWithRange:r1];
+    [stream appendData:d1 callback:^(NSError *error) {
+        [exp1 fulfill];
+    } queue:dispatch_get_main_queue()];
+
+
+    XCTestExpectation *exp2 = [self expectationWithDescription:@"d2 write"];
+    NSData *d2 = [data subdataWithRange:r2];
+    [stream appendData:d2 callback:^(NSError *error) {
+        [exp2 fulfill];
+    } queue:dispatch_get_main_queue()];
+
+
+    XCTestExpectation *exp3 = [self expectationWithDescription:@"d3 write"];
+    NSData *d3 = [data subdataWithRange:r3];
+    [stream appendBytes:d3.bytes length:d3.length callback:^(NSError *error) {
+        [exp3 fulfill];
+    } queue:dispatch_get_main_queue()];
+
+
+    XCTestExpectation *exp4 = [self expectationWithDescription:@"d4 write"];
+    NSData *d4 = [data subdataWithRange:r4];
+    [stream appendBytes:d4.bytes length:d4.length callback:^(NSError *error) {
+        [exp4 fulfill];
+    } queue:dispatch_get_main_queue()];
+
+    XCTestExpectation *exp5 = [self expectationWithDescription:@"d5 write"];
+    NSData *d5 = [data subdataWithRange:r5];
+    [stream appendData:d5 callback:^(NSError *error) {
+        [exp5 fulfill];
+    } queue:dispatch_get_main_queue()];
+
+    [self waitForExpectationsWithTimeout:3.0 handler:^(NSError *error) {
+        NSLog(@"Error: %@", error);
+    }];
+
+
+    // Now check read data
+    XCTestExpectation *readExp = [self expectationWithDescription:@"Read whole data"];
+
+    NSData * __block readAllData = nil;
+    [stream readAllDataWithCallback:^(NSData *continousData, NSError *error) {
+        readAllData = continousData;
+        XCTAssertNil(error);
+        [readExp fulfill];
+    } queue:dispatch_get_main_queue()];
+
+    [self waitForExpectationsWithTimeout:3.0 handler:^(NSError *error) {
+        NSLog(@"Error: %@", error);
+    }];
+
+    XCTAssertEqualObjects(readAllData, data);
 }
 
 - (void)testStreamWriteMoreChunksWithFinalize
