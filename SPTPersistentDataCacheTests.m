@@ -1960,6 +1960,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqualObjects(readAllData, data);
 }
 
+#if 0
 /**
  * Write 3 chunks. finalize.
  * check read whole data and check its same as written.
@@ -2077,6 +2078,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                    withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
 
                        stream = s;
+
+                       if (error) {
+                           NSLog(@"Error for key:%@ error:%@", key, error);
+                       }
                        XCTAssertEqual(result, PDC_DATA_OPERATION_SUCCEEDED, @"Result must be success");
                        XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
                        XCTAssertNil(error, @"error is not expected to be here");
@@ -2128,6 +2133,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     XCTAssertEqualObjects(readAllData, data);
 }
+#endif
 
 #pragma mark - Internal methods
 
