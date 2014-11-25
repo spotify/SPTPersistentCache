@@ -210,12 +210,12 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
     dispatch_sync(self.workQueue, ^{
         flags = self.header.flags;
     });
-    return (flags & PDC_HEADER_FLAGS_STREAM_INCOMPLETE) > 0;
+    return (flags & PDC_HEADER_FLAGS_STREAM_INCOMPLETE) == 0;
 }
 
-- (void)finalize
+- (void)finalize:(dispatch_block_t)completion
 {
-    assert(self.currentOffset > 0);
+    assert(self.currentOffset >= 0);
     assert(self.fileDesc != -1);
 
     dispatch_async(self.workQueue, ^{
@@ -231,6 +231,10 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
         }
 
         fsync(self.fileDesc);
+        
+        if (completion) {
+            completion();
+        }
     });
 }
 

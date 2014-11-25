@@ -62,7 +62,8 @@ typedef void(^DataReadCallback)(NSData *continousData, NSError *error);
 
 /**
  * Call to mark record as complete. Further append calls make record incomplete again until next finalize call.
+ * @param completion Block to call when finalize is accomplished. May be nil.
  */
-- (void)finalize;
+- (void)finalize:(dispatch_block_t)completion;
 
 @end
