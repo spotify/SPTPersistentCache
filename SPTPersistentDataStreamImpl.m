@@ -322,7 +322,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
         }
     } else {
         self.currentOffset += length;
-        [self debugOutput:@"PersistentDataStream: key:%@, written: %ld", self.key, length];
+//        [self debugOutput:@"PersistentDataStream: key:%@, written: %ld", self.key, length];
     }
 
     return ret;
