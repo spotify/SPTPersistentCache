@@ -62,10 +62,6 @@ typedef NS_ENUM(NSInteger, SPTDataCacheResponseCode)
 
  @constant PDC_ERROR_RECORD_IS_STREAM_AND_BUSY Record is opened as stream and busy right now.
 
- @constant PDC_ERROR_STREAM_WRITE_FAILED Write operation had failed with stream.
-
- @constant PDC_ERROR_STREAM_READ_FAILED Read operation had failed with stream.
-
  @constant PDC_ERROR_INTERNAL_INCONSISTENCY Something bad has happened that shouldn't.
  */
 typedef NS_ENUM(NSInteger, SPTDataCacheLoadingError)
@@ -77,8 +73,6 @@ typedef NS_ENUM(NSInteger, SPTDataCacheLoadingError)
     PDC_ERROR_INVALID_HEADER_CRC,
     PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
     PDC_ERROR_RECORD_IS_STREAM_AND_BUSY,
-    PDC_ERROR_STREAM_WRITE_FAILED,
-    PDC_ERROR_STREAM_READ_FAILED,
     ///
     PDC_ERROR_INTERNAL_INCONSISTENCY
 };
