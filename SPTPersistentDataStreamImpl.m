@@ -7,12 +7,12 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 @interface SPTPersistentDataStreamImpl ()
 @property (nonatomic, strong) NSString *filePath;
 @property (nonatomic, strong) NSString *key;
-@property (nonatomic, strong) dispatch_io_t source;
 @property (nonatomic, strong) dispatch_queue_t workQueue;
 @property (nonatomic, copy) CleanupHeandlerCallback cleanupHandler;
 @property (nonatomic, copy) SPTDataCacheDebugCallback debugOutput;
 @property (nonatomic, assign) SPTPersistentRecordHeaderType header;
-@property (nonatomic, assign) off_t writeOffset;
+@property (nonatomic, assign) off_t currentOffset;
+@property (nonatomic, assign) int fileDesc;
 @end
 
 @implementation SPTPersistentDataStreamImpl
@@ -33,16 +33,14 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
     _workQueue = dispatch_queue_create(key.UTF8String, DISPATCH_QUEUE_SERIAL);
     _cleanupHandler = cleanupHandler;
     _debugOutput = debugCalback;
+    _fileDesc = -1;
 
     return self;
 }
 
 - (void)dealloc
 {
-    if (self.source) {
-        dispatch_io_close(self.source, 0);
-        self.source = nil;
-    }
+    [self closeStream];
 }
 
 - (void)open:(SPTDataCacheStreamCallback)callback
@@ -53,6 +51,9 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
     }
 
     NSError *openError = [self guardOpenFileWithPath:self.filePath jobBlock:^NSError *(int filedes) {
+
+        // Save file descriptor for futher usage
+        self.fileDesc = filedes;
 
         int intError = 0;
         int bytesRead = read(filedes, &_header, kSPTPersistentRecordHeaderSize);
@@ -65,60 +66,16 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
             }
 
             // Get write offset right after last byte of file
-            self.writeOffset = lseek(filedes, 0, SEEK_END) - kSPTPersistentRecordHeaderSize;
-            if (self.writeOffset < 0) {
-                intError = errno;
-                const char *strErr = strerror(intError);
-                [self debugOutput:@"PersistentDataCache: Error getting file size key:%@, (%d) %s", self.key, intError, strErr];
-
-                nsError = [NSError errorWithDomain:NSPOSIXErrorDomain code:intError userInfo:@{NSLocalizedDescriptionKey : @(strErr)}];
+            nsError = nil;
+            self.currentOffset = [self seekToOffset:0 withOrigin:SEEK_END error:&nsError] - kSPTPersistentRecordHeaderSize;
+            if (self.currentOffset < 0 || nsError != nil) {
+                [self debugOutput:@"PersistentDataCache: Error getting file size key:%@", self.key];
                 callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
                 return nsError;
             }
 
-            off_t offset = lseek(filedes, kSPTPersistentRecordHeaderSize, SEEK_SET);
-            if (offset < 0) {
-                intError = errno;
-                const char *strErr = strerror(intError);
-                [self debugOutput:@"PersistentDataCache: Error setting header offset for file key:%@, %s", self.key, strErr];
-
-                nsError = [NSError errorWithDomain:NSPOSIXErrorDomain code:intError userInfo:@{NSLocalizedDescriptionKey : @(strErr)}];
-                callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
-                return nsError;
-            }
-
-
-            // Let block capture this parameters
-            CleanupHeandlerCallback cleanupHandler = self.cleanupHandler;
-            NSString *key = self.key;
-
-            __typeof(self) __weak wself = self;
-            self.source = dispatch_io_create(DISPATCH_IO_RANDOM, filedes, self.workQueue, ^(int posix_error) {
-                __typeof(self) sself = wself;
-
-                if (posix_error != 0) {
-                    const char *strErr = strerror(posix_error);
-                    // TODO: Fix nil here dealloc
-                    [sself debugOutput:@"PersistentDataCache: Error in handler for key:%@, %s", key, strErr];
-                }
-
-                fsync(filedes);
-                close(filedes);
-
-                if (cleanupHandler)
-                    cleanupHandler();
-            });
-
-            if (self.source != NULL) {
-                // Prevent getting partial result in read/write callbacks to make life easier
-                dispatch_io_set_low_water(self.source, SIZE_MAX);
-                callback(PDC_DATA_OPERATION_SUCCEEDED, self, nil);
-                return nil;
-            }
-
-            nsError = [self nsErrorWithCode:PDC_ERROR_UNABLE_TO_CREATE_IO_SOURCE];
-            callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
-            return nsError;
+            callback(PDC_DATA_OPERATION_SUCCEEDED, self, nil);
+            return nil;
 
         } else if (bytesRead != -1 && bytesRead < kSPTPersistentRecordHeaderSize) {
             // Migration in future
@@ -149,7 +106,15 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
           callback:(DataWriteCallback)callback
              queue:(dispatch_queue_t)queue
 {
-    [self appendBytes:data.bytes length:data.length callback:callback queue:queue];
+    dispatch_async(self.workQueue, ^{
+        _header.flags |= PDC_HEADER_FLAGS_STREAM_INCOMPLETE;
+
+        NSError *nsError = nil;
+        [self writeBytes:data.bytes length:data.length error:&nsError];
+        dispatch_async(queue, ^{
+            callback(nsError);
+        });
+    });
 }
 
 - (void)appendBytes:(const void *)bytes
@@ -157,38 +122,8 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
            callback:(DataWriteCallback)callback
               queue:(dispatch_queue_t)queue
 {
-#if 1
-#else
-    off_t offset = 0;
-    offset = self.writeOffset;
-    self.writeOffset += length;
-
-    dispatch_data_t data = dispatch_data_create(bytes, length, self.workQueue, DISPATCH_DATA_DESTRUCTOR_DEFAULT);
-    dispatch_io_write(self.source, offset, data, self.workQueue, ^(bool done, dispatch_data_t dataRemained, int error) {
-
-        NSError *nsError = nil;
-        if (done == YES && error == 0) {
-            // Success: Mark record as incomplete
-            _header.flags |= PDC_HEADER_FLAGS_STREAM_INCOMPLETE;
-
-
-        } else if (done == YES && error > 0) {
-            const char *strerr = strerror(error);
-            nsError = [NSError errorWithDomain:SPTPersistentDataCacheErrorDomain
-                                          code:PDC_ERROR_STREAM_WRITE_FAILED
-                                      userInfo:@{NSLocalizedDescriptionKey : @(strerr)}];
-        } else if (done == NO) {
-            // We do not expect it
-            assert(!"Not expected");
-        }
-
-        if (callback != nil) {
-            dispatch_async(queue, ^{
-                callback(nsError);
-            });
-        }
-    });
-#endif
+    NSMutableData *data = [NSMutableData dataWithBytes:bytes length:length];
+    [self appendData:data callback:callback queue:queue];
 }
 
 - (void)readDataWithOffset:(off_t)offset
@@ -198,41 +133,69 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 {
     assert(callback != nil);
     assert(queue != nil);
+    assert(offset >= 0);
+
     if (callback == nil || queue == nil) {
         return;
     }
 
-#if 1
-#else
+    dispatch_async(self.workQueue, ^{
 
-    dispatch_io_read(self.source, offset, length, self.workQueue, ^(bool done, dispatch_data_t dataRead, int error) {
-
+        NSUInteger newLength = length;
         NSError *nsError = nil;
-        NSMutableData * __block payload = nil;
+        // If we want all data try to find current size
+        if (newLength == SIZE_MAX) {
 
-        if (done == YES && error == 0) {
-            payload = [NSMutableData data];
+            // Just sanity check
+            const off_t currentOff = [self seekToOffset:0 withOrigin:SEEK_CUR error:&nsError];
+            assert(currentOff == self.currentOffset+kSPTPersistentRecordHeaderSize);
+            
+            if (nsError != nil) {
+                dispatch_async(queue, ^{
+                    callback(nil, nsError);
+                });
+                return;
+            }
 
-            dispatch_data_apply(dataRead, ^bool(dispatch_data_t region, size_t regionOffset, const void *buffer, size_t size) {
-                [payload appendBytes:buffer length:size];
-                return YES;
-            });
+            // Get last byte offset as file size
+            off_t offSize = [self seekToOffset:0 withOrigin:SEEK_END error:&nsError];
+            if (nsError != nil) {
+                dispatch_async(queue, ^{
+                    callback(nil, nsError);
+                });
+                return;
+            }
 
-        } else if (done == YES && error > 0) {
-            const char *strerr = strerror(error);
-            nsError = [NSError errorWithDomain:SPTPersistentDataCacheErrorDomain
-                                          code:PDC_ERROR_STREAM_WRITE_FAILED
-                                      userInfo:@{NSLocalizedDescriptionKey : @(strerr)}];
-        } else if (done == NO) {
-            // Partial data read which we do not expect
-            assert(!"Not expected");
+            // Put file pointer back in place
+            [self seekToOffset:self.currentOffset withOrigin:SEEK_SET error:&nsError];
+            if (nsError != nil) {
+                dispatch_async(queue, ^{
+                    callback(nil, nsError);
+                });
+                return;
+            }
+
+            // Calculate payload size as whole file size minus header size
+            newLength = offSize - kSPTPersistentRecordHeaderSize;
+        }
+
+        // Prepare buffer of appropriate size
+        NSMutableData *data = [NSMutableData dataWithCapacity:newLength];
+        [data setLength:newLength];
+
+        // Convert read offset to file offset
+        off_t readOffset = offset + kSPTPersistentRecordHeaderSize;
+
+        [self readBytes:data.mutableBytes length:newLength offset:readOffset error:&nsError];
+
+        if (nsError != nil) {
+            data = nil;
         }
 
         dispatch_async(queue, ^{
-            callback(payload, nsError);
+            callback(data, nsError);
         });
     });
-#endif
 }
 
 - (void)readAllDataWithCallback:(DataReadCallback)callback
@@ -243,35 +206,31 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 
 - (BOOL)isComplete
 {
-    uint32_t flags = 0;
-//    @synchronized(self.source) {
+    uint32_t __block flags = 0;
+    dispatch_sync(self.workQueue, ^{
         flags = self.header.flags;
-//    }
-
+    });
     return (flags & PDC_HEADER_FLAGS_STREAM_INCOMPLETE) > 0;
 }
 
-// WARNING: This operation is not thread safe against append methods
 - (void)finalize
 {
-    assert(self.writeOffset > 0);
-    _header.payloadSizeBytes = (uint64_t)self.writeOffset;
-    _header.flags = 0;
-    _header.crc = pdc_CalculateHeaderCRC(&_header);
+    assert(self.currentOffset > 0);
+    assert(self.fileDesc != -1);
 
-    dispatch_data_t data = dispatch_data_create(&_header, kSPTPersistentRecordHeaderSize, self.workQueue, DISPATCH_DATA_DESTRUCTOR_DEFAULT);
-    off_t offset = -kSPTPersistentRecordHeaderSize;
-    
-    dispatch_io_write(self.source, offset, data, self.workQueue, ^(bool done, dispatch_data_t dataRemained, int error) {
-        if (done == YES && error == 0) {
-            // Success: done
-        } else if (done == YES && error > 0) {
-            const char *strerr = strerror(error);
-            [self debugOutput:@"PersistentDataStream: Error finilizing file: (%d) %s", error, strerr];
-        } else if (done == NO) {
-            // Partial data read which we do not expect
-            assert(!"Not expected");
+    dispatch_async(self.workQueue, ^{
+        _header.payloadSizeBytes = (uint64_t)self.currentOffset;
+        _header.flags = 0;
+        _header.crc = pdc_CalculateHeaderCRC(&_header);
+
+        ssize_t ret = pwrite(self.fileDesc, &_header, kSPTPersistentRecordHeaderSize, 0);
+        if (ret == -1) {
+            const int errn = errno;
+            const char* serr = strerror(errn);
+            [self debugOutput:@"PersistentDataStream: Error finilizing key:%@ , error:%s", self.key, serr];
         }
+
+        fsync(self.fileDesc);
     });
 }
 
@@ -284,7 +243,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
         return nil;
     }
 
-    int fd = open([filePath UTF8String], O_RDWR);
+    int fd = open([filePath UTF8String], O_RDWR|O_EXLOCK);
     if (fd == -1) {
         const int errn = errno;
         const char* serr = strerror(errn);
@@ -306,6 +265,85 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
     }
 
     return nsError;
+}
+
+- (void)closeStream
+{
+    CleanupHeandlerCallback cleanupCallback = [self.cleanupHandler copy];
+    dispatch_queue_t queue = self.workQueue;
+    int filedesc = self.fileDesc;
+    assert(self.fileDesc != -1);
+
+    dispatch_async(queue, ^{
+        fsync(filedesc);
+        close(filedesc);
+
+        if (cleanupCallback)
+            cleanupCallback();
+    });
+}
+
+- (off_t)seekToOffset:(off_t)offset withOrigin:(int)origin error:(NSError * __autoreleasing *)error
+{
+    assert(self.fileDesc != -1);
+
+    off_t newOffset = lseek(self.fileDesc, offset, origin);
+    if (newOffset < 0) {
+        int intError = errno;
+        const char *strErr = strerror(intError);
+        [self debugOutput:@"PersistentDataStream: Error while lseek, key:%@, (%d) %s", self.key, intError, strErr];
+
+        if (error) {
+            *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:intError userInfo:@{NSLocalizedDescriptionKey : @(strErr)}];
+        }
+    }
+
+    return newOffset;
+}
+
+- (ssize_t)writeBytes:(const void*)bytes length:(size_t)length error:(NSError * __autoreleasing *)error
+{
+    assert(bytes != NULL);
+    assert(self.fileDesc != -1);
+
+    ssize_t ret = write(self.fileDesc, bytes, length);
+    fsync(self.fileDesc);
+    if (ret == -1) {
+        int intError = errno;
+        const char *strErr = strerror(intError);
+        [self debugOutput:@"PersistentDataStream: Error while write, key:%@, (%d) %s", self.key, intError, strErr];
+
+        if (error) {
+            *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:intError userInfo:@{NSLocalizedDescriptionKey : @(strErr)}];
+        }
+    } else {
+        self.currentOffset += length;
+        [self debugOutput:@"PersistentDataStream: key:%@, written: %ld", self.key, length];
+    }
+
+    return ret;
+}
+
+/**
+ * Read data from specified offset not modifying file pointer.
+ * offset is file offset
+ */
+- (ssize_t)readBytes:(void *)buffer length:(size_t)length offset:(off_t)offset error:(NSError * __autoreleasing *)error
+{
+    assert(buffer != NULL);
+    assert(self.fileDesc != -1);
+
+    ssize_t ret = pread(self.fileDesc, buffer, length, offset);
+    if (ret == -1) {
+        int intError = errno;
+        const char *strErr = strerror(intError);
+        [self debugOutput:@"PersistentDataStream: Error while read, key:%@, (%d) %s", self.key, intError, strErr];
+
+        if (error) {
+            *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:intError userInfo:@{NSLocalizedDescriptionKey : @(strErr)}];
+        }
+    }
+    return ret;
 }
 
 - (NSError *)nsErrorWithCode:(SPTDataCacheLoadingError)errorCode

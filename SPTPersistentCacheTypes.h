@@ -60,8 +60,6 @@ typedef NS_ENUM(NSInteger, SPTDataCacheResponseCode)
  @constant PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER Binary data size read as header is less then current header size
  which means we can't proceed further with this file.
 
- @constant PDC_ERROR_UNABLE_TO_CREATE_IO_SOURCE Cache was not able to create dispatch_io_t source for requested stream.
-
  @constant PDC_ERROR_RECORD_IS_STREAM_AND_BUSY Record is opened as stream and busy right now.
 
  @constant PDC_ERROR_STREAM_WRITE_FAILED Write operation had failed with stream.
@@ -78,7 +76,6 @@ typedef NS_ENUM(NSInteger, SPTDataCacheLoadingError)
     PDC_ERROR_WRONG_PAYLOAD_SIZE,
     PDC_ERROR_INVALID_HEADER_CRC,
     PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
-    PDC_ERROR_UNABLE_TO_CREATE_IO_SOURCE,
     PDC_ERROR_RECORD_IS_STREAM_AND_BUSY,
     PDC_ERROR_STREAM_WRITE_FAILED,
     PDC_ERROR_STREAM_READ_FAILED,

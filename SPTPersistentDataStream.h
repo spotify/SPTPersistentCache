@@ -5,8 +5,8 @@ typedef void(^DataWriteCallback)(NSError *error);
 typedef void(^DataReadCallback)(NSData *continousData, NSError *error);
 
 /**
- * @discussion Implemetetion of this protocol is not thread safe in a sense that no two or more consecutive writes
- *             from different threads could guarantee the order of data that will be written. Serveral reads at once is fine.
+ * @discussion Implementation of this protocol is not thread safe in a sense that no two or more consecutive writes
+ *             from different threads could guarantee the order of data that will be written. Several reads at once is fine.
  *             Intermixing of reads and writes is also should be fine.
  */
 @protocol SPTPersistentDataStream <NSObject>
@@ -56,12 +56,12 @@ typedef void(^DataReadCallback)(NSData *continousData, NSError *error);
                           queue:(dispatch_queue_t)queue;
 
 /**
- *  Return YES if data was finilized in previos session. NO otherwise.
+ *  Return YES if data was finalized in previous session. NO otherwise.
  */
 - (BOOL)isComplete;
 
 /**
- * Call to mark record as complete. Further append calls make record incomplete again untill next finalize call.
+ * Call to mark record as complete. Further append calls make record incomplete again until next finalize call.
  */
 - (void)finalize;
 
