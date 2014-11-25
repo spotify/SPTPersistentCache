@@ -56,7 +56,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
         self.fileDesc = filedes;
 
         int intError = 0;
-        int bytesRead = read(filedes, &_header, kSPTPersistentRecordHeaderSize);
+        ssize_t bytesRead = read(filedes, &_header, kSPTPersistentRecordHeaderSize);
         if (bytesRead == kSPTPersistentRecordHeaderSize) {
 
             NSError *nsError = [self checkHeaderValid:&_header];
@@ -149,7 +149,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
             // Just sanity check
             const off_t currentOff = [self seekToOffset:0 withOrigin:SEEK_CUR error:&nsError];
             assert(currentOff == self.currentOffset+kSPTPersistentRecordHeaderSize);
-            
+
             if (nsError != nil) {
                 dispatch_async(queue, ^{
                     callback(nil, nsError);
@@ -231,7 +231,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
         }
 
         fsync(self.fileDesc);
-        
+
         if (completion) {
             completion();
         }
