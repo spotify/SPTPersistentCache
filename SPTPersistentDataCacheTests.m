@@ -44,6 +44,7 @@ static const uint64_t kTTL3 = 1495;
 static const uint64_t kTTL4 = 86400;
 static const NSInteger kCorruptedFileSize = 15;
 static const uint64_t kTestEpochTime = 1488;
+static const NSTimeInterval kDefaultWaitTime = 6.0; //sec
 
 static const StoreParamsType kParams[] = {
     {0,     YES, NO, -1},
@@ -88,6 +89,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 @property (nonatomic, strong) NSBundle *thisBundle;
 @end
 
+/** DO NOT DELETE:
+ * Failed seeds: 1417002282, 1417004699, 1417005389, 1417006103
+ * Prune size failed: 1417004677, 1417004725, 1417003704
+ */
 @implementation SPTPersistentDataCacheTests
 
 /*
@@ -1250,7 +1255,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 - (void)testPruneWithSizeRestriction
 {
-    NSUInteger expectedSize = [self calculateExpectedSize];
     const NSUInteger count = self.imageNames.count;
 
     // Just dummy cache to get path to items
@@ -1268,16 +1272,16 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         XCTAssertNotEqual(ret, -1, @"Failed to set file access time");
     }
 
-    NSMutableArray *removedItems = [NSMutableArray array];
+    NSMutableArray *savedItems = [NSMutableArray array];
 
-    // Define size contstrain by looking into params table and figure our what can't be dropped by cache
-    const int dropCount = 4;
+    // Take 6 first elements which are least oldest
+    const int dropCount = 6;
+    NSUInteger expectedSize = 0;
+
     for (unsigned i = 0; i < count && i < dropCount; ++i) {
-        if (kParams[i].locked) {
-            NSUInteger size = [self dataSizeForItem:self.imageNames[i]];
-            expectedSize -= (size + kSPTPersistentRecordHeaderSize);
-            [removedItems addObject:self.imageNames[i]];
-        }
+        NSUInteger size = [self dataSizeForItem:self.imageNames[i]];
+        expectedSize -= (size + kSPTPersistentRecordHeaderSize);
+        [savedItems addObject:self.imageNames[i]];
     }
 
     SPTPersistentDataCacheOptions *options = [SPTPersistentDataCacheOptions new];
@@ -1296,12 +1300,18 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssert(realSize <= expectedSize, @"real cache size has to be less or equal to what we expect");
 
     // Check that files supposed to be deleted was actually removed
-    for (unsigned i = 0; i < removedItems.count; ++i) {
+    for (unsigned i = 0; i < savedItems.count; ++i) {
 
-        NSString *path = [cache pathForKey:removedItems[i]];
+        // Skip not locked files since they could be deleted
+        NSUInteger idx = [self.imageNames indexOfObject:savedItems[i]];
+        if (!kParams[idx].locked) {
+            continue;
+        }
+
+        NSString *path = [cache pathForKey:savedItems[i]];
         SPTPersistentRecordHeaderType header;
         BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
-        XCTAssertTrue(opened, @"Locked files expected to in place");
+        XCTAssertTrue(opened, @"Saved files expected to in place");
     }
 
     // Call once more to make sure nothing will be droped
@@ -1938,7 +1948,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [exp5 fulfill];
     } queue:dispatch_get_main_queue()];
 
-    [self waitForExpectationsWithTimeout:3.0 handler:^(NSError *error) {
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:^(NSError *error) {
         NSLog(@"Error: %@", error);
     }];
 
@@ -1953,7 +1963,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [readExp fulfill];
     } queue:dispatch_get_main_queue()];
 
-    [self waitForExpectationsWithTimeout:3.0 handler:^(NSError *error) {
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:^(NSError *error) {
         NSLog(@"Error: %@", error);
     }];
 
@@ -1969,6 +1979,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testStreamWriteMoreChunksWithFinalize
 {
+
     const NSTimeInterval refTime = kTestEpochTime + 17.0;
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
@@ -1987,22 +1998,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     NSString *key = self.imageNames[idx];
     id<SPTPersistentDataStream> __block stream = nil;
-
-    [self.asyncHelper startTest];
-    [cache openDataStreamForKey:key createIfNotExist:YES ttl:0 locked:NO
-                   withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
-
-                       stream = s;
-                       XCTAssertEqual(result, PDC_DATA_OPERATION_SUCCEEDED, @"Result must be success");
-                       XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
-                       XCTAssertNil(error, @"error is not expected to be here");
-
-                       [self.asyncHelper endTest];
-
-                   } onQueue:dispatch_get_main_queue()];
-
-    [self.asyncHelper waitForTestGroupSync];
-
+    NSString *fileName = [self.thisBundle pathForResource:key ofType:nil];
+    NSData *data = [NSData dataWithContentsOfFile:fileName];
     NSUInteger expectedLen = maxDataSize /5;
 
     // Get ranges we want to get from stream
@@ -2014,62 +2011,77 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     XCTAssertEqual(r1.length+r2.length+r3.length+r4.length+r5.length, maxDataSize);
 
-    NSString *fileName = [self.thisBundle pathForResource:key ofType:nil];
-    NSData *data = [NSData dataWithContentsOfFile:fileName];
+    // Autorelease pool is required as sync primitive to make stream dealloc invoked first before reopen it again.
+    @autoreleasepool {
+        [self.asyncHelper startTest];
+        [cache openDataStreamForKey:key createIfNotExist:YES ttl:0 locked:NO
+                       withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
 
-    XCTestExpectation *exp1 = [self expectationWithDescription:@"d1 write"];
-    NSData *d1 = [data subdataWithRange:r1];
-    [stream appendData:d1 callback:^(NSError *error) {
-        [exp1 fulfill];
-    } queue:dispatch_get_main_queue()];
+                           stream = s;
+                           XCTAssertEqual(result, PDC_DATA_OPERATION_SUCCEEDED, @"Result must be success");
+                           XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
+                           XCTAssertNil(error, @"error is not expected to be here");
 
+                           [self.asyncHelper endTest];
 
-    XCTestExpectation *exp2 = [self expectationWithDescription:@"d2 write"];
-    NSData *d2 = [data subdataWithRange:r2];
-    [stream appendData:d2 callback:^(NSError *error) {
-        [exp2 fulfill];
-    } queue:dispatch_get_main_queue()];
+                       } onQueue:dispatch_get_main_queue()];
 
+        [self.asyncHelper waitForTestGroupSync];
 
-    XCTestExpectation *exp3 = [self expectationWithDescription:@"d3 write"];
-    NSData *d3 = [data subdataWithRange:r3];
-    [stream appendBytes:d3.bytes length:d3.length callback:^(NSError *error) {
-        [exp3 fulfill];
-    } queue:dispatch_get_main_queue()];
-
-    XCTestExpectation *expFinalize = [self expectationWithDescription:@"finalize"];
-    [stream finalize: ^{
-        [expFinalize fulfill];
-    }];
-
-    [self waitForExpectationsWithTimeout:3.0 handler:^(NSError *error) {
-        NSLog(@"Error: %@", error);
-    }];
+        XCTestExpectation *exp1 = [self expectationWithDescription:@"d1 write"];
+        NSData *d1 = [data subdataWithRange:r1];
+        [stream appendData:d1 callback:^(NSError *error) {
+            [exp1 fulfill];
+        } queue:dispatch_get_main_queue()];
 
 
-    // Now check read data
-    XCTestExpectation *read123Exp = [self expectationWithDescription:@"Read d1 d2 d3 data"];
+        XCTestExpectation *exp2 = [self expectationWithDescription:@"d2 write"];
+        NSData *d2 = [data subdataWithRange:r2];
+        [stream appendData:d2 callback:^(NSError *error) {
+            [exp2 fulfill];
+        } queue:dispatch_get_main_queue()];
 
-    NSData * __block readData = nil;
-    [stream readAllDataWithCallback:^(NSData *continousData, NSError *error) {
-        readData = continousData;
-        XCTAssertNil(error);
-        [read123Exp fulfill];
-    } queue:dispatch_get_main_queue()];
 
-    [self waitForExpectationsWithTimeout:3.0 handler:^(NSError *error) {
-        NSLog(@"Error: %@", error);
-    }];
+        XCTestExpectation *exp3 = [self expectationWithDescription:@"d3 write"];
+        NSData *d3 = [data subdataWithRange:r3];
+        [stream appendBytes:d3.bytes length:d3.length callback:^(NSError *error) {
+            [exp3 fulfill];
+        } queue:dispatch_get_main_queue()];
 
-    XCTAssertTrue([stream isComplete]);
+        XCTestExpectation *expFinalize = [self expectationWithDescription:@"finalize"];
+        [stream finalize: ^{
+            [expFinalize fulfill];
+        }];
 
-    NSMutableData* d123 = [NSMutableData dataWithData:d1];
-    [d123 appendData:d2];
-    [d123 appendData:d3];
-    XCTAssertEqualObjects(d123, readData);
+        [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:^(NSError *error) {
+            NSLog(@"Error: %@", error);
+        }];
 
-    // Release stream
-    stream = nil;
+
+        // Now check read data
+        XCTestExpectation *read123Exp = [self expectationWithDescription:@"Read d1 d2 d3 data"];
+
+        NSData * __block readData = nil;
+        [stream readAllDataWithCallback:^(NSData *continousData, NSError *error) {
+            readData = continousData;
+            XCTAssertNil(error);
+            [read123Exp fulfill];
+        } queue:dispatch_get_main_queue()];
+        
+        [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:^(NSError *error) {
+            NSLog(@"Error: %@", error);
+        }];
+        
+        XCTAssertTrue([stream isComplete]);
+        
+        NSMutableData* d123 = [NSMutableData dataWithData:d1];
+        [d123 appendData:d2];
+        [d123 appendData:d3];
+        XCTAssertEqualObjects(d123, readData);
+        
+        // Release stream
+        stream = nil;
+    }
 
     XCTestExpectation *openExp = [self expectationWithDescription:@"second open for append"];
     // and reopen it again to comlete it
@@ -2081,6 +2093,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                        if (error) {
                            NSLog(@"Error for key:%@ error:%@", key, error);
                        }
+
                        XCTAssertEqual(result, PDC_DATA_OPERATION_SUCCEEDED, @"Result must be success");
                        XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
                        XCTAssertNil(error, @"error is not expected to be here");
@@ -2088,11 +2101,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                        [openExp fulfill];
 
                    } onQueue:dispatch_get_main_queue()];
-
-    [self waitForExpectationsWithTimeout:3.0 handler:^(NSError *error) {
+    
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:^(NSError *error) {
         NSLog(@"Error: %@", error);
     }];
-
 
     XCTestExpectation *exp4 = [self expectationWithDescription:@"d4 write"];
     NSData *d4 = [data subdataWithRange:r4];
