@@ -1275,7 +1275,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     NSMutableArray *savedItems = [NSMutableArray array];
 
     // Take 6 first elements which are least oldest
-    const int dropCount = 6;
+    const NSUInteger dropCount = 6;
     NSUInteger expectedSize = 0;
 
     for (unsigned i = 0; i < count && i < dropCount; ++i) {
