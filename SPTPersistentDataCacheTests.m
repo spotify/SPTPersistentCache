@@ -356,9 +356,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
         [self.asyncHelper endTest];
     } onQueue:dispatch_get_main_queue()];
-    
+
     [self.asyncHelper waitForTestGroupSync];
-    
+
 }
 
 /*
@@ -508,7 +508,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             [self.asyncHelper endTest];
         } onQueue:dispatch_get_main_queue()];
     }
-    
+
     [self.asyncHelper waitForTestGroupSync];
 
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
@@ -854,7 +854,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             [self.asyncHelper endTest];
         } onQueue:dispatch_get_main_queue()];
     }
-    
+
     [self.asyncHelper waitForTestGroupSync];
 
     const int normalFilesCount = params_GetDefaultExpireFilesNumber();
@@ -1403,16 +1403,16 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                                XCTAssertNil(stream, @"Must be nil stream on not found");
                                XCTAssertNotNil(error, @"Valid error is expected to be here");
                                errorCalls += 1;
-                               
+
                            } else {
                                XCTAssert(NO, @"Unexpected result code on LOAD");
                            }
-                           
+
                            [self.asyncHelper endTest];
-                           
+
                        } onQueue:dispatch_get_main_queue()];
     }
-    
+
     [self.asyncHelper waitForTestGroupSync];
 
     const int corrupted = params_GetCorruptedFilesNumber();
@@ -1652,12 +1652,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
 
     [self.asyncHelper waitForTestGroupSync];
-    
+
     XCTAssertEqual(calls, count, @"Number of files and callbacks must match");
     XCTAssertEqual(successCalls , 0, @"Success calls must match");
     XCTAssertEqual(notFoundCalls, 0);
     XCTAssertEqual(errorCalls, count, @"Error calls must match");
-    
+
     for (unsigned i = 0; i < count; ++i) {
         NSString *path = [cache pathForKey:self.imageNames[i]];
         int ret = chflags(path.UTF8String, 0);
@@ -1960,7 +1960,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqualObjects(readAllData, data);
 }
 
-#if 0
 /**
  * Write 3 chunks. finalize.
  * check read whole data and check its same as written.
@@ -2133,7 +2132,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     XCTAssertEqualObjects(readAllData, data);
 }
-#endif
 
 #pragma mark - Internal methods
 
@@ -2230,7 +2228,7 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
 
     off_t ret = lseek(fd, SEEK_SET, 0);
     XCTAssert(ret != -1);
-    
+
     ssize_t written = write(fd, &header, headerSize);
     XCTAssert(written == headerSize, @"header was not written");
     fsync(fd);
