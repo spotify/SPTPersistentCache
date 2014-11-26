@@ -278,6 +278,8 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
     int filedesc = self.fileDesc;
     assert(self.fileDesc != -1);
 
+//    [self debugOutput:@"PersistentDataStream: Closing stream for key:%@, cleanup:0x%p", self.key, cleanupCallback];
+
     dispatch_async(queue, ^{
         fsync(filedesc);
         close(filedesc);
