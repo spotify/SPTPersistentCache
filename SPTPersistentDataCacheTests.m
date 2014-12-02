@@ -109,7 +109,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     time_t seed = time(NULL);
     NSLog(@"Seed:%ld", seed);
-    srand(seed);
+    srand((unsigned int)seed);
 
     // Form array of images for shuffling
     self.imageNames = [NSMutableArray array];
