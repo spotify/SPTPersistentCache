@@ -948,7 +948,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
     (void)(stream);
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     for (unsigned i = 0; i < count; ++i) {
         [self.asyncHelper startTest];
@@ -1052,7 +1052,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [self.asyncHelper waitForTestGroupSync];
 
     // Try to touch the data that is expired
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     int __block calls = 0;
     int __block notFoundCalls = 0;
@@ -1382,7 +1382,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     // Now do regular check of data integrity after touch
     int __block calls = 0;
@@ -1474,7 +1474,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     // Now do regular check of data integrity after touch
     int __block calls = 0;
@@ -1534,7 +1534,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     // Now do regular check of data integrity after touch
     int __block calls = 0;
@@ -1610,7 +1610,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     for (unsigned i = 0; i < count; ++i) {
         NSString *path = [cache pathForKey:self.imageNames[i]];
@@ -1681,7 +1681,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
 
     NSUInteger maxDataSize = 0;
@@ -1773,7 +1773,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     // Get index of most large data
     NSUInteger maxDataSize = 0;
@@ -1867,7 +1867,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     const NSTimeInterval refTime = kTestEpochTime + 17.0;
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     NSUInteger maxDataSize = 0;
     int idx = 0;
@@ -1983,7 +1983,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     const NSTimeInterval refTime = kTestEpochTime + 17.0;
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-    const int count = self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
     NSUInteger maxDataSize = 0;
     int idx = 0;
