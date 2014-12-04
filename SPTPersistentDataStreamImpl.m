@@ -101,7 +101,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
     }
 }
 
-#pragma mrk - Public API
+#pragma mark - Public API
 - (void)appendData:(NSData *)data
           callback:(DataWriteCallback)callback
              queue:(dispatch_queue_t)queue
