@@ -71,7 +71,6 @@ static const StoreParamsType kParams[] = {
 static int params_GetFilesNumber(BOOL locked);
 static int params_GetCorruptedFilesNumber(void);
 static int params_GetDefaultExpireFilesNumber(void);
-static int params_GetFilesWithTTLNumber(BOOL locked);
 
 static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentRecordHeaderType *header);
 
@@ -2419,19 +2418,6 @@ static int params_GetDefaultExpireFilesNumber(void)
         if (kParams[i].ttl == 0 &&
             kParams[i].corruptReason == -1 &&
             kParams[i].locked == NO) {
-            c += 1;
-        }
-    }
-    return c;
-}
-
-static int params_GetFilesWithTTLNumber(BOOL locked)
-{
-    int c = 0;
-    for (unsigned i = 0; kParams[i].last != YES; ++i) {
-        if (kParams[i].ttl > 0 &&
-            kParams[i].corruptReason == -1 &&
-            kParams[i].locked == locked) {
             c += 1;
         }
     }
