@@ -2082,29 +2082,53 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         stream = nil;
     }
 
-    XCTestExpectation *openExp = [self expectationWithDescription:@"second open for append"];
-    // and reopen it again to comlete it
-    [cache openDataStreamForKey:key createIfNotExist:NO ttl:0 locked:NO
-                   withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
+    /**
+     * We make wating loop for 10 attempts to make sure stream was closed and could be opened again
+     * without triggering BUSY error from PDC.
+     */
+    int loop_count = 0;
+    while (loop_count++ < 10) {
 
-                       stream = s;
+        NSError *__block openError = nil;
 
-                       if (error) {
-                           NSLog(@"Error for key:%@ error:%@", key, error);
-                       }
+        XCTestExpectation *openExp = [self expectationWithDescription:@"second open for append"];
+        // and reopen it again to comlete it
+        [cache openDataStreamForKey:key createIfNotExist:NO ttl:0 locked:NO
+                       withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
 
-                       XCTAssertEqual(result, PDC_DATA_OPERATION_SUCCEEDED, @"Result must be success");
-                       XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
-                       XCTAssertNil(error, @"error is not expected to be here");
+                           stream = s;
+                           openError = error;
 
-                       [openExp fulfill];
+                           if (error) {
+                               NSLog(@"Error for key:%@ error:%@", key, error);
 
-                   } onQueue:dispatch_get_main_queue()];
+                               if (error.code != PDC_ERROR_RECORD_IS_STREAM_AND_BUSY) {
+                                   XCTAssertEqual(result, PDC_DATA_OPERATION_SUCCEEDED, @"Result must be success");
+                                   XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
+                                   XCTAssertNil(error, @"error is not expected to be here");
+                               }
+                           }
+
+                           [openExp fulfill];
+
+                       } onQueue:dispatch_get_main_queue()];
+        
+        [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:^(NSError *error) {
+            NSLog(@"Error: %@", error);
+        }];
+
+        if (openError == nil) {
+            break;
+        }
+        
+        // break the loop and fail in case of non busy error.
+        if (openError && openError.code != PDC_ERROR_RECORD_IS_STREAM_AND_BUSY) {
+            break;
+        }
+    }
+
+    XCTAssert(loop_count < 10, @"Successful time open limit exceeded");
     
-    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:^(NSError *error) {
-        NSLog(@"Error: %@", error);
-    }];
-
     XCTestExpectation *exp4 = [self expectationWithDescription:@"d4 write"];
     NSData *d4 = [data subdataWithRange:r4];
     [stream appendBytes:d4.bytes length:d4.length callback:^(NSError *error) {
