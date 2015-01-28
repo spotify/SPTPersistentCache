@@ -148,7 +148,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 
             // Just sanity check
             const off_t currentOff = [self seekToOffset:0 withOrigin:SEEK_CUR error:&nsError];
-            assert(currentOff == self.currentOffset+kSPTPersistentRecordHeaderSize);
+            //assert(currentOff == self.currentOffset+kSPTPersistentRecordHeaderSize);
 
             if (nsError != nil) {
                 dispatch_async(queue, ^{
@@ -210,7 +210,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
     dispatch_sync(self.workQueue, ^{
         flags = self.header.flags;
     });
-    return (flags & PDC_HEADER_FLAGS_STREAM_INCOMPLETE) == 0;
+    return (flags & PDC_HEADER_FLAGS_STREAM_INCOMPLETE) == 1;
 }
 
 - (void)finalize:(dispatch_block_t)completion
