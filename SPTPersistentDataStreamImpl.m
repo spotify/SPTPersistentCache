@@ -74,6 +74,11 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
                 return nsError;
             }
 
+            // Req.#1.4. If there is no data in the file mark it as incomplete
+            if (_header.payloadSizeBytes == 0) {
+                _header.flags |= PDC_HEADER_FLAGS_STREAM_INCOMPLETE;
+            }
+
             callback(PDC_DATA_OPERATION_SUCCEEDED, self, nil);
             return nil;
 
@@ -111,9 +116,12 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 
         NSError *nsError = nil;
         [self writeBytes:data.bytes length:data.length error:&nsError];
-        dispatch_async(queue, ^{
-            callback(nsError);
-        });
+        
+        if (callback && queue) {
+            dispatch_async(queue, ^{
+                callback(nsError);
+            });
+        }
     });
 }
 
@@ -146,9 +154,10 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
         // If we want all data try to find current size
         if (newLength == SIZE_MAX) {
 
-            // Just sanity check
+            // Just sanity check which MUST be holded
             const off_t currentOff = [self seekToOffset:0 withOrigin:SEEK_CUR error:&nsError];
-            //assert(currentOff == self.currentOffset+kSPTPersistentRecordHeaderSize);
+//            [self debugOutput:@"%@: currentOff:%lld, off:%lld", self.key, currentOff, self.currentOffset];
+            assert(currentOff == self.currentOffset+kSPTPersistentRecordHeaderSize);
 
             if (nsError != nil) {
                 dispatch_async(queue, ^{
@@ -167,7 +176,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
             }
 
             // Put file pointer back in place
-            [self seekToOffset:self.currentOffset withOrigin:SEEK_SET error:&nsError];
+            [self seekToOffset:self.currentOffset+kSPTPersistentRecordHeaderSize withOrigin:SEEK_SET error:&nsError];
             if (nsError != nil) {
                 dispatch_async(queue, ^{
                     callback(nil, nsError);
@@ -210,7 +219,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
     dispatch_sync(self.workQueue, ^{
         flags = self.header.flags;
     });
-    return (flags & PDC_HEADER_FLAGS_STREAM_INCOMPLETE) == 1;
+    return (flags & PDC_HEADER_FLAGS_STREAM_INCOMPLETE) == 0;
 }
 
 - (void)finalize:(dispatch_block_t)completion
@@ -235,6 +244,23 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
         if (completion) {
             completion();
         }
+    });
+}
+
+- (void)dataSizeWithCallback:(DataSizeCallback)callback queue:(dispatch_queue_t)queue
+{
+    assert(callback != nil);
+    assert(queue != nil);
+
+    if (callback == nil || queue == nil) {
+        return;
+    }
+
+    dispatch_async(self.workQueue, ^{
+        const NSUInteger bytesSize = self.currentOffset;
+        dispatch_async(queue, ^{
+            callback(bytesSize);
+        });
     });
 }
 

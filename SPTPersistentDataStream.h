@@ -3,6 +3,7 @@
 
 typedef void(^DataWriteCallback)(NSError *error);
 typedef void(^DataReadCallback)(NSData *continousData, NSError *error);
+typedef void(^DataSizeCallback)(NSUInteger sizeBytes);
 
 /**
  * @discussion Implementation of this protocol is not thread safe in a sense that no two or more consecutive writes
@@ -65,5 +66,12 @@ typedef void(^DataReadCallback)(NSData *continousData, NSError *error);
  * @param completion Block to call when finalize is accomplished. May be nil.
  */
 - (void)finalize:(dispatch_block_t)completion;
+
+/**
+ * Call to get current payload size
+ * @param callback Block to call to know the size. May not be nil.
+ * @param queue Queue to execute callback on.
+ */
+- (void)dataSizeWithCallback:(DataSizeCallback)callback queue:(dispatch_queue_t)queue;
 
 @end

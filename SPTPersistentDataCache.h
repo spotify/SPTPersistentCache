@@ -163,6 +163,7 @@ typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
  *             TLL could be specified if known, otherwise put 0 as TTL meaning default expiration rule applies.
  *             Record could be created as locked initially specifying YES to locked: argument. refCount is set according to rules
  *             specified for -storeData:. TLL is set to new ttl value.
+ *             Req.#1.4. Zero payload stream marked as incomplete on open.
  *
  * @param key Key to associate the data with.
  * @param needCreate If YES file is created, otherwise just opened.
