@@ -1911,7 +1911,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     NSString *fileName = [self.thisBundle pathForResource:key ofType:nil];
     NSData *data = [NSData dataWithContentsOfFile:fileName];
 
-    XCTAssertTrue([stream isComplete]);
+    XCTAssertFalse([stream isComplete]);
 
     XCTestExpectation *exp1 = [self expectationWithDescription:@"d1 write"];
     NSData *d1 = [data subdataWithRange:r1];
