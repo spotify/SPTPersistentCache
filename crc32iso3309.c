@@ -85,7 +85,7 @@ static const uint32_t crc_table[] = {
  }
  if (crc != original_crc) error();
  */
-static uint32_t update_crc(uint32_t crc, uint8_t *buf, size_t len)
+static uint32_t update_crc(uint32_t crc, const uint8_t *buf, size_t len)
 {
     uint32_t c = crc ^ 0xffFFffFFU;
 
@@ -96,7 +96,7 @@ static uint32_t update_crc(uint32_t crc, uint8_t *buf, size_t len)
 }
 
 /* Return the CRC of the bytes buf[0..len-1]. */
-uint32_t spt_crc32(uint8_t *buf, size_t len)
+uint32_t spt_crc32(const uint8_t *buf, size_t len)
 {
     return update_crc(0L, buf, len);
 }

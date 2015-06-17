@@ -778,7 +778,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             // File read with error -> inform user
             [self dispatchError:error result:PDC_DATA_OPERATION_ERROR callback:callback onQueue:queue];
         } else {
-            SPTPersistentRecordHeaderType *header = pdc_GetHeaderFromData([rawData bytes], [rawData length]);
+            SPTPersistentRecordHeaderType *header = pdc_GetHeaderFromData(rawData.mutableBytes, rawData.length);
 
             // If not enough data to cast to header, its not the file we can process
             if (header == NULL) {
@@ -1451,13 +1451,13 @@ NS_INLINE BOOL PointerMagicAlignCheck(const void *ptr)
     return (v%align == 0);
 }
 
-SPTPersistentRecordHeaderType* pdc_GetHeaderFromData(const void* data, size_t size)
+SPTPersistentRecordHeaderType *pdc_GetHeaderFromData(void *data, size_t size)
 {
     if (size < kSPTPersistentRecordHeaderSize) {
         return NULL;
     }
 
-    return (SPTPersistentRecordHeaderType*)data;
+    return (SPTPersistentRecordHeaderType *)data;
 }
 
 int /*SPTDataCacheLoadingError*/ pdc_ValidateHeader(const SPTPersistentRecordHeaderType *header)
@@ -1498,5 +1498,5 @@ uint32_t pdc_CalculateHeaderCRC(const SPTPersistentRecordHeaderType *header)
         return 0;
     }
 
-    return spt_crc32((uint8_t*)header, kSPTPersistentRecordHeaderSize - sizeof(header->crc));
+    return spt_crc32((const uint8_t *)header, kSPTPersistentRecordHeaderSize - sizeof(header->crc));
 }

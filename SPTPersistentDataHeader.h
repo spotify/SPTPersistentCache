@@ -46,7 +46,7 @@ _Static_assert(sizeof(SPTPersistentRecordHeaderType)%4 == 0, "Struct size has to
 // Following functions used internally and could be used for testing purposes also
 
 // Function return pointer to header if there are enough data otherwise NULL
-FOUNDATION_EXPORT SPTPersistentRecordHeaderType* pdc_GetHeaderFromData(const void* data, size_t size);
+FOUNDATION_EXPORT SPTPersistentRecordHeaderType *pdc_GetHeaderFromData(void *data, size_t size);
 
 // Function validates header accoring to predefined rules used in production code
 // @return -1 if everything is ok, otherwise one of codes from SPTDataCacheLoadingError
