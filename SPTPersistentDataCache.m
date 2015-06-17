@@ -831,13 +831,13 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_OPERATION_SUCCEEDED
                                                                                                 error:nil
                                                                                                record:record];
-            // If data ttl == 0 we apdate access time
+            // If data ttl == 0 we update access time
             if (ttl == 0) {
                 localHeader.updateTimeSec = (uint64_t)self.currentTime();
                 localHeader.crc = pdc_CalculateHeaderCRC(&localHeader);
                 memcpy(header, &localHeader, sizeof(localHeader));
 
-                // Write back with update access attributes
+                // Write back with updated access attributes
                 NSError *werror = nil;
                 if (![rawData writeToFile:filePath options:NSDataWritingAtomic error:&werror]) {
                     [self debugOutput:@"PersistentDataCache: Error writing back record:%@, error:%@", filePath.lastPathComponent, werror];
