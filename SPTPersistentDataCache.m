@@ -656,7 +656,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     });
 }
 
-- (void)wipeLockedFiles;
+- (void)wipeLockedFiles
 {
     dispatch_barrier_async(self.workQueue, ^{
         [self collectGarbageForceExpire:NO forceLocked:YES];
