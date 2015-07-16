@@ -1541,11 +1541,18 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     int __block errorCalls = 0;
     int __block successCalls = 0;
 
+    int expectedSuccessCalls = 0;
+    int expectedErrorCalls = 0;
     for (unsigned i = 0; i < count; ++i) {
         [self.asyncHelper startTest];
 
         const uint64_t ttl = (kParams[i].ttl > 0 ? refTTL : 0);
         const BOOL locked = !kParams[i].locked;
+        if (kParams[i].corruptReason == -1 || kParams[i].corruptReason == PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER) {
+            expectedSuccessCalls++;
+        } else {
+            expectedErrorCalls++;
+        }
 
         [cache openDataStreamForKey:self.imageNames[i] createIfNotExist:YES ttl:ttl locked:locked
                        withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
@@ -1580,24 +1587,22 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [self.asyncHelper waitForTestGroupSync];
 
     XCTAssertEqual(calls, count, @"Number of files and callbacks must match");
-    XCTAssertEqual(successCalls , count, @"Success calls must match");
+    XCTAssertEqual(successCalls , expectedSuccessCalls, @"Success calls must match");
     XCTAssertEqual(notFoundCalls, 0);
-    XCTAssertEqual(errorCalls, 0, @"Error calls must match");
+    XCTAssertEqual(errorCalls, expectedErrorCalls, @"Error calls must match");
 
     for (unsigned i = 0; i < count; ++i) {
         NSString *path = [cache pathForKey:self.imageNames[i]];
 
         SPTPersistentRecordHeaderType header;
-        BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
-        XCTAssertTrue(opened, @"Files must be at place");
-
-        const uint32_t refCount = (kParams[i].locked ? 0 : 1);
-        XCTAssertEqual(header.refCount, refCount, @"RefCoutn must match");
-        const uint64_t ttl = (kParams[i].ttl > 0 ? refTTL : 0);
-        XCTAssertEqual(header.ttl, ttl, @"TTL must match");
-        XCTAssertEqual(header.payloadSizeBytes, 0, @"Payload must be 0 initially");
-        XCTAssertEqual(header.flags, 0, @"Flags must be 0 initially");
-        XCTAssertEqual(header.updateTimeSec, refTime, @"Update time must match");
+        if (kParams[i].corruptReason == -1) {
+            BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
+            XCTAssertTrue(opened, @"Files must be at place");
+            const uint32_t refCount = (kParams[i].locked ? 1 : 0);
+            XCTAssertEqual(header.refCount, refCount, @"RefCoutn must match");
+            XCTAssertEqual(header.ttl, kParams[i].ttl, @"TTL must match");
+            XCTAssertEqual(header.flags, 0, @"Flags must be 0 initially");
+        }
     }
 }
 
