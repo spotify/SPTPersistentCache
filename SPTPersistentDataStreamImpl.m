@@ -302,7 +302,6 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
     CleanupHeandlerCallback cleanupCallback = [self.cleanupHandler copy];
     dispatch_queue_t queue = self.workQueue;
     int filedesc = self.fileDesc;
-    assert(self.fileDesc != -1);
 
 //    [self debugOutput:@"PersistentDataStream: Closing stream for key:%@, cleanup:0x%p", self.key, cleanupCallback];
 
