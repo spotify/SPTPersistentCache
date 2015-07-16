@@ -377,10 +377,14 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             });
             return;
         }
+        
+        NSString *filePath = [self pathForKey:key];
 
         NSError *nsError = nil;
         if (needCreate) {
-            nsError = [self storeDataSync:[NSData data] forKey:key ttl:ttl locked:locked withCallback:nil onQueue:nil];
+            if (![self.fileManager fileExistsAtPath:filePath isDirectory:nil]) {
+                nsError = [self storeDataSync:[NSData data] forKey:key ttl:ttl locked:locked withCallback:nil onQueue:nil];
+            }
         }
 
         if (nsError != nil) {
@@ -390,7 +394,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             return;
         }
 
-        NSString *filePath = [self pathForKey:key];
+        
 
         // Try to satisfy Req.#1.2 only for file we created earlier
         if (!needCreate) {
