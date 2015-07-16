@@ -1884,7 +1884,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         }
     }
 
-    NSString *key = self.imageNames[idx];
+    NSString *key = [self.imageNames[idx] stringByAppendingString:@"test"];
     id<SPTPersistentDataStream> __block stream = nil;
 
     [self.asyncHelper startTest];
@@ -1913,7 +1913,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     XCTAssertEqual(r1.length+r2.length+r3.length+r4.length+r5.length, maxDataSize);
 
-    NSString *fileName = [self.thisBundle pathForResource:key ofType:nil];
+    NSString *fileName = [self.thisBundle pathForResource:self.imageNames[idx] ofType:nil];
     NSData *data = [NSData dataWithContentsOfFile:fileName];
 
     XCTAssertFalse([stream isComplete]);
@@ -2000,9 +2000,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         }
     }
 
-    NSString *key = self.imageNames[idx];
+    NSString *key = [self.imageNames[idx] stringByAppendingString:@"test2"];
     id<SPTPersistentDataStream> __block stream = nil;
-    NSString *fileName = [self.thisBundle pathForResource:key ofType:nil];
+    NSString *fileName = [self.thisBundle pathForResource:self.imageNames[idx] ofType:nil];
     NSData *data = [NSData dataWithContentsOfFile:fileName];
     NSUInteger expectedLen = maxDataSize /5;
 
