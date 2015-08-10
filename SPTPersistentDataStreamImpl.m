@@ -50,6 +50,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
         return;
     }
 
+    // stream was successfully opened if error is nil
     NSError *openError = [self guardOpenFileWithPath:self.filePath jobBlock:^NSError *(int filedes) {
 
         // Save file descriptor for futher usage
@@ -61,7 +62,6 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 
             NSError *nsError = [self checkHeaderValid:&_header];
             if (nsError != nil) {
-                callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
                 return nsError;
             }
 
@@ -70,7 +70,6 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
             self.currentOffset = [self seekToOffset:0 withOrigin:SEEK_END error:&nsError] - kSPTPersistentRecordHeaderSize;
             if (self.currentOffset < 0 || nsError != nil) {
                 [self debugOutput:@"PersistentDataCache: Error getting file size key:%@", self.key];
-                callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
                 return nsError;
             }
 
@@ -79,14 +78,13 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
                 _header.flags |= PDC_HEADER_FLAGS_STREAM_INCOMPLETE;
             }
 
-            callback(PDC_DATA_OPERATION_SUCCEEDED, self, nil);
+            // success
             return nil;
 
         } else if (bytesRead != -1 && bytesRead < kSPTPersistentRecordHeaderSize) {
             // Migration in future
 
             NSError *nsError = [self nsErrorWithCode:PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER];
-            callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
             return nsError;
         } else {
             // -1 error
@@ -97,12 +95,14 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
         const char *strErr = strerror(intError);
 
         NSError *nsError = [NSError errorWithDomain:NSPOSIXErrorDomain code:intError userInfo:@{NSLocalizedDescriptionKey : @(strErr)}];
-        callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
         return nsError;
     }];
 
+    // execute callback
     if (openError != nil) {
         callback(PDC_DATA_OPERATION_ERROR, nil, openError);
+    } else {
+        callback(PDC_DATA_OPERATION_SUCCEEDED, self, nil);
     }
 }
 
