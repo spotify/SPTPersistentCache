@@ -8,8 +8,6 @@
 #import "SPTPersistentDataHeader.h"
 #import "SPTPersistentDataCache.h"
 
-#import "SPTAsyncTestHelper.h"
-
 static const char* kImages[] = {
     "b91998ae68b9639cee6243df0886d69bdeb75854",
     "c3b19963fc076930dd36ce3968757704bbc97357",
@@ -84,7 +82,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 @property (nonatomic, strong) SPTPersistentDataCache *cache;
 @property (nonatomic, strong) NSMutableArray *imageNames;
 @property (nonatomic, strong) NSString *cachePath;
-@property (nonatomic, strong) SPTAsyncTestHelper *asyncHelper;
 @property (nonatomic, strong) NSBundle *thisBundle;
 @end
 
@@ -142,22 +139,19 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     self.thisBundle = [NSBundle bundleForClass:[self class]];
 
-    self.asyncHelper = [SPTAsyncTestHelper new];
-
     const NSUInteger count = self.imageNames.count;
 
     for (unsigned i = 0; i < count; ++i) {
-        [self.asyncHelper startTest];
-
         XCTAssert(kParams[i].last != YES, @"Last param element reached");
         NSString *fileName = [self.thisBundle pathForResource:self.imageNames[i] ofType:nil];
-        [self putFile:fileName inCache:self.cache withKey:self.imageNames[i] ttl:kParams[i].ttl locked:kParams[i].locked];
+        XCTestExpectation *expectation = [self expectationWithDescription:fileName];
+        [self putFile:fileName inCache:self.cache withKey:self.imageNames[i] ttl:kParams[i].ttl locked:kParams[i].locked expectation:expectation];
         NSData *data = [NSData dataWithContentsOfFile:fileName];
         UIImage *image = [UIImage imageWithData:data];
         XCTAssertNotNil(image, @"Image is invalid");
     }
-
-    [self.asyncHelper waitForTestGroupSync];
+    
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     for (unsigned i = 0; !kParams[i].last; ++i) {
         if (kParams[i].corruptReason > -1) {
@@ -174,7 +168,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [[NSFileManager defaultManager] removeItemAtPath:self.cachePath error:nil];
     self.cache = nil;
     self.imageNames = nil;
-    self.asyncHelper = nil;
     self.thisBundle = nil;
 
     [super tearDown];
@@ -203,9 +196,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     for (unsigned i = 0; i < count; ++i) {
 
-        [self.asyncHelper startTest];
+        NSString *cacheKey = self.imageNames[i];
+        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
-        [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
+        [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
 
             calls += 1;
 
@@ -232,13 +226,13 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssert(NO, @"Unexpected result code on LOAD");
             }
 
-            [self.asyncHelper endTest];
+            [exp fulfill];
         } onQueue:dispatch_get_main_queue()];
 
         XCTAssert(kParams[i].last != YES, @"Last param element reached");
     }
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     // Check that updat time was modified when access cache (both case ttl==0, ttl>0)
     for (unsigned i = 0; i < count; ++i) {
@@ -273,10 +267,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     // No expiration
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
         return [NSDate timeIntervalSinceReferenceDate];
-    }
-                                                       expirationTime:[NSDate timeIntervalSinceReferenceDate]];
+    } expirationTime:[NSDate timeIntervalSinceReferenceDate]];
 
-    [self.asyncHelper startTest];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"testLoadWithPrefixesSuccess"];
 
     // Thas hardcode logic: 10th element should be safe to get
     const int index = 10;
@@ -313,11 +306,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             XCTAssertNotNil(response.error, @"error is not expected to be here");
         }
 
-        [self.asyncHelper endTest];
+        [expectation fulfill];
     } onQueue:dispatch_get_main_queue()];
 
-    [self.asyncHelper waitForTestGroupSync];
-
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 }
 
 /**
@@ -328,10 +320,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     // No expiration
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
         return [NSDate timeIntervalSinceReferenceDate];
-    }
-                                                       expirationTime:[NSDate timeIntervalSinceReferenceDate]];
+    } expirationTime:[NSDate timeIntervalSinceReferenceDate]];
 
-    [self.asyncHelper startTest];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"testLoadWithPrefixesFail"];
 
     // Thas hardcode logic: 10th element should be safe to get
     const int index = 9;
@@ -358,11 +349,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             XCTAssert(NO, @"This shouldnt happen");
         }
 
-        [self.asyncHelper endTest];
+        [expectation fulfill];
     } onQueue:dispatch_get_main_queue()];
 
-    [self.asyncHelper waitForTestGroupSync];
-
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 }
 
 /*
@@ -396,25 +386,23 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
 
     // Wait untill all lock/unlock is done
-    [self.asyncHelper startTest];
+    XCTestExpectation *lockExp = [self expectationWithDescription:@"lock"];
     NSInteger __block toLockCount = [toLock count];
     [cache lockDataForKeys:toLock callback:^(SPTPersistentCacheResponse *response) {
         if (--toLockCount == 0) {
-            [self.asyncHelper endTest];
+            [lockExp fulfill];
         }
-    }
-                   onQueue:dispatch_get_main_queue()];
+    } onQueue:dispatch_get_main_queue()];
 
-    [self.asyncHelper startTest];
+    XCTestExpectation *unlockExp = [self expectationWithDescription:@"unlock"];
     NSInteger __block toUnlockCount = [toUnlock count];
     [cache unlockDataForKeys:toUnlock callback:^(SPTPersistentCacheResponse *response) {
         if (--toUnlockCount == 0){
-            [self.asyncHelper endTest];
+            [unlockExp fulfill];
         }
-    }
-                     onQueue:dispatch_get_main_queue()];
+    } onQueue:dispatch_get_main_queue()];
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     // Now check that updateTime is not altered by lock unlock calls for all not corrupted files
     for (unsigned i = 0; i < count; ++i) {
@@ -429,9 +417,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     for (unsigned i = 0; i < count; ++i) {
 
-        [self.asyncHelper startTest];
+        NSString *cacheKey = self.imageNames[i];
+        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
-        [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
+        [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
@@ -457,11 +446,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssert(NO, @"Unexpected result code on LOAD");
             }
 
-            [self.asyncHelper endTest];
+            [exp fulfill];
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     XCTAssertEqual(calls, self.imageNames.count, @"Number of checked files must match");
     // -1 stands for stream
@@ -493,10 +482,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     for (unsigned i = 0; i < count; ++i) {
 
-        [self.asyncHelper startTest];
+        NSString *cacheKey = self.imageNames[i];
+        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
         // This just give us guarantee that files should be deleted
-        [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
+        [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
             if (i == streamIndex) {
@@ -509,11 +499,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssertNil(response.error, @"error is not expected to be here");
             }
 
-            [self.asyncHelper endTest];
+            [exp fulfill];
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
 
@@ -548,10 +538,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     for (unsigned i = 0; i < count; ++i) {
 
-        [self.asyncHelper startTest];
+        NSString *cacheKey = self.imageNames[i];
+        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
         // This just give us guarantee that files should be deleted
-        [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
+        [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
 
             calls += 1;
 
@@ -565,11 +556,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssertNil(response.error, @"error is not expected to be here");
             }
 
-            [self.asyncHelper endTest];
+            [exp fulfill];
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
 
@@ -611,9 +602,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     const NSUInteger count = self.imageNames.count;
 
     for (unsigned i = 0; i < count; ++i) {
-        [self.asyncHelper startTest];
+        NSString *cacheKey = self.imageNames[i];
+        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
-        [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
+        [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
@@ -646,11 +638,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssert(NO, @"Unexpected result code on LOAD");
             }
 
-            [self.asyncHelper endTest];
+            [exp fulfill];
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
     // -1 stand for locked file opened as stream
@@ -694,9 +686,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     const NSUInteger count = self.imageNames.count;
 
     for (unsigned i = 0; i < count; ++i) {
-        [self.asyncHelper startTest];
+        
+        NSString *cacheKey = self.imageNames[i];
+        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
-        [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
+        [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
@@ -730,11 +724,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssert(NO, @"Unexpected result code on LOAD");
             }
 
-            [self.asyncHelper endTest];
+            [exp fulfill];
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
     // -1 stands for opened stream
@@ -825,9 +819,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     BOOL __block unlocked = YES;
 
     for (unsigned i = 0; i < count; ++i) {
-        [self.asyncHelper startTest];
+        NSString *cacheKey = self.imageNames[i];
+        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
-        [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
+        [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
@@ -855,11 +850,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssert(NO, @"Unexpected result code on LOAD");
             }
 
-            [self.asyncHelper endTest];
+            [exp fulfill];
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     const int normalFilesCount = params_GetDefaultExpireFilesNumber();
     const int corrupted = params_GetCorruptedFilesNumber();
@@ -888,9 +883,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     BOOL __block unlocked = YES;
 
     for (unsigned i = 0; i < count; ++i) {
-        [self.asyncHelper startTest];
+        NSString *cacheKey = self.imageNames[i];
+        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
-        [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
+        [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
@@ -918,11 +914,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssert(NO, @"Unexpected result code on LOAD");
             }
 
-            [self.asyncHelper endTest];
+            [exp fulfill];
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     const int normalFilesCount = params_GetFilesNumber(NO);
 
@@ -950,14 +946,15 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     const NSUInteger count = self.imageNames.count;
 
     for (unsigned i = 0; i < count; ++i) {
-        [self.asyncHelper startTest];
+        NSString *cacheKey = self.imageNames[i];
+        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
-        [cache touchDataForKey:self.imageNames[i] callback:^(SPTPersistentCacheResponse *response) {
-            [self.asyncHelper endTest];
+        [cache touchDataForKey:cacheKey callback:^(SPTPersistentCacheResponse *response) {
+            [exp fulfill];
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     // Now check that updateTime is not altered for files with TTL
     for (unsigned i = 0; i < count; ++i) {
@@ -983,9 +980,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     BOOL __block unlocked = YES;
 
     for (unsigned i = 0; i < count; ++i) {
-        [self.asyncHelper startTest];
+        NSString *cacheKey = self.imageNames[i];
+        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
-        [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
+        [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
@@ -1013,11 +1011,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssert(NO, @"Unexpected result code on LOAD");
             }
 
-            [self.asyncHelper endTest];
+            [exp fulfill];
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     const int corrupted = params_GetCorruptedFilesNumber();
 
@@ -1039,16 +1037,16 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
     // Try to get stream for expired object
-    [self.asyncHelper startTest];
+    XCTestExpectation *streamExp = [self expectationWithDescription:@"stream"];
     [cache openDataStreamForKey:self.imageNames[2] createIfNotExist:NO ttl:0 locked:NO
                    withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
                        XCTAssertEqual(result, PDC_DATA_NOT_FOUND);
                        XCTAssertNil(s);
                        XCTAssertNil(error);
-                       [self.asyncHelper endTest];
+                       [streamExp fulfill];
                    } onQueue:dispatch_get_main_queue()];
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     // Try to touch the data that is expired
     const NSUInteger count = self.imageNames.count;
@@ -1059,9 +1057,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     int __block successCalls = 0;
 
     for (unsigned i = 0; i < count; ++i) {
-        [self.asyncHelper startTest];
+        NSString *cacheKey = self.imageNames[i];
+        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
-        [cache touchDataForKey:self.imageNames[i] callback:^(SPTPersistentCacheResponse *response) {
+        [cache touchDataForKey:cacheKey callback:^(SPTPersistentCacheResponse *response) {
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
                 successCalls += 1;
 
@@ -1072,11 +1071,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 errorCalls += 1;
             }
 
-            [self.asyncHelper endTest];
+            [exp fulfill];
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     const int lockedFilesCount = params_GetFilesNumber(YES);
     const int corrupted = params_GetCorruptedFilesNumber();
@@ -1113,9 +1112,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     errorCalls = 0;
 
     for (unsigned i = 0; i < count; ++i) {
-        [self.asyncHelper startTest];
+        NSString *cacheKey = self.imageNames[i];
+        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
-        [cache loadDataForKey:self.imageNames[i] withCallback:^(SPTPersistentCacheResponse *response) {
+        [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
@@ -1143,11 +1143,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssert(NO, @"Unexpected result code on LOAD");
             }
 
-            [self.asyncHelper endTest];
+            [exp fulfill];
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     XCTAssert(calls == count, @"Number of checked files must match");
 
@@ -1343,9 +1343,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertNotNil(image, @"Image is invalid");
 
     // Put file for existing name and expect new ttl and lock status
-    [self.asyncHelper startTest];
-    [self putFile:fileName inCache:cache withKey:key ttl:kTTL1 locked:YES];
-    [self.asyncHelper waitForTestGroupSync];
+    XCTestExpectation *exp1 = [self expectationWithDescription:@"exp1"];
+    [self putFile:fileName inCache:cache withKey:key ttl:kTTL1 locked:YES expectation:exp1];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     // Check data
     SPTPersistentRecordHeaderType header;
@@ -1354,9 +1354,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(header.refCount, 1, @"refCount must match");
 
     // Now same call with new ttl and same lock status. Expect no change in refCount according to API Req.#1.0
-    [self.asyncHelper startTest];
-    [self putFile:fileName inCache:cache withKey:key ttl:kTTL2 locked:YES];
-    [self.asyncHelper waitForTestGroupSync];
+    XCTestExpectation *exp2 = [self expectationWithDescription:@"exp2"];
+    [self putFile:fileName inCache:cache withKey:key ttl:kTTL2 locked:YES expectation:exp2];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     // Check data
     XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, YES, &header), @"Expect valid record");
@@ -1364,9 +1364,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(header.refCount, 1, @"refCount must match");
 
     // Now same call with new ttl and new lock status. Expect no change in refCount according to API Req.#1.0
-    [self.asyncHelper startTest];
-    [self putFile:fileName inCache:cache withKey:key ttl:kTTL1 locked:NO];
-    [self.asyncHelper waitForTestGroupSync];
+    XCTestExpectation *exp3 = [self expectationWithDescription:@"exp3"];
+    [self putFile:fileName inCache:cache withKey:key ttl:kTTL1 locked:NO expectation:exp3];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     // Check data
     XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, YES, &header), @"Expect valid record");
@@ -1390,9 +1390,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     int __block successCalls = 0;
 
     for (unsigned i = 0; i < count; ++i) {
-        [self.asyncHelper startTest];
+        NSString *cacheKey = self.imageNames[i];
+        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
-        [cache openDataStreamForKey:self.imageNames[i] createIfNotExist:NO ttl:0 locked:NO
+        [cache openDataStreamForKey:cacheKey createIfNotExist:NO ttl:0 locked:NO
                        withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
 
                            calls += 1;
@@ -1417,12 +1418,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                                XCTAssert(NO, @"Unexpected result code on LOAD");
                            }
 
-                           [self.asyncHelper endTest];
+                           [exp fulfill];
 
                        } onQueue:dispatch_get_main_queue()];
     }
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     const int corrupted = params_GetCorruptedFilesNumber();
     XCTAssertEqual(calls, count, @"Number of files and callbacks must match");
@@ -1439,7 +1440,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
-    [self.asyncHelper startTest];
+    XCTestExpectation *exp1 = [self expectationWithDescription:@"stream1"];
     id<SPTPersistentDataStream> __block s1 = nil;
     [cache openDataStreamForKey:self.imageNames[2] createIfNotExist:NO ttl:0 locked:NO
                    withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
@@ -1447,24 +1448,24 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                        XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
                        XCTAssertNil(error, @"error is not expected to be here");
                        s1 = stream;
-                       [self.asyncHelper endTest];
+                       [exp1 fulfill];
                    }
                         onQueue:dispatch_get_main_queue()];
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
-    [self.asyncHelper startTest];
+    XCTestExpectation *exp2 = [self expectationWithDescription:@"stream2"];
     [cache openDataStreamForKey:self.imageNames[2] createIfNotExist:NO ttl:0 locked:NO
                    withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
                        XCTAssertEqual(result, PDC_DATA_OPERATION_ERROR);
                        XCTAssertNil(stream, @"Must be valid non nil stream on success");
                        XCTAssertNotNil(error, @"error is not expected to be here");
                        XCTAssertEqual(error.code, PDC_ERROR_RECORD_IS_STREAM_AND_BUSY, @"Error code must match");
-                       [self.asyncHelper endTest];
+                       [exp2 fulfill];
                    }
                         onQueue:dispatch_get_main_queue()];
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 }
 
 - (void)testStreamOpenFailNoCreate
@@ -1482,9 +1483,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     int __block successCalls = 0;
 
     for (unsigned i = 0; i < count; ++i) {
-        [self.asyncHelper startTest];
+        NSString *cacheKey = self.imageNames[i];
+        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
-        [cache openDataStreamForKey:self.imageNames[i] createIfNotExist:NO ttl:0 locked:NO
+        [cache openDataStreamForKey:cacheKey createIfNotExist:NO ttl:0 locked:NO
                        withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
 
                            calls += 1;
@@ -1509,12 +1511,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                                XCTAssert(NO, @"Unexpected result code on LOAD");
                            }
 
-                           [self.asyncHelper endTest];
+                           [exp fulfill];
 
                        } onQueue:dispatch_get_main_queue()];
     }
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     const int corrupted = params_GetCorruptedFilesNumber();
     XCTAssertEqual(calls, count, @"Number of files and callbacks must match");
@@ -1544,7 +1546,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     int expectedSuccessCalls = 0;
     int expectedErrorCalls = 0;
     for (unsigned i = 0; i < count; ++i) {
-        [self.asyncHelper startTest];
+        NSString *cacheKey = self.imageNames[i];
+        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
         const uint64_t ttl = (kParams[i].ttl > 0 ? refTTL : 0);
         const BOOL locked = !kParams[i].locked;
@@ -1554,7 +1557,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             expectedErrorCalls++;
         }
 
-        [cache openDataStreamForKey:self.imageNames[i] createIfNotExist:YES ttl:ttl locked:locked
+        [cache openDataStreamForKey:cacheKey createIfNotExist:YES ttl:ttl locked:locked
                        withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
 
                            calls += 1;
@@ -1579,12 +1582,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                                XCTAssert(NO, @"Unexpected result code on LOAD");
                            }
 
-                           [self.asyncHelper endTest];
+                           [exp fulfill];
 
                        } onQueue:dispatch_get_main_queue()];
     }
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     XCTAssertEqual(calls, count, @"Number of files and callbacks must match");
     XCTAssertEqual(successCalls , expectedSuccessCalls, @"Success calls must match");
@@ -1630,12 +1633,13 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     int __block successCalls = 0;
 
     for (unsigned i = 0; i < count; ++i) {
-        [self.asyncHelper startTest];
+        NSString *cacheKey = self.imageNames[i];
+        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
         const uint64_t ttl = (kParams[i].ttl > 0 ? refTTL : 0);
         const BOOL locked = !kParams[i].locked;
 
-        [cache openDataStreamForKey:self.imageNames[i] createIfNotExist:YES ttl:ttl locked:locked
+        [cache openDataStreamForKey:cacheKey createIfNotExist:YES ttl:ttl locked:locked
                        withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
 
                            calls += 1;
@@ -1660,12 +1664,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                                XCTAssert(NO, @"Unexpected result code on LOAD");
                            }
 
-                           [self.asyncHelper endTest];
+                           [exp fulfill];
 
                        } onQueue:dispatch_get_main_queue()];
     }
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     XCTAssertEqual(calls, count, @"Number of files and callbacks must match");
     XCTAssertEqual(successCalls , 0, @"Success calls must match");
@@ -1701,7 +1705,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     NSString *key = self.imageNames[idx];
     id<SPTPersistentDataStream> __block stream = nil;
 
-    [self.asyncHelper startTest];
+    XCTestExpectation *streamExp = [self expectationWithDescription:@"stream"];
     [cache openDataStreamForKey:key createIfNotExist:NO ttl:0 locked:NO
                    withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
 
@@ -1710,11 +1714,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                        XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
                        XCTAssertNil(error, @"error is not expected to be here");
 
-                       [self.asyncHelper endTest];
+                       [streamExp fulfill];
 
                    } onQueue:dispatch_get_main_queue()];
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     NSUInteger expectedLen = maxDataSize /3;
 
@@ -1725,9 +1729,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     XCTAssertEqual(r1.length+r2.length+r3.length, maxDataSize);
 
-    [self.asyncHelper startTest];
-    [self.asyncHelper startTest];
-    [self.asyncHelper startTest];
+    XCTestExpectation *exp1 = [self expectationWithDescription:@"s1"];
+    XCTestExpectation *exp2 = [self expectationWithDescription:@"s2"];
+    XCTestExpectation *exp3 = [self expectationWithDescription:@"s3"];
 
     NSData * __block data1 = nil;
     NSData * __block data2 = nil;
@@ -1738,7 +1742,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         XCTAssertNil(error);
         data1 = continousData;
 
-        [self.asyncHelper endTest];
+        [exp1 fulfill];
     } queue:dispatch_get_main_queue()];
 
     [stream readDataWithOffset:r2.location length:r2.length callback:^(NSData *continousData, NSError *error) {
@@ -1746,7 +1750,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         XCTAssertNil(error);
         data2 = continousData;
 
-        [self.asyncHelper endTest];
+        [exp2 fulfill];
     } queue:dispatch_get_main_queue()];
 
     [stream readDataWithOffset:r3.location length:r3.length callback:^(NSData *continousData, NSError *error) {
@@ -1754,10 +1758,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         XCTAssertNil(error);
         data3 = continousData;
 
-        [self.asyncHelper endTest];
+        [exp3 fulfill];
     } queue:dispatch_get_main_queue()];
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     NSMutableData *imageData = [NSMutableData dataWithData:data1];
     [imageData appendData:data2];
@@ -1793,7 +1797,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     NSString *key = self.imageNames[idx];
     id<SPTPersistentDataStream> __block stream = nil;
 
-    [self.asyncHelper startTest];
+    XCTestExpectation *streamExp = [self expectationWithDescription:@"stream"];
     [cache openDataStreamForKey:key createIfNotExist:NO ttl:0 locked:NO
                    withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
 
@@ -1802,11 +1806,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                        XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
                        XCTAssertNil(error, @"error is not expected to be here");
 
-                       [self.asyncHelper endTest];
+                       [streamExp fulfill];
 
                    } onQueue:dispatch_get_main_queue()];
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     NSUInteger expectedLen = maxDataSize /2;
 
@@ -1816,9 +1820,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     XCTAssertEqual(r1.length+r2.length, maxDataSize);
 
-    [self.asyncHelper startTest];
-    [self.asyncHelper startTest];
-    [self.asyncHelper startTest];
+    XCTestExpectation *exp1 = [self expectationWithDescription:@"s1"];
+    XCTestExpectation *exp2 = [self expectationWithDescription:@"s2"];
+    XCTestExpectation *exp3 = [self expectationWithDescription:@"s3"];
 
     NSData * __block data1 = nil;
     NSData * __block data2 = nil;
@@ -1829,7 +1833,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         XCTAssertNil(error);
         data1 = continousData;
 
-        [self.asyncHelper endTest];
+        [exp1 fulfill];
     } queue:dispatch_get_main_queue()];
 
     [stream readDataWithOffset:r2.location length:r2.length callback:^(NSData *continousData, NSError *error) {
@@ -1837,7 +1841,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         XCTAssertNil(error);
         data2 = continousData;
 
-        [self.asyncHelper endTest];
+        [exp2 fulfill];
     } queue:dispatch_get_main_queue()];
 
     // Read whole data
@@ -1846,10 +1850,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         XCTAssertNil(error);
         wholeData = continousData;
 
-        [self.asyncHelper endTest];
+        [exp3 fulfill];
     } queue:dispatch_get_main_queue()];
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     NSMutableData *imageData = [NSMutableData dataWithData:data1];
     [imageData appendData:data2];
@@ -1887,7 +1891,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     NSString *key = [self.imageNames[idx] stringByAppendingString:@"test"];
     id<SPTPersistentDataStream> __block stream = nil;
 
-    [self.asyncHelper startTest];
+    XCTestExpectation *streamExp = [self expectationWithDescription:@"stream"];
     [cache openDataStreamForKey:key createIfNotExist:YES ttl:0 locked:NO
                    withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
 
@@ -1896,11 +1900,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                        XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
                        XCTAssertNil(error, @"error is not expected to be here");
 
-                       [self.asyncHelper endTest];
+                       [streamExp fulfill];
 
                    } onQueue:dispatch_get_main_queue()];
 
-    [self.asyncHelper waitForTestGroupSync];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
     NSUInteger expectedLen = maxDataSize /5;
 
@@ -2017,7 +2021,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     // Autorelease pool is required as sync primitive to make stream dealloc invoked first before reopen it again.
     @autoreleasepool {
-        [self.asyncHelper startTest];
+        XCTestExpectation *streamExp = [self expectationWithDescription:@"stream"];
         [cache openDataStreamForKey:key createIfNotExist:YES ttl:0 locked:NO
                        withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
 
@@ -2026,11 +2030,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                            XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
                            XCTAssertNil(error, @"error is not expected to be here");
 
-                           [self.asyncHelper endTest];
+                           [streamExp fulfill];
 
                        } onQueue:dispatch_get_main_queue()];
 
-        [self.asyncHelper waitForTestGroupSync];
+        [self waitForExpectationsWithTimeout:0.5 handler:nil];
 
         XCTestExpectation *exp1 = [self expectationWithDescription:@"d1 write"];
         NSData *d1 = [data subdataWithRange:r1];
@@ -2180,6 +2184,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         withKey:(NSString *)key
             ttl:(NSUInteger)ttl
          locked:(BOOL)locked
+    expectation:(XCTestExpectation *)expectation
 {
     NSData *data = [NSData dataWithContentsOfFile:file];
     XCTAssertNotNil(data, @"Unable to get data from file:%@", file);
@@ -2195,8 +2200,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         } else {
             XCTAssert(NO, @"This is not expected result code for STORE operation");
         }
-
-        [self.asyncHelper endTest];
+        [expectation fulfill];
     } onQueue:dispatch_get_main_queue()];
 }
 
@@ -2377,17 +2381,17 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
 
 - (id<SPTPersistentDataStream>)openStreamWithIndex:(NSInteger)index onCache:(SPTPersistentDataCache *)cache
 {
-    [self.asyncHelper startTest];
+    XCTestExpectation *exp = [self expectationWithDescription:@""];
     id<SPTPersistentDataStream> __block stream = nil;
     [cache openDataStreamForKey:self.imageNames[index] createIfNotExist:NO ttl:0 locked:NO
                    withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
                        stream = s;
                        XCTAssertNotNil(s);
                        XCTAssertNil(error);
-                       [self.asyncHelper endTest];
+                       [exp fulfill];
                    } onQueue:dispatch_get_main_queue()];
-
-    [self.asyncHelper waitForTestGroupSync];
+    
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
     return stream;
 }
 
