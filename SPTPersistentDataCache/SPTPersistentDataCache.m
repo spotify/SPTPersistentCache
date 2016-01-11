@@ -8,8 +8,6 @@
 //#define DEBUG_OUTPUT_ENABLED
 
 NSString *const SPTPersistentDataCacheErrorDomain = @"persistent.cache.error";
-const NSUInteger SPTPersistentDataCacheDefaultGCIntervalSec = 6 * 60 + 3;
-const NSUInteger SPTPersistentDataCacheDefaultExpirationTimeSec = 10 * 60;
 static const uint64_t kTTLUpperBoundInSec = 86400 * 31 * 2;
 static const NSUInteger SPTPersistentDataCacheGCIntervalLimitSec = 60;
 static const NSUInteger SPTPersistentDataCacheDefaultExpirationLimitSec = 60;
@@ -74,22 +72,6 @@ static NSString * const SPTDataCacheFileAttributesKey = @"SPTDataCacheFileAttrib
     return self;
 }
 
-@end
-
-#pragma mark - SPTPersistentDataCacheOptions
-@implementation SPTPersistentDataCacheOptions
-- (instancetype)init
-{
-    if (!(self = [super init])) {
-        return nil;
-    }
-
-    _defaultExpirationPeriodSec = SPTPersistentDataCacheDefaultExpirationTimeSec;
-    _gcIntervalSec = SPTPersistentDataCacheDefaultGCIntervalSec;
-    _folderSeparationEnabled = YES;
-    
-    return self;
-}
 @end
 
 typedef SPTPersistentCacheResponse* (^FileProcessingBlockType)(int filedes);

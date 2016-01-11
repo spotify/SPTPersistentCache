@@ -1,12 +1,11 @@
-
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
+
+#import "SPTPersistentDataCacheConvenience.h"
+
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
-#import "SPTPersistentDataHeader.h"
-#import "SPTPersistentDataCache.h"
 
 static const char* kImages[] = {
     "b91998ae68b9639cee6243df0886d69bdeb75854",
@@ -151,7 +150,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         XCTAssertNotNil(image, @"Image is invalid");
     }
     
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     for (unsigned i = 0; !kParams[i].last; ++i) {
         if (kParams[i].corruptReason > -1) {
@@ -232,7 +231,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         XCTAssert(kParams[i].last != YES, @"Last param element reached");
     }
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     // Check that updat time was modified when access cache (both case ttl==0, ttl>0)
     for (unsigned i = 0; i < count; ++i) {
@@ -309,7 +308,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [expectation fulfill];
     } onQueue:dispatch_get_main_queue()];
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 }
 
 /**
@@ -352,7 +351,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [expectation fulfill];
     } onQueue:dispatch_get_main_queue()];
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 }
 
 /*
@@ -402,7 +401,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         }
     } onQueue:dispatch_get_main_queue()];
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     // Now check that updateTime is not altered by lock unlock calls for all not corrupted files
     for (unsigned i = 0; i < count; ++i) {
@@ -450,7 +449,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     XCTAssertEqual(calls, self.imageNames.count, @"Number of checked files must match");
     // -1 stands for stream
@@ -503,7 +502,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
 
@@ -560,7 +559,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
 
@@ -642,7 +641,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
     // -1 stand for locked file opened as stream
@@ -728,7 +727,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
     // -1 stands for opened stream
@@ -854,7 +853,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     const int normalFilesCount = params_GetDefaultExpireFilesNumber();
     const int corrupted = params_GetCorruptedFilesNumber();
@@ -918,7 +917,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     const int normalFilesCount = params_GetFilesNumber(NO);
 
@@ -954,7 +953,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     // Now check that updateTime is not altered for files with TTL
     for (unsigned i = 0; i < count; ++i) {
@@ -1015,7 +1014,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     const int corrupted = params_GetCorruptedFilesNumber();
 
@@ -1046,7 +1045,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                        [streamExp fulfill];
                    } onQueue:dispatch_get_main_queue()];
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     // Try to touch the data that is expired
     const NSUInteger count = self.imageNames.count;
@@ -1075,7 +1074,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     const int lockedFilesCount = params_GetFilesNumber(YES);
     const int corrupted = params_GetCorruptedFilesNumber();
@@ -1147,7 +1146,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         } onQueue:dispatch_get_main_queue()];
     }
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     XCTAssert(calls == count, @"Number of checked files must match");
 
@@ -1345,7 +1344,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     // Put file for existing name and expect new ttl and lock status
     XCTestExpectation *exp1 = [self expectationWithDescription:@"exp1"];
     [self putFile:fileName inCache:cache withKey:key ttl:kTTL1 locked:YES expectation:exp1];
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     // Check data
     SPTPersistentRecordHeaderType header;
@@ -1356,7 +1355,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     // Now same call with new ttl and same lock status. Expect no change in refCount according to API Req.#1.0
     XCTestExpectation *exp2 = [self expectationWithDescription:@"exp2"];
     [self putFile:fileName inCache:cache withKey:key ttl:kTTL2 locked:YES expectation:exp2];
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     // Check data
     XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, YES, &header), @"Expect valid record");
@@ -1366,7 +1365,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     // Now same call with new ttl and new lock status. Expect no change in refCount according to API Req.#1.0
     XCTestExpectation *exp3 = [self expectationWithDescription:@"exp3"];
     [self putFile:fileName inCache:cache withKey:key ttl:kTTL1 locked:NO expectation:exp3];
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     // Check data
     XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, YES, &header), @"Expect valid record");
@@ -1423,7 +1422,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                        } onQueue:dispatch_get_main_queue()];
     }
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     const int corrupted = params_GetCorruptedFilesNumber();
     XCTAssertEqual(calls, count, @"Number of files and callbacks must match");
@@ -1452,7 +1451,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                    }
                         onQueue:dispatch_get_main_queue()];
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     XCTestExpectation *exp2 = [self expectationWithDescription:@"stream2"];
     [cache openDataStreamForKey:self.imageNames[2] createIfNotExist:NO ttl:0 locked:NO
@@ -1465,7 +1464,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                    }
                         onQueue:dispatch_get_main_queue()];
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 }
 
 - (void)testStreamOpenFailNoCreate
@@ -1516,7 +1515,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                        } onQueue:dispatch_get_main_queue()];
     }
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     const int corrupted = params_GetCorruptedFilesNumber();
     XCTAssertEqual(calls, count, @"Number of files and callbacks must match");
@@ -1587,7 +1586,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                        } onQueue:dispatch_get_main_queue()];
     }
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     XCTAssertEqual(calls, count, @"Number of files and callbacks must match");
     XCTAssertEqual(successCalls , expectedSuccessCalls, @"Success calls must match");
@@ -1669,7 +1668,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                        } onQueue:dispatch_get_main_queue()];
     }
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     XCTAssertEqual(calls, count, @"Number of files and callbacks must match");
     XCTAssertEqual(successCalls , 0, @"Success calls must match");
@@ -1718,7 +1717,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
                    } onQueue:dispatch_get_main_queue()];
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     NSUInteger expectedLen = maxDataSize /3;
 
@@ -1761,7 +1760,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [exp3 fulfill];
     } queue:dispatch_get_main_queue()];
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     NSMutableData *imageData = [NSMutableData dataWithData:data1];
     [imageData appendData:data2];
@@ -1810,7 +1809,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
                    } onQueue:dispatch_get_main_queue()];
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     NSUInteger expectedLen = maxDataSize /2;
 
@@ -1853,7 +1852,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [exp3 fulfill];
     } queue:dispatch_get_main_queue()];
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     NSMutableData *imageData = [NSMutableData dataWithData:data1];
     [imageData appendData:data2];
@@ -1904,7 +1903,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
                    } onQueue:dispatch_get_main_queue()];
 
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     NSUInteger expectedLen = maxDataSize /5;
 
@@ -2034,7 +2033,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
                        } onQueue:dispatch_get_main_queue()];
 
-        [self waitForExpectationsWithTimeout:0.5 handler:nil];
+        [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
         XCTestExpectation *exp1 = [self expectationWithDescription:@"d1 write"];
         NSData *d1 = [data subdataWithRange:r1];
@@ -2168,7 +2167,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [expFinalize1 fulfill];
     }];
 
-    [self waitForExpectationsWithTimeout:4.0 handler:^(NSError *error) {
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:^(NSError *error) {
         NSLog(@"Error: %@", error);
     }];
 
@@ -2222,7 +2221,7 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
 
     int fd = open([filePath UTF8String], flags);
     if (fd == -1) {
-        XCTAssert(fd != -1, @"Could open file for currupting");
+        XCTAssert(fd != -1, @"Could not open file while trying to simulate corruption");
         return;
     }
 
@@ -2391,7 +2390,7 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
                        [exp fulfill];
                    } onQueue:dispatch_get_main_queue()];
     
-    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
     return stream;
 }
 

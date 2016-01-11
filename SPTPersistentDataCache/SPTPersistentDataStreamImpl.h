@@ -1,7 +1,9 @@
 #import <Foundation/Foundation.h>
+
 #import "SPTPersistentDataStream.h"
 #import "SPTPersistentDataHeader.h"
 #import "SPTPersistentCacheTypes.h"
+#import "SPTPersistentDataCacheOptions.h"
 
 typedef dispatch_block_t CleanupHeandlerCallback;
 

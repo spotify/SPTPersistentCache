@@ -1,0 +1,508 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0510FF1F1BA2FF7A00ED0766 /* libSPTPersistentDataCache.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0510FF131BA2FF7A00ED0766 /* libSPTPersistentDataCache.a */; };
+		0510FF371BA300DC00ED0766 /* crc32iso3309.c in Sources */ = {isa = PBXBuildFile; fileRef = 0510FF331BA300DC00ED0766 /* crc32iso3309.c */; };
+		0510FF381BA300DC00ED0766 /* SPTPersistentDataStreamImpl.m in Sources */ = {isa = PBXBuildFile; fileRef = 0510FF361BA300DC00ED0766 /* SPTPersistentDataStreamImpl.m */; };
+		0510FF3A1BA3010500ED0766 /* SPTPersistentDataCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 0510FF391BA3010500ED0766 /* SPTPersistentDataCache.m */; };
+		0510FF591BA3073600ED0766 /* aad0e75ab0a6828d0a9b37a68198cc9d70d84850 in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF481BA3073600ED0766 /* aad0e75ab0a6828d0a9b37a68198cc9d70d84850 */; };
+		0510FF5A1BA3073600ED0766 /* ab3d97d4d7b3df5417490aa726c5a49b9ee98038 in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF491BA3073600ED0766 /* ab3d97d4d7b3df5417490aa726c5a49b9ee98038 */; };
+		0510FF5B1BA3073600ED0766 /* b02c1be08c00bac5f4f1a62c6f353a24487bb024 in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF4A1BA3073600ED0766 /* b02c1be08c00bac5f4f1a62c6f353a24487bb024 */; };
+		0510FF5C1BA3073600ED0766 /* b3e04bf446b486412a13659af71e3a333c6152f4 in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF4B1BA3073600ED0766 /* b3e04bf446b486412a13659af71e3a333c6152f4 */; };
+		0510FF5D1BA3073600ED0766 /* b53aed36cdc67dd43b496db74843ac32fe1f64bb in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF4C1BA3073600ED0766 /* b53aed36cdc67dd43b496db74843ac32fe1f64bb */; };
+		0510FF5E1BA3073600ED0766 /* b91998ae68b9639cee6243df0886d69bdeb75854 in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF4D1BA3073600ED0766 /* b91998ae68b9639cee6243df0886d69bdeb75854 */; };
+		0510FF5F1BA3073600ED0766 /* c3b19963fc076930dd36ce3968757704bbc97357 in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF4E1BA3073600ED0766 /* c3b19963fc076930dd36ce3968757704bbc97357 */; };
+		0510FF601BA3073600ED0766 /* c5aec3eef2478bfe47aef16787a6b4df31eb45f2 in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF4F1BA3073600ED0766 /* c5aec3eef2478bfe47aef16787a6b4df31eb45f2 */; };
+		0510FF611BA3073600ED0766 /* e5a1921f8f75d42412e08aff4da33e1132f7ee8a in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF501BA3073600ED0766 /* e5a1921f8f75d42412e08aff4da33e1132f7ee8a */; };
+		0510FF621BA3073600ED0766 /* e5b8abdc091921d49e86687e28b74abb3139df70 in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF511BA3073600ED0766 /* e5b8abdc091921d49e86687e28b74abb3139df70 */; };
+		0510FF631BA3073600ED0766 /* ee6b44ab07fa3937a6d37f449355b64c09677295 in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF521BA3073600ED0766 /* ee6b44ab07fa3937a6d37f449355b64c09677295 */; };
+		0510FF641BA3073600ED0766 /* ee678d23b8dba2997c52741e88fa7a1fdeaf2863 in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF531BA3073600ED0766 /* ee678d23b8dba2997c52741e88fa7a1fdeaf2863 */; };
+		0510FF651BA3073600ED0766 /* eee9747e967c4440eb90bb812d148aa3d0056700 in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF541BA3073600ED0766 /* eee9747e967c4440eb90bb812d148aa3d0056700 */; };
+		0510FF661BA3073600ED0766 /* f1eeb834607dcc2b01909bd740d4356f2abb4cd1 in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF551BA3073600ED0766 /* f1eeb834607dcc2b01909bd740d4356f2abb4cd1 */; };
+		0510FF671BA3073600ED0766 /* f7501f27f70162a9a7da196c5d2ece3151a2d80a in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF561BA3073600ED0766 /* f7501f27f70162a9a7da196c5d2ece3151a2d80a */; };
+		0510FF681BA3073600ED0766 /* f50512901688b79a7852999d384d097a71fad788 in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF571BA3073600ED0766 /* f50512901688b79a7852999d384d097a71fad788 */; };
+		0510FF691BA3073600ED0766 /* fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF581BA3073600ED0766 /* fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c */; };
+		0510FF6B1BA3073D00ED0766 /* SPTPersistentDataCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0510FF6A1BA3073D00ED0766 /* SPTPersistentDataCacheTests.m */; };
+		058E7EDC1BC6DCDD00C2BB19 /* SPTPersistentDataCacheOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = 058E7EDB1BC6DCDD00C2BB19 /* SPTPersistentDataCacheOptions.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0510FF201BA2FF7A00ED0766 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0510FF0B1BA2FF7A00ED0766 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0510FF121BA2FF7A00ED0766;
+			remoteInfo = SPTPersistentDataCache;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		0510FF111BA2FF7A00ED0766 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		051000001BA30F2300ED0766 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; name = module.modulemap; path = include/SPTPersistentDataCache/module.modulemap; sourceTree = SOURCE_ROOT; };
+		0510FF131BA2FF7A00ED0766 /* libSPTPersistentDataCache.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSPTPersistentDataCache.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		0510FF1E1BA2FF7A00ED0766 /* SPTPersistentDataCacheTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SPTPersistentDataCacheTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0510FF241BA2FF7A00ED0766 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0510FF2E1BA300C500ED0766 /* SPTPersistentCacheTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SPTPersistentCacheTypes.h; path = include/SPTPersistentDataCache/SPTPersistentCacheTypes.h; sourceTree = SOURCE_ROOT; };
+		0510FF2F1BA300C500ED0766 /* SPTPersistentDataCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SPTPersistentDataCache.h; path = include/SPTPersistentDataCache/SPTPersistentDataCache.h; sourceTree = SOURCE_ROOT; };
+		0510FF301BA300C500ED0766 /* SPTPersistentDataHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SPTPersistentDataHeader.h; path = include/SPTPersistentDataCache/SPTPersistentDataHeader.h; sourceTree = SOURCE_ROOT; };
+		0510FF311BA300C500ED0766 /* SPTPersistentDataStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SPTPersistentDataStream.h; path = include/SPTPersistentDataCache/SPTPersistentDataStream.h; sourceTree = SOURCE_ROOT; };
+		0510FF331BA300DC00ED0766 /* crc32iso3309.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = crc32iso3309.c; sourceTree = "<group>"; };
+		0510FF341BA300DC00ED0766 /* crc32iso3309.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crc32iso3309.h; sourceTree = "<group>"; };
+		0510FF351BA300DC00ED0766 /* SPTPersistentDataStreamImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataStreamImpl.h; sourceTree = "<group>"; };
+		0510FF361BA300DC00ED0766 /* SPTPersistentDataStreamImpl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataStreamImpl.m; sourceTree = "<group>"; };
+		0510FF391BA3010500ED0766 /* SPTPersistentDataCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCache.m; sourceTree = "<group>"; };
+		0510FF481BA3073600ED0766 /* aad0e75ab0a6828d0a9b37a68198cc9d70d84850 */ = {isa = PBXFileReference; lastKnownFileType = file; path = aad0e75ab0a6828d0a9b37a68198cc9d70d84850; sourceTree = "<group>"; };
+		0510FF491BA3073600ED0766 /* ab3d97d4d7b3df5417490aa726c5a49b9ee98038 */ = {isa = PBXFileReference; lastKnownFileType = file; path = ab3d97d4d7b3df5417490aa726c5a49b9ee98038; sourceTree = "<group>"; };
+		0510FF4A1BA3073600ED0766 /* b02c1be08c00bac5f4f1a62c6f353a24487bb024 */ = {isa = PBXFileReference; lastKnownFileType = file; path = b02c1be08c00bac5f4f1a62c6f353a24487bb024; sourceTree = "<group>"; };
+		0510FF4B1BA3073600ED0766 /* b3e04bf446b486412a13659af71e3a333c6152f4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = b3e04bf446b486412a13659af71e3a333c6152f4; sourceTree = "<group>"; };
+		0510FF4C1BA3073600ED0766 /* b53aed36cdc67dd43b496db74843ac32fe1f64bb */ = {isa = PBXFileReference; lastKnownFileType = file; path = b53aed36cdc67dd43b496db74843ac32fe1f64bb; sourceTree = "<group>"; };
+		0510FF4D1BA3073600ED0766 /* b91998ae68b9639cee6243df0886d69bdeb75854 */ = {isa = PBXFileReference; lastKnownFileType = file; path = b91998ae68b9639cee6243df0886d69bdeb75854; sourceTree = "<group>"; };
+		0510FF4E1BA3073600ED0766 /* c3b19963fc076930dd36ce3968757704bbc97357 */ = {isa = PBXFileReference; lastKnownFileType = file; path = c3b19963fc076930dd36ce3968757704bbc97357; sourceTree = "<group>"; };
+		0510FF4F1BA3073600ED0766 /* c5aec3eef2478bfe47aef16787a6b4df31eb45f2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = c5aec3eef2478bfe47aef16787a6b4df31eb45f2; sourceTree = "<group>"; };
+		0510FF501BA3073600ED0766 /* e5a1921f8f75d42412e08aff4da33e1132f7ee8a */ = {isa = PBXFileReference; lastKnownFileType = file; path = e5a1921f8f75d42412e08aff4da33e1132f7ee8a; sourceTree = "<group>"; };
+		0510FF511BA3073600ED0766 /* e5b8abdc091921d49e86687e28b74abb3139df70 */ = {isa = PBXFileReference; lastKnownFileType = file; path = e5b8abdc091921d49e86687e28b74abb3139df70; sourceTree = "<group>"; };
+		0510FF521BA3073600ED0766 /* ee6b44ab07fa3937a6d37f449355b64c09677295 */ = {isa = PBXFileReference; lastKnownFileType = file; path = ee6b44ab07fa3937a6d37f449355b64c09677295; sourceTree = "<group>"; };
+		0510FF531BA3073600ED0766 /* ee678d23b8dba2997c52741e88fa7a1fdeaf2863 */ = {isa = PBXFileReference; lastKnownFileType = file; path = ee678d23b8dba2997c52741e88fa7a1fdeaf2863; sourceTree = "<group>"; };
+		0510FF541BA3073600ED0766 /* eee9747e967c4440eb90bb812d148aa3d0056700 */ = {isa = PBXFileReference; lastKnownFileType = file; path = eee9747e967c4440eb90bb812d148aa3d0056700; sourceTree = "<group>"; };
+		0510FF551BA3073600ED0766 /* f1eeb834607dcc2b01909bd740d4356f2abb4cd1 */ = {isa = PBXFileReference; lastKnownFileType = file; path = f1eeb834607dcc2b01909bd740d4356f2abb4cd1; sourceTree = "<group>"; };
+		0510FF561BA3073600ED0766 /* f7501f27f70162a9a7da196c5d2ece3151a2d80a */ = {isa = PBXFileReference; lastKnownFileType = file; path = f7501f27f70162a9a7da196c5d2ece3151a2d80a; sourceTree = "<group>"; };
+		0510FF571BA3073600ED0766 /* f50512901688b79a7852999d384d097a71fad788 */ = {isa = PBXFileReference; lastKnownFileType = file; path = f50512901688b79a7852999d384d097a71fad788; sourceTree = "<group>"; };
+		0510FF581BA3073600ED0766 /* fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c */ = {isa = PBXFileReference; lastKnownFileType = file; path = fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c; sourceTree = "<group>"; };
+		0510FF6A1BA3073D00ED0766 /* SPTPersistentDataCacheTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCacheTests.m; sourceTree = "<group>"; };
+		0510FF6D1BA3078200ED0766 /* spotify_shared.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = spotify_shared.xcconfig; path = ../../other/spotify_shared.xcconfig; sourceTree = "<group>"; };
+		0510FFFF1BA30EAF00ED0766 /* SPTPersistentDataCacheConvenience.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SPTPersistentDataCacheConvenience.h; path = include/SPTPersistentDataCache/SPTPersistentDataCacheConvenience.h; sourceTree = SOURCE_ROOT; };
+		058E7EDB1BC6DCDD00C2BB19 /* SPTPersistentDataCacheOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCacheOptions.m; sourceTree = "<group>"; };
+		058E7EDD1BC6DDAA00C2BB19 /* SPTPersistentDataCacheOptions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SPTPersistentDataCacheOptions.h; path = include/SPTPersistentDataCache/SPTPersistentDataCacheOptions.h; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		0510FF101BA2FF7A00ED0766 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0510FF1B1BA2FF7A00ED0766 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0510FF1F1BA2FF7A00ED0766 /* libSPTPersistentDataCache.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0510FF0A1BA2FF7A00ED0766 = {
+			isa = PBXGroup;
+			children = (
+				0510FF151BA2FF7A00ED0766 /* SPTPersistentDataCache */,
+				0510FF221BA2FF7A00ED0766 /* SPTPersistentDataCacheTests */,
+				0510FF141BA2FF7A00ED0766 /* Products */,
+				0510FF6C1BA3076300ED0766 /* Build System */,
+			);
+			sourceTree = "<group>";
+		};
+		0510FF141BA2FF7A00ED0766 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0510FF131BA2FF7A00ED0766 /* libSPTPersistentDataCache.a */,
+				0510FF1E1BA2FF7A00ED0766 /* SPTPersistentDataCacheTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		0510FF151BA2FF7A00ED0766 /* SPTPersistentDataCache */ = {
+			isa = PBXGroup;
+			children = (
+				0510FF2D1BA300BA00ED0766 /* API */,
+				0510FF321BA300C900ED0766 /* Source */,
+			);
+			path = SPTPersistentDataCache;
+			sourceTree = "<group>";
+		};
+		0510FF221BA2FF7A00ED0766 /* SPTPersistentDataCacheTests */ = {
+			isa = PBXGroup;
+			children = (
+				0510FF481BA3073600ED0766 /* aad0e75ab0a6828d0a9b37a68198cc9d70d84850 */,
+				0510FF491BA3073600ED0766 /* ab3d97d4d7b3df5417490aa726c5a49b9ee98038 */,
+				0510FF4A1BA3073600ED0766 /* b02c1be08c00bac5f4f1a62c6f353a24487bb024 */,
+				0510FF4B1BA3073600ED0766 /* b3e04bf446b486412a13659af71e3a333c6152f4 */,
+				0510FF4C1BA3073600ED0766 /* b53aed36cdc67dd43b496db74843ac32fe1f64bb */,
+				0510FF4D1BA3073600ED0766 /* b91998ae68b9639cee6243df0886d69bdeb75854 */,
+				0510FF4E1BA3073600ED0766 /* c3b19963fc076930dd36ce3968757704bbc97357 */,
+				0510FF4F1BA3073600ED0766 /* c5aec3eef2478bfe47aef16787a6b4df31eb45f2 */,
+				0510FF501BA3073600ED0766 /* e5a1921f8f75d42412e08aff4da33e1132f7ee8a */,
+				0510FF511BA3073600ED0766 /* e5b8abdc091921d49e86687e28b74abb3139df70 */,
+				0510FF521BA3073600ED0766 /* ee6b44ab07fa3937a6d37f449355b64c09677295 */,
+				0510FF531BA3073600ED0766 /* ee678d23b8dba2997c52741e88fa7a1fdeaf2863 */,
+				0510FF541BA3073600ED0766 /* eee9747e967c4440eb90bb812d148aa3d0056700 */,
+				0510FF551BA3073600ED0766 /* f1eeb834607dcc2b01909bd740d4356f2abb4cd1 */,
+				0510FF561BA3073600ED0766 /* f7501f27f70162a9a7da196c5d2ece3151a2d80a */,
+				0510FF571BA3073600ED0766 /* f50512901688b79a7852999d384d097a71fad788 */,
+				0510FF581BA3073600ED0766 /* fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c */,
+				0510FF6A1BA3073D00ED0766 /* SPTPersistentDataCacheTests.m */,
+				0510FF231BA2FF7A00ED0766 /* Supporting Files */,
+			);
+			path = SPTPersistentDataCacheTests;
+			sourceTree = "<group>";
+		};
+		0510FF231BA2FF7A00ED0766 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				0510FF241BA2FF7A00ED0766 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		0510FF2D1BA300BA00ED0766 /* API */ = {
+			isa = PBXGroup;
+			children = (
+				0510FF2E1BA300C500ED0766 /* SPTPersistentCacheTypes.h */,
+				0510FF2F1BA300C500ED0766 /* SPTPersistentDataCache.h */,
+				0510FF301BA300C500ED0766 /* SPTPersistentDataHeader.h */,
+				0510FF311BA300C500ED0766 /* SPTPersistentDataStream.h */,
+				0510FFFF1BA30EAF00ED0766 /* SPTPersistentDataCacheConvenience.h */,
+				058E7EDD1BC6DDAA00C2BB19 /* SPTPersistentDataCacheOptions.h */,
+				051000001BA30F2300ED0766 /* module.modulemap */,
+			);
+			name = API;
+			sourceTree = "<group>";
+		};
+		0510FF321BA300C900ED0766 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				0510FF331BA300DC00ED0766 /* crc32iso3309.c */,
+				0510FF341BA300DC00ED0766 /* crc32iso3309.h */,
+				0510FF351BA300DC00ED0766 /* SPTPersistentDataStreamImpl.h */,
+				0510FF361BA300DC00ED0766 /* SPTPersistentDataStreamImpl.m */,
+				0510FF391BA3010500ED0766 /* SPTPersistentDataCache.m */,
+				058E7EDB1BC6DCDD00C2BB19 /* SPTPersistentDataCacheOptions.m */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		0510FF6C1BA3076300ED0766 /* Build System */ = {
+			isa = PBXGroup;
+			children = (
+				0510FF6D1BA3078200ED0766 /* spotify_shared.xcconfig */,
+			);
+			name = "Build System";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0510FF121BA2FF7A00ED0766 /* SPTPersistentDataCache */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0510FF271BA2FF7A00ED0766 /* Build configuration list for PBXNativeTarget "SPTPersistentDataCache" */;
+			buildPhases = (
+				0510FF0F1BA2FF7A00ED0766 /* Sources */,
+				0510FF101BA2FF7A00ED0766 /* Frameworks */,
+				0510FF111BA2FF7A00ED0766 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SPTPersistentDataCache;
+			productName = SPTPersistentDataCache;
+			productReference = 0510FF131BA2FF7A00ED0766 /* libSPTPersistentDataCache.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		0510FF1D1BA2FF7A00ED0766 /* SPTPersistentDataCacheTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0510FF2A1BA2FF7A00ED0766 /* Build configuration list for PBXNativeTarget "SPTPersistentDataCacheTests" */;
+			buildPhases = (
+				0510FF1A1BA2FF7A00ED0766 /* Sources */,
+				0510FF1B1BA2FF7A00ED0766 /* Frameworks */,
+				0510FF1C1BA2FF7A00ED0766 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0510FF211BA2FF7A00ED0766 /* PBXTargetDependency */,
+			);
+			name = SPTPersistentDataCacheTests;
+			productName = SPTPersistentDataCacheTests;
+			productReference = 0510FF1E1BA2FF7A00ED0766 /* SPTPersistentDataCacheTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0510FF0B1BA2FF7A00ED0766 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0700;
+				ORGANIZATIONNAME = spotify;
+				TargetAttributes = {
+					0510FF121BA2FF7A00ED0766 = {
+						CreatedOnToolsVersion = 6.4;
+					};
+					0510FF1D1BA2FF7A00ED0766 = {
+						CreatedOnToolsVersion = 6.4;
+					};
+				};
+			};
+			buildConfigurationList = 0510FF0E1BA2FF7A00ED0766 /* Build configuration list for PBXProject "SPTPersistentDataCache" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 0510FF0A1BA2FF7A00ED0766;
+			productRefGroup = 0510FF141BA2FF7A00ED0766 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0510FF121BA2FF7A00ED0766 /* SPTPersistentDataCache */,
+				0510FF1D1BA2FF7A00ED0766 /* SPTPersistentDataCacheTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		0510FF1C1BA2FF7A00ED0766 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0510FF651BA3073600ED0766 /* eee9747e967c4440eb90bb812d148aa3d0056700 in Resources */,
+				0510FF681BA3073600ED0766 /* f50512901688b79a7852999d384d097a71fad788 in Resources */,
+				0510FF5D1BA3073600ED0766 /* b53aed36cdc67dd43b496db74843ac32fe1f64bb in Resources */,
+				0510FF5C1BA3073600ED0766 /* b3e04bf446b486412a13659af71e3a333c6152f4 in Resources */,
+				0510FF671BA3073600ED0766 /* f7501f27f70162a9a7da196c5d2ece3151a2d80a in Resources */,
+				0510FF5A1BA3073600ED0766 /* ab3d97d4d7b3df5417490aa726c5a49b9ee98038 in Resources */,
+				0510FF591BA3073600ED0766 /* aad0e75ab0a6828d0a9b37a68198cc9d70d84850 in Resources */,
+				0510FF641BA3073600ED0766 /* ee678d23b8dba2997c52741e88fa7a1fdeaf2863 in Resources */,
+				0510FF661BA3073600ED0766 /* f1eeb834607dcc2b01909bd740d4356f2abb4cd1 in Resources */,
+				0510FF5F1BA3073600ED0766 /* c3b19963fc076930dd36ce3968757704bbc97357 in Resources */,
+				0510FF611BA3073600ED0766 /* e5a1921f8f75d42412e08aff4da33e1132f7ee8a in Resources */,
+				0510FF601BA3073600ED0766 /* c5aec3eef2478bfe47aef16787a6b4df31eb45f2 in Resources */,
+				0510FF631BA3073600ED0766 /* ee6b44ab07fa3937a6d37f449355b64c09677295 in Resources */,
+				0510FF691BA3073600ED0766 /* fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c in Resources */,
+				0510FF621BA3073600ED0766 /* e5b8abdc091921d49e86687e28b74abb3139df70 in Resources */,
+				0510FF5E1BA3073600ED0766 /* b91998ae68b9639cee6243df0886d69bdeb75854 in Resources */,
+				0510FF5B1BA3073600ED0766 /* b02c1be08c00bac5f4f1a62c6f353a24487bb024 in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0510FF0F1BA2FF7A00ED0766 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				058E7EDC1BC6DCDD00C2BB19 /* SPTPersistentDataCacheOptions.m in Sources */,
+				0510FF381BA300DC00ED0766 /* SPTPersistentDataStreamImpl.m in Sources */,
+				0510FF3A1BA3010500ED0766 /* SPTPersistentDataCache.m in Sources */,
+				0510FF371BA300DC00ED0766 /* crc32iso3309.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0510FF1A1BA2FF7A00ED0766 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0510FF6B1BA3073D00ED0766 /* SPTPersistentDataCacheTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0510FF211BA2FF7A00ED0766 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0510FF121BA2FF7A00ED0766 /* SPTPersistentDataCache */;
+			targetProxy = 0510FF201BA2FF7A00ED0766 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0510FF251BA2FF7A00ED0766 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		0510FF261BA2FF7A00ED0766 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		0510FF281BA2FF7A00ED0766 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0510FF6D1BA3078200ED0766 /* spotify_shared.xcconfig */;
+			buildSettings = {
+				DEFINES_MODULE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					/include/SPTPersistentDataCache,
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		0510FF291BA2FF7A00ED0766 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0510FF6D1BA3078200ED0766 /* spotify_shared.xcconfig */;
+			buildSettings = {
+				DEFINES_MODULE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					/include/SPTPersistentDataCache,
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		0510FF2B1BA2FF7A00ED0766 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = SPTPersistentDataCacheTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		0510FF2C1BA2FF7A00ED0766 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				INFOPLIST_FILE = SPTPersistentDataCacheTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0510FF0E1BA2FF7A00ED0766 /* Build configuration list for PBXProject "SPTPersistentDataCache" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0510FF251BA2FF7A00ED0766 /* Debug */,
+				0510FF261BA2FF7A00ED0766 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0510FF271BA2FF7A00ED0766 /* Build configuration list for PBXNativeTarget "SPTPersistentDataCache" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0510FF281BA2FF7A00ED0766 /* Debug */,
+				0510FF291BA2FF7A00ED0766 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0510FF2A1BA2FF7A00ED0766 /* Build configuration list for PBXNativeTarget "SPTPersistentDataCacheTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0510FF2B1BA2FF7A00ED0766 /* Debug */,
+				0510FF2C1BA2FF7A00ED0766 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0510FF0B1BA2FF7A00ED0766 /* Project object */;
+}

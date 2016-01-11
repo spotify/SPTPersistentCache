@@ -1,6 +1,7 @@
 #import "SPTPersistentDataStreamImpl.h"
 #import "SPTPersistentCacheTypes.h"
 #import "SPTPersistentDataHeader.h"
+#import "SPTPersistentDataCacheOptions.h"
 
 typedef NSError* (^FileProcessingBlockType)(int filedes);
 
