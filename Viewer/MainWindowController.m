@@ -7,8 +7,8 @@
 //
 
 #import "MainWindowController.h"
-#import "SPTPersistentDataCache.h"
-#import "SPTPersistentDataHeader.h"
+#import <SPTPersistentDataCache/SPTPersistentDataCache.h>
+#import <SPTPersistentDataCache/SPTPersistentDataHeader.h>
 
 @interface MainWindowController () <NSTableViewDataSource, NSTableViewDelegate>
 @property (nonatomic, strong) NSMutableArray *cacheFiles;
