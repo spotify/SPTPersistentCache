@@ -1,5 +1,12 @@
-#import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
+
+#if TARGET_OS_IPHONE
+#import <UIKit/UIImage.h>
+#define ImageClass UIImage
+#elif TARGET_OS_MAC
+#import <AppKit/NSImage.h>
+#define ImageClass NSImage
+#endif
 
 #import "SPTPersistentDataCacheConvenience.h"
 
@@ -146,7 +153,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         XCTestExpectation *expectation = [self expectationWithDescription:fileName];
         [self putFile:fileName inCache:self.cache withKey:self.imageNames[i] ttl:kParams[i].ttl locked:kParams[i].locked expectation:expectation];
         NSData *data = [NSData dataWithContentsOfFile:fileName];
-        UIImage *image = [UIImage imageWithData:data];
+        ImageClass *image = [[ImageClass alloc] initWithData:data];
         XCTAssertNotNil(image, @"Image is invalid");
     }
     
@@ -204,7 +211,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
-                UIImage *image = [UIImage imageWithData:response.record.data];
+                ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
                 XCTAssertNil(response.error, @"error is not expected to be here");
 
@@ -286,7 +293,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
         if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
             XCTAssertNotNil(response.record, @"Expected valid not nil record");
-            UIImage *image = [UIImage imageWithData:response.record.data];
+            ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
             XCTAssertNotNil(image, @"Expected valid not nil image");
             XCTAssertNil(response.error, @"error is not expected to be here");
 
@@ -424,7 +431,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
-                UIImage *image = [UIImage imageWithData:response.record.data];
+                ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
                 XCTAssertNil(response.error, @"error is not expected to be here");
 
@@ -609,7 +616,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
-                UIImage *image = [UIImage imageWithData:response.record.data];
+                ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
                 XCTAssertNil(response.error, @"error is not expected to be here");
 
@@ -694,7 +701,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
-                UIImage *image = [UIImage imageWithData:response.record.data];
+                ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
                 XCTAssertNil(response.error, @"error is not expected to be here");
 
@@ -827,7 +834,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
                 ++successCalls;
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
-                UIImage *image = [UIImage imageWithData:response.record.data];
+                ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
                 XCTAssertNil(response.error, @"error is not expected to be here");
 
@@ -891,7 +898,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
                 ++successCalls;
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
-                UIImage *image = [UIImage imageWithData:response.record.data];
+                ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
                 XCTAssertNil(response.error, @"error is not expected to be here");
 
@@ -988,7 +995,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
                 ++successCalls;
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
-                UIImage *image = [UIImage imageWithData:response.record.data];
+                ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
                 XCTAssertNil(response.error, @"error is not expected to be here");
 
@@ -1120,7 +1127,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
                 ++successCalls;
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
-                UIImage *image = [UIImage imageWithData:response.record.data];
+                ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
                 XCTAssertNil(response.error, @"error is not expected to be here");
 
@@ -1338,7 +1345,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     // Check that image is valid just in case
     NSData *data = [NSData dataWithContentsOfFile:fileName];
-    UIImage *image = [UIImage imageWithData:data];
+    ImageClass *image = [[ImageClass alloc] initWithData:data];
     XCTAssertNotNil(image, @"Image is invalid");
 
     // Put file for existing name and expect new ttl and lock status
@@ -1766,7 +1773,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [imageData appendData:data2];
     [imageData appendData:data3];
 
-    UIImage *image = [UIImage imageWithData:imageData];
+    ImageClass *image = [[ImageClass alloc] initWithData:imageData];
     XCTAssertNotNil(image, @"Image must be non nil");
 
     NSString *fileName = [self.thisBundle pathForResource:key ofType:nil];
@@ -1857,10 +1864,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     NSMutableData *imageData = [NSMutableData dataWithData:data1];
     [imageData appendData:data2];
 
-    UIImage *image = [UIImage imageWithData:imageData];
+    ImageClass *image = [[ImageClass alloc] initWithData:imageData];
     XCTAssertNotNil(image, @"Image must be non nil");
 
-    UIImage *wholeImage = [UIImage imageWithData:wholeData];
+    ImageClass *wholeImage = [[ImageClass alloc] initWithData:wholeData];
     XCTAssertNotNil(wholeImage, @"Image must be non nil");
 
     NSString *fileName = [self.thisBundle pathForResource:key ofType:nil];
