@@ -1533,7 +1533,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(errorCalls, (corrupted -1), @"Error calls must match");
 }
 
-- (void)testStreamOpenSuccessWithCreate
+- (void)DISABLED_testStreamOpenSuccessWithCreate
 {
     const NSTimeInterval refTime = kTestEpochTime + 17.0;
     const uint64_t refTTL = kTTL1 + kTTL3;
