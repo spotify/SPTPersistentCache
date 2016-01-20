@@ -85,7 +85,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
         } else if (bytesRead != -1 && bytesRead < kSPTPersistentRecordHeaderSize) {
             // Migration in future
 
-            NSError *nsError = [self nsErrorWithCode:PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER];
+            NSError *nsError = [self nsErrorWithCode:SPTDataCacheLoadingErrorNotEnoughDataToGetHeader];
             return nsError;
         } else {
             // -1 error

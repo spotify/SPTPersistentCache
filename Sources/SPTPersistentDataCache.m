@@ -353,7 +353,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
         // That satisfies Req.#1.3
         if ([self.busyKeys containsObject:key]) {
-            NSError *nsError = [self nsErrorWithCode:PDC_ERROR_RECORD_IS_STREAM_AND_BUSY];
+            NSError *nsError = [self nsErrorWithCode:SPTDataCacheLoadingErrorRecordIsStreamAndBusy];
             dispatch_async(queue, ^{
                 callback(SPTDataCacheResponseCodeOperationError, nil, nsError);
             });
@@ -768,7 +768,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
             // If not enough data to cast to header, its not the file we can process
             if (header == NULL) {
-                NSError *headerError = [self nsErrorWithCode:PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER];
+                NSError *headerError = [self nsErrorWithCode:SPTDataCacheLoadingErrorNotEnoughDataToGetHeader];
                 [self dispatchError:headerError result:SPTDataCacheResponseCodeOperationError callback:callback onQueue:queue];
                 return;
             }
@@ -798,7 +798,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             // Check that payload is correct size
             if (localHeader.payloadSizeBytes != [rawData length] - kSPTPersistentRecordHeaderSize) {
                 [self debugOutput:@"PersistentDataCache: Error: Wrong payload size for key:%@ , will return error", key];
-                [self dispatchError:[self nsErrorWithCode:PDC_ERROR_WRONG_PAYLOAD_SIZE]
+                [self dispatchError:[self nsErrorWithCode:SPTDataCacheLoadingErrorWrongPayloadSize]
                              result:SPTDataCacheResponseCodeOperationError
                            callback:callback onQueue:queue];
                 return;
@@ -985,7 +985,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         SPTPersistentRecordHeaderType header;
         ssize_t readBytes = read(filedes, &header, kSPTPersistentRecordHeaderSize);
         if (readBytes != kSPTPersistentRecordHeaderSize) {
-            NSError *error = [self nsErrorWithCode:PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER];
+            NSError *error = [self nsErrorWithCode:SPTDataCacheLoadingErrorNotEnoughDataToGetHeader];
             if (readBytes == -1) {
                 const int errn = errno;
                 const char* serr = strerror(errn);
@@ -1419,7 +1419,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 - (BOOL)processKeyIfBusy:(NSString *)key callback:(SPTDataCacheResponseCallback)callback queue:(dispatch_queue_t)queue
 {
     if ([self.busyKeys containsObject:key]) {
-        NSError *nsError = [self nsErrorWithCode:PDC_ERROR_RECORD_IS_STREAM_AND_BUSY];
+        NSError *nsError = [self nsErrorWithCode:SPTDataCacheLoadingErrorRecordIsStreamAndBusy];
         [self dispatchError:nsError result:SPTDataCacheResponseCodeOperationError callback:callback onQueue:queue];
         return YES;
     }
@@ -1450,28 +1450,28 @@ int /*SPTDataCacheLoadingError*/ pdc_ValidateHeader(const SPTPersistentRecordHea
 {
     assert(header != NULL);
     if (header == NULL) {
-        return PDC_ERROR_INTERNAL_INCONSISTENCY;
+        return SPTDataCacheLoadingErrorInternalInconsistency;
     }
 
     // Check that header could be read according to alignment
     if (!PointerMagicAlignCheck(header)) {
-        return PDC_ERROR_HEADER_ALIGNMENT_MISSMATCH;
+        return SPTDataCacheLoadingErrorHeaderAlignmentMismatch;
     }
 
     // 1. Check magic
     if (header->magic != kSPTPersistentDataCacheMagic) {
-        return PDC_ERROR_MAGIC_MISSMATCH;
+        return SPTDataCacheLoadingErrorMagicMismatch;
     }
 
     // 2. Check CRC
     uint32_t crc = pdc_CalculateHeaderCRC(header);
     if (crc != header->crc) {
-        return PDC_ERROR_INVALID_HEADER_CRC;
+        return SPTDataCacheLoadingErrorInvalidHeaderCRC;
     }
 
     // 3. Check header size
     if (header->headerSize != kSPTPersistentRecordHeaderSize) {
-        return PDC_ERROR_WRONG_HEADER_SIZE;
+        return SPTDataCacheLoadingErrorWrongHeaderSize;
     }
 
     return -1;
