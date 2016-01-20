@@ -76,7 +76,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 
             // Req.#1.4. If there is no data in the file mark it as incomplete
             if (_header.payloadSizeBytes == 0) {
-                _header.flags |= PDC_HEADER_FLAGS_STREAM_INCOMPLETE;
+                _header.flags |= SPTPersistentRecordHeaderFlagsStreamIncomplete;
             }
 
             // success
@@ -113,7 +113,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
              queue:(dispatch_queue_t)queue
 {
     dispatch_async(self.workQueue, ^{
-        _header.flags |= PDC_HEADER_FLAGS_STREAM_INCOMPLETE;
+        _header.flags |= SPTPersistentRecordHeaderFlagsStreamIncomplete;
 
         NSError *nsError = nil;
         [self writeBytes:data.bytes length:data.length error:&nsError];
@@ -220,7 +220,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
     dispatch_sync(self.workQueue, ^{
         flags = self.header.flags;
     });
-    return (flags & PDC_HEADER_FLAGS_STREAM_INCOMPLETE) == 0;
+    return (flags & SPTPersistentRecordHeaderFlagsStreamIncomplete) == 0;
 }
 
 - (void)finalize:(dispatch_block_t)completion

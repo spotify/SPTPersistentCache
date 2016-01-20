@@ -39,7 +39,6 @@ typedef NS_ENUM(NSInteger, SPTDataCacheResponseCode) {
     SPTDataCacheResponseCodeOperationError
 };
 
-
 /**
  @enum SPTDataCacheLoadingError
 
