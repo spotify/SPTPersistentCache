@@ -5,6 +5,8 @@
 #import "SPTPersistentDataStreamImpl.h"
 #import "SPTDataCacheRecord+Private.h"
 #import "SPTPersistentCacheResponse+Private.h"
+#import "SPTPersistentDataCache+Private.h"
+#import "SPTTimerProxy.h"
 
 #include <sys/stat.h>
 
@@ -31,6 +33,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 #pragma mark - SPTPersistentDataCache()
 
 @interface SPTPersistentDataCache ()
+
 @property (nonatomic, copy) SPTPersistentDataCacheOptions *options;
 // Serial queue used to run all internall stuff
 @property (nonatomic, strong) dispatch_queue_t workQueue;
@@ -41,23 +44,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 // Keys that are currently shouldn't be opened bcuz its busy by streams for example
 @property (nonatomic, strong) NSMutableSet *busyKeys;
 
-- (void)runRegularGC;
-- (void)pruneBySize;
-
-@end
-
-@interface SPTTimerProxy : NSObject
-@property (nonatomic, weak) SPTPersistentDataCache *dataCache;
-@property (nonatomic, strong) dispatch_queue_t queue;
-@end
-@implementation SPTTimerProxy
-- (void)enqueueGC:(NSTimer *)timer
-{
-    dispatch_barrier_async(self.queue, ^{
-        [self.dataCache runRegularGC];
-        [self.dataCache pruneBySize];
-    });
-}
 @end
 
 #pragma mark - SPTPersistentDataCache
@@ -810,23 +796,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     [self.fileManager createDirectoryAtPath:subDir withIntermediateDirectories:YES attributes:nil error:nil];
 
     uint32_t __block oldRefCount = 0;
-
-    // Maybe we would need it
-#if 0
-
-    // If file already exit satisfy requirement to preserv its refCount for futher possible modification
-    if ([self.fileManager fileExistsAtPath:filePath]) {
-        // WARNING: We may skip return result here bcuz in that case we will rewrite bad file with new one
-        [self alterHeaderForFileAtPath:filePath
-                             withBlock:^(SPTPersistentRecordHeaderType *header){
-                                 assert(header != nil);
-                                 oldRefCount = header->refCount;
-                             }
-                             writeBack:NO
-                              complain:YES];
-    }
-#endif
-
     const NSUInteger payloadLen = [data length];
     const CFIndex rawdataLen = kSPTPersistentRecordHeaderSize + payloadLen;
 
@@ -1271,8 +1240,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
         SPTDiskSizeType totalSpace = fileSystemSize.longLongValue;
         SPTDiskSizeType freeSpace = fileSystemFreeSpace.longLongValue + currentCacheSize;
-
-//        SPTDiskSizeType proposedCacheSize = (totalSpace * (1.0 - SPTDataCacheMinimumFreeDiskSpace)) - (totalSpace - freeSpace);
         SPTDiskSizeType proposedCacheSize = freeSpace - totalSpace * SPTDataCacheMinimumFreeDiskSpace;
 
         tempCacheSize = MAX(0, proposedCacheSize);

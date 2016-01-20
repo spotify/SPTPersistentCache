@@ -157,7 +157,6 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 
             // Just sanity check which MUST be holded
             const off_t currentOff = [self seekToOffset:0 withOrigin:SEEK_CUR error:&nsError];
-//            [self debugOutput:@"%@: currentOff:%lld, off:%lld", self.key, currentOff, self.currentOffset];
             assert(currentOff == self.currentOffset+kSPTPersistentRecordHeaderSize);
 
             if (nsError != nil) {
@@ -303,9 +302,6 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
     CleanupHeandlerCallback cleanupCallback = [self.cleanupHandler copy];
     dispatch_queue_t queue = self.workQueue;
     int filedesc = self.fileDesc;
-
-//    [self debugOutput:@"PersistentDataStream: Closing stream for key:%@, cleanup:0x%p", self.key, cleanupCallback];
-
     dispatch_async(queue, ^{
         fsync(filedesc);
         close(filedesc);
@@ -350,7 +346,6 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
         }
     } else {
         self.currentOffset += length;
-//        [self debugOutput:@"PersistentDataStream: key:%@, written: %ld", self.key, length];
     }
 
     return ret;
