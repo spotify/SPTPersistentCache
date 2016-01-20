@@ -1,7 +1,10 @@
 #import "SPTPersistentDataCache.h"
+
 #import "crc32iso3309.h"
 #import "SPTPersistentDataHeader.h"
 #import "SPTPersistentDataStreamImpl.h"
+#import "SPTDataCacheRecord+Private.h"
+
 #include <sys/stat.h>
 
 // Enable for more precise logging
@@ -20,34 +23,6 @@ static const double SPTDataCacheMinimumFreeDiskSpace = 0.1;
 
 static NSString * const SPTDataCacheFileNameKey = @"SPTDataCacheFileNameKey";
 static NSString * const SPTDataCacheFileAttributesKey = @"SPTDataCacheFileAttributesKey";
-
-#pragma mark - SPTDataCacheRecord
-@interface SPTDataCacheRecord ()
-@property (nonatomic, assign, readwrite) NSUInteger refCount;
-@property (nonatomic, assign, readwrite) NSUInteger ttl;
-@property (nonatomic, strong, readwrite) NSString *key;
-@property (nonatomic, strong, readwrite) NSData *data;
-@end
-
-@implementation SPTDataCacheRecord
-- (instancetype)initWithData:(NSData *)data
-                         key:(NSString *)key
-                    refCount:(NSUInteger)refCount
-                         ttl:(NSUInteger)ttl
-{
-    if (!(self = [super init])) {
-        return nil;
-    }
-
-    _refCount = refCount;
-    _ttl = ttl;
-    _key = key;
-    _data = data;
-
-    return self;
-}
-
-@end
 
 #pragma mark - SPTPersistentCacheResponse
 @interface SPTPersistentCacheResponse ()
