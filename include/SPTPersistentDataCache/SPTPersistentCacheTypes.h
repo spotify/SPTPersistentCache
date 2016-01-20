@@ -24,7 +24,8 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentDataCacheDefaultExpirationTimeSe
  loadDataForKey:withCallback: method.
 
  @constant SPTDataCacheResponseCodeOperationSucceeded Indicates success of requested operation with data.
- record field of SPTPersistentCacheResponse mustn't be nil if it was load operation otherwise it could be. error would be nil.
+ record field of SPTPersistentCacheResponse mustn't be nil if it was load operation otherwise it could be. error would
+ be nil.
 
  @constant SPTDataCacheResponseCodeNotFound Indicates that no file found for given key in cache or is expired.
  record and error field of SPTPersistentCacheResponse is nil in this case.
@@ -57,8 +58,8 @@ typedef NS_ENUM(NSInteger, SPTDataCacheResponseCode) {
 
  @constant SPTDataCacheLoadingErrorInvalidHeaderCRC CRC calculated for reader and contained in header are different.
 
- @constant SPTDataCacheLoadingErrorNotEnoughDataToGetHeader Binary data size read as header is less then current header size
- which means we can't proceed further with this file.
+ @constant SPTDataCacheLoadingErrorNotEnoughDataToGetHeader Binary data size read as header is less then current header
+ size which means we can't proceed further with this file.
 
  @constant SPTDataCacheLoadingErrorRecordIsStreamAndBusy Record is opened as stream and busy right now.
 
@@ -78,4 +79,6 @@ typedef NS_ENUM(NSInteger, SPTDataCacheLoadingError) {
 /**
  * Type of callback that is used  to provide a stream access for particular cache record.
  */
-typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error);
+typedef void (^SPTDataCacheStreamCallback)(SPTDataCacheResponseCode result,
+                                           id<SPTPersistentDataStream> stream,
+                                           NSError *error);
