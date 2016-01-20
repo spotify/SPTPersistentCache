@@ -30,24 +30,10 @@
 		696CD78B1C4707E20071DD18 /* SPTPersistentDataCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 696CD7861C4707E20071DD18 /* SPTPersistentDataCache.m */; };
 		696CD78C1C4707E20071DD18 /* SPTPersistentDataCacheOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = 696CD7871C4707E20071DD18 /* SPTPersistentDataCacheOptions.m */; };
 		696CD78D1C4707E20071DD18 /* SPTPersistentDataStreamImpl.m in Sources */ = {isa = PBXBuildFile; fileRef = 696CD7891C4707E20071DD18 /* SPTPersistentDataStreamImpl.m */; };
-		696CD79E1C4708ED0071DD18 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 696CD79D1C4708ED0071DD18 /* AppDelegate.m */; };
-		696CD7A11C4708ED0071DD18 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 696CD7A01C4708ED0071DD18 /* main.m */; };
-		696CD7A31C4708ED0071DD18 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 696CD7A21C4708ED0071DD18 /* Images.xcassets */; };
-		696CD7A61C4708ED0071DD18 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 696CD7A41C4708ED0071DD18 /* MainMenu.xib */; };
-		69A726AE1C470B56005FC024 /* MainWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 69A726AC1C470B56005FC024 /* MainWindowController.m */; };
-		69A726AF1C470B56005FC024 /* MainWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 69A726AD1C470B56005FC024 /* MainWindowController.xib */; };
-		69A726C61C471002005FC024 /* libSPTPersistentDataCache.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0510FF131BA2FF7A00ED0766 /* libSPTPersistentDataCache.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		0510FF201BA2FF7A00ED0766 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0510FF0B1BA2FF7A00ED0766 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 0510FF121BA2FF7A00ED0766;
-			remoteInfo = SPTPersistentDataCache;
-		};
-		69A726C41C470FFE005FC024 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0510FF0B1BA2FF7A00ED0766 /* Project object */;
 			proxyType = 1;
@@ -104,16 +90,6 @@
 		696CD7931C4707EA0071DD18 /* SPTPersistentDataCacheOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataCacheOptions.h; sourceTree = "<group>"; };
 		696CD7941C4707EA0071DD18 /* SPTPersistentDataHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataHeader.h; sourceTree = "<group>"; };
 		696CD7951C4707EA0071DD18 /* SPTPersistentDataStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataStream.h; sourceTree = "<group>"; };
-		696CD79A1C4708ED0071DD18 /* SPTPersistentDataCacheViewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SPTPersistentDataCacheViewer.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		696CD79C1C4708ED0071DD18 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		696CD79D1C4708ED0071DD18 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		696CD7A01C4708ED0071DD18 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		696CD7A21C4708ED0071DD18 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		696CD7A51C4708ED0071DD18 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		696CD7A71C4708ED0071DD18 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		69A726AB1C470B56005FC024 /* MainWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainWindowController.h; sourceTree = "<group>"; };
-		69A726AC1C470B56005FC024 /* MainWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainWindowController.m; sourceTree = "<group>"; };
-		69A726AD1C470B56005FC024 /* MainWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainWindowController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -132,14 +108,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		696CD7971C4708ED0071DD18 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				69A726C61C471002005FC024 /* libSPTPersistentDataCache.a in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -149,7 +117,6 @@
 				696CD78E1C4707EA0071DD18 /* API */,
 				696CD7831C4707E20071DD18 /* Sources */,
 				0510FF221BA2FF7A00ED0766 /* Tests */,
-				696CD79B1C4708ED0071DD18 /* Viewer */,
 				0510FF141BA2FF7A00ED0766 /* Products */,
 				0510FF6C1BA3076300ED0766 /* Build System */,
 			);
@@ -160,7 +127,6 @@
 			children = (
 				0510FF131BA2FF7A00ED0766 /* libSPTPersistentDataCache.a */,
 				0510FF1E1BA2FF7A00ED0766 /* SPTPersistentDataCacheTests.xctest */,
-				696CD79A1C4708ED0071DD18 /* SPTPersistentDataCacheViewer.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -235,30 +201,6 @@
 			path = include/SPTPersistentDataCache;
 			sourceTree = "<group>";
 		};
-		696CD79B1C4708ED0071DD18 /* Viewer */ = {
-			isa = PBXGroup;
-			children = (
-				696CD79C1C4708ED0071DD18 /* AppDelegate.h */,
-				696CD79D1C4708ED0071DD18 /* AppDelegate.m */,
-				69A726AB1C470B56005FC024 /* MainWindowController.h */,
-				69A726AC1C470B56005FC024 /* MainWindowController.m */,
-				69A726AD1C470B56005FC024 /* MainWindowController.xib */,
-				696CD7A21C4708ED0071DD18 /* Images.xcassets */,
-				696CD7A41C4708ED0071DD18 /* MainMenu.xib */,
-				696CD7A71C4708ED0071DD18 /* Info.plist */,
-				696CD79F1C4708ED0071DD18 /* Supporting Files */,
-			);
-			path = Viewer;
-			sourceTree = "<group>";
-		};
-		696CD79F1C4708ED0071DD18 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				696CD7A01C4708ED0071DD18 /* main.m */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -297,24 +239,6 @@
 			productReference = 0510FF1E1BA2FF7A00ED0766 /* SPTPersistentDataCacheTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		696CD7991C4708ED0071DD18 /* SPTPersistentDataCacheViewer */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 696CD7AA1C4708ED0071DD18 /* Build configuration list for PBXNativeTarget "SPTPersistentDataCacheViewer" */;
-			buildPhases = (
-				696CD7961C4708ED0071DD18 /* Sources */,
-				696CD7971C4708ED0071DD18 /* Frameworks */,
-				696CD7981C4708ED0071DD18 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				69A726C51C470FFE005FC024 /* PBXTargetDependency */,
-			);
-			name = SPTPersistentDataCacheViewer;
-			productName = SPTPersistentDataCacheViewer;
-			productReference = 696CD79A1C4708ED0071DD18 /* SPTPersistentDataCacheViewer.app */;
-			productType = "com.apple.product-type.application";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -329,9 +253,6 @@
 					};
 					0510FF1D1BA2FF7A00ED0766 = {
 						CreatedOnToolsVersion = 6.4;
-					};
-					696CD7991C4708ED0071DD18 = {
-						CreatedOnToolsVersion = 7.2;
 					};
 				};
 			};
@@ -350,7 +271,6 @@
 			targets = (
 				0510FF121BA2FF7A00ED0766 /* SPTPersistentDataCache */,
 				0510FF1D1BA2FF7A00ED0766 /* SPTPersistentDataCacheTests */,
-				696CD7991C4708ED0071DD18 /* SPTPersistentDataCacheViewer */,
 			);
 		};
 /* End PBXProject section */
@@ -380,16 +300,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		696CD7981C4708ED0071DD18 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				696CD7A31C4708ED0071DD18 /* Images.xcassets in Resources */,
-				69A726AF1C470B56005FC024 /* MainWindowController.xib in Resources */,
-				696CD7A61C4708ED0071DD18 /* MainMenu.xib in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -412,16 +322,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		696CD7961C4708ED0071DD18 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				69A726AE1C470B56005FC024 /* MainWindowController.m in Sources */,
-				696CD7A11C4708ED0071DD18 /* main.m in Sources */,
-				696CD79E1C4708ED0071DD18 /* AppDelegate.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -430,23 +330,7 @@
 			target = 0510FF121BA2FF7A00ED0766 /* SPTPersistentDataCache */;
 			targetProxy = 0510FF201BA2FF7A00ED0766 /* PBXContainerItemProxy */;
 		};
-		69A726C51C470FFE005FC024 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 0510FF121BA2FF7A00ED0766 /* SPTPersistentDataCache */;
-			targetProxy = 69A726C41C470FFE005FC024 /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
-
-/* Begin PBXVariantGroup section */
-		696CD7A41C4708ED0071DD18 /* MainMenu.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				696CD7A51C4708ED0071DD18 /* Base */,
-			);
-			name = MainMenu.xib;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		0510FF251BA2FF7A00ED0766 /* Debug */ = {
@@ -582,47 +466,6 @@
 			};
 			name = Release;
 		};
-		696CD7A81C4708ED0071DD18 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
-				CLANG_CXX_LIBRARY = "libc++";
-				CODE_SIGN_IDENTITY = "-";
-				COMBINE_HIDPI_IMAGES = YES;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/include";
-				INFOPLIST_FILE = Viewer/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
-				PRODUCT_BUNDLE_IDENTIFIER = com.spotify.SPTPersistentDataCacheViewer;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
-				SUPPORTED_PLATFORMS = macosx;
-			};
-			name = Debug;
-		};
-		696CD7A91C4708ED0071DD18 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
-				CLANG_CXX_LIBRARY = "libc++";
-				CODE_SIGN_IDENTITY = "-";
-				COMBINE_HIDPI_IMAGES = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/include";
-				INFOPLIST_FILE = Viewer/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
-				PRODUCT_BUNDLE_IDENTIFIER = com.spotify.SPTPersistentDataCacheViewer;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
-				SUPPORTED_PLATFORMS = macosx;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -649,15 +492,6 @@
 			buildConfigurations = (
 				0510FF2B1BA2FF7A00ED0766 /* Debug */,
 				0510FF2C1BA2FF7A00ED0766 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		696CD7AA1C4708ED0071DD18 /* Build configuration list for PBXNativeTarget "SPTPersistentDataCacheViewer" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				696CD7A81C4708ED0071DD18 /* Debug */,
-				696CD7A91C4708ED0071DD18 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
