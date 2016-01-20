@@ -131,7 +131,7 @@
     NSString *fullFilePath = [self.cacheFiles objectAtIndex:idx];
     NSData *rawData = [NSData dataWithContentsOfFile:fullFilePath];
 
-    SPTPersistentRecordHeaderType *h = pdc_GetHeaderFromData([rawData bytes], [rawData length]);
+    SPTPersistentRecordHeaderType *h = pdc_GetHeaderFromData(__DECONST(void*, [rawData bytes]), [rawData length]);
 
     if (h == NULL) {
         // TODO: error
