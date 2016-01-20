@@ -2,12 +2,10 @@
 
 #import "crc32iso3309.h"
 #import "SPTPersistentDataHeader.h"
-#import "SPTPersistentDataStreamImpl.h"
 #import "SPTDataCacheRecord+Private.h"
 #import "SPTPersistentCacheResponse+Private.h"
 #import "SPTPersistentDataCache+Private.h"
 #import "SPTTimerProxy.h"
-
 #include <sys/stat.h>
 
 // Enable for more precise logging
@@ -273,103 +271,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     });
 }
 
-- (void)openDataStreamForKey:(NSString *)key
-            createIfNotExist:(BOOL)needCreate
-                         ttl:(NSUInteger)ttl
-                      locked:(BOOL)locked
-                withCallback:(SPTDataCacheStreamCallback)callback
-                     onQueue:(dispatch_queue_t)queue
-{
-    assert(callback != nil);
-    assert(queue != nil);
-    if (callback == nil || queue == nil) {
-        return;
-    }
-
-    dispatch_barrier_async(self.workQueue, ^{
-
-        // That satisfies Req.#1.3
-        if ([self.busyKeys containsObject:key]) {
-            NSError *nsError = [self nsErrorWithCode:SPTDataCacheLoadingErrorRecordIsStreamAndBusy];
-            dispatch_async(queue, ^{
-                callback(SPTDataCacheResponseCodeOperationError, nil, nsError);
-            });
-            return;
-        }
-        
-        NSString *filePath = [self pathForKey:key];
-
-        NSError *nsError = nil;
-        if (needCreate) {
-            if (![self.fileManager fileExistsAtPath:filePath isDirectory:nil]) {
-                nsError = [self storeDataSync:[NSData data] forKey:key ttl:ttl locked:locked withCallback:nil onQueue:nil];
-            }
-        }
-
-        if (nsError != nil) {
-            dispatch_async(queue, ^{
-                callback(SPTDataCacheResponseCodeOperationError, nil, nsError);
-            });
-            return;
-        }
-
-        
-
-        // Try to satisfy Req.#1.2 only for file we created earlier
-        if (!needCreate) {
-            BOOL __block expired = NO;
-            // WARNING: we can't ignore return result here
-            SPTPersistentCacheResponse *response =
-            [self alterHeaderForFileAtPath:filePath
-                                 withBlock:^(SPTPersistentRecordHeaderType *header) {
-                                     assert(header != nil);
-                                     // Satisfy Req.#1.2
-                                     expired = [self isDataExpiredWithHeader:header];
-                                 }
-                                 writeBack:NO
-                                  complain:NO];
-
-            if (response.result == SPTDataCacheResponseCodeOperationSucceeded) {
-                if (expired) {
-                    dispatch_async(queue, ^{
-                        callback(SPTDataCacheResponseCodeNotFound, nil, nil);
-                    });
-                    return;
-                }
-            } else {
-                dispatch_async(queue, ^{
-                    callback(response.result, nil, response.error);
-                });
-                return;
-            }
-        }
-
-        SPTPersistentDataStreamImpl *stream = [[SPTPersistentDataStreamImpl alloc] initWithPath:filePath
-                                                                                            key:key
-                                                                                 cleanupHandler:^{
-
-                                                                                     dispatch_barrier_async(self.workQueue, ^{
-                                                                                         [self.busyKeys removeObject:key];
-                                                                                     });
-
-                                                                                 } debugCallback:self.debugOutput];
-
-        // WARNING: Callback must be and is synchronous here
-        [stream open:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
-
-            if (result == SPTDataCacheResponseCodeOperationSucceeded) {
-                assert(s != nil);
-                assert(error == nil);
-
-                [self.busyKeys addObject:key];
-            }
-
-            dispatch_async(queue, ^{
-                callback(result, s, error);
-            });
-        }];
-    });
-}
 
 // TODO: return NOT_PERMITTED on try to touch TLL>0
 - (void)touchDataForKey:(NSString *)key

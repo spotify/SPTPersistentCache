@@ -32,7 +32,6 @@
 		696CD78A1C4707E20071DD18 /* crc32iso3309.c in Sources */ = {isa = PBXBuildFile; fileRef = 696CD7841C4707E20071DD18 /* crc32iso3309.c */; };
 		696CD78B1C4707E20071DD18 /* SPTPersistentDataCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 696CD7861C4707E20071DD18 /* SPTPersistentDataCache.m */; };
 		696CD78C1C4707E20071DD18 /* SPTPersistentDataCacheOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = 696CD7871C4707E20071DD18 /* SPTPersistentDataCacheOptions.m */; };
-		696CD78D1C4707E20071DD18 /* SPTPersistentDataStreamImpl.m in Sources */ = {isa = PBXBuildFile; fileRef = 696CD7891C4707E20071DD18 /* SPTPersistentDataStreamImpl.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -93,15 +92,12 @@
 		696CD7851C4707E20071DD18 /* crc32iso3309.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crc32iso3309.h; sourceTree = "<group>"; };
 		696CD7861C4707E20071DD18 /* SPTPersistentDataCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCache.m; sourceTree = "<group>"; };
 		696CD7871C4707E20071DD18 /* SPTPersistentDataCacheOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCacheOptions.m; sourceTree = "<group>"; };
-		696CD7881C4707E20071DD18 /* SPTPersistentDataStreamImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataStreamImpl.h; sourceTree = "<group>"; };
-		696CD7891C4707E20071DD18 /* SPTPersistentDataStreamImpl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataStreamImpl.m; sourceTree = "<group>"; };
 		696CD78F1C4707EA0071DD18 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
 		696CD7901C4707EA0071DD18 /* SPTPersistentCacheTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheTypes.h; sourceTree = "<group>"; };
 		696CD7911C4707EA0071DD18 /* SPTPersistentDataCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataCache.h; sourceTree = "<group>"; };
 		696CD7921C4707EA0071DD18 /* SPTPersistentDataCacheConvenience.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataCacheConvenience.h; sourceTree = "<group>"; };
 		696CD7931C4707EA0071DD18 /* SPTPersistentDataCacheOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataCacheOptions.h; sourceTree = "<group>"; };
 		696CD7941C4707EA0071DD18 /* SPTPersistentDataHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataHeader.h; sourceTree = "<group>"; };
-		696CD7951C4707EA0071DD18 /* SPTPersistentDataStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataStream.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -193,8 +189,6 @@
 				0595F33B1C5011E30052328B /* SPTPersistentDataCache+Private.h */,
 				696CD7861C4707E20071DD18 /* SPTPersistentDataCache.m */,
 				696CD7871C4707E20071DD18 /* SPTPersistentDataCacheOptions.m */,
-				696CD7881C4707E20071DD18 /* SPTPersistentDataStreamImpl.h */,
-				696CD7891C4707E20071DD18 /* SPTPersistentDataStreamImpl.m */,
 				0595F0AB1C5008AB0052328B /* SPTDataCacheRecord+Private.h */,
 				0595F0A81C5008060052328B /* SPTDataCacheRecord.m */,
 				0595F0B21C500A540052328B /* SPTPersistentCacheResponse+Private.h */,
@@ -214,7 +208,6 @@
 				696CD7921C4707EA0071DD18 /* SPTPersistentDataCacheConvenience.h */,
 				696CD7931C4707EA0071DD18 /* SPTPersistentDataCacheOptions.h */,
 				696CD7941C4707EA0071DD18 /* SPTPersistentDataHeader.h */,
-				696CD7951C4707EA0071DD18 /* SPTPersistentDataStream.h */,
 				0595F0AA1C50081C0052328B /* SPTDataCacheRecord.h */,
 				0595F0B11C5009920052328B /* SPTPersistentCacheResponse.h */,
 			);
@@ -328,7 +321,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				696CD78D1C4707E20071DD18 /* SPTPersistentDataStreamImpl.m in Sources */,
 				0595F33A1C50117B0052328B /* SPTTimerProxy.m in Sources */,
 				0595F0A91C5008060052328B /* SPTDataCacheRecord.m in Sources */,
 				696CD78A1C4707E20071DD18 /* crc32iso3309.c in Sources */,
