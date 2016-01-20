@@ -101,9 +101,9 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 
     // execute callback
     if (openError != nil) {
-        callback(PDC_DATA_OPERATION_ERROR, nil, openError);
+        callback(SPTDataCacheResponseCodeOperationError, nil, openError);
     } else {
-        callback(PDC_DATA_OPERATION_SUCCEEDED, self, nil);
+        callback(SPTDataCacheResponseCodeOperationSucceeded, self, nil);
     }
 }
 

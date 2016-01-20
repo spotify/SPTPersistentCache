@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+
 #import "SPTPersistentDataStream.h"
 
 FOUNDATION_EXPORT NSString *const SPTPersistentDataCacheErrorDomain;
@@ -22,20 +23,19 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentDataCacheDefaultExpirationTimeSe
  is used to identify what kind of response would be given in callback to
  loadDataForKey:withCallback: method.
 
- @constant PDC_OPERATION_SUCCEEDED Indicates success of requested operation with data.
+ @constant SPTDataCacheResponseCodeOperationSucceeded Indicates success of requested operation with data.
  record field of SPTPersistentCacheResponse mustn't be nil if it was load operation otherwise it could be. error would be nil.
 
- @constant PDC_DATA_NOT_FOUND Indicates that no file found for given key in cache or is expired.
+ @constant SPTDataCacheResponseCodeNotFound Indicates that no file found for given key in cache or is expired.
  record and error field of SPTPersistentCacheResponse is nil in this case.
 
- @constant PDC_OPERATION_ERROR Indicates error occured during requested operation.
+ @constant SPTDataCacheResponseCodeOperationError Indicates error occured during requested operation.
  record field of SPTPersistentCacheResponse would be nil. error mustn't be nil and specify exact error.
  */
-typedef NS_ENUM(NSInteger, SPTDataCacheResponseCode)
-{
-    PDC_DATA_OPERATION_SUCCEEDED,
-    PDC_DATA_NOT_FOUND,
-    PDC_DATA_OPERATION_ERROR
+typedef NS_ENUM(NSInteger, SPTDataCacheResponseCode) {
+    SPTDataCacheResponseCodeOperationSucceeded,
+    SPTDataCacheResponseCodeNotFound,
+    SPTDataCacheResponseCodeOperationError
 };
 
 
@@ -83,7 +83,7 @@ typedef NS_ENUM(NSInteger, SPTDataCacheLoadingError)
  *
  * @discussion Class defines one record in cache that is returned in response.
  *             Each record is represented by single file on disk.
- *             If file deleted from disk then cache assumes its never existed and return PDC_DATA_NOT_FOUND for load call.
+ *             If file deleted from disk then cache assumes its never existed and return SPTDataCacheResponseCodeNotFound for load call.
  */
 @interface SPTDataCacheRecord : NSObject
 /*
