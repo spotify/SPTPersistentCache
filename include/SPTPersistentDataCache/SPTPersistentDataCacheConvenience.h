@@ -4,3 +4,4 @@
 #import "SPTPersistentDataStream.h"
 #import "SPTPersistentDataCacheOptions.h"
 #import "SPTDataCacheRecord.h"
+#import "SPTPersistentCacheResponse.h"

@@ -4,6 +4,7 @@
 #import "SPTPersistentDataHeader.h"
 #import "SPTPersistentDataStreamImpl.h"
 #import "SPTDataCacheRecord+Private.h"
+#import "SPTPersistentCacheResponse+Private.h"
 
 #include <sys/stat.h>
 
@@ -23,31 +24,6 @@ static const double SPTDataCacheMinimumFreeDiskSpace = 0.1;
 
 static NSString * const SPTDataCacheFileNameKey = @"SPTDataCacheFileNameKey";
 static NSString * const SPTDataCacheFileAttributesKey = @"SPTDataCacheFileAttributesKey";
-
-#pragma mark - SPTPersistentCacheResponse
-@interface SPTPersistentCacheResponse ()
-@property (nonatomic, assign, readwrite) SPTDataCacheResponseCode result;
-@property (nonatomic, strong, readwrite) NSError *error;
-@property (nonatomic, strong, readwrite) SPTDataCacheRecord *record;
-@end
-
-@implementation SPTPersistentCacheResponse
-- (instancetype)initWithResult:(SPTDataCacheResponseCode)result
-                         error:(NSError *)error
-                        record:(SPTDataCacheRecord *)record
-{
-    if (!(self = [super init])) {
-        return nil;
-    }
-
-    _result = result;
-    _error = error;
-    _record = record;
-
-    return self;
-}
-
-@end
 
 typedef SPTPersistentCacheResponse* (^FileProcessingBlockType)(int filedes);
 typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *header);

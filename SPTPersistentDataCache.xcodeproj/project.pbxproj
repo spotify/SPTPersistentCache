@@ -27,6 +27,7 @@
 		0510FF691BA3073600ED0766 /* fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF581BA3073600ED0766 /* fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c */; };
 		0510FF6B1BA3073D00ED0766 /* SPTPersistentDataCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0510FF6A1BA3073D00ED0766 /* SPTPersistentDataCacheTests.m */; };
 		0595F0A91C5008060052328B /* SPTDataCacheRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 0595F0A81C5008060052328B /* SPTDataCacheRecord.m */; };
+		0595F0B01C5009800052328B /* SPTPersistentCacheResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 0595F0AF1C5009800052328B /* SPTPersistentCacheResponse.m */; };
 		696CD78A1C4707E20071DD18 /* crc32iso3309.c in Sources */ = {isa = PBXBuildFile; fileRef = 696CD7841C4707E20071DD18 /* crc32iso3309.c */; };
 		696CD78B1C4707E20071DD18 /* SPTPersistentDataCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 696CD7861C4707E20071DD18 /* SPTPersistentDataCache.m */; };
 		696CD78C1C4707E20071DD18 /* SPTPersistentDataCacheOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = 696CD7871C4707E20071DD18 /* SPTPersistentDataCacheOptions.m */; };
@@ -81,6 +82,9 @@
 		0595F0A81C5008060052328B /* SPTDataCacheRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTDataCacheRecord.m; sourceTree = "<group>"; };
 		0595F0AA1C50081C0052328B /* SPTDataCacheRecord.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPTDataCacheRecord.h; sourceTree = "<group>"; };
 		0595F0AB1C5008AB0052328B /* SPTDataCacheRecord+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SPTDataCacheRecord+Private.h"; sourceTree = "<group>"; };
+		0595F0AF1C5009800052328B /* SPTPersistentCacheResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheResponse.m; sourceTree = "<group>"; };
+		0595F0B11C5009920052328B /* SPTPersistentCacheResponse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheResponse.h; sourceTree = "<group>"; };
+		0595F0B21C500A540052328B /* SPTPersistentCacheResponse+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SPTPersistentCacheResponse+Private.h"; sourceTree = "<group>"; };
 		696CD7841C4707E20071DD18 /* crc32iso3309.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = crc32iso3309.c; sourceTree = "<group>"; };
 		696CD7851C4707E20071DD18 /* crc32iso3309.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crc32iso3309.h; sourceTree = "<group>"; };
 		696CD7861C4707E20071DD18 /* SPTPersistentDataCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCache.m; sourceTree = "<group>"; };
@@ -188,6 +192,8 @@
 				696CD7891C4707E20071DD18 /* SPTPersistentDataStreamImpl.m */,
 				0595F0AB1C5008AB0052328B /* SPTDataCacheRecord+Private.h */,
 				0595F0A81C5008060052328B /* SPTDataCacheRecord.m */,
+				0595F0B21C500A540052328B /* SPTPersistentCacheResponse+Private.h */,
+				0595F0AF1C5009800052328B /* SPTPersistentCacheResponse.m */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -203,6 +209,7 @@
 				696CD7941C4707EA0071DD18 /* SPTPersistentDataHeader.h */,
 				696CD7951C4707EA0071DD18 /* SPTPersistentDataStream.h */,
 				0595F0AA1C50081C0052328B /* SPTDataCacheRecord.h */,
+				0595F0B11C5009920052328B /* SPTPersistentCacheResponse.h */,
 			);
 			name = API;
 			path = include/SPTPersistentDataCache;
@@ -318,6 +325,7 @@
 				0595F0A91C5008060052328B /* SPTDataCacheRecord.m in Sources */,
 				696CD78A1C4707E20071DD18 /* crc32iso3309.c in Sources */,
 				696CD78B1C4707E20071DD18 /* SPTPersistentDataCache.m in Sources */,
+				0595F0B01C5009800052328B /* SPTPersistentCacheResponse.m in Sources */,
 				696CD78C1C4707E20071DD18 /* SPTPersistentDataCacheOptions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

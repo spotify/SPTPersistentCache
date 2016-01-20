@@ -75,28 +75,6 @@ typedef NS_ENUM(NSInteger, SPTDataCacheLoadingError) {
     SPTDataCacheLoadingErrorInternalInconsistency
 };
 
-@class SPTDataCacheRecord;
-
-/**
- * @brief SPTPersistentCacheResponse
- *
- * @discussion Class defines one response passed in callback to call loadDataForKey:
- */
-@interface SPTPersistentCacheResponse : NSObject
-/**
- * @see SPTDataCacheResponseCode
- */
-@property (nonatomic, assign, readonly) SPTDataCacheResponseCode result;
-/**
- * Defines error of response if appliable
- */
-@property (nonatomic, strong, readonly) NSError *error;
-/**
- * @see SPTDataCacheRecord
- */
-@property (nonatomic, strong, readonly) SPTDataCacheRecord *record;
-@end
-
 /**
  * Type of callback that is used  to provide a stream access for particular cache record.
  */
