@@ -1,7 +1,13 @@
 #import "SPTPersistentDataCache.h"
+
 #import "crc32iso3309.h"
 #import "SPTPersistentDataHeader.h"
 #import "SPTPersistentDataStreamImpl.h"
+#import "SPTDataCacheRecord+Private.h"
+#import "SPTPersistentCacheResponse+Private.h"
+#import "SPTPersistentDataCache+Private.h"
+#import "SPTTimerProxy.h"
+
 #include <sys/stat.h>
 
 // Enable for more precise logging
@@ -21,65 +27,13 @@ static const double SPTDataCacheMinimumFreeDiskSpace = 0.1;
 static NSString * const SPTDataCacheFileNameKey = @"SPTDataCacheFileNameKey";
 static NSString * const SPTDataCacheFileAttributesKey = @"SPTDataCacheFileAttributesKey";
 
-#pragma mark - SPTDataCacheRecord
-@interface SPTDataCacheRecord ()
-@property (nonatomic, assign, readwrite) NSUInteger refCount;
-@property (nonatomic, assign, readwrite) NSUInteger ttl;
-@property (nonatomic, strong, readwrite) NSString *key;
-@property (nonatomic, strong, readwrite) NSData *data;
-@end
-
-@implementation SPTDataCacheRecord
-- (instancetype)initWithData:(NSData *)data
-                         key:(NSString *)key
-                    refCount:(NSUInteger)refCount
-                         ttl:(NSUInteger)ttl
-{
-    if (!(self = [super init])) {
-        return nil;
-    }
-
-    _refCount = refCount;
-    _ttl = ttl;
-    _key = key;
-    _data = data;
-
-    return self;
-}
-
-@end
-
-#pragma mark - SPTPersistentCacheResponse
-@interface SPTPersistentCacheResponse ()
-@property (nonatomic, assign, readwrite) SPTDataCacheResponseCode result;
-@property (nonatomic, strong, readwrite) NSError *error;
-@property (nonatomic, strong, readwrite) SPTDataCacheRecord *record;
-@end
-
-@implementation SPTPersistentCacheResponse
-- (instancetype)initWithResult:(SPTDataCacheResponseCode)result
-                         error:(NSError *)error
-                        record:(SPTDataCacheRecord *)record
-{
-    if (!(self = [super init])) {
-        return nil;
-    }
-
-    _result = result;
-    _error = error;
-    _record = record;
-
-    return self;
-}
-
-@end
-
 typedef SPTPersistentCacheResponse* (^FileProcessingBlockType)(int filedes);
 typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *header);
 
 #pragma mark - SPTPersistentDataCache()
 
 @interface SPTPersistentDataCache ()
+
 @property (nonatomic, copy) SPTPersistentDataCacheOptions *options;
 // Serial queue used to run all internall stuff
 @property (nonatomic, strong) dispatch_queue_t workQueue;
@@ -90,23 +44,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 // Keys that are currently shouldn't be opened bcuz its busy by streams for example
 @property (nonatomic, strong) NSMutableSet *busyKeys;
 
-- (void)runRegularGC;
-- (void)pruneBySize;
-
-@end
-
-@interface SPTTimerProxy : NSObject
-@property (nonatomic, weak) SPTPersistentDataCache *dataCache;
-@property (nonatomic, strong) dispatch_queue_t queue;
-@end
-@implementation SPTTimerProxy
-- (void)enqueueGC:(NSTimer *)timer
-{
-    dispatch_barrier_async(self.queue, ^{
-        [self.dataCache runRegularGC];
-        [self.dataCache pruneBySize];
-    });
-}
 @end
 
 #pragma mark - SPTPersistentDataCache
@@ -238,10 +175,10 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         if (content == nil) {
             // If no directory is exist its fine, say not found to user
             if (error.code == NSFileReadNoSuchFileError || error.code == NSFileNoSuchFileError) {
-                [self dispatchEmptyResponseWithResult:PDC_DATA_NOT_FOUND callback:callback onQueue:queue];
+                [self dispatchEmptyResponseWithResult:SPTDataCacheResponseCodeNotFound callback:callback onQueue:queue];
             } else {
                 [self debugOutput:@"PersistentDataCache: Unable to get dir contents: %@, error: %@", path, [error localizedDescription]];
-                [self dispatchError:error result:PDC_DATA_OPERATION_ERROR callback:callback onQueue:queue];
+                [self dispatchError:error result:SPTDataCacheResponseCodeOperationError callback:callback onQueue:queue];
             }
             return;
         }
@@ -277,7 +214,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
         // If not keys left after validation we are done with not found callback
         if (keysToConsider.count == 0) {
-            [self dispatchEmptyResponseWithResult:PDC_DATA_NOT_FOUND callback:callback onQueue:queue];
+            [self dispatchEmptyResponseWithResult:SPTDataCacheResponseCodeNotFound callback:callback onQueue:queue];
             return;
         }
 
@@ -285,7 +222,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
         // If user told us 'nil' he didnt found abything interesting in keys so we are done wiht not found
         if (keyToOpen == nil) {
-            [self dispatchEmptyResponseWithResult:PDC_DATA_NOT_FOUND callback:callback onQueue:queue];
+            [self dispatchEmptyResponseWithResult:SPTDataCacheResponseCodeNotFound callback:callback onQueue:queue];
             return;
         }
 
@@ -353,9 +290,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
         // That satisfies Req.#1.3
         if ([self.busyKeys containsObject:key]) {
-            NSError *nsError = [self nsErrorWithCode:PDC_ERROR_RECORD_IS_STREAM_AND_BUSY];
+            NSError *nsError = [self nsErrorWithCode:SPTDataCacheLoadingErrorRecordIsStreamAndBusy];
             dispatch_async(queue, ^{
-                callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
+                callback(SPTDataCacheResponseCodeOperationError, nil, nsError);
             });
             return;
         }
@@ -371,7 +308,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
         if (nsError != nil) {
             dispatch_async(queue, ^{
-                callback(PDC_DATA_OPERATION_ERROR, nil, nsError);
+                callback(SPTDataCacheResponseCodeOperationError, nil, nsError);
             });
             return;
         }
@@ -392,10 +329,10 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                  writeBack:NO
                                   complain:NO];
 
-            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+            if (response.result == SPTDataCacheResponseCodeOperationSucceeded) {
                 if (expired) {
                     dispatch_async(queue, ^{
-                        callback(PDC_DATA_NOT_FOUND, nil, nil);
+                        callback(SPTDataCacheResponseCodeNotFound, nil, nil);
                     });
                     return;
                 }
@@ -420,7 +357,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         // WARNING: Callback must be and is synchronous here
         [stream open:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
 
-            if (result == PDC_DATA_OPERATION_SUCCEEDED) {
+            if (result == SPTDataCacheResponseCodeOperationSucceeded) {
                 assert(s != nil);
                 assert(error == nil);
 
@@ -474,7 +411,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
         // Satisfy Req.#1.2
         if (expired) {
-            response = [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_NOT_FOUND error:nil record:nil];
+            response = [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeNotFound error:nil record:nil];
         }
 
         if (callback) {
@@ -548,7 +485,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
             // Satisfy Req.#1.2
             if (expired) {
-                response = [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_NOT_FOUND error:nil record:nil];
+                response = [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeNotFound error:nil record:nil];
             }
 
             if (callback) {
@@ -746,7 +683,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     // File not exist -> inform user
     if (![self.fileManager fileExistsAtPath:filePath]) {
-        [self dispatchEmptyResponseWithResult:PDC_DATA_NOT_FOUND callback:callback onQueue:queue];
+        [self dispatchEmptyResponseWithResult:SPTDataCacheResponseCodeNotFound callback:callback onQueue:queue];
         return;
     } else {
 
@@ -762,14 +699,14 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                                                  error:&error];
         if (rawData == nil) {
             // File read with error -> inform user
-            [self dispatchError:error result:PDC_DATA_OPERATION_ERROR callback:callback onQueue:queue];
+            [self dispatchError:error result:SPTDataCacheResponseCodeOperationError callback:callback onQueue:queue];
         } else {
             SPTPersistentRecordHeaderType *header = pdc_GetHeaderFromData(rawData.mutableBytes, rawData.length);
 
             // If not enough data to cast to header, its not the file we can process
             if (header == NULL) {
-                NSError *headerError = [self nsErrorWithCode:PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER];
-                [self dispatchError:headerError result:PDC_DATA_OPERATION_ERROR callback:callback onQueue:queue];
+                NSError *headerError = [self nsErrorWithCode:SPTDataCacheLoadingErrorNotEnoughDataToGetHeader];
+                [self dispatchError:headerError result:SPTDataCacheResponseCodeOperationError callback:callback onQueue:queue];
                 return;
             }
 
@@ -779,7 +716,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             // Check header is valid
             NSError *headerError = [self checkHeaderValid:&localHeader];
             if (headerError != nil) {
-                [self dispatchError:headerError result:PDC_DATA_OPERATION_ERROR callback:callback onQueue:queue];
+                [self dispatchError:headerError result:SPTDataCacheResponseCodeOperationError callback:callback onQueue:queue];
                 return;
             }
 
@@ -791,15 +728,15 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 #ifdef DEBUG_OUTPUT_ENABLED
                 [self debugOutput:@"PersistentDataCache: Record with key: %@ expired, t:%llu, TTL:%llu", key, localHeader.updateTimeSec, localHeader.ttl];
 #endif
-                [self dispatchEmptyResponseWithResult:PDC_DATA_NOT_FOUND callback:callback onQueue:queue];
+                [self dispatchEmptyResponseWithResult:SPTDataCacheResponseCodeNotFound callback:callback onQueue:queue];
                 return;
             }
 
             // Check that payload is correct size
             if (localHeader.payloadSizeBytes != [rawData length] - kSPTPersistentRecordHeaderSize) {
                 [self debugOutput:@"PersistentDataCache: Error: Wrong payload size for key:%@ , will return error", key];
-                [self dispatchError:[self nsErrorWithCode:PDC_ERROR_WRONG_PAYLOAD_SIZE]
-                             result:PDC_DATA_OPERATION_ERROR
+                [self dispatchError:[self nsErrorWithCode:SPTDataCacheLoadingErrorWrongPayloadSize]
+                             result:SPTDataCacheResponseCodeOperationError
                            callback:callback onQueue:queue];
                 return;
             }
@@ -814,7 +751,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                                                          refCount:refCount
                                                                               ttl:ttl];
 
-            SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_OPERATION_SUCCEEDED
+            SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeOperationSucceeded
                                                                                                 error:nil
                                                                                                record:record];
             // If data ttl == 0 we update access time
@@ -859,23 +796,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     [self.fileManager createDirectoryAtPath:subDir withIntermediateDirectories:YES attributes:nil error:nil];
 
     uint32_t __block oldRefCount = 0;
-
-    // Maybe we would need it
-#if 0
-
-    // If file already exit satisfy requirement to preserv its refCount for futher possible modification
-    if ([self.fileManager fileExistsAtPath:filePath]) {
-        // WARNING: We may skip return result here bcuz in that case we will rewrite bad file with new one
-        [self alterHeaderForFileAtPath:filePath
-                             withBlock:^(SPTPersistentRecordHeaderType *header){
-                                 assert(header != nil);
-                                 oldRefCount = header->refCount;
-                             }
-                             writeBack:NO
-                              complain:YES];
-    }
-#endif
-
     const NSUInteger payloadLen = [data length];
     const CFIndex rawdataLen = kSPTPersistentRecordHeaderSize + payloadLen;
 
@@ -901,12 +821,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     if (![rawData writeToFile:filePath options:NSDataWritingAtomic error:&error]) {
         [self debugOutput:@"PersistentDataCache: Error writting to file:%@ , for key:%@. Removing it...", filePath, key];
         [self removeDataForKeysSync:@[key]];
-        [self dispatchError:error result:PDC_DATA_OPERATION_ERROR callback:callback onQueue:queue];
+        [self dispatchError:error result:SPTDataCacheResponseCodeOperationError callback:callback onQueue:queue];
 
     } else {
 
         if (callback != nil) {
-            SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_OPERATION_SUCCEEDED
+            SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeOperationSucceeded
                                                                                                 error:nil
                                                                                                record:nil];
 
@@ -938,7 +858,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         if (needComplains) {
             [self debugOutput:@"PersistentDataCache: Record not exist at path:%@", filePath];
         }
-        return [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_NOT_FOUND error:nil record:nil];
+        return [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeNotFound error:nil record:nil];
 
     } else {
         const int flags = (writeBack ? O_RDWR : O_RDONLY);
@@ -949,7 +869,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             const char* serr = strerror(errn);
             [self debugOutput:@"PersistentDataCache: Error opening file:%@ , error:%s", filePath, serr];
             NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: @(serr)}];
-            return [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_OPERATION_ERROR error:error record:nil];
+            return [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeOperationError error:error record:nil];
         }
 
         SPTPersistentCacheResponse *response = jobBlock(fd);
@@ -960,7 +880,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             const char* serr = strerror(errn);
             [self debugOutput:@"PersistentDataCache: Error closing file:%@ , error:%s", filePath, serr];
             NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: @(serr)}];
-            return [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_OPERATION_ERROR error:error record:nil];
+            return [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeOperationError error:error record:nil];
         }
 
         return response;
@@ -985,7 +905,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         SPTPersistentRecordHeaderType header;
         ssize_t readBytes = read(filedes, &header, kSPTPersistentRecordHeaderSize);
         if (readBytes != kSPTPersistentRecordHeaderSize) {
-            NSError *error = [self nsErrorWithCode:PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER];
+            NSError *error = [self nsErrorWithCode:SPTDataCacheLoadingErrorNotEnoughDataToGetHeader];
             if (readBytes == -1) {
                 const int errn = errno;
                 const char* serr = strerror(errn);
@@ -995,13 +915,13 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             [self debugOutput:@"PersistentDataCache: Error not enough data to read the header of file path:%@ , error:%@",
              filePath, [error localizedDescription]];
 
-            return [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_OPERATION_ERROR error:error record:nil];
+            return [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeOperationError error:error record:nil];
         }
 
         NSError *nsError = [self checkHeaderValid:&header];
         if (nsError != nil) {
             [self debugOutput:@"PersistentDataCache: Error checking header at file path:%@ , error:%@", filePath, nsError];
-            return [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_OPERATION_ERROR error:nsError record:nil];
+            return [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeOperationError error:nsError record:nil];
         }
 
         modifyBlock(&header);
@@ -1013,7 +933,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
             // If nothing has changed we do nothing then
             if (oldCRC == header.crc) {
-                return [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_OPERATION_SUCCEEDED error:nil record:nil];
+                return [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeOperationSucceeded error:nil record:nil];
             }
 
             // Set file pointer to the beginning of the file
@@ -1023,7 +943,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 const char* serr = strerror(errn);
                 [self debugOutput:@"PersistentDataCache: Error seeking to begin of file path:%@ , error:%s", filePath, serr];
                 NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: @(serr)}];
-                return [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_OPERATION_ERROR error:error record:nil];
+                return [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeOperationError error:error record:nil];
 
             } else {
                 ssize_t writtenBytes = write(filedes, &header, kSPTPersistentRecordHeaderSize);
@@ -1032,7 +952,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                     const char* serr = strerror(errn);
                     [self debugOutput:@"PersistentDataCache: Error writting header at file path:%@ , error:%s", filePath, serr];
                     NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: @(serr)}];
-                    return [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_OPERATION_ERROR error:error record:nil];
+                    return [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeOperationError error:error record:nil];
 
                 } else {
                     int result = fsync(filedes);
@@ -1041,13 +961,13 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                         const char* serr = strerror(errn);
                         [self debugOutput:@"PersistentDataCache: Error flushing file:%@ , error:%s", filePath, serr];
                         NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: @(serr)}];
-                        return [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_OPERATION_ERROR error:error record:nil];
+                        return [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeOperationError error:error record:nil];
                     }
                 }
             }
         }
 
-        return [[SPTPersistentCacheResponse alloc] initWithResult:PDC_DATA_OPERATION_SUCCEEDED error:nil record:nil];
+        return [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeOperationSucceeded error:nil record:nil];
     }
                               complain:needComplains
                              writeBack:needWriteBack];
@@ -1320,8 +1240,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
         SPTDiskSizeType totalSpace = fileSystemSize.longLongValue;
         SPTDiskSizeType freeSpace = fileSystemFreeSpace.longLongValue + currentCacheSize;
-
-//        SPTDiskSizeType proposedCacheSize = (totalSpace * (1.0 - SPTDataCacheMinimumFreeDiskSpace)) - (totalSpace - freeSpace);
         SPTDiskSizeType proposedCacheSize = freeSpace - totalSpace * SPTDataCacheMinimumFreeDiskSpace;
 
         tempCacheSize = MAX(0, proposedCacheSize);
@@ -1419,8 +1337,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 - (BOOL)processKeyIfBusy:(NSString *)key callback:(SPTDataCacheResponseCallback)callback queue:(dispatch_queue_t)queue
 {
     if ([self.busyKeys containsObject:key]) {
-        NSError *nsError = [self nsErrorWithCode:PDC_ERROR_RECORD_IS_STREAM_AND_BUSY];
-        [self dispatchError:nsError result:PDC_DATA_OPERATION_ERROR callback:callback onQueue:queue];
+        NSError *nsError = [self nsErrorWithCode:SPTDataCacheLoadingErrorRecordIsStreamAndBusy];
+        [self dispatchError:nsError result:SPTDataCacheResponseCodeOperationError callback:callback onQueue:queue];
         return YES;
     }
 
@@ -1450,28 +1368,28 @@ int /*SPTDataCacheLoadingError*/ pdc_ValidateHeader(const SPTPersistentRecordHea
 {
     assert(header != NULL);
     if (header == NULL) {
-        return PDC_ERROR_INTERNAL_INCONSISTENCY;
+        return SPTDataCacheLoadingErrorInternalInconsistency;
     }
 
     // Check that header could be read according to alignment
     if (!PointerMagicAlignCheck(header)) {
-        return PDC_ERROR_HEADER_ALIGNMENT_MISSMATCH;
+        return SPTDataCacheLoadingErrorHeaderAlignmentMismatch;
     }
 
     // 1. Check magic
     if (header->magic != kSPTPersistentDataCacheMagic) {
-        return PDC_ERROR_MAGIC_MISSMATCH;
+        return SPTDataCacheLoadingErrorMagicMismatch;
     }
 
     // 2. Check CRC
     uint32_t crc = pdc_CalculateHeaderCRC(header);
     if (crc != header->crc) {
-        return PDC_ERROR_INVALID_HEADER_CRC;
+        return SPTDataCacheLoadingErrorInvalidHeaderCRC;
     }
 
     // 3. Check header size
     if (header->headerSize != kSPTPersistentRecordHeaderSize) {
-        return PDC_ERROR_WRONG_HEADER_SIZE;
+        return SPTDataCacheLoadingErrorWrongHeaderSize;
     }
 
     return -1;

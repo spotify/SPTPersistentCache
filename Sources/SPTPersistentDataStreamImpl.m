@@ -76,7 +76,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 
             // Req.#1.4. If there is no data in the file mark it as incomplete
             if (_header.payloadSizeBytes == 0) {
-                _header.flags |= PDC_HEADER_FLAGS_STREAM_INCOMPLETE;
+                _header.flags |= SPTPersistentRecordHeaderFlagsStreamIncomplete;
             }
 
             // success
@@ -85,7 +85,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
         } else if (bytesRead != -1 && bytesRead < kSPTPersistentRecordHeaderSize) {
             // Migration in future
 
-            NSError *nsError = [self nsErrorWithCode:PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER];
+            NSError *nsError = [self nsErrorWithCode:SPTDataCacheLoadingErrorNotEnoughDataToGetHeader];
             return nsError;
         } else {
             // -1 error
@@ -101,9 +101,9 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 
     // execute callback
     if (openError != nil) {
-        callback(PDC_DATA_OPERATION_ERROR, nil, openError);
+        callback(SPTDataCacheResponseCodeOperationError, nil, openError);
     } else {
-        callback(PDC_DATA_OPERATION_SUCCEEDED, self, nil);
+        callback(SPTDataCacheResponseCodeOperationSucceeded, self, nil);
     }
 }
 
@@ -113,7 +113,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
              queue:(dispatch_queue_t)queue
 {
     dispatch_async(self.workQueue, ^{
-        _header.flags |= PDC_HEADER_FLAGS_STREAM_INCOMPLETE;
+        _header.flags |= SPTPersistentRecordHeaderFlagsStreamIncomplete;
 
         NSError *nsError = nil;
         [self writeBytes:data.bytes length:data.length error:&nsError];
@@ -157,7 +157,6 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
 
             // Just sanity check which MUST be holded
             const off_t currentOff = [self seekToOffset:0 withOrigin:SEEK_CUR error:&nsError];
-//            [self debugOutput:@"%@: currentOff:%lld, off:%lld", self.key, currentOff, self.currentOffset];
             assert(currentOff == self.currentOffset+kSPTPersistentRecordHeaderSize);
 
             if (nsError != nil) {
@@ -220,7 +219,7 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
     dispatch_sync(self.workQueue, ^{
         flags = self.header.flags;
     });
-    return (flags & PDC_HEADER_FLAGS_STREAM_INCOMPLETE) == 0;
+    return (flags & SPTPersistentRecordHeaderFlagsStreamIncomplete) == 0;
 }
 
 - (void)finalize:(dispatch_block_t)completion
@@ -303,9 +302,6 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
     CleanupHeandlerCallback cleanupCallback = [self.cleanupHandler copy];
     dispatch_queue_t queue = self.workQueue;
     int filedesc = self.fileDesc;
-
-//    [self debugOutput:@"PersistentDataStream: Closing stream for key:%@, cleanup:0x%p", self.key, cleanupCallback];
-
     dispatch_async(queue, ^{
         fsync(filedesc);
         close(filedesc);
@@ -350,7 +346,6 @@ typedef NSError* (^FileProcessingBlockType)(int filedes);
         }
     } else {
         self.currentOffset += length;
-//        [self debugOutput:@"PersistentDataStream: key:%@, written: %ld", self.key, length];
     }
 
     return ret;

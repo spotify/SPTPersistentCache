@@ -7,20 +7,18 @@ FOUNDATION_EXPORT const MagicType kSPTPersistentDataCacheMagic;
 /**
  * Describes different flags for record
  */
-typedef enum SPTPersistentRecordHeaderFlags
-{
+typedef enum SPTPersistentRecordHeaderFlags {
     // 0x0 means regular file
     /*
      * Indicates that record might not be completed last time it was written.
      * This is not an error state but more Application logic.
      */
-    PDC_HEADER_FLAGS_STREAM_INCOMPLETE = 0x1,
+    SPTPersistentRecordHeaderFlagsStreamIncomplete = 0x1,
 
 
 } SPTPersistentRecordHeaderFlags;
 
-typedef struct SPTPersistentRecordHeaderType
-{
+typedef struct SPTPersistentRecordHeaderType {
     // Version 1:
     MagicType magic;
     uint32_t headerSize;

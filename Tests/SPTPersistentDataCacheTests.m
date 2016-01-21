@@ -63,11 +63,11 @@ static const StoreParamsType kParams[] = {
     {0,     NO, NO, -1},
     {0,     NO, NO, -1},
     {0,     NO, NO, -1}, // 12
-    {0,     NO, NO, PDC_ERROR_MAGIC_MISSMATCH},
-    {0,     NO, NO, PDC_ERROR_WRONG_HEADER_SIZE},
-    {0,     NO, NO, PDC_ERROR_WRONG_PAYLOAD_SIZE},
-    {0,     NO, NO, PDC_ERROR_INVALID_HEADER_CRC},
-    {0,     NO, NO, PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER}, // 17
+    {0,     NO, NO, SPTDataCacheLoadingErrorMagicMismatch},
+    {0,     NO, NO, SPTDataCacheLoadingErrorWrongHeaderSize},
+    {0,     NO, NO, SPTDataCacheLoadingErrorWrongPayloadSize},
+    {0,     NO, NO, SPTDataCacheLoadingErrorInvalidHeaderCRC},
+    {0,     NO, NO, SPTDataCacheLoadingErrorNotEnoughDataToGetHeader}, // 17
 
     {kTTL4, NO, YES, -1}
 };
@@ -209,7 +209,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
             calls += 1;
 
-            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+            if (response.result == SPTDataCacheResponseCodeOperationSucceeded) {
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
                 ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
@@ -219,11 +219,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssertEqual(kParams[i].locked, locked, @"Same files must be locked");
                 XCTAssertEqual(kParams[i].ttl, response.record.ttl, @"Same files must have same TTL");
                 XCTAssertEqualObjects(self.imageNames[i], response.record.key, @"Same files must have same key");
-            } else if (response.result == PDC_DATA_NOT_FOUND) {
+            } else if (response.result == SPTDataCacheResponseCodeNotFound) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNil(response.error, @"error is not expected to be here");
 
-            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
+            } else if (response.result == SPTDataCacheResponseCodeOperationError) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNotNil(response.error, @"Valid error is expected to be here");
                 errorCalls += 1;
@@ -291,7 +291,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     } withCallback:^(SPTPersistentCacheResponse *response) {
 
-        if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+        if (response.result == SPTDataCacheResponseCodeOperationSucceeded) {
             XCTAssertNotNil(response.record, @"Expected valid not nil record");
             ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
             XCTAssertNotNil(image, @"Expected valid not nil image");
@@ -305,10 +305,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             XCTAssertEqual(kParams[idx].ttl, response.record.ttl, @"Same files must have same TTL");
             XCTAssertEqualObjects(key, response.record.key, @"Same files must have same key");
 
-        } else if (response.result == PDC_DATA_NOT_FOUND) {
+        } else if (response.result == SPTDataCacheResponseCodeNotFound) {
             XCTAssert(NO, @"This shouldnt happen");
 
-        } else if (response.result == PDC_DATA_OPERATION_ERROR ){
+        } else if (response.result == SPTDataCacheResponseCodeOperationError ){
             XCTAssertNotNil(response.error, @"error is not expected to be here");
         }
 
@@ -346,9 +346,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     } withCallback:^(SPTPersistentCacheResponse *response) {
 
-        if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+        if (response.result == SPTDataCacheResponseCodeOperationSucceeded) {
             XCTAssert(NO, @"This shouldnt happen");
-        } else if (response.result == PDC_DATA_NOT_FOUND) {
+        } else if (response.result == SPTDataCacheResponseCodeNotFound) {
             XCTAssertNil(response.record, @"Expected valid nil record");
             XCTAssertNil(response.error, @"Valid nil error is expected to be here");
         } else {
@@ -429,7 +429,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
-            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+            if (response.result == SPTDataCacheResponseCodeOperationSucceeded) {
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
                 ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
@@ -439,11 +439,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssertNotEqual(kParams[i].locked, locked, @"Same files must be locked");
                 XCTAssertEqual(kParams[i].ttl, response.record.ttl, @"Same files must have same TTL");
                 XCTAssertEqualObjects(self.imageNames[i], response.record.key, @"Same files must have same key");
-            } else if (response.result == PDC_DATA_NOT_FOUND) {
+            } else if (response.result == SPTDataCacheResponseCodeNotFound) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNil(response.error, @"error is not expected to be here");
 
-            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
+            } else if (response.result == SPTDataCacheResponseCodeOperationError) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNotNil(response.error, @"Valid error is expected to be here");
                 errorCalls += 1;
@@ -496,11 +496,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             calls += 1;
 
             if (i == streamIndex) {
-                XCTAssert(response.result == PDC_DATA_OPERATION_ERROR, @"We expect file wouldn't be found after removing");
+                XCTAssert(response.result == SPTDataCacheResponseCodeOperationError, @"We expect file wouldn't be found after removing");
                 XCTAssertNil(response.record, @"Expected valid nil record");
-                XCTAssertEqual(response.error.code, PDC_ERROR_RECORD_IS_STREAM_AND_BUSY, @"error code is not as expected to be here");
+                XCTAssertEqual(response.error.code, SPTDataCacheLoadingErrorRecordIsStreamAndBusy, @"error code is not as expected to be here");
             } else {
-                XCTAssertEqual(response.result, PDC_DATA_NOT_FOUND, @"We expect file wouldn't be found after removing");
+                XCTAssertEqual(response.result, SPTDataCacheResponseCodeNotFound, @"We expect file wouldn't be found after removing");
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNil(response.error, @"error is not expected to be here");
             }
@@ -553,11 +553,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             calls += 1;
 
             if (i == streamIndex) {
-                XCTAssert(response.result == PDC_DATA_OPERATION_ERROR, @"We expect file wouldn't be found after removing");
+                XCTAssert(response.result == SPTDataCacheResponseCodeOperationError, @"We expect file wouldn't be found after removing");
                 XCTAssertNil(response.record, @"Expected valid nil record");
-                XCTAssertEqual(response.error.code, PDC_ERROR_RECORD_IS_STREAM_AND_BUSY, @"error code is not as expected to be here");
+                XCTAssertEqual(response.error.code, SPTDataCacheLoadingErrorRecordIsStreamAndBusy, @"error code is not as expected to be here");
             } else {
-                XCTAssertEqual(response.result, PDC_DATA_NOT_FOUND, @"We expect file wouldn't be found after removing");
+                XCTAssertEqual(response.result, SPTDataCacheResponseCodeNotFound, @"We expect file wouldn't be found after removing");
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNil(response.error, @"error is not expected to be here");
             }
@@ -614,7 +614,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
-            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+            if (response.result == SPTDataCacheResponseCodeOperationSucceeded) {
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
                 ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
@@ -624,16 +624,16 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssertEqual(kParams[i].locked, locked, @"Same files must be locked");
                 XCTAssertEqual(kParams[i].ttl, response.record.ttl, @"Same files must have same TTL");
                 XCTAssertEqualObjects(self.imageNames[i], response.record.key, @"Same files must have same key");
-            } else if (response.result == PDC_DATA_NOT_FOUND) {
+            } else if (response.result == SPTDataCacheResponseCodeNotFound) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNil(response.error, @"error is not expected to be here");
                 notFoundCalls += 1;
 
-            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
+            } else if (response.result == SPTDataCacheResponseCodeOperationError) {
 
                 if (i == streamIndex) {
                     XCTAssertNil(response.record, @"Expected valid nil record");
-                    XCTAssertEqual(response.error.code, PDC_ERROR_RECORD_IS_STREAM_AND_BUSY, @"Valid error is expected to be here");
+                    XCTAssertEqual(response.error.code, SPTDataCacheLoadingErrorRecordIsStreamAndBusy, @"Valid error is expected to be here");
                 } else {
                     XCTAssertNil(response.record, @"Expected valid nil record");
                     XCTAssertNotNil(response.error, @"Valid error is expected to be here");
@@ -686,7 +686,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     int __block notFoundCalls = 0;
     int __block errorCalls = 0;
     BOOL __block unlocked = YES;
-    // +1 stands for PDC_ERROR_WRONG_PAYLOAD_SIZE since technically it has corrent header.
+    // +1 stands for SPTDataCacheLoadingErrorWrongPayloadSize since technically it has corrent header.
     const int reallyUnlocked = params_GetFilesNumber(NO) + 1;
 
     const NSUInteger count = self.imageNames.count;
@@ -699,7 +699,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
-            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+            if (response.result == SPTDataCacheResponseCodeOperationSucceeded) {
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
                 ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
@@ -709,16 +709,16 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssertEqual(kParams[i].locked, !unlocked, @"Same files must be locked");
                 XCTAssertEqual(kParams[i].ttl, response.record.ttl, @"Same files must have same TTL");
                 XCTAssertEqualObjects(self.imageNames[i], response.record.key, @"Same files must have same key");
-            } else if (response.result == PDC_DATA_NOT_FOUND) {
+            } else if (response.result == SPTDataCacheResponseCodeNotFound) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNil(response.error, @"error is not expected to be here");
                 notFoundCalls += 1;
 
-            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
+            } else if (response.result == SPTDataCacheResponseCodeOperationError) {
 
                 if (i == streamIndex) {
                     XCTAssertNil(response.record, @"Expected valid nil record");
-                    XCTAssertEqual(response.error.code, PDC_ERROR_RECORD_IS_STREAM_AND_BUSY, @"Valid error is expected to be here");
+                    XCTAssertEqual(response.error.code, SPTDataCacheLoadingErrorRecordIsStreamAndBusy, @"Valid error is expected to be here");
                 } else {
                     XCTAssertNil(response.record, @"Expected valid nil record");
                     XCTAssertNotNil(response.error, @"Valid error is expected to be here");
@@ -831,7 +831,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
-            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+            if (response.result == SPTDataCacheResponseCodeOperationSucceeded) {
                 ++successCalls;
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
                 ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
@@ -842,12 +842,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssertEqual(kParams[i].locked, !unlocked, @"Same files must be locked");
                 XCTAssertEqual(kParams[i].ttl, response.record.ttl, @"Same files must have same TTL");
                 XCTAssertEqualObjects(self.imageNames[i], response.record.key, @"Same files must have same key");
-            } else if (response.result == PDC_DATA_NOT_FOUND) {
+            } else if (response.result == SPTDataCacheResponseCodeNotFound) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNil(response.error, @"error is not expected to be here");
                 notFoundCalls += 1;
 
-            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
+            } else if (response.result == SPTDataCacheResponseCodeOperationError) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNotNil(response.error, @"Valid error is expected to be here");
                 errorCalls += 1;
@@ -895,7 +895,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
-            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+            if (response.result == SPTDataCacheResponseCodeOperationSucceeded) {
                 ++successCalls;
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
                 ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
@@ -906,12 +906,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssertEqual(kParams[i].locked, !unlocked, @"Same files must be locked");
                 XCTAssertEqual(kParams[i].ttl, response.record.ttl, @"Same files must have same TTL");
                 XCTAssertEqualObjects(self.imageNames[i], response.record.key, @"Same files must have same key");
-            } else if (response.result == PDC_DATA_NOT_FOUND) {
+            } else if (response.result == SPTDataCacheResponseCodeNotFound) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNil(response.error, @"error is not expected to be here");
                 notFoundCalls += 1;
 
-            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
+            } else if (response.result == SPTDataCacheResponseCodeOperationError) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNotNil(response.error, @"Valid error is expected to be here");
                 errorCalls += 1;
@@ -992,7 +992,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
-            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+            if (response.result == SPTDataCacheResponseCodeOperationSucceeded) {
                 ++successCalls;
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
                 ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
@@ -1003,12 +1003,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssertEqual(kParams[i].locked, !unlocked, @"Same files must be locked");
                 XCTAssertEqual(kParams[i].ttl, response.record.ttl, @"Same files must have same TTL");
                 XCTAssertEqualObjects(self.imageNames[i], response.record.key, @"Same files must have same key");
-            } else if (response.result == PDC_DATA_NOT_FOUND) {
+            } else if (response.result == SPTDataCacheResponseCodeNotFound) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNil(response.error, @"error is not expected to be here");
                 notFoundCalls += 1;
 
-            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
+            } else if (response.result == SPTDataCacheResponseCodeOperationError) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNotNil(response.error, @"Valid error is expected to be here");
                 errorCalls += 1;
@@ -1046,7 +1046,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTestExpectation *streamExp = [self expectationWithDescription:@"stream"];
     [cache openDataStreamForKey:self.imageNames[2] createIfNotExist:NO ttl:0 locked:NO
                    withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
-                       XCTAssertEqual(result, PDC_DATA_NOT_FOUND);
+                       XCTAssertEqual(result, SPTDataCacheResponseCodeNotFound);
                        XCTAssertNil(s);
                        XCTAssertNil(error);
                        [streamExp fulfill];
@@ -1067,13 +1067,13 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
         [cache touchDataForKey:cacheKey callback:^(SPTPersistentCacheResponse *response) {
-            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+            if (response.result == SPTDataCacheResponseCodeOperationSucceeded) {
                 successCalls += 1;
 
-            } else if (response.result == PDC_DATA_NOT_FOUND) {
+            } else if (response.result == SPTDataCacheResponseCodeNotFound) {
                 notFoundCalls += 1;
 
-            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
+            } else if (response.result == SPTDataCacheResponseCodeOperationError) {
                 errorCalls += 1;
             }
 
@@ -1124,7 +1124,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
 
-            if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+            if (response.result == SPTDataCacheResponseCodeOperationSucceeded) {
                 ++successCalls;
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
                 ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
@@ -1135,12 +1135,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssertEqual(kParams[i].locked, !unlocked, @"Same files must be locked");
                 XCTAssertEqual(kParams[i].ttl, response.record.ttl, @"Same files must have same TTL");
                 XCTAssertEqualObjects(self.imageNames[i], response.record.key, @"Same files must have same key");
-            } else if (response.result == PDC_DATA_NOT_FOUND) {
+            } else if (response.result == SPTDataCacheResponseCodeNotFound) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNil(response.error, @"error is not expected to be here");
                 notFoundCalls += 1;
 
-            } else if (response.result == PDC_DATA_OPERATION_ERROR) {
+            } else if (response.result == SPTDataCacheResponseCodeOperationError) {
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNotNil(response.error, @"Valid error is expected to be here");
                 errorCalls += 1;
@@ -1404,18 +1404,18 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
                            calls += 1;
 
-                           if (result == PDC_DATA_OPERATION_SUCCEEDED) {
+                           if (result == SPTDataCacheResponseCodeOperationSucceeded) {
                                ++successCalls;
 
                                XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
                                XCTAssertNil(error, @"error is not expected to be here");
 
-                           } else if (result == PDC_DATA_NOT_FOUND) {
+                           } else if (result == SPTDataCacheResponseCodeNotFound) {
                                XCTAssertNil(stream, @"Must be nil stream on not found");
                                XCTAssertNil(error, @"error is not expected to be here");
                                notFoundCalls += 1;
 
-                           } else if (result == PDC_DATA_OPERATION_ERROR) {
+                           } else if (result == SPTDataCacheResponseCodeOperationError) {
                                XCTAssertNil(stream, @"Must be nil stream on not found");
                                XCTAssertNotNil(error, @"Valid error is expected to be here");
                                errorCalls += 1;
@@ -1450,7 +1450,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     id<SPTPersistentDataStream> __block s1 = nil;
     [cache openDataStreamForKey:self.imageNames[2] createIfNotExist:NO ttl:0 locked:NO
                    withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
-                       XCTAssertEqual(result, PDC_DATA_OPERATION_SUCCEEDED);
+                       XCTAssertEqual(result, SPTDataCacheResponseCodeOperationSucceeded);
                        XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
                        XCTAssertNil(error, @"error is not expected to be here");
                        s1 = stream;
@@ -1463,10 +1463,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTestExpectation *exp2 = [self expectationWithDescription:@"stream2"];
     [cache openDataStreamForKey:self.imageNames[2] createIfNotExist:NO ttl:0 locked:NO
                    withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
-                       XCTAssertEqual(result, PDC_DATA_OPERATION_ERROR);
+                       XCTAssertEqual(result, SPTDataCacheResponseCodeOperationError);
                        XCTAssertNil(stream, @"Must be valid non nil stream on success");
                        XCTAssertNotNil(error, @"error is not expected to be here");
-                       XCTAssertEqual(error.code, PDC_ERROR_RECORD_IS_STREAM_AND_BUSY, @"Error code must match");
+                       XCTAssertEqual(error.code, SPTDataCacheLoadingErrorRecordIsStreamAndBusy, @"Error code must match");
                        [exp2 fulfill];
                    }
                         onQueue:dispatch_get_main_queue()];
@@ -1497,18 +1497,18 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
                            calls += 1;
 
-                           if (result == PDC_DATA_OPERATION_SUCCEEDED) {
+                           if (result == SPTDataCacheResponseCodeOperationSucceeded) {
                                ++successCalls;
 
                                XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
                                XCTAssertNil(error, @"error is not expected to be here");
 
-                           } else if (result == PDC_DATA_NOT_FOUND) {
+                           } else if (result == SPTDataCacheResponseCodeNotFound) {
                                XCTAssertNil(stream, @"Must be nil stream on not found");
                                XCTAssertNil(error, @"error is not expected to be here");
                                notFoundCalls += 1;
 
-                           } else if (result == PDC_DATA_OPERATION_ERROR) {
+                           } else if (result == SPTDataCacheResponseCodeOperationError) {
                                XCTAssertNil(stream, @"Must be nil stream on not found");
                                XCTAssertNotNil(error, @"Valid error is expected to be here");
                                errorCalls += 1;
@@ -1557,7 +1557,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
         const uint64_t ttl = (kParams[i].ttl > 0 ? refTTL : 0);
         const BOOL locked = !kParams[i].locked;
-        if (kParams[i].corruptReason == -1 || kParams[i].corruptReason == PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER) {
+        if (kParams[i].corruptReason == -1 || kParams[i].corruptReason == SPTDataCacheLoadingErrorNotEnoughDataToGetHeader) {
             expectedSuccessCalls++;
         } else {
             expectedErrorCalls++;
@@ -1568,18 +1568,18 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
                            calls += 1;
 
-                           if (result == PDC_DATA_OPERATION_SUCCEEDED) {
+                           if (result == SPTDataCacheResponseCodeOperationSucceeded) {
                                ++successCalls;
 
                                XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
                                XCTAssertNil(error, @"error is not expected to be here");
 
-                           } else if (result == PDC_DATA_NOT_FOUND) {
+                           } else if (result == SPTDataCacheResponseCodeNotFound) {
                                XCTAssertNil(stream, @"Must be nil stream on not found");
                                XCTAssertNil(error, @"error is not expected to be here");
                                notFoundCalls += 1;
 
-                           } else if (result == PDC_DATA_OPERATION_ERROR) {
+                           } else if (result == SPTDataCacheResponseCodeOperationError) {
                                XCTAssertNil(stream, @"Must be nil stream on not found");
                                XCTAssertNotNil(error, @"Valid error is expected to be here");
                                errorCalls += 1;
@@ -1650,18 +1650,18 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
                            calls += 1;
 
-                           if (result == PDC_DATA_OPERATION_SUCCEEDED) {
+                           if (result == SPTDataCacheResponseCodeOperationSucceeded) {
                                ++successCalls;
 
                                XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
                                XCTAssertNil(error, @"error is not expected to be here");
 
-                           } else if (result == PDC_DATA_NOT_FOUND) {
+                           } else if (result == SPTDataCacheResponseCodeNotFound) {
                                XCTAssertNil(stream, @"Must be nil stream on not found");
                                XCTAssertNil(error, @"error is not expected to be here");
                                notFoundCalls += 1;
 
-                           } else if (result == PDC_DATA_OPERATION_ERROR) {
+                           } else if (result == SPTDataCacheResponseCodeOperationError) {
                                XCTAssertNil(stream, @"Must be nil stream on not found");
                                XCTAssertNotNil(error, @"Valid error is expected to be here");
                                errorCalls += 1;
@@ -1716,7 +1716,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                    withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
 
                        stream = s;
-                       XCTAssertEqual(result, PDC_DATA_OPERATION_SUCCEEDED, @"Result must be success");
+                       XCTAssertEqual(result, SPTDataCacheResponseCodeOperationSucceeded, @"Result must be success");
                        XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
                        XCTAssertNil(error, @"error is not expected to be here");
 
@@ -1808,7 +1808,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                    withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
 
                        stream = s;
-                       XCTAssertEqual(result, PDC_DATA_OPERATION_SUCCEEDED, @"Result must be success");
+                       XCTAssertEqual(result, SPTDataCacheResponseCodeOperationSucceeded, @"Result must be success");
                        XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
                        XCTAssertNil(error, @"error is not expected to be here");
 
@@ -1902,7 +1902,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                    withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
 
                        stream = s;
-                       XCTAssertEqual(result, PDC_DATA_OPERATION_SUCCEEDED, @"Result must be success");
+                       XCTAssertEqual(result, SPTDataCacheResponseCodeOperationSucceeded, @"Result must be success");
                        XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
                        XCTAssertNil(error, @"error is not expected to be here");
 
@@ -2032,7 +2032,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                        withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
 
                            stream = s;
-                           XCTAssertEqual(result, PDC_DATA_OPERATION_SUCCEEDED, @"Result must be success");
+                           XCTAssertEqual(result, SPTDataCacheResponseCodeOperationSucceeded, @"Result must be success");
                            XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
                            XCTAssertNil(error, @"error is not expected to be here");
 
@@ -2117,8 +2117,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                            if (error) {
                                NSLog(@"Error for key:%@ error:%@", key, error);
 
-                               if (error.code != PDC_ERROR_RECORD_IS_STREAM_AND_BUSY) {
-                                   XCTAssertEqual(result, PDC_DATA_OPERATION_SUCCEEDED, @"Result must be success");
+                               if (error.code != SPTDataCacheLoadingErrorRecordIsStreamAndBusy) {
+                                   XCTAssertEqual(result, SPTDataCacheResponseCodeOperationSucceeded, @"Result must be success");
                                    XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
                                    XCTAssertNil(error, @"error is not expected to be here");
                                }
@@ -2137,7 +2137,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         }
         
         // break the loop and fail in case of non busy error.
-        if (openError && openError.code != PDC_ERROR_RECORD_IS_STREAM_AND_BUSY) {
+        if (openError && openError.code != SPTDataCacheLoadingErrorRecordIsStreamAndBusy) {
             break;
         }
     }
@@ -2197,10 +2197,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertNotNil(key, @"Key must be specified");
 
     [cache storeData:data forKey:key ttl:ttl locked:locked withCallback:^(SPTPersistentCacheResponse *response) {
-        if (response.result == PDC_DATA_OPERATION_SUCCEEDED) {
+        if (response.result == SPTDataCacheResponseCodeOperationSucceeded) {
             XCTAssertNil(response.record, @"record expected to be nil");
             XCTAssertNil(response.error, @"error xpected to be nil");
-        } else if (response.result == PDC_DATA_OPERATION_ERROR) {
+        } else if (response.result == SPTDataCacheResponseCodeOperationError) {
             XCTAssertNil(response.record, @"record expected to be nil");
             XCTAssertNotNil(response.error, @"error must exist for when STORE failed");
         } else {
@@ -2211,18 +2211,18 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 }
 
 /*
-PDC_ERROR_MAGIC_MISSMATCH,
-PDC_ERROR_WRONG_HEADER_SIZE,
-PDC_ERROR_WRONG_PAYLOAD_SIZE,
-PDC_ERROR_INVALID_HEADER_CRC,
-PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
+SPTDataCacheLoadingErrorMagicMismatch,
+SPTDataCacheLoadingErrorWrongHeaderSize,
+SPTDataCacheLoadingErrorWrongPayloadSize,
+SPTDataCacheLoadingErrorInvalidHeaderCRC,
+SPTDataCacheLoadingErrorNotEnoughDataToGetHeader,
 */
 
 - (void)corruptFile:(NSString *)filePath
            pdcError:(int)pdcError
 {
     unsigned flags = O_RDWR;
-    if (pdcError == PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER) {
+    if (pdcError == SPTDataCacheLoadingErrorNotEnoughDataToGetHeader) {
         flags |= O_TRUNC;
     }
 
@@ -2235,7 +2235,7 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
     SPTPersistentRecordHeaderType header;
     memset(&header, 0, kSPTPersistentRecordHeaderSize);
 
-    if (pdcError != PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER) {
+    if (pdcError != SPTDataCacheLoadingErrorNotEnoughDataToGetHeader) {
 
         ssize_t readSize = read(fd, &header, kSPTPersistentRecordHeaderSize);
         if (readSize != kSPTPersistentRecordHeaderSize) {
@@ -2248,26 +2248,26 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
     NSUInteger headerSize = kSPTPersistentRecordHeaderSize;
 
     switch (pdcError) {
-        case PDC_ERROR_MAGIC_MISSMATCH:
+        case SPTDataCacheLoadingErrorMagicMismatch:
             header.magic = 0xFFFF5454;
 
             break;
 
-        case PDC_ERROR_WRONG_HEADER_SIZE:
+        case SPTDataCacheLoadingErrorWrongHeaderSize:
             header.headerSize = kSPTPersistentRecordHeaderSize + 1 + arc4random_uniform(106);
             header.crc = pdc_CalculateHeaderCRC(&header);
 
             break;
-        case PDC_ERROR_WRONG_PAYLOAD_SIZE:
+        case SPTDataCacheLoadingErrorWrongPayloadSize:
             header.payloadSizeBytes += (1 + (arc4random_uniform((uint32_t)header.payloadSizeBytes) - (header.payloadSizeBytes-1)/2));
             header.crc = pdc_CalculateHeaderCRC(&header);
 
             break;
-        case PDC_ERROR_INVALID_HEADER_CRC:
+        case SPTDataCacheLoadingErrorInvalidHeaderCRC:
             header.crc = header.crc + 5;
 
             break;
-        case PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER:
+        case SPTDataCacheLoadingErrorNotEnoughDataToGetHeader:
             headerSize = kCorruptedFileSize;
             break;
 
@@ -2375,7 +2375,7 @@ PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER,
     NSUInteger expectedSize = 0;
 
     for (unsigned i = 0; i < self.imageNames.count; ++i) {
-        if (kParams[i].corruptReason == PDC_ERROR_NOT_ENOUGH_DATA_TO_GET_HEADER) {
+        if (kParams[i].corruptReason == SPTDataCacheLoadingErrorNotEnoughDataToGetHeader) {
             expectedSize += kCorruptedFileSize;
         } else {
             expectedSize += ([self dataSizeForItem:self.imageNames[i]] + kSPTPersistentRecordHeaderSize);
