@@ -191,10 +191,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
                                                        expirationTime:[NSDate timeIntervalSinceReferenceDate]];
 
-    const int streamIndex = 2;
-    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
-    (void)(stream);
-
     int __block calls = 0;
     int __block errorCalls = 0;
 
@@ -247,18 +243,13 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             if (kParams[i].ttl > 0) {
                 XCTAssertEqual(updateTime, kTestEpochTime, @"Time must not be altered for records with TTL > 0 on cache access");
             } else {
-                if (i == streamIndex) {
-                    XCTAssertEqual(updateTime, kTestEpochTime, @"Time must not be altered for records with TTL > 0 on cache access");
-                } else {
-                    XCTAssertNotEqual(updateTime, kTestEpochTime, @"Time must be altered since cache was accessed");
-                }
+                XCTAssertNotEqual(updateTime, kTestEpochTime, @"Time must be altered since cache was accessed");
             }
         }];
     }
 
     XCTAssertEqual(calls, self.imageNames.count, @"Number of checked files must match");
-    // -1 for opened stream
-    XCTAssertEqual(errorCalls -1, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
+    XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
 }
 
 /**
@@ -375,10 +366,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
-    const int streamIndex = 2;
-    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
-    (void)(stream);
-
     NSMutableArray *toLock = [NSMutableArray array];
     NSMutableArray *toUnlock = [NSMutableArray array];
 
@@ -459,8 +446,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     XCTAssertEqual(calls, self.imageNames.count, @"Number of checked files must match");
-    // -1 stands for stream
-    XCTAssertEqual(errorCalls -1, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
+    XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
 }
 
 /*
@@ -476,10 +462,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
-    const int streamIndex = 2;
-    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
-    (void)(stream);
-
     [cache removeDataForKeys:self.imageNames];
 
     int __block calls = 0;
@@ -494,17 +476,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         // This just give us guarantee that files should be deleted
         [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
-
-            if (i == streamIndex) {
-                XCTAssert(response.result == SPTDataCacheResponseCodeOperationError, @"We expect file wouldn't be found after removing");
-                XCTAssertNil(response.record, @"Expected valid nil record");
-                XCTAssertEqual(response.error.code, SPTDataCacheLoadingErrorRecordIsStreamAndBusy, @"error code is not as expected to be here");
-            } else {
-                XCTAssertEqual(response.result, SPTDataCacheResponseCodeNotFound, @"We expect file wouldn't be found after removing");
-                XCTAssertNil(response.record, @"Expected valid nil record");
-                XCTAssertNil(response.error, @"error is not expected to be here");
-            }
-
+            XCTAssertEqual(response.result, SPTDataCacheResponseCodeNotFound, @"We expect file wouldn't be found after removing");
+            XCTAssertNil(response.record, @"Expected valid nil record");
+            XCTAssertNil(response.error, @"error is not expected to be here");
             [exp fulfill];
         } onQueue:dispatch_get_main_queue()];
     }
@@ -515,8 +489,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     // Check file syste, that there are no files left
     NSUInteger files = [self getFilesNumberAtPath:self.cachePath];
-    // 1 for opened stream
-    XCTAssertEqual(files, 1, @"There shouldn't be files left");
+    XCTAssertEqual(files, 0, @"There shouldn't be files left");
 }
 
 /*
@@ -531,10 +504,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         return kTestEpochTime + SPTPersistentDataCacheDefaultExpirationTimeSec - 1;
     }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-
-    const int streamIndex = 2;
-    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
-    (void)(stream);
 
     [cache prune];
 
@@ -552,15 +521,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
             calls += 1;
 
-            if (i == streamIndex) {
-                XCTAssert(response.result == SPTDataCacheResponseCodeOperationError, @"We expect file wouldn't be found after removing");
-                XCTAssertNil(response.record, @"Expected valid nil record");
-                XCTAssertEqual(response.error.code, SPTDataCacheLoadingErrorRecordIsStreamAndBusy, @"error code is not as expected to be here");
-            } else {
-                XCTAssertEqual(response.result, SPTDataCacheResponseCodeNotFound, @"We expect file wouldn't be found after removing");
-                XCTAssertNil(response.record, @"Expected valid nil record");
-                XCTAssertNil(response.error, @"error is not expected to be here");
-            }
+            XCTAssertEqual(response.result, SPTDataCacheResponseCodeNotFound, @"We expect file wouldn't be found after removing");
+            XCTAssertNil(response.record, @"Expected valid nil record");
+            XCTAssertNil(response.error, @"error is not expected to be here");
 
             [exp fulfill];
         } onQueue:dispatch_get_main_queue()];
@@ -572,8 +535,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     // Check file syste, that there are no files left
     NSUInteger files = [self getFilesNumberAtPath:self.cachePath];
-    // 1 for opened streams
-    XCTAssertEqual(files, 1, @"There shouldn't be files left");
+    XCTAssertEqual(files, 0, @"There shouldn't be files left");
 }
 
 
@@ -592,9 +554,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         return kTestEpochTime;
     }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-    const int streamIndex = 1;
-    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
-    (void)(stream);
 
     [cache wipeLockedFiles];
 
@@ -628,16 +587,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 XCTAssertNil(response.record, @"Expected valid nil record");
                 XCTAssertNil(response.error, @"error is not expected to be here");
                 notFoundCalls += 1;
-
             } else if (response.result == SPTDataCacheResponseCodeOperationError) {
-
-                if (i == streamIndex) {
-                    XCTAssertNil(response.record, @"Expected valid nil record");
-                    XCTAssertEqual(response.error.code, SPTDataCacheLoadingErrorRecordIsStreamAndBusy, @"Valid error is expected to be here");
-                } else {
-                    XCTAssertNil(response.record, @"Expected valid nil record");
-                    XCTAssertNotNil(response.error, @"Valid error is expected to be here");
-                }
+                XCTAssertNil(response.record, @"Expected valid nil record");
+                XCTAssertNotNil(response.error, @"Valid error is expected to be here");
                 errorCalls += 1;
 
             } else {
@@ -651,15 +603,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
-    // -1 stand for locked file opened as stream
-    XCTAssertEqual(notFoundCalls, reallyLocked-1, @"Number of really locked files files is not the same we deleted");
+    XCTAssertEqual(notFoundCalls, reallyLocked, @"Number of really locked files files is not the same we deleted");
 
     // Check file syste, that there are no files left
     NSUInteger files = [self getFilesNumberAtPath:self.cachePath];
-    // -1 stand for locked file opened as stream
-    XCTAssertEqual(files -1, self.imageNames.count-reallyLocked, @"There shouldn't be files left");
-    // -1 stand for locked file opened as stream
-    XCTAssertEqual(errorCalls -1, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
+    XCTAssertEqual(files, self.imageNames.count-reallyLocked, @"There shouldn't be files left");
+    XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
 }
 
 /*
@@ -675,10 +624,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         return kTestEpochTime + SPTPersistentDataCacheDefaultExpirationTimeSec - 1;
     }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-
-    const int streamIndex = 2;
-    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
-    (void)(stream);
 
     [cache wipeNonLockedFiles];
 
@@ -715,15 +660,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                 notFoundCalls += 1;
 
             } else if (response.result == SPTDataCacheResponseCodeOperationError) {
-
-                if (i == streamIndex) {
-                    XCTAssertNil(response.record, @"Expected valid nil record");
-                    XCTAssertEqual(response.error.code, SPTDataCacheLoadingErrorRecordIsStreamAndBusy, @"Valid error is expected to be here");
-                } else {
-                    XCTAssertNil(response.record, @"Expected valid nil record");
-                    XCTAssertNotNil(response.error, @"Valid error is expected to be here");
-                }
-
+                XCTAssertNil(response.record, @"Expected valid nil record");
+                XCTAssertNotNil(response.error, @"Valid error is expected to be here");
+                
                 errorCalls += 1;
 
             } else {
@@ -737,15 +676,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
-    // -1 stands for opened stream
-    XCTAssertEqual(notFoundCalls, reallyUnlocked -1, @"Number of really locked files files is not the same we deleted");
+    XCTAssertEqual(notFoundCalls, reallyUnlocked, @"Number of really locked files files is not the same we deleted");
 
     // Check file system, that there are no files left
     NSUInteger files = [self getFilesNumberAtPath:self.cachePath];
-    // -1 stands for opened stream
-    XCTAssertEqual(files -1, self.imageNames.count-reallyUnlocked, @"There shouldn't be files left");
-    // -1 stands for opened stream
-    XCTAssertEqual(errorCalls -1, params_GetCorruptedFilesNumber()-1, @"Number of checked files must match");
+    XCTAssertEqual(files, self.imageNames.count-reallyUnlocked, @"There shouldn't be files left");
+    XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber()-1, @"Number of checked files must match");
 }
 
 /*
@@ -759,10 +695,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         return kTestEpochTime + SPTPersistentDataCacheDefaultExpirationTimeSec - 1;
     }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-
-    const int streamIndex = 2;
-    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
-    (void)(stream);
 
     NSUInteger expectedSize = [self calculateExpectedSize];
     NSUInteger realUsedSize = [cache totalUsedSizeInBytes];
@@ -781,17 +713,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
-    const int streamIndex = 1;
-    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
-    (void)(stream);
-
     NSUInteger expectedSize = 0;
 
     for (unsigned i = 0; !kParams[i].last; ++i) {
-
-        if (i == streamIndex) {
-            continue;
-        }
 
         if (kParams[i].locked) {
 
@@ -945,9 +869,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         return kTestEpochTime + SPTPersistentDataCacheDefaultExpirationTimeSec - 1;
     }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-    const NSUInteger streamIndex = 2;
-    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
-    (void)(stream);
 
     const NSUInteger count = self.imageNames.count;
 
@@ -967,11 +888,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         NSString *path = [cache pathForKey:self.imageNames[i]];
         [self checkUpdateTimeForFileAtPath:path validate:kParams[i].corruptReason == -1 referenceTimeCheck:^(uint64_t updateTime) {
             if (kParams[i].ttl == 0) {
-                if (i == streamIndex) {
-                    XCTAssertEqual(updateTime, kTestEpochTime, @"Time must match for initial value i.e. touched");
-                } else {
-                    XCTAssertNotEqual(updateTime, kTestEpochTime, @"Time must not match for initial value i.e. touched");
-                }
+                XCTAssertNotEqual(updateTime, kTestEpochTime, @"Time must not match for initial value i.e. touched");
             } else {
                 XCTAssertEqual(updateTime, kTestEpochTime, @"Time must match for initial value i.e. not touched");
             }
@@ -1026,11 +943,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     const int corrupted = params_GetCorruptedFilesNumber();
 
     XCTAssert(calls == count, @"Number of checked files must match");
-    // -1 stands for opened stream
-    XCTAssertEqual(successCalls, count-corrupted -1, @"There should be exact number of locked files");
+    XCTAssertEqual(successCalls, count-corrupted, @"There should be exact number of locked files");
     XCTAssertEqual(notFoundCalls, 0, @"Number of not found files must match");
-    // -1 stands for opened stream
-    XCTAssertEqual(errorCalls -1, corrupted, @"Number of not found files must match");
+    XCTAssertEqual(errorCalls, corrupted, @"Number of not found files must match");
 }
 
 
@@ -1041,18 +956,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 {
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-
-    // Try to get stream for expired object
-    XCTestExpectation *streamExp = [self expectationWithDescription:@"stream"];
-    [cache openDataStreamForKey:self.imageNames[2] createIfNotExist:NO ttl:0 locked:NO
-                   withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
-                       XCTAssertEqual(result, SPTDataCacheResponseCodeNotFound);
-                       XCTAssertNil(s);
-                       XCTAssertNil(error);
-                       [streamExp fulfill];
-                   } onQueue:dispatch_get_main_queue()];
-
-    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     // Try to touch the data that is expired
     const NSUInteger count = self.imageNames.count;
@@ -1170,11 +1073,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
-    const int streamIndex = 2;
-    NSString *path2 = [cache pathForKey:self.imageNames[streamIndex]];
-    [self alterUpdateTime:[[NSDate date] timeIntervalSince1970] forFileAtPath:path2];
-    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
-    (void)(stream);
 
     const NSUInteger count = self.imageNames.count;
 
@@ -1186,10 +1084,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     for (unsigned i = 0; i < count; ++i) {
         NSString *path = [cache pathForKey:self.imageNames[i]];
-
-        if (i == streamIndex) {
-            continue;
-        }
 
         SPTPersistentRecordHeaderType header;
         BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
@@ -1203,9 +1097,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
 
     XCTAssertEqual(lockedCount, params_GetFilesNumber(YES), @"Locked files count must match");
-    // We add number of corrupted since we couldn't open them anyway
-    // -1 stand for opened stream, its not deleted
-    XCTAssertEqual(removedCount, params_GetFilesNumber(NO)+params_GetCorruptedFilesNumber() -1, @"Removed files count must match");
+    XCTAssertEqual(removedCount, params_GetFilesNumber(NO)+params_GetCorruptedFilesNumber(), @"Removed files count must match");
 }
 
 // WARNING: This test is dependent on hardcoded data TTL4
@@ -1217,12 +1109,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
-    const int streamIndex = 2;
-    NSString *path2 = [cache pathForKey:self.imageNames[streamIndex]];
-    [self alterUpdateTime:[[NSDate date] timeIntervalSince1970] forFileAtPath:path2];
-    id<SPTPersistentDataStream> stream = [self openStreamWithIndex:streamIndex onCache:cache];
-    (void)(stream);
-
     const NSUInteger count = self.imageNames.count;
 
     [cache runRegularGC];
@@ -1233,10 +1119,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     for (unsigned i = 0; i < count; ++i) {
         NSString *path = [cache pathForKey:self.imageNames[i]];
-
-        if (i == streamIndex) {
-            continue;
-        }
 
         SPTPersistentRecordHeaderType header;
         BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
@@ -1254,8 +1136,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(lockedCount, params_GetFilesNumber(YES), @"Locked files count must match");
     // We add number of corrupted since we couldn't open them anyway
     // -1 stands for wrong payload
-    // -1 stands for opened stream
-    XCTAssertEqual(removedCount, params_GetFilesNumber(NO)+params_GetCorruptedFilesNumber() -1 -1, @"Removed files count must match");
+    XCTAssertEqual(removedCount, params_GetFilesNumber(NO)+params_GetCorruptedFilesNumber() -1, @"Removed files count must match");
 }
 
 - (void)testPruneWithSizeRestriction
@@ -1378,809 +1259,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, YES, &header), @"Expect valid record");
     XCTAssertEqual(header.ttl, kTTL1, @"TTL must match");
     XCTAssertEqual(header.refCount, 0, @"refCount must match");
-}
-
-- (void)testStreamOpenSuccessNoCreate
-{
-    const NSTimeInterval refTime = kTestEpochTime + 1.0;
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
-                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-
-
-    const NSUInteger count = self.imageNames.count;
-
-    // Now do regular check of data integrity after touch
-    int __block calls = 0;
-    int __block notFoundCalls = 0;
-    int __block errorCalls = 0;
-    int __block successCalls = 0;
-
-    for (unsigned i = 0; i < count; ++i) {
-        NSString *cacheKey = self.imageNames[i];
-        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
-
-        [cache openDataStreamForKey:cacheKey createIfNotExist:NO ttl:0 locked:NO
-                       withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
-
-                           calls += 1;
-
-                           if (result == SPTDataCacheResponseCodeOperationSucceeded) {
-                               ++successCalls;
-
-                               XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
-                               XCTAssertNil(error, @"error is not expected to be here");
-
-                           } else if (result == SPTDataCacheResponseCodeNotFound) {
-                               XCTAssertNil(stream, @"Must be nil stream on not found");
-                               XCTAssertNil(error, @"error is not expected to be here");
-                               notFoundCalls += 1;
-
-                           } else if (result == SPTDataCacheResponseCodeOperationError) {
-                               XCTAssertNil(stream, @"Must be nil stream on not found");
-                               XCTAssertNotNil(error, @"Valid error is expected to be here");
-                               errorCalls += 1;
-
-                           } else {
-                               XCTAssert(NO, @"Unexpected result code on LOAD");
-                           }
-
-                           [exp fulfill];
-
-                       } onQueue:dispatch_get_main_queue()];
-    }
-
-    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
-
-    const int corrupted = params_GetCorruptedFilesNumber();
-    XCTAssertEqual(calls, count, @"Number of files and callbacks must match");
-    // -1 for wrong payload
-    XCTAssertEqual(successCalls , count - (corrupted -1), @"Success calls must match");
-    XCTAssertEqual(notFoundCalls, 0);
-    // -1 for wrong payload
-    XCTAssertEqual(errorCalls, (corrupted -1), @"Error calls must match");
-}
-
-- (void)testCantGetSameStreamMoreThanOneTime
-{
-    const NSTimeInterval refTime = kTestEpochTime + 1.0;
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
-                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-
-    XCTestExpectation *exp1 = [self expectationWithDescription:@"stream1"];
-    id<SPTPersistentDataStream> __block s1 = nil;
-    [cache openDataStreamForKey:self.imageNames[2] createIfNotExist:NO ttl:0 locked:NO
-                   withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
-                       XCTAssertEqual(result, SPTDataCacheResponseCodeOperationSucceeded);
-                       XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
-                       XCTAssertNil(error, @"error is not expected to be here");
-                       s1 = stream;
-                       [exp1 fulfill];
-                   }
-                        onQueue:dispatch_get_main_queue()];
-
-    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
-
-    XCTestExpectation *exp2 = [self expectationWithDescription:@"stream2"];
-    [cache openDataStreamForKey:self.imageNames[2] createIfNotExist:NO ttl:0 locked:NO
-                   withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
-                       XCTAssertEqual(result, SPTDataCacheResponseCodeOperationError);
-                       XCTAssertNil(stream, @"Must be valid non nil stream on success");
-                       XCTAssertNotNil(error, @"error is not expected to be here");
-                       XCTAssertEqual(error.code, SPTDataCacheLoadingErrorRecordIsStreamAndBusy, @"Error code must match");
-                       [exp2 fulfill];
-                   }
-                        onQueue:dispatch_get_main_queue()];
-
-    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
-}
-
-- (void)testStreamOpenFailNoCreate
-{
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil
-                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-
-
-    const NSUInteger count = self.imageNames.count;
-
-    // Now do regular check of data integrity after touch
-    int __block calls = 0;
-    int __block notFoundCalls = 0;
-    int __block errorCalls = 0;
-    int __block successCalls = 0;
-
-    for (unsigned i = 0; i < count; ++i) {
-        NSString *cacheKey = self.imageNames[i];
-        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
-
-        [cache openDataStreamForKey:cacheKey createIfNotExist:NO ttl:0 locked:NO
-                       withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
-
-                           calls += 1;
-
-                           if (result == SPTDataCacheResponseCodeOperationSucceeded) {
-                               ++successCalls;
-
-                               XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
-                               XCTAssertNil(error, @"error is not expected to be here");
-
-                           } else if (result == SPTDataCacheResponseCodeNotFound) {
-                               XCTAssertNil(stream, @"Must be nil stream on not found");
-                               XCTAssertNil(error, @"error is not expected to be here");
-                               notFoundCalls += 1;
-
-                           } else if (result == SPTDataCacheResponseCodeOperationError) {
-                               XCTAssertNil(stream, @"Must be nil stream on not found");
-                               XCTAssertNotNil(error, @"Valid error is expected to be here");
-                               errorCalls += 1;
-
-                           } else {
-                               XCTAssert(NO, @"Unexpected result code on LOAD");
-                           }
-
-                           [exp fulfill];
-
-                       } onQueue:dispatch_get_main_queue()];
-    }
-
-    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
-
-    const int corrupted = params_GetCorruptedFilesNumber();
-    XCTAssertEqual(calls, count, @"Number of files and callbacks must match");
-    // -1 for wrong payload
-    XCTAssertEqual(successCalls , 0, @"Success calls must match");
-    XCTAssertEqual(notFoundCalls, count - (corrupted -1));
-    // -1 for wrong payload
-    XCTAssertEqual(errorCalls, (corrupted -1), @"Error calls must match");
-}
-
-- (void)DISABLED_testStreamOpenSuccessWithCreate
-{
-    const NSTimeInterval refTime = kTestEpochTime + 17.0;
-    const uint64_t refTTL = kTTL1 + kTTL3;
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
-                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-
-
-    const NSUInteger count = self.imageNames.count;
-
-    // Now do regular check of data integrity after touch
-    int __block calls = 0;
-    int __block notFoundCalls = 0;
-    int __block errorCalls = 0;
-    int __block successCalls = 0;
-
-    int expectedSuccessCalls = 0;
-    int expectedErrorCalls = 0;
-    for (unsigned i = 0; i < count; ++i) {
-        NSString *cacheKey = self.imageNames[i];
-        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
-
-        const uint64_t ttl = (kParams[i].ttl > 0 ? refTTL : 0);
-        const BOOL locked = !kParams[i].locked;
-        if (kParams[i].corruptReason == -1 || kParams[i].corruptReason == SPTDataCacheLoadingErrorNotEnoughDataToGetHeader) {
-            expectedSuccessCalls++;
-        } else {
-            expectedErrorCalls++;
-        }
-
-        [cache openDataStreamForKey:cacheKey createIfNotExist:YES ttl:ttl locked:locked
-                       withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
-
-                           calls += 1;
-
-                           if (result == SPTDataCacheResponseCodeOperationSucceeded) {
-                               ++successCalls;
-
-                               XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
-                               XCTAssertNil(error, @"error is not expected to be here");
-
-                           } else if (result == SPTDataCacheResponseCodeNotFound) {
-                               XCTAssertNil(stream, @"Must be nil stream on not found");
-                               XCTAssertNil(error, @"error is not expected to be here");
-                               notFoundCalls += 1;
-
-                           } else if (result == SPTDataCacheResponseCodeOperationError) {
-                               XCTAssertNil(stream, @"Must be nil stream on not found");
-                               XCTAssertNotNil(error, @"Valid error is expected to be here");
-                               errorCalls += 1;
-
-                           } else {
-                               XCTAssert(NO, @"Unexpected result code on LOAD");
-                           }
-
-                           [exp fulfill];
-
-                       } onQueue:dispatch_get_main_queue()];
-    }
-
-    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
-
-    XCTAssertEqual(calls, count, @"Number of files and callbacks must match");
-    XCTAssertEqual(successCalls , expectedSuccessCalls, @"Success calls must match");
-    XCTAssertEqual(notFoundCalls, 0);
-    XCTAssertEqual(errorCalls, expectedErrorCalls, @"Error calls must match");
-
-    for (unsigned i = 0; i < count; ++i) {
-        NSString *path = [cache pathForKey:self.imageNames[i]];
-
-        SPTPersistentRecordHeaderType header;
-        if (kParams[i].corruptReason == -1) {
-            BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
-            XCTAssertTrue(opened, @"Files must be at place");
-            const uint32_t refCount = (kParams[i].locked ? 1 : 0);
-            XCTAssertEqual(header.refCount, refCount, @"RefCoutn must match");
-            XCTAssertEqual(header.ttl, kParams[i].ttl, @"TTL must match");
-            XCTAssertEqual(header.flags, 0, @"Flags must be 0 initially");
-        }
-    }
-}
-
-- (void)testStreamOpenFailWithCreate
-{
-    const NSTimeInterval refTime = kTestEpochTime + 17.0;
-    const uint64_t refTTL = kTTL1 + kTTL3;
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
-                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-
-
-    const NSUInteger count = self.imageNames.count;
-
-    for (unsigned i = 0; i < count; ++i) {
-        NSString *path = [cache pathForKey:self.imageNames[i]];
-        int ret = chflags(path.UTF8String, UF_IMMUTABLE);
-        XCTAssertEqual(ret, 0, @"Couldnt change file flags");
-    }
-
-
-    // Now do regular check of data integrity after touch
-    int __block calls = 0;
-    int __block notFoundCalls = 0;
-    int __block errorCalls = 0;
-    int __block successCalls = 0;
-
-    for (unsigned i = 0; i < count; ++i) {
-        NSString *cacheKey = self.imageNames[i];
-        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
-
-        const uint64_t ttl = (kParams[i].ttl > 0 ? refTTL : 0);
-        const BOOL locked = !kParams[i].locked;
-
-        [cache openDataStreamForKey:cacheKey createIfNotExist:YES ttl:ttl locked:locked
-                       withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> stream, NSError *error) {
-
-                           calls += 1;
-
-                           if (result == SPTDataCacheResponseCodeOperationSucceeded) {
-                               ++successCalls;
-
-                               XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
-                               XCTAssertNil(error, @"error is not expected to be here");
-
-                           } else if (result == SPTDataCacheResponseCodeNotFound) {
-                               XCTAssertNil(stream, @"Must be nil stream on not found");
-                               XCTAssertNil(error, @"error is not expected to be here");
-                               notFoundCalls += 1;
-
-                           } else if (result == SPTDataCacheResponseCodeOperationError) {
-                               XCTAssertNil(stream, @"Must be nil stream on not found");
-                               XCTAssertNotNil(error, @"Valid error is expected to be here");
-                               errorCalls += 1;
-
-                           } else {
-                               XCTAssert(NO, @"Unexpected result code on LOAD");
-                           }
-
-                           [exp fulfill];
-
-                       } onQueue:dispatch_get_main_queue()];
-    }
-
-    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
-
-    XCTAssertEqual(calls, count, @"Number of files and callbacks must match");
-    XCTAssertEqual(successCalls , 0, @"Success calls must match");
-    XCTAssertEqual(notFoundCalls, 0);
-    XCTAssertEqual(errorCalls, count, @"Error calls must match");
-
-    for (unsigned i = 0; i < count; ++i) {
-        NSString *path = [cache pathForKey:self.imageNames[i]];
-        int ret = chflags(path.UTF8String, 0);
-        XCTAssertEqual(ret, 0, @"Couldnt change file flags back to normal");
-    }
-}
-
-- (void)testStreamReadImageWithParts
-{
-    const NSTimeInterval refTime = kTestEpochTime + 17.0;
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
-                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-
-    const NSUInteger count = self.imageNames.count;
-
-
-    NSUInteger maxDataSize = 0;
-    int idx = 0;
-    for (unsigned i = 0; i < count; ++i) {
-        NSUInteger size = [self dataSizeForItem:self.imageNames[i]];
-        if (size > maxDataSize && kParams[i].corruptReason == -1) {
-            maxDataSize = size;
-            idx = i;
-        }
-    }
-
-    NSString *key = self.imageNames[idx];
-    id<SPTPersistentDataStream> __block stream = nil;
-
-    XCTestExpectation *streamExp = [self expectationWithDescription:@"stream"];
-    [cache openDataStreamForKey:key createIfNotExist:NO ttl:0 locked:NO
-                   withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
-
-                       stream = s;
-                       XCTAssertEqual(result, SPTDataCacheResponseCodeOperationSucceeded, @"Result must be success");
-                       XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
-                       XCTAssertNil(error, @"error is not expected to be here");
-
-                       [streamExp fulfill];
-
-                   } onQueue:dispatch_get_main_queue()];
-
-    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
-
-    NSUInteger expectedLen = maxDataSize /3;
-
-    // Get ranges we want to get from stream
-    NSRange r1 = NSMakeRange(0, expectedLen);
-    NSRange r2 = NSMakeRange(expectedLen, expectedLen);
-    NSRange r3 = NSMakeRange(2*expectedLen, maxDataSize - 2*expectedLen);
-
-    XCTAssertEqual(r1.length+r2.length+r3.length, maxDataSize);
-
-    XCTestExpectation *exp1 = [self expectationWithDescription:@"s1"];
-    XCTestExpectation *exp2 = [self expectationWithDescription:@"s2"];
-    XCTestExpectation *exp3 = [self expectationWithDescription:@"s3"];
-
-    NSData * __block data1 = nil;
-    NSData * __block data2 = nil;
-    NSData * __block data3 = nil;
-
-    [stream readDataWithOffset:r1.location length:r1.length callback:^(NSData *continousData, NSError *error) {
-        XCTAssertNotNil(continousData);
-        XCTAssertNil(error);
-        data1 = continousData;
-
-        [exp1 fulfill];
-    } queue:dispatch_get_main_queue()];
-
-    [stream readDataWithOffset:r2.location length:r2.length callback:^(NSData *continousData, NSError *error) {
-        XCTAssertNotNil(continousData);
-        XCTAssertNil(error);
-        data2 = continousData;
-
-        [exp2 fulfill];
-    } queue:dispatch_get_main_queue()];
-
-    [stream readDataWithOffset:r3.location length:r3.length callback:^(NSData *continousData, NSError *error) {
-        XCTAssertNotNil(continousData);
-        XCTAssertNil(error);
-        data3 = continousData;
-
-        [exp3 fulfill];
-    } queue:dispatch_get_main_queue()];
-
-    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
-
-    NSMutableData *imageData = [NSMutableData dataWithData:data1];
-    [imageData appendData:data2];
-    [imageData appendData:data3];
-
-    ImageClass *image = [[ImageClass alloc] initWithData:imageData];
-    XCTAssertNotNil(image, @"Image must be non nil");
-
-    NSString *fileName = [self.thisBundle pathForResource:key ofType:nil];
-    NSData *originalData = [NSData dataWithContentsOfFile:fileName];
-    XCTAssertEqualObjects(imageData, originalData, @"Read and original data must match");
-}
-
-- (void)testStreamReadWhole
-{
-    const NSTimeInterval refTime = kTestEpochTime + 17.0;
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
-                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-
-    const NSUInteger count = self.imageNames.count;
-
-    // Get index of most large data
-    NSUInteger maxDataSize = 0;
-    int idx = 0;
-    for (unsigned i = 0; i < count; ++i) {
-        NSUInteger size = [self dataSizeForItem:self.imageNames[i]];
-        if (size > maxDataSize && kParams[i].corruptReason == -1) {
-            maxDataSize = size;
-            idx = i;
-        }
-    }
-
-    NSString *key = self.imageNames[idx];
-    id<SPTPersistentDataStream> __block stream = nil;
-
-    XCTestExpectation *streamExp = [self expectationWithDescription:@"stream"];
-    [cache openDataStreamForKey:key createIfNotExist:NO ttl:0 locked:NO
-                   withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
-
-                       stream = s;
-                       XCTAssertEqual(result, SPTDataCacheResponseCodeOperationSucceeded, @"Result must be success");
-                       XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
-                       XCTAssertNil(error, @"error is not expected to be here");
-
-                       [streamExp fulfill];
-
-                   } onQueue:dispatch_get_main_queue()];
-
-    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
-
-    NSUInteger expectedLen = maxDataSize /2;
-
-    // Get ranges we want to get from stream
-    NSRange r1 = NSMakeRange(0, expectedLen);
-    NSRange r2 = NSMakeRange(expectedLen, maxDataSize - expectedLen);
-
-    XCTAssertEqual(r1.length+r2.length, maxDataSize);
-
-    XCTestExpectation *exp1 = [self expectationWithDescription:@"s1"];
-    XCTestExpectation *exp2 = [self expectationWithDescription:@"s2"];
-    XCTestExpectation *exp3 = [self expectationWithDescription:@"s3"];
-
-    NSData * __block data1 = nil;
-    NSData * __block data2 = nil;
-    NSData * __block wholeData = nil;
-
-    [stream readDataWithOffset:r1.location length:r1.length callback:^(NSData *continousData, NSError *error) {
-        XCTAssertNotNil(continousData);
-        XCTAssertNil(error);
-        data1 = continousData;
-
-        [exp1 fulfill];
-    } queue:dispatch_get_main_queue()];
-
-    [stream readDataWithOffset:r2.location length:r2.length callback:^(NSData *continousData, NSError *error) {
-        XCTAssertNotNil(continousData);
-        XCTAssertNil(error);
-        data2 = continousData;
-
-        [exp2 fulfill];
-    } queue:dispatch_get_main_queue()];
-
-    // Read whole data
-    [stream readAllDataWithCallback:^(NSData *continousData, NSError *error) {
-        XCTAssertNotNil(continousData);
-        XCTAssertNil(error);
-        wholeData = continousData;
-
-        [exp3 fulfill];
-    } queue:dispatch_get_main_queue()];
-
-    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
-
-    NSMutableData *imageData = [NSMutableData dataWithData:data1];
-    [imageData appendData:data2];
-
-    ImageClass *image = [[ImageClass alloc] initWithData:imageData];
-    XCTAssertNotNil(image, @"Image must be non nil");
-
-    ImageClass *wholeImage = [[ImageClass alloc] initWithData:wholeData];
-    XCTAssertNotNil(wholeImage, @"Image must be non nil");
-
-    NSString *fileName = [self.thisBundle pathForResource:key ofType:nil];
-    NSData *originalData = [NSData dataWithContentsOfFile:fileName];
-    XCTAssertEqualObjects(imageData, originalData, @"Read and original data must match");
-    XCTAssertEqualObjects(wholeData, originalData, @"Read and wholeData data must match");
-}
-
-- (void)testStreamWriteChunks
-{
-    const NSTimeInterval refTime = kTestEpochTime + 17.0;
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
-                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-    const NSUInteger count = self.imageNames.count;
-
-    NSUInteger maxDataSize = 0;
-    int idx = 0;
-    for (unsigned i = 0; i < count; ++i) {
-        NSUInteger size = [self dataSizeForItem:self.imageNames[i]];
-        // Exclude corrupted files
-        if (size > maxDataSize && kParams[i].corruptReason == -1) {
-            maxDataSize = size;
-            idx = i;
-        }
-    }
-
-    NSString *key = [self.imageNames[idx] stringByAppendingString:@"test"];
-    id<SPTPersistentDataStream> __block stream = nil;
-
-    XCTestExpectation *streamExp = [self expectationWithDescription:@"stream"];
-    [cache openDataStreamForKey:key createIfNotExist:YES ttl:0 locked:NO
-                   withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
-
-                       stream = s;
-                       XCTAssertEqual(result, SPTDataCacheResponseCodeOperationSucceeded, @"Result must be success");
-                       XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
-                       XCTAssertNil(error, @"error is not expected to be here");
-
-                       [streamExp fulfill];
-
-                   } onQueue:dispatch_get_main_queue()];
-
-    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
-
-    NSUInteger expectedLen = maxDataSize /5;
-
-    // Get ranges we want to get from stream
-    NSRange r1 = NSMakeRange(0, expectedLen);
-    NSRange r2 = NSMakeRange(1*expectedLen, expectedLen);
-    NSRange r3 = NSMakeRange(2*expectedLen, expectedLen);
-    NSRange r4 = NSMakeRange(3*expectedLen, expectedLen);
-    NSRange r5 = NSMakeRange(4*expectedLen, maxDataSize - 4*expectedLen);
-
-    XCTAssertEqual(r1.length+r2.length+r3.length+r4.length+r5.length, maxDataSize);
-
-    NSString *fileName = [self.thisBundle pathForResource:self.imageNames[idx] ofType:nil];
-    NSData *data = [NSData dataWithContentsOfFile:fileName];
-
-    XCTAssertFalse([stream isComplete]);
-
-    XCTestExpectation *exp1 = [self expectationWithDescription:@"d1 write"];
-    NSData *d1 = [data subdataWithRange:r1];
-    [stream appendData:d1 callback:^(NSError *error) {
-        [exp1 fulfill];
-    } queue:dispatch_get_main_queue()];
-
-    XCTAssertFalse([stream isComplete]);
-
-    XCTestExpectation *exp2 = [self expectationWithDescription:@"d2 write"];
-    NSData *d2 = [data subdataWithRange:r2];
-    [stream appendData:d2 callback:^(NSError *error) {
-        [exp2 fulfill];
-    } queue:dispatch_get_main_queue()];
-
-
-    XCTestExpectation *exp3 = [self expectationWithDescription:@"d3 write"];
-    NSData *d3 = [data subdataWithRange:r3];
-    [stream appendBytes:d3.bytes length:d3.length callback:^(NSError *error) {
-        [exp3 fulfill];
-    } queue:dispatch_get_main_queue()];
-
-
-    XCTestExpectation *exp4 = [self expectationWithDescription:@"d4 write"];
-    NSData *d4 = [data subdataWithRange:r4];
-    [stream appendBytes:d4.bytes length:d4.length callback:^(NSError *error) {
-        [exp4 fulfill];
-    } queue:dispatch_get_main_queue()];
-
-    XCTestExpectation *exp5 = [self expectationWithDescription:@"d5 write"];
-    NSData *d5 = [data subdataWithRange:r5];
-    [stream appendData:d5 callback:^(NSError *error) {
-        [exp5 fulfill];
-    } queue:dispatch_get_main_queue()];
-
-    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:^(NSError *error) {
-        NSLog(@"Error: %@", error);
-    }];
-
-
-    // Now check read data
-    XCTestExpectation *readExp = [self expectationWithDescription:@"Read whole data"];
-
-    NSData * __block readAllData = nil;
-    [stream readAllDataWithCallback:^(NSData *continousData, NSError *error) {
-        readAllData = continousData;
-        XCTAssertNil(error);
-        [readExp fulfill];
-    } queue:dispatch_get_main_queue()];
-
-    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:^(NSError *error) {
-        NSLog(@"Error: %@", error);
-    }];
-
-    XCTAssertEqualObjects(readAllData, data);
-}
-
-/**
- * Write 3 chunks. finalize.
- * check read whole data and check its same as written.
- * Kill the stream
- * write to more chinks. finalize
- * read whole and compare
- */
-- (void)testStreamWriteMoreChunksWithFinalize
-{
-
-    const NSTimeInterval refTime = kTestEpochTime + 17.0;
-    SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
-                                                       expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-    const NSUInteger count = self.imageNames.count;
-
-    NSUInteger maxDataSize = 0;
-    int idx = 0;
-    for (unsigned i = 0; i < count; ++i) {
-        NSUInteger size = [self dataSizeForItem:self.imageNames[i]];
-        // Exclude corrupted files
-        if (size > maxDataSize && kParams[i].corruptReason == -1) {
-            maxDataSize = size;
-            idx = i;
-        }
-    }
-
-    NSString *key = [self.imageNames[idx] stringByAppendingString:@"test2"];
-    id<SPTPersistentDataStream> __block stream = nil;
-    NSString *fileName = [self.thisBundle pathForResource:self.imageNames[idx] ofType:nil];
-    NSData *data = [NSData dataWithContentsOfFile:fileName];
-    NSUInteger expectedLen = maxDataSize /5;
-
-    // Get ranges we want to get from stream
-    NSRange r1 = NSMakeRange(0, expectedLen);
-    NSRange r2 = NSMakeRange(1*expectedLen, expectedLen);
-    NSRange r3 = NSMakeRange(2*expectedLen, expectedLen);
-    NSRange r4 = NSMakeRange(3*expectedLen, expectedLen);
-    NSRange r5 = NSMakeRange(4*expectedLen, maxDataSize - 4*expectedLen);
-
-    XCTAssertEqual(r1.length+r2.length+r3.length+r4.length+r5.length, maxDataSize);
-
-    // Autorelease pool is required as sync primitive to make stream dealloc invoked first before reopen it again.
-    @autoreleasepool {
-        XCTestExpectation *streamExp = [self expectationWithDescription:@"stream"];
-        [cache openDataStreamForKey:key createIfNotExist:YES ttl:0 locked:NO
-                       withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
-
-                           stream = s;
-                           XCTAssertEqual(result, SPTDataCacheResponseCodeOperationSucceeded, @"Result must be success");
-                           XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
-                           XCTAssertNil(error, @"error is not expected to be here");
-
-                           [streamExp fulfill];
-
-                       } onQueue:dispatch_get_main_queue()];
-
-        [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
-
-        XCTestExpectation *exp1 = [self expectationWithDescription:@"d1 write"];
-        NSData *d1 = [data subdataWithRange:r1];
-        [stream appendData:d1 callback:^(NSError *error) {
-            [exp1 fulfill];
-        } queue:dispatch_get_main_queue()];
-
-
-        XCTestExpectation *exp2 = [self expectationWithDescription:@"d2 write"];
-        NSData *d2 = [data subdataWithRange:r2];
-        [stream appendData:d2 callback:^(NSError *error) {
-            [exp2 fulfill];
-        } queue:dispatch_get_main_queue()];
-
-
-        XCTestExpectation *exp3 = [self expectationWithDescription:@"d3 write"];
-        NSData *d3 = [data subdataWithRange:r3];
-        [stream appendBytes:d3.bytes length:d3.length callback:^(NSError *error) {
-            [exp3 fulfill];
-        } queue:dispatch_get_main_queue()];
-
-        XCTestExpectation *expFinalize = [self expectationWithDescription:@"finalize"];
-        [stream finalize: ^{
-            [expFinalize fulfill];
-        }];
-
-        [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:^(NSError *error) {
-            NSLog(@"Error: %@", error);
-        }];
-
-
-        // Now check read data
-        XCTestExpectation *read123Exp = [self expectationWithDescription:@"Read d1 d2 d3 data"];
-
-        NSData * __block readData = nil;
-        [stream readAllDataWithCallback:^(NSData *continousData, NSError *error) {
-            readData = continousData;
-            XCTAssertNil(error);
-            [read123Exp fulfill];
-        } queue:dispatch_get_main_queue()];
-        
-        [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:^(NSError *error) {
-            NSLog(@"Error: %@", error);
-        }];
-        
-        XCTAssertTrue([stream isComplete]);
-        
-        NSMutableData* d123 = [NSMutableData dataWithData:d1];
-        [d123 appendData:d2];
-        [d123 appendData:d3];
-        XCTAssertEqualObjects(d123, readData);
-        
-        // Release stream
-        stream = nil;
-    }
-
-    /**
-     * We make wating loop for 10 attempts to make sure stream was closed and could be opened again
-     * without triggering BUSY error from PDC.
-     */
-    int loop_count = 0;
-    while (loop_count++ < 10) {
-
-        NSError *__block openError = nil;
-
-        XCTestExpectation *openExp = [self expectationWithDescription:@"second open for append"];
-        // and reopen it again to comlete it
-        [cache openDataStreamForKey:key createIfNotExist:NO ttl:0 locked:NO
-                       withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
-
-                           stream = s;
-                           openError = error;
-
-                           if (error) {
-                               NSLog(@"Error for key:%@ error:%@", key, error);
-
-                               if (error.code != SPTDataCacheLoadingErrorRecordIsStreamAndBusy) {
-                                   XCTAssertEqual(result, SPTDataCacheResponseCodeOperationSucceeded, @"Result must be success");
-                                   XCTAssertNotNil(stream, @"Must be valid non nil stream on success");
-                                   XCTAssertNil(error, @"error is not expected to be here");
-                               }
-                           }
-
-                           [openExp fulfill];
-
-                       } onQueue:dispatch_get_main_queue()];
-        
-        [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:^(NSError *error) {
-            NSLog(@"Error: %@", error);
-        }];
-
-        if (openError == nil) {
-            break;
-        }
-        
-        // break the loop and fail in case of non busy error.
-        if (openError && openError.code != SPTDataCacheLoadingErrorRecordIsStreamAndBusy) {
-            break;
-        }
-    }
-
-    XCTAssert(loop_count < 10, @"Successful time open limit exceeded");
-    
-    XCTestExpectation *exp4 = [self expectationWithDescription:@"d4 write"];
-    NSData *d4 = [data subdataWithRange:r4];
-    [stream appendBytes:d4.bytes length:d4.length callback:^(NSError *error) {
-        [exp4 fulfill];
-    } queue:dispatch_get_main_queue()];
-
-    XCTAssertFalse([stream isComplete]);
-
-    XCTestExpectation *exp5 = [self expectationWithDescription:@"d5 write"];
-    NSData *d5 = [data subdataWithRange:r5];
-    [stream appendData:d5 callback:^(NSError *error) {
-        [exp5 fulfill];
-    } queue:dispatch_get_main_queue()];
-
-
-    // Now check read data
-    XCTestExpectation *readExp = [self expectationWithDescription:@"Read whole data"];
-
-    NSData * __block readAllData = nil;
-    [stream readAllDataWithCallback:^(NSData *continousData, NSError *error) {
-        readAllData = continousData;
-        XCTAssertNil(error);
-        [readExp fulfill];
-    } queue:dispatch_get_main_queue()];
-
-    XCTestExpectation *expFinalize1 = [self expectationWithDescription:@"finalize"];
-    [stream finalize: ^{
-        [expFinalize1 fulfill];
-    }];
-
-    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:^(NSError *error) {
-        NSLog(@"Error: %@", error);
-    }];
-
-    XCTAssertTrue([stream isComplete]);
-
-    XCTAssertEqualObjects(readAllData, data);
 }
 
 #pragma mark - Internal methods
@@ -2385,21 +1463,6 @@ SPTDataCacheLoadingErrorNotEnoughDataToGetHeader,
     return expectedSize;
 }
 
-- (id<SPTPersistentDataStream>)openStreamWithIndex:(NSInteger)index onCache:(SPTPersistentDataCache *)cache
-{
-    XCTestExpectation *exp = [self expectationWithDescription:@""];
-    id<SPTPersistentDataStream> __block stream = nil;
-    [cache openDataStreamForKey:self.imageNames[index] createIfNotExist:NO ttl:0 locked:NO
-                   withCallback:^(SPTDataCacheResponseCode result, id<SPTPersistentDataStream> s, NSError *error) {
-                       stream = s;
-                       XCTAssertNotNil(s);
-                       XCTAssertNil(error);
-                       [exp fulfill];
-                   } onQueue:dispatch_get_main_queue()];
-    
-    [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
-    return stream;
-}
 
 @end
 

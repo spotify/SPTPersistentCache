@@ -1,7 +1,6 @@
 #import <Foundation/Foundation.h>
 
 #import "SPTPersistentCacheTypes.h"
-#import "SPTPersistentDataStream.h"
 #import "SPTPersistentDataCacheOptions.h"
 
 /**
@@ -89,33 +88,6 @@
            locked:(BOOL)locked
      withCallback:(SPTDataCacheResponseCallback)callback
           onQueue:(dispatch_queue_t)queue;
-
-
-/**
- * @discussion Open cache record for appending data. 
- *             Req.#1.2. Expired records treated as not found on open stream, if createIfNotExist=NO.
- *             Req.#1.0. If record is not exist and createIfNotExist is YES then record will
- *             be created, if already exist and createIfNotExist is YES will be overwritten.
- *             In that case ttl and locked is taken into accout, otherwise is ignored.
- *             TLL could be specified if known, otherwise put 0 as TTL meaning default expiration rule applies.
- *             Record could be created as locked initially specifying YES to locked: argument. refCount is set according to rules
- *             specified for -storeData:. TLL is set to new ttl value.
- *             Req.#1.4. Zero payload stream marked as incomplete on open.
- *
- * @param key Key to associate the data with.
- * @param needCreate If YES file is created, otherwise just opened.
- * @param ttl TTL value for a file. 0 is equivalent to storeData:forKey:locked:... behavior.
- * @param locked If YES then data refCount is incremented by 1.
- *        If NO then remain unchanged (for new created file set to 0 and incremented if YES).
- * @param callback Callback to call once data is loaded. Could not be nil.
- * @param queue Queue on which to run the callback. Could not be nil .
- */
-- (void)openDataStreamForKey:(NSString *)key
-            createIfNotExist:(BOOL)needCreate
-                         ttl:(NSUInteger)ttl
-                      locked:(BOOL)locked
-                withCallback:(SPTDataCacheStreamCallback)callback
-                     onQueue:(dispatch_queue_t)queue;
 
 /**
  * @discussion Update last access time in header of the record. Only applies for default expiration policy (ttl == 0).
