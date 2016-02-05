@@ -1176,7 +1176,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
         SPTDiskSizeType totalSpace = fileSystemSize.longLongValue;
         SPTDiskSizeType freeSpace = fileSystemFreeSpace.longLongValue + currentCacheSize;
-        SPTDiskSizeType proposedCacheSize = freeSpace - totalSpace * SPTDataCacheMinimumFreeDiskSpace;
+        SPTDiskSizeType proposedCacheSize = freeSpace - llrint(totalSpace * SPTDataCacheMinimumFreeDiskSpace);
 
         tempCacheSize = MAX(0, proposedCacheSize);
 
