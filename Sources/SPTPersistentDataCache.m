@@ -1148,14 +1148,16 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     // Remove oldest data until we reach acceptable cache size
     while (currentCacheSize > optimalCacheSize && images.count) {
-        NSDictionary *image = [images lastObject];
+        NSDictionary *image = images.lastObject;
         [images removeLastObject];
+
+        NSString *fileName = image[SPTDataCacheFileNameKey];
         NSError *localError = nil;
-        if (![self.fileManager removeItemAtPath:image[SPTDataCacheFileNameKey] error:&localError]) {
+        if (fileName.length > 0 && ![self.fileManager removeItemAtPath:fileName error:&localError]) {
             [self debugOutput:@"PersistentDataCache: %@ ERROR %@", @(__PRETTY_FUNCTION__), [localError localizedDescription]];
             continue;
         } else {
-            [self debugOutput:@"PersistentDataCache: evicting by size key:%@", [image[SPTDataCacheFileNameKey] lastPathComponent]];
+            [self debugOutput:@"PersistentDataCache: evicting by size key:%@", fileName.lastPathComponent];
         }
 
         currentCacheSize -= [image[SPTDataCacheFileAttributesKey][NSFileSize] integerValue];
