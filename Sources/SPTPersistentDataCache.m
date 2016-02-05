@@ -733,7 +733,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     uint32_t __block oldRefCount = 0;
     const NSUInteger payloadLen = [data length];
-    const CFIndex rawdataLen = kSPTPersistentRecordHeaderSize + payloadLen;
+    const NSUInteger rawdataLen = kSPTPersistentRecordHeaderSize + payloadLen;
 
     NSMutableData *rawData = [NSMutableData dataWithCapacity:rawdataLen];
 
