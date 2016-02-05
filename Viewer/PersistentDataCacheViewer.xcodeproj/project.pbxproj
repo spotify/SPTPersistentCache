@@ -65,7 +65,6 @@
 				696CD79B1C4708ED0071DD18 /* Sources */,
 				69FD59D71C4F0C970052626E /* Dependencies */,
 				0510FF141BA2FF7A00ED0766 /* Products */,
-				0510FF6C1BA3076300ED0766 /* Build System */,
 			);
 			sourceTree = "<group>";
 		};

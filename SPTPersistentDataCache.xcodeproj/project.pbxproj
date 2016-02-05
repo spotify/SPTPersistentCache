@@ -78,7 +78,6 @@
 		0510FF571BA3073600ED0766 /* f50512901688b79a7852999d384d097a71fad788 */ = {isa = PBXFileReference; lastKnownFileType = text; path = f50512901688b79a7852999d384d097a71fad788; sourceTree = "<group>"; };
 		0510FF581BA3073600ED0766 /* fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c */ = {isa = PBXFileReference; lastKnownFileType = text; path = fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c; sourceTree = "<group>"; };
 		0510FF6A1BA3073D00ED0766 /* SPTPersistentDataCacheTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCacheTests.m; sourceTree = "<group>"; };
-		0510FF6D1BA3078200ED0766 /* spotify_shared.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = spotify_shared.xcconfig; path = ../../other/spotify_shared.xcconfig; sourceTree = "<group>"; };
 		055725EB1C6519B700EF6787 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		055725ED1C651ED600EF6787 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		055725EE1C651EF200EF6787 /* CONTRIBUTING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CONTRIBUTING.md; sourceTree = "<group>"; };
@@ -101,6 +100,8 @@
 		696CD7921C4707EA0071DD18 /* SPTPersistentDataCacheConvenience.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataCacheConvenience.h; sourceTree = "<group>"; };
 		696CD7931C4707EA0071DD18 /* SPTPersistentDataCacheOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataCacheOptions.h; sourceTree = "<group>"; };
 		696CD7941C4707EA0071DD18 /* SPTPersistentDataHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataHeader.h; sourceTree = "<group>"; };
+		9C882A801C65422700D463BB /* project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = project.xcconfig; sourceTree = "<group>"; };
+		9C882A811C65422700D463BB /* spotify_os.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = spotify_os.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -180,7 +181,8 @@
 		0510FF6C1BA3076300ED0766 /* Build System */ = {
 			isa = PBXGroup;
 			children = (
-				0510FF6D1BA3078200ED0766 /* spotify_shared.xcconfig */,
+				9C882A801C65422700D463BB /* project.xcconfig */,
+				9C882A811C65422700D463BB /* spotify_os.xcconfig */,
 			);
 			name = "Build System";
 			sourceTree = "<group>";
@@ -365,6 +367,7 @@
 /* Begin XCBuildConfiguration section */
 		0510FF251BA2FF7A00ED0766 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9C882A801C65422700D463BB /* project.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_MODULES = YES;
@@ -400,7 +403,6 @@
 					include,
 					"$(inherited)",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -411,6 +413,7 @@
 		};
 		0510FF261BA2FF7A00ED0766 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9C882A801C65422700D463BB /* project.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_MODULES = YES;
@@ -439,7 +442,6 @@
 					include,
 					"$(inherited)",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos macosx";
@@ -450,13 +452,8 @@
 		};
 		0510FF281BA2FF7A00ED0766 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0510FF6D1BA3078200ED0766 /* spotify_shared.xcconfig */;
 			buildSettings = {
 				DEFINES_MODULE = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -466,13 +463,8 @@
 		};
 		0510FF291BA2FF7A00ED0766 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0510FF6D1BA3078200ED0766 /* spotify_shared.xcconfig */;
 			buildSettings = {
 				DEFINES_MODULE = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
