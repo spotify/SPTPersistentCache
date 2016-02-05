@@ -1139,7 +1139,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     NSMutableArray *images = [self storedImageNamesAndAttributes];
 
     // Find the free space on the disk
-    SPTDiskSizeType currentCacheSize = [self lockedItemsSizeInBytes];
+    SPTDiskSizeType currentCacheSize = (SPTDiskSizeType)[self lockedItemsSizeInBytes];
     for (NSDictionary *image in images) {
         currentCacheSize += [image[SPTDataCacheFileAttributesKey][NSFileSize] integerValue];
     }
@@ -1164,7 +1164,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
 - (SPTDiskSizeType)optimalSizeForCache:(SPTDiskSizeType)currentCacheSize
 {
-    SPTDiskSizeType tempCacheSize = self.options.sizeConstraintBytes;
+    SPTDiskSizeType tempCacheSize = (SPTDiskSizeType)self.options.sizeConstraintBytes;
 
     NSError *error = nil;
     NSDictionary *fileSystemAttributes = [self.fileManager attributesOfFileSystemForPath:self.options.cachePath
@@ -1184,7 +1184,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         [self debugOutput:@"PersistentDataCache: %@ ERROR %@", @(__PRETTY_FUNCTION__), [error localizedDescription]];
     }
 
-    return MIN(tempCacheSize, self.options.sizeConstraintBytes);
+    return MIN(tempCacheSize, (SPTDiskSizeType)self.options.sizeConstraintBytes);
 }
 
 - (NSMutableArray *)storedImageNamesAndAttributes
