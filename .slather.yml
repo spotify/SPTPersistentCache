@@ -1,0 +1,5 @@
+coverage_service: coveralls
+ci_service: travis_ci
+ignore:
+  - "../**/Developer/*"
+  - "Tests/*"
