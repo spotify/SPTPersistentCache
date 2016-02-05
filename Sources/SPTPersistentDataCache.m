@@ -31,6 +31,17 @@
 // Enable for more precise logging
 //#define DEBUG_OUTPUT_ENABLED
 
+/**
+ * Converts the given `double` _value_ to an `uint64_t` value.
+ *
+ * @param value The value as a `double`.
+ * @return The value as an `uint64_t`.
+ */
+NS_INLINE uint64_t spt_uint64rint(double value)
+{
+    return (uint64_t)llrint(value);
+}
+
 NSString *const SPTPersistentDataCacheErrorDomain = @"persistent.cache.error";
 static const uint64_t kTTLUpperBoundInSec = 86400 * 31 * 2;
 static const NSUInteger SPTPersistentDataCacheGCIntervalLimitSec = 60;
@@ -324,7 +335,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
                                  // Touch files that have default expiration policy
                                  if (header->ttl == 0) {
-                                     header->updateTimeSec = self.currentTime();
+                                     header->updateTimeSec = spt_uint64rint(self.currentTime());
                                  }
                              }
                              writeBack:YES
@@ -677,7 +688,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                                                                                record:record];
             // If data ttl == 0 we update access time
             if (ttl == 0) {
-                localHeader.updateTimeSec = (uint64_t)self.currentTime();
+                localHeader.updateTimeSec = spt_uint64rint(self.currentTime());
                 localHeader.crc = pdc_CalculateHeaderCRC(&localHeader);
                 memcpy(header, &localHeader, sizeof(localHeader));
 
@@ -731,7 +742,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     header->refCount = oldRefCount + (locked ? 1 : 0);
     header->ttl = ttl;
     header->payloadSizeBytes = payloadLen;
-    header->updateTimeSec = (uint64_t)self.currentTime();
+    header->updateTimeSec = spt_uint64rint(self.currentTime());
     header->crc = pdc_CalculateHeaderCRC(header);
 
     [rawData appendBytes:&dummy length:kSPTPersistentRecordHeaderSize];
@@ -939,8 +950,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 {
     assert(header != nil);
     uint64_t ttl = header->ttl;
-    uint64_t current = (uint64_t)self.currentTime();
-    int64_t threshold = (ttl > 0) ? ttl : self.options.defaultExpirationPeriodSec;
+    uint64_t current = spt_uint64rint(self.currentTime());
+    int64_t threshold = (int64_t)((ttl > 0) ? ttl : self.options.defaultExpirationPeriodSec);
 
     if (ttl > kTTLUpperBoundInSec) {
         [self debugOutput:@"PersistentDataCache: WARNING: TTL seems too big: %llu > %llu sec", ttl, kTTLUpperBoundInSec];
