@@ -489,10 +489,10 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     NSTimeInterval interval = self.options.gcIntervalSec;
     // clang diagnostics to workaround http://www.openradar.appspot.com/17806477 (-Wselector)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wselector"
+    _Pragma("clang diagnostic push");
+    _Pragma("clang diagnostic ignored \"-Wselector\"");
     self.gcTimer = [NSTimer timerWithTimeInterval:interval target:proxy selector:@selector(enqueueGC:) userInfo:nil repeats:YES];
-#pragma clang diagnostic pop
+    _Pragma("clang diagnostic pop");
     self.gcTimer.tolerance = 300;
     
     [[NSRunLoop mainRunLoop] addTimer:self.gcTimer forMode:NSDefaultRunLoopMode];

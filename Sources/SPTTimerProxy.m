@@ -28,11 +28,11 @@
 {
     __weak __typeof(self) const weakSelf = self;
     dispatch_barrier_async(self.queue, ^{
-// We want to shadow `self` in this case.
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wshadow"
+        // We want to shadow `self` in this case.
+        _Pragma("clang diagnostic push");
+        _Pragma("clang diagnostic ignored \"-Wshadow\"");
         __typeof(weakSelf) const self = weakSelf;
-#pragma clang diagnostic pop
+        _Pragma("clang diagnostic pop");
 
         SPTPersistentDataCache * const dataCache = self.dataCache;
 
