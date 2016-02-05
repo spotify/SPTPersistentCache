@@ -116,7 +116,7 @@
  *             Req.#1.2. Expired records treated as not found on touch.
  *
  * @param key Key which record header to update. Mustn't be nil.
- * @param callback. May be nil if not interested in result.
+ * @param callback May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
 - (void)touchDataForKey:(NSString *)key
@@ -133,7 +133,7 @@
  *             Req.#1.2. Expired records treated as not found on lock.
  *
  * @param keys Non nil non empty array of keys.
- * @param callback. May be nil if not interested in result.
+ * @param callback May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
 - (void)lockDataForKeys:(NSArray *)keys
@@ -145,7 +145,7 @@
  *             If decrements exceeds increments assertion is given.
  *
  * @param keys Non nil non empty array of keys.
- * @param callback. May be nil if not interested in result.
+ * @param callback May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
 - (void)unlockDataForKeys:(NSArray *)keys
