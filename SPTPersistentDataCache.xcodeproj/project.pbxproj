@@ -79,6 +79,9 @@
 		0510FF581BA3073600ED0766 /* fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c */ = {isa = PBXFileReference; lastKnownFileType = text; path = fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c; sourceTree = "<group>"; };
 		0510FF6A1BA3073D00ED0766 /* SPTPersistentDataCacheTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCacheTests.m; sourceTree = "<group>"; };
 		0510FF6D1BA3078200ED0766 /* spotify_shared.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = spotify_shared.xcconfig; path = ../../other/spotify_shared.xcconfig; sourceTree = "<group>"; };
+		055725EB1C6519B700EF6787 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		055725ED1C651ED600EF6787 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		055725EE1C651EF200EF6787 /* CONTRIBUTING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CONTRIBUTING.md; sourceTree = "<group>"; };
 		0595F0A81C5008060052328B /* SPTDataCacheRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTDataCacheRecord.m; sourceTree = "<group>"; };
 		0595F0AA1C50081C0052328B /* SPTDataCacheRecord.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPTDataCacheRecord.h; sourceTree = "<group>"; };
 		0595F0AB1C5008AB0052328B /* SPTDataCacheRecord+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SPTDataCacheRecord+Private.h"; sourceTree = "<group>"; };
@@ -126,6 +129,7 @@
 				696CD7831C4707E20071DD18 /* Sources */,
 				0510FF221BA2FF7A00ED0766 /* Tests */,
 				0510FF141BA2FF7A00ED0766 /* Products */,
+				055725EA1C65199E00EF6787 /* Supporting Files */,
 				0510FF6C1BA3076300ED0766 /* Build System */,
 			);
 			sourceTree = "<group>";
@@ -179,6 +183,16 @@
 				0510FF6D1BA3078200ED0766 /* spotify_shared.xcconfig */,
 			);
 			name = "Build System";
+			sourceTree = "<group>";
+		};
+		055725EA1C65199E00EF6787 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				055725EE1C651EF200EF6787 /* CONTRIBUTING.md */,
+				055725ED1C651ED600EF6787 /* LICENSE */,
+				055725EB1C6519B700EF6787 /* README.md */,
+			);
+			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		696CD7831C4707E20071DD18 /* Sources */ = {
