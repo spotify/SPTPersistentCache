@@ -31,6 +31,17 @@
 // Enable for more precise logging
 //#define DEBUG_OUTPUT_ENABLED
 
+/**
+ * Converts the given `double` _value_ to an `uint64_t` value.
+ *
+ * @param value The value as a `double`.
+ * @return The value as an `uint64_t`.
+ */
+NS_INLINE uint64_t spt_uint64rint(double value)
+{
+    return (uint64_t)llrint(value);
+}
+
 NSString *const SPTPersistentDataCacheErrorDomain = @"persistent.cache.error";
 static const uint64_t kTTLUpperBoundInSec = 86400 * 31 * 2;
 static const NSUInteger SPTPersistentDataCacheGCIntervalLimitSec = 60;
@@ -324,7 +335,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
                                  // Touch files that have default expiration policy
                                  if (header->ttl == 0) {
-                                     header->updateTimeSec = self.currentTime();
+                                     header->updateTimeSec = spt_uint64rint(self.currentTime());
                                  }
                              }
                              writeBack:YES
@@ -477,7 +488,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     proxy.queue = self.workQueue;
 
     NSTimeInterval interval = self.options.gcIntervalSec;
+    // clang diagnostics to workaround http://www.openradar.appspot.com/17806477 (-Wselector)
+    _Pragma("clang diagnostic push");
+    _Pragma("clang diagnostic ignored \"-Wselector\"");
     self.gcTimer = [NSTimer timerWithTimeInterval:interval target:proxy selector:@selector(enqueueGC:) userInfo:nil repeats:YES];
+    _Pragma("clang diagnostic pop");
     self.gcTimer.tolerance = 300;
     
     [[NSRunLoop mainRunLoop] addTimer:self.gcTimer forMode:NSDefaultRunLoopMode];
@@ -677,7 +692,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                                                                                                record:record];
             // If data ttl == 0 we update access time
             if (ttl == 0) {
-                localHeader.updateTimeSec = (uint64_t)self.currentTime();
+                localHeader.updateTimeSec = spt_uint64rint(self.currentTime());
                 localHeader.crc = pdc_CalculateHeaderCRC(&localHeader);
                 memcpy(header, &localHeader, sizeof(localHeader));
 
@@ -718,7 +733,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     uint32_t __block oldRefCount = 0;
     const NSUInteger payloadLen = [data length];
-    const CFIndex rawdataLen = kSPTPersistentRecordHeaderSize + payloadLen;
+    const NSUInteger rawdataLen = kSPTPersistentRecordHeaderSize + payloadLen;
 
     NSMutableData *rawData = [NSMutableData dataWithCapacity:rawdataLen];
 
@@ -731,7 +746,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     header->refCount = oldRefCount + (locked ? 1 : 0);
     header->ttl = ttl;
     header->payloadSizeBytes = payloadLen;
-    header->updateTimeSec = (uint64_t)self.currentTime();
+    header->updateTimeSec = spt_uint64rint(self.currentTime());
     header->crc = pdc_CalculateHeaderCRC(header);
 
     [rawData appendBytes:&dummy length:kSPTPersistentRecordHeaderSize];
@@ -787,9 +802,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         int fd = open([filePath UTF8String], flags);
         if (fd == -1) {
             const int errn = errno;
-            const char* serr = strerror(errn);
-            [self debugOutput:@"PersistentDataCache: Error opening file:%@ , error:%s", filePath, serr];
-            NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: @(serr)}];
+            NSString *serr = @(strerror(errn));
+            [self debugOutput:@"PersistentDataCache: Error opening file:%@ , error:%@", filePath, serr];
+            NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: serr}];
             return [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeOperationError error:error record:nil];
         }
 
@@ -798,9 +813,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         fd = close(fd);
         if (fd == -1) {
             const int errn = errno;
-            const char* serr = strerror(errn);
-            [self debugOutput:@"PersistentDataCache: Error closing file:%@ , error:%s", filePath, serr];
-            NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: @(serr)}];
+            NSString *serr = @(strerror(errn));
+            [self debugOutput:@"PersistentDataCache: Error closing file:%@ , error:%@", filePath, serr];
+            NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: serr}];
             return [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeOperationError error:error record:nil];
         }
 
@@ -861,27 +876,27 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             off_t ret = lseek(filedes, SEEK_SET, 0);
             if (ret != 0) {
                 const int errn = errno;
-                const char* serr = strerror(errn);
-                [self debugOutput:@"PersistentDataCache: Error seeking to begin of file path:%@ , error:%s", filePath, serr];
-                NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: @(serr)}];
+                NSString *serr = @(strerror(errn));
+                [self debugOutput:@"PersistentDataCache: Error seeking to begin of file path:%@ , error:%@", filePath, serr];
+                NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: serr}];
                 return [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeOperationError error:error record:nil];
 
             } else {
                 ssize_t writtenBytes = write(filedes, &header, kSPTPersistentRecordHeaderSize);
                 if (writtenBytes != kSPTPersistentRecordHeaderSize) {
                     const int errn = errno;
-                    const char* serr = strerror(errn);
-                    [self debugOutput:@"PersistentDataCache: Error writting header at file path:%@ , error:%s", filePath, serr];
-                    NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: @(serr)}];
+                    NSString *serr = @(strerror(errn));
+                    [self debugOutput:@"PersistentDataCache: Error writting header at file path:%@ , error:%@", filePath, serr];
+                    NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: serr}];
                     return [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeOperationError error:error record:nil];
 
                 } else {
                     int result = fsync(filedes);
                     if (result == -1) {
                         const int errn = errno;
-                        const char* serr = strerror(errn);
-                        [self debugOutput:@"PersistentDataCache: Error flushing file:%@ , error:%s", filePath, serr];
-                        NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: @(serr)}];
+                        NSString *serr = @(strerror(errn));
+                        [self debugOutput:@"PersistentDataCache: Error flushing file:%@ , error:%@", filePath, serr];
+                        NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: serr}];
                         return [[SPTPersistentCacheResponse alloc] initWithResult:SPTDataCacheResponseCodeOperationError error:error record:nil];
                     }
                 }
@@ -939,8 +954,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 {
     assert(header != nil);
     uint64_t ttl = header->ttl;
-    uint64_t current = (uint64_t)self.currentTime();
-    int64_t threshold = (ttl > 0) ? ttl : self.options.defaultExpirationPeriodSec;
+    uint64_t current = spt_uint64rint(self.currentTime());
+    int64_t threshold = (int64_t)((ttl > 0) ? ttl : self.options.defaultExpirationPeriodSec);
 
     if (ttl > kTTLUpperBoundInSec) {
         [self debugOutput:@"PersistentDataCache: WARNING: TTL seems too big: %llu > %llu sec", ttl, kTTLUpperBoundInSec];
@@ -1124,7 +1139,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     NSMutableArray *images = [self storedImageNamesAndAttributes];
 
     // Find the free space on the disk
-    SPTDiskSizeType currentCacheSize = [self lockedItemsSizeInBytes];
+    SPTDiskSizeType currentCacheSize = (SPTDiskSizeType)[self lockedItemsSizeInBytes];
     for (NSDictionary *image in images) {
         currentCacheSize += [image[SPTDataCacheFileAttributesKey][NSFileSize] integerValue];
     }
@@ -1133,14 +1148,16 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     // Remove oldest data until we reach acceptable cache size
     while (currentCacheSize > optimalCacheSize && images.count) {
-        NSDictionary *image = [images lastObject];
+        NSDictionary *image = images.lastObject;
         [images removeLastObject];
+
+        NSString *fileName = image[SPTDataCacheFileNameKey];
         NSError *localError = nil;
-        if (![self.fileManager removeItemAtPath:image[SPTDataCacheFileNameKey] error:&localError]) {
-            [self debugOutput:@"PersistentDataCache: %s ERROR %@", __PRETTY_FUNCTION__, [localError localizedDescription]];
+        if (fileName.length > 0 && ![self.fileManager removeItemAtPath:fileName error:&localError]) {
+            [self debugOutput:@"PersistentDataCache: %@ ERROR %@", @(__PRETTY_FUNCTION__), [localError localizedDescription]];
             continue;
         } else {
-            [self debugOutput:@"PersistentDataCache: evicting by size key:%@", [image[SPTDataCacheFileNameKey] lastPathComponent]];
+            [self debugOutput:@"PersistentDataCache: evicting by size key:%@", fileName.lastPathComponent];
         }
 
         currentCacheSize -= [image[SPTDataCacheFileAttributesKey][NSFileSize] integerValue];
@@ -1149,7 +1166,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
 - (SPTDiskSizeType)optimalSizeForCache:(SPTDiskSizeType)currentCacheSize
 {
-    SPTDiskSizeType tempCacheSize = self.options.sizeConstraintBytes;
+    SPTDiskSizeType tempCacheSize = (SPTDiskSizeType)self.options.sizeConstraintBytes;
 
     NSError *error = nil;
     NSDictionary *fileSystemAttributes = [self.fileManager attributesOfFileSystemForPath:self.options.cachePath
@@ -1161,15 +1178,15 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
         SPTDiskSizeType totalSpace = fileSystemSize.longLongValue;
         SPTDiskSizeType freeSpace = fileSystemFreeSpace.longLongValue + currentCacheSize;
-        SPTDiskSizeType proposedCacheSize = freeSpace - totalSpace * SPTDataCacheMinimumFreeDiskSpace;
+        SPTDiskSizeType proposedCacheSize = freeSpace - llrint(totalSpace * SPTDataCacheMinimumFreeDiskSpace);
 
         tempCacheSize = MAX(0, proposedCacheSize);
 
     } else {
-        [self debugOutput:@"PersistentDataCache: %s ERROR %@", __PRETTY_FUNCTION__, [error localizedDescription]];
+        [self debugOutput:@"PersistentDataCache: %@ ERROR %@", @(__PRETTY_FUNCTION__), [error localizedDescription]];
     }
 
-    return MIN(tempCacheSize, self.options.sizeConstraintBytes);
+    return MIN(tempCacheSize, (SPTDiskSizeType)self.options.sizeConstraintBytes);
 }
 
 - (NSMutableArray *)storedImageNamesAndAttributes

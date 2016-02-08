@@ -26,9 +26,18 @@
 
 - (void)enqueueGC:(NSTimer *)timer
 {
+    __weak __typeof(self) const weakSelf = self;
     dispatch_barrier_async(self.queue, ^{
-        [self.dataCache runRegularGC];
-        [self.dataCache pruneBySize];
+        // We want to shadow `self` in this case.
+        _Pragma("clang diagnostic push");
+        _Pragma("clang diagnostic ignored \"-Wshadow\"");
+        __typeof(weakSelf) const self = weakSelf;
+        _Pragma("clang diagnostic pop");
+
+        SPTPersistentDataCache * const dataCache = self.dataCache;
+
+        [dataCache runRegularGC];
+        [dataCache pruneBySize];
     });
 }
 
