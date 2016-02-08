@@ -1,0 +1,7 @@
+coverage_service: coveralls
+ci_service: travis_ci
+xcodeproj: SPTPersistentDataCache.xcodeproj
+scheme: SPTPersistentDataCache
+ignore:
+  - "../**/Developer/*"
+  - "Tests/*"
