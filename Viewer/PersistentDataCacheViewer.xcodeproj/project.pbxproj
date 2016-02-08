@@ -14,6 +14,7 @@
 		69A726AE1C470B56005FC024 /* MainWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 69A726AC1C470B56005FC024 /* MainWindowController.m */; };
 		69A726AF1C470B56005FC024 /* MainWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 69A726AD1C470B56005FC024 /* MainWindowController.xib */; };
 		69FD59E11C4F0CB30052626E /* libSPTPersistentDataCache.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 69FD59DE1C4F0CA80052626E /* libSPTPersistentDataCache.a */; };
+		DDBCF5F41C68E2A300693038 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DDBCF5F31C68E2A300693038 /* Cocoa.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +46,7 @@
 		69A726AC1C470B56005FC024 /* MainWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainWindowController.m; sourceTree = "<group>"; };
 		69A726AD1C470B56005FC024 /* MainWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainWindowController.xib; sourceTree = "<group>"; };
 		69FD59D81C4F0CA70052626E /* SPTPersistentDataCache.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SPTPersistentDataCache.xcodeproj; path = ../SPTPersistentDataCache.xcodeproj; sourceTree = "<group>"; };
+		DDBCF5F31C68E2A300693038 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +54,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DDBCF5F41C68E2A300693038 /* Cocoa.framework in Frameworks */,
 				69FD59E11C4F0CB30052626E /* libSPTPersistentDataCache.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -62,6 +65,7 @@
 		0510FF0A1BA2FF7A00ED0766 = {
 			isa = PBXGroup;
 			children = (
+				DDBCF5F31C68E2A300693038 /* Cocoa.framework */,
 				696CD79B1C4708ED0071DD18 /* Sources */,
 				69FD59D71C4F0C970052626E /* Dependencies */,
 				0510FF141BA2FF7A00ED0766 /* Products */,
@@ -125,8 +129,8 @@
 			buildConfigurationList = 696CD7AA1C4708ED0071DD18 /* Build configuration list for PBXNativeTarget "PersistentDataCacheViewer" */;
 			buildPhases = (
 				696CD7961C4708ED0071DD18 /* Sources */,
-				696CD7971C4708ED0071DD18 /* Frameworks */,
 				696CD7981C4708ED0071DD18 /* Resources */,
+				696CD7971C4708ED0071DD18 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -246,7 +250,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -313,7 +317,6 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/../include";
 				INFOPLIST_FILE = Info.plist;
