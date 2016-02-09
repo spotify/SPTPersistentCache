@@ -677,9 +677,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 return;
             }
 
-            NSRange payloadRange = NSMakeRange(kSPTPersistentRecordHeaderSize, localHeader.payloadSizeBytes);
+            NSRange payloadRange = NSMakeRange(kSPTPersistentRecordHeaderSize, (NSUInteger)localHeader.payloadSizeBytes);
             NSData *payload = [rawData subdataWithRange:payloadRange];
-            const NSUInteger ttl = localHeader.ttl;
+            const NSUInteger ttl = (NSUInteger)localHeader.ttl;
 
 
             SPTDataCacheRecord *record = [[SPTDataCacheRecord alloc] initWithData:payload
@@ -1115,7 +1115,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     if (attrs == nil) {
         [self debugOutput:@"PersistentDataCache: Error getting attributes for file: %@, error: %@", filePath, error];
     }
-    return [attrs fileSize];
+    return (NSUInteger)[attrs fileSize];
 }
 
 - (void)debugOutput:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2)
