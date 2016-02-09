@@ -96,7 +96,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     assert(self.options.cachePath != nil);
     
     NSString *name = [NSString stringWithFormat:@"%@.queue.%ld.%ld.%p", self.options.cacheIdentifier,
-                      (unsigned long)self.options.gcIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, self];
+                      (unsigned long)self.options.gcIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, (void *)self];
     _workQueue = dispatch_queue_create([name UTF8String], DISPATCH_QUEUE_CONCURRENT);
     _busyKeys = [NSMutableSet set];
 
@@ -119,7 +119,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         self.options.cacheIdentifier = @"persistent.cache";
     }
     NSString *name = [NSString stringWithFormat:@"%@.queue.%ld.%ld.%p", self.options.cacheIdentifier,
-                      (unsigned long)self.options.gcIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, self];
+                      (unsigned long)self.options.gcIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, (void *)self];
     _workQueue = dispatch_queue_create([name UTF8String], DISPATCH_QUEUE_CONCURRENT);
     assert(_workQueue != nil);
     self.fileManager = [NSFileManager defaultManager];
