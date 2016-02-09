@@ -23,6 +23,30 @@
 #import "SPTTimerProxy.h"
 #import <SPTPersistentDataCache/SPTPersistentDataCache.h>
 
+@interface SPTPersistentDataCacheForUnitTests : SPTPersistentDataCache
+@property (nonatomic) dispatch_queue_t queue;
+@property (nonatomic) XCTestExpectation *testExpectation;
+@property (nonatomic) BOOL wasCalledFromIncorrectQueue;
+@property (nonatomic) BOOL wasRunRegularGCCalled;
+@property (nonatomic) BOOL wasPruneBySizeCalled;
+@end
+
+@implementation SPTPersistentDataCacheForUnitTests
+
+- (void)runRegularGC
+{
+    self.wasCalledFromIncorrectQueue = (dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL) != dispatch_queue_get_label(self.queue));
+    self.wasRunRegularGCCalled = (YES && !self.wasPruneBySizeCalled);
+}
+
+- (void)pruneBySize
+{
+    self.wasCalledFromIncorrectQueue = (dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL) != dispatch_queue_get_label(self.queue));
+    self.wasPruneBySizeCalled = (YES && self.wasRunRegularGCCalled);
+    [self.testExpectation fulfill];
+}
+
+@end
 
 @interface SPTTimerProxyTests : XCTestCase
 @property (nonatomic, strong) SPTTimerProxy *timerProxy;
@@ -36,9 +60,9 @@
 {
     [super setUp];
     
-    self.dataCache = [[SPTPersistentDataCache alloc] init];
+    self.dataCache = [[SPTPersistentDataCacheForUnitTests alloc] init];
     
-    self.dispatchQueue = dispatch_get_main_queue();
+    self.dispatchQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
     
     self.timerProxy = [[SPTTimerProxy alloc] initWithDataCache:self.dataCache
                                                          queue:self.dispatchQueue];
@@ -50,6 +74,22 @@
     
     XCTAssertEqual(self.timerProxy.queue, self.dispatchQueue);
     XCTAssertEqualObjects(strongDataCache, self.dataCache);
+}
+
+- (void)testGarbageCollectorEnqueue
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:@"testGarbageCollectorEnqueue"];
+    
+    SPTPersistentDataCacheForUnitTests *dataCacheForUnitTests = (SPTPersistentDataCacheForUnitTests *)self.timerProxy.dataCache;
+    dataCacheForUnitTests.queue = self.timerProxy.queue;
+    dataCacheForUnitTests.testExpectation = expectation;
+    [self.timerProxy enqueueGC:nil];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error) {
+        XCTAssertTrue(dataCacheForUnitTests.wasRunRegularGCCalled);
+        XCTAssertTrue(dataCacheForUnitTests.wasPruneBySizeCalled);
+        XCTAssertFalse(dataCacheForUnitTests.wasCalledFromIncorrectQueue);
+    }];
 }
 
 @end
