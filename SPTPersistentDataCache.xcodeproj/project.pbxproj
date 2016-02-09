@@ -275,7 +275,7 @@
 		0510FF0B1BA2FF7A00ED0766 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0720;
+				LastUpgradeCheck = 0730;
 				ORGANIZATIONNAME = spotify;
 				TargetAttributes = {
 					0510FF121BA2FF7A00ED0766 = {
