@@ -95,8 +95,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     }
     assert(self.options.cachePath != nil);
     
-    NSString *name = [NSString stringWithFormat:@"%@.queue.%ld.%ld.%p", self.options.cacheIdentifier,
-                      (unsigned long)self.options.gcIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, self];
+    NSString *name = [NSString stringWithFormat:@"%@.queue.%lu.%lu.%p", self.options.cacheIdentifier,
+                      (unsigned long)self.options.gcIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, (void *)self];
     _workQueue = dispatch_queue_create([name UTF8String], DISPATCH_QUEUE_CONCURRENT);
     _busyKeys = [NSMutableSet set];
 
@@ -118,8 +118,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     if (self.options.cacheIdentifier == nil) {
         self.options.cacheIdentifier = @"persistent.cache";
     }
-    NSString *name = [NSString stringWithFormat:@"%@.queue.%ld.%ld.%p", self.options.cacheIdentifier,
-                      (unsigned long)self.options.gcIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, self];
+    NSString *name = [NSString stringWithFormat:@"%@.queue.%lu.%lu.%p", self.options.cacheIdentifier,
+                      (unsigned long)self.options.gcIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, (void *)self];
     _workQueue = dispatch_queue_create([name UTF8String], DISPATCH_QUEUE_CONCURRENT);
     assert(_workQueue != nil);
     self.fileManager = [NSFileManager defaultManager];
@@ -148,12 +148,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     }
 
     if (self.options.defaultExpirationPeriodSec < SPTPersistentDataCacheDefaultExpirationLimitSec) {
-        [self debugOutput:@"PersistentDataCache: Forcing defaultExpirationPeriodSec to %ld sec", (unsigned long)SPTPersistentDataCacheDefaultExpirationLimitSec];
+        [self debugOutput:@"PersistentDataCache: Forcing defaultExpirationPeriodSec to %lu sec", (unsigned long)SPTPersistentDataCacheDefaultExpirationLimitSec];
         self.options.defaultExpirationPeriodSec = SPTPersistentDataCacheDefaultExpirationLimitSec;
     }
 
     if (self.options.gcIntervalSec < SPTPersistentDataCacheGCIntervalLimitSec) {
-        [self debugOutput:@"PersistentDataCache: Forcing gcIntervalSec to %ld sec", (unsigned long)SPTPersistentDataCacheGCIntervalLimitSec];
+        [self debugOutput:@"PersistentDataCache: Forcing gcIntervalSec to %lu sec", (unsigned long)SPTPersistentDataCacheGCIntervalLimitSec];
         self.options.gcIntervalSec = SPTPersistentDataCacheGCIntervalLimitSec;
     }
 
@@ -677,9 +677,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 return;
             }
 
-            NSRange payloadRange = NSMakeRange(kSPTPersistentRecordHeaderSize, localHeader.payloadSizeBytes);
+            NSRange payloadRange = NSMakeRange(kSPTPersistentRecordHeaderSize, (NSUInteger)localHeader.payloadSizeBytes);
             NSData *payload = [rawData subdataWithRange:payloadRange];
-            const NSUInteger ttl = localHeader.ttl;
+            const NSUInteger ttl = (NSUInteger)localHeader.ttl;
 
 
             SPTDataCacheRecord *record = [[SPTDataCacheRecord alloc] initWithData:payload
@@ -1115,7 +1115,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     if (attrs == nil) {
         [self debugOutput:@"PersistentDataCache: Error getting attributes for file: %@, error: %@", filePath, error];
     }
-    return [attrs fileSize];
+    return (NSUInteger)[attrs fileSize];
 }
 
 - (void)debugOutput:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2)

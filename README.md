@@ -3,7 +3,7 @@
 Everyone tries to implement a cache at some point in their apps lifecycle, and this is ours. This is a library that allows people to cache NSData with TTL values and semantics for disk management.
 
 - [x] 📱 iOS 7.0+
-- [x] 💻 OS X 10.8+
+- [x] 💻 OS X 10.9+
 
 ## Architecture :triangular_ruler:
 `SPTPersistentDataCache` is designed as an LRU cache which stores all the data in a single binary file, with entries containing the length, last accessed time and a CRC check designed to prevent corruption. It can be used to automatically schedule garbage collection and invoke pruning.
