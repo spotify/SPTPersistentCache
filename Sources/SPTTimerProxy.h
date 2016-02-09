@@ -24,8 +24,24 @@
 
 @interface SPTTimerProxy : NSObject
 
-@property (nonatomic, weak) SPTPersistentDataCache *dataCache;
-@property (nonatomic, strong) dispatch_queue_t queue;
+/**
+ *  Persistent Data Cache that will be used for garbage collection operations.
+ */
+@property (nonatomic, weak, readonly) SPTPersistentDataCache *dataCache;
+
+/**
+ *  Dispatch queue where the operations will take place.
+ */
+@property (nonatomic, strong, readonly) dispatch_queue_t queue;
+
+/**
+ *  Initializes the timer proxy on a specific queue using a specific data cache.
+ *  
+ *  @param dataCache Persistent Data Cache that will be used for garbage collection operations.
+ *  @param queue Dispatch queue where the operations will take place.
+ */
+- (instancetype)initWithDataCache:(SPTPersistentDataCache *)dataCache
+                            queue:(dispatch_queue_t)queue;
 
 - (void)enqueueGC:(NSTimer *)timer;
 
