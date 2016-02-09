@@ -95,7 +95,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     }
     assert(self.options.cachePath != nil);
     
-    NSString *name = [NSString stringWithFormat:@"%@.queue.%ld.%ld.%p", self.options.cacheIdentifier,
+    NSString *name = [NSString stringWithFormat:@"%@.queue.%lu.%lu.%p", self.options.cacheIdentifier,
                       (unsigned long)self.options.gcIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, (void *)self];
     _workQueue = dispatch_queue_create([name UTF8String], DISPATCH_QUEUE_CONCURRENT);
     _busyKeys = [NSMutableSet set];
@@ -118,7 +118,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     if (self.options.cacheIdentifier == nil) {
         self.options.cacheIdentifier = @"persistent.cache";
     }
-    NSString *name = [NSString stringWithFormat:@"%@.queue.%ld.%ld.%p", self.options.cacheIdentifier,
+    NSString *name = [NSString stringWithFormat:@"%@.queue.%lu.%lu.%p", self.options.cacheIdentifier,
                       (unsigned long)self.options.gcIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, (void *)self];
     _workQueue = dispatch_queue_create([name UTF8String], DISPATCH_QUEUE_CONCURRENT);
     assert(_workQueue != nil);
@@ -148,12 +148,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
     }
 
     if (self.options.defaultExpirationPeriodSec < SPTPersistentDataCacheDefaultExpirationLimitSec) {
-        [self debugOutput:@"PersistentDataCache: Forcing defaultExpirationPeriodSec to %ld sec", (unsigned long)SPTPersistentDataCacheDefaultExpirationLimitSec];
+        [self debugOutput:@"PersistentDataCache: Forcing defaultExpirationPeriodSec to %lu sec", (unsigned long)SPTPersistentDataCacheDefaultExpirationLimitSec];
         self.options.defaultExpirationPeriodSec = SPTPersistentDataCacheDefaultExpirationLimitSec;
     }
 
     if (self.options.gcIntervalSec < SPTPersistentDataCacheGCIntervalLimitSec) {
-        [self debugOutput:@"PersistentDataCache: Forcing gcIntervalSec to %ld sec", (unsigned long)SPTPersistentDataCacheGCIntervalLimitSec];
+        [self debugOutput:@"PersistentDataCache: Forcing gcIntervalSec to %lu sec", (unsigned long)SPTPersistentDataCacheGCIntervalLimitSec];
         self.options.gcIntervalSec = SPTPersistentDataCacheGCIntervalLimitSec;
     }
 
