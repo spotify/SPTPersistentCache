@@ -483,9 +483,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         return;
     }
 
-    SPTTimerProxy *proxy = [SPTTimerProxy new];
-    proxy.dataCache = self;
-    proxy.queue = self.workQueue;
+    SPTTimerProxy *proxy = [[SPTTimerProxy alloc] initWithDataCache:self
+                                                              queue:self.workQueue];
 
     NSTimeInterval interval = self.options.gcIntervalSec;
     // clang diagnostics to workaround http://www.openradar.appspot.com/17806477 (-Wselector)

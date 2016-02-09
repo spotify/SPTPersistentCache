@@ -24,6 +24,19 @@
 
 @implementation SPTTimerProxy
 
+- (instancetype)initWithDataCache:(SPTPersistentDataCache *)dataCache
+                            queue:(dispatch_queue_t)queue
+{
+    if (!(self = [super init])) {
+        return nil;
+    }
+    
+    _dataCache = dataCache;
+    _queue = queue;
+    
+    return self;
+}
+
 - (void)enqueueGC:(NSTimer *)timer
 {
     __weak __typeof(self) const weakSelf = self;
