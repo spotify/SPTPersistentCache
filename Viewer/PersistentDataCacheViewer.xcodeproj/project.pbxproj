@@ -321,7 +321,7 @@
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/../include";
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.spotify.PersistentDataCacheViewer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -339,7 +339,7 @@
 				HEADER_SEARCH_PATHS = "$(SRCROOT)/../include";
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.spotify.PersistentDataCacheViewer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
