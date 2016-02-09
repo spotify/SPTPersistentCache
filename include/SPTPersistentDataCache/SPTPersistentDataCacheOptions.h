@@ -23,6 +23,17 @@
 @class SPTPersistentCacheResponse;
 
 /**
+ *  Default expiration time for the cache to expire.
+ */
+extern const NSUInteger SPTPersistentDataCacheDefaultExpirationTimeSec;
+
+/**
+ *  Default expiration time for the garbage collector interval.
+ */
+extern const NSUInteger SPTPersistentDataCacheDefaultGCIntervalSec;
+
+
+/**
  * Type off callback for load/store calls
  */
 typedef void (^SPTDataCacheResponseCallback)(SPTPersistentCacheResponse *response);

@@ -33,6 +33,8 @@
 		696CD78B1C4707E20071DD18 /* SPTPersistentDataCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 696CD7861C4707E20071DD18 /* SPTPersistentDataCache.m */; };
 		696CD78C1C4707E20071DD18 /* SPTPersistentDataCacheOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = 696CD7871C4707E20071DD18 /* SPTPersistentDataCacheOptions.m */; };
 		C4B4148C1C6A01970099FECD /* SPTDataCacheRecordTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C4B4148B1C6A01970099FECD /* SPTDataCacheRecordTests.m */; };
+		C4B4148F1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C4B4148E1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m */; };
+		C4B414911C6A24A10099FECD /* SPTPersistentDataCacheOptionsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C4B414901C6A24A10099FECD /* SPTPersistentDataCacheOptionsTests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -104,6 +106,8 @@
 		9C882A801C65422700D463BB /* project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = project.xcconfig; sourceTree = "<group>"; };
 		9C882A811C65422700D463BB /* spotify_os.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = spotify_os.xcconfig; sourceTree = "<group>"; };
 		C4B4148B1C6A01970099FECD /* SPTDataCacheRecordTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTDataCacheRecordTests.m; sourceTree = "<group>"; };
+		C4B4148E1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheResponseTests.m; sourceTree = "<group>"; };
+		C4B414901C6A24A10099FECD /* SPTPersistentDataCacheOptionsTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCacheOptionsTests.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -168,6 +172,8 @@
 				0510FF581BA3073600ED0766 /* fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c */,
 				0510FF6A1BA3073D00ED0766 /* SPTPersistentDataCacheTests.m */,
 				C4B4148B1C6A01970099FECD /* SPTDataCacheRecordTests.m */,
+				C4B4148E1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m */,
+				C4B414901C6A24A10099FECD /* SPTPersistentDataCacheOptionsTests.m */,
 				0510FF231BA2FF7A00ED0766 /* Supporting Files */,
 			);
 			path = Tests;
@@ -353,8 +359,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C4B414911C6A24A10099FECD /* SPTPersistentDataCacheOptionsTests.m in Sources */,
 				0510FF6B1BA3073D00ED0766 /* SPTPersistentDataCacheTests.m in Sources */,
 				C4B4148C1C6A01970099FECD /* SPTDataCacheRecordTests.m in Sources */,
+				C4B4148F1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
