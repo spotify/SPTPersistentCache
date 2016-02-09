@@ -41,7 +41,7 @@
 /**
  * Key for that record.
  */
-@property (nonatomic, strong, readonly) NSString *key;
+@property (nonatomic, copy, readonly) NSString *key;
 /*
  * Data that was initially passed into storeData:...
  */
