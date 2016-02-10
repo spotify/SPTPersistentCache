@@ -432,6 +432,10 @@
 				INFOPLIST_FILE = Tests/Info.plist;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				WARNING_CFLAGS = (
+					"$(inherited)",
+					"-Wno-error=partial-availability",
+				);
 			};
 			name = Debug;
 		};
@@ -443,6 +447,10 @@
 				INFOPLIST_FILE = Tests/Info.plist;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				WARNING_CFLAGS = (
+					"$(inherited)",
+					"-Wno-error=partial-availability",
+				);
 			};
 			name = Release;
 		};
