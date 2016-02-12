@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <SPTPersistentDataCache/SPTPersistentCacheTypes.h>
+#import <SPTPersistentDataCache/SPTPersistentDataCacheTypes.h>
 #import <SPTPersistentDataCache/SPTPersistentDataCache.h>
 #import <SPTPersistentDataCache/SPTPersistentDataHeader.h>
 #import <SPTPersistentDataCache/SPTPersistentDataCacheOptions.h>

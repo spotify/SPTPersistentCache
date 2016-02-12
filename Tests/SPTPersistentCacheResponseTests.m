@@ -26,7 +26,7 @@
 #import <SPTPersistentDataCache/SPTPersistentCacheResponse.h>
 
 
-static const SPTDataCacheResponseCode SPTPersistentCacheResponseTestsTestCode   = SPTDataCacheResponseCodeNotFound;
+static const SPTPersistentDataCacheResponseCode SPTPersistentCacheResponseTestsTestCode   = SPTPersistentDataCacheResponseCodeNotFound;
 
 @interface SPTPersistentCacheResponseTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentCacheResponse *persistentCacheResponse;

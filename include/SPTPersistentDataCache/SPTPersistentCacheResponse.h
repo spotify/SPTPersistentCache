@@ -20,7 +20,7 @@
  */
 #import <Foundation/Foundation.h>
 
-#import "SPTPersistentCacheTypes.h"
+#import "SPTPersistentDataCacheTypes.h"
 
 @class SPTDataCacheRecord;
 
@@ -34,7 +34,7 @@
 /**
  * @see SPTDataCacheResponseCode
  */
-@property (nonatomic, assign, readonly) SPTDataCacheResponseCode result;
+@property (nonatomic, assign, readonly) SPTPersistentDataCacheResponseCode result;
 /**
  * Defines error of response if appliable
  */

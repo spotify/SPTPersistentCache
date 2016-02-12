@@ -26,6 +26,7 @@
 		0510FF681BA3073600ED0766 /* f50512901688b79a7852999d384d097a71fad788 in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF571BA3073600ED0766 /* f50512901688b79a7852999d384d097a71fad788 */; };
 		0510FF691BA3073600ED0766 /* fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF581BA3073600ED0766 /* fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c */; };
 		0510FF6B1BA3073D00ED0766 /* SPTPersistentDataCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0510FF6A1BA3073D00ED0766 /* SPTPersistentDataCacheTests.m */; };
+		057AF8541C6E18AC00350C9F /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 057AF8531C6E18AC00350C9F /* AppKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		0595F0A91C5008060052328B /* SPTDataCacheRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 0595F0A81C5008060052328B /* SPTDataCacheRecord.m */; };
 		0595F0B01C5009800052328B /* SPTPersistentCacheResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 0595F0AF1C5009800052328B /* SPTPersistentCacheResponse.m */; };
 		0595F33A1C50117B0052328B /* SPTTimerProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 0595F3391C50117B0052328B /* SPTTimerProxy.m */; };
@@ -85,6 +86,7 @@
 		055725EB1C6519B700EF6787 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		055725ED1C651ED600EF6787 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		055725EE1C651EF200EF6787 /* CONTRIBUTING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CONTRIBUTING.md; sourceTree = "<group>"; };
+		057AF8531C6E18AC00350C9F /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		0595F0A81C5008060052328B /* SPTDataCacheRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTDataCacheRecord.m; sourceTree = "<group>"; };
 		0595F0AA1C50081C0052328B /* SPTDataCacheRecord.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPTDataCacheRecord.h; sourceTree = "<group>"; };
 		0595F0AB1C5008AB0052328B /* SPTDataCacheRecord+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SPTDataCacheRecord+Private.h"; sourceTree = "<group>"; };
@@ -99,7 +101,7 @@
 		696CD7861C4707E20071DD18 /* SPTPersistentDataCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCache.m; sourceTree = "<group>"; };
 		696CD7871C4707E20071DD18 /* SPTPersistentDataCacheOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCacheOptions.m; sourceTree = "<group>"; };
 		696CD78F1C4707EA0071DD18 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
-		696CD7901C4707EA0071DD18 /* SPTPersistentCacheTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheTypes.h; sourceTree = "<group>"; };
+		696CD7901C4707EA0071DD18 /* SPTPersistentDataCacheTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataCacheTypes.h; sourceTree = "<group>"; };
 		696CD7911C4707EA0071DD18 /* SPTPersistentDataCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataCache.h; sourceTree = "<group>"; };
 		696CD7921C4707EA0071DD18 /* SPTPersistentDataCacheConvenience.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataCacheConvenience.h; sourceTree = "<group>"; };
 		696CD7931C4707EA0071DD18 /* SPTPersistentDataCacheOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataCacheOptions.h; sourceTree = "<group>"; };
@@ -124,6 +126,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				057AF8541C6E18AC00350C9F /* AppKit.framework in Frameworks */,
 				0510FF1F1BA2FF7A00ED0766 /* libSPTPersistentDataCache.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -195,6 +198,7 @@
 			children = (
 				9C882A801C65422700D463BB /* project.xcconfig */,
 				9C882A811C65422700D463BB /* spotify_os.xcconfig */,
+				057AF8531C6E18AC00350C9F /* AppKit.framework */,
 			);
 			name = "Build System";
 			sourceTree = "<group>";
@@ -231,7 +235,7 @@
 			isa = PBXGroup;
 			children = (
 				696CD78F1C4707EA0071DD18 /* module.modulemap */,
-				696CD7901C4707EA0071DD18 /* SPTPersistentCacheTypes.h */,
+				696CD7901C4707EA0071DD18 /* SPTPersistentDataCacheTypes.h */,
 				696CD7911C4707EA0071DD18 /* SPTPersistentDataCache.h */,
 				696CD7921C4707EA0071DD18 /* SPTPersistentDataCacheConvenience.h */,
 				696CD7931C4707EA0071DD18 /* SPTPersistentDataCacheOptions.h */,
