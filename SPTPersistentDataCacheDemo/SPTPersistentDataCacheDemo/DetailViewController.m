@@ -21,6 +21,8 @@
 #import "DetailViewController.h"
 
 #import <SPTPersistentDataCache/SPTPersistentDataCache.h>
+#import <SPTPersistentDataCache/SPTPersistentCacheResponse.h>
+#import <SPTPersistentDataCache/SPTDataCacheRecord.h>
 
 @interface DetailViewController ()
 
@@ -44,7 +46,7 @@
 {
     // Update the user interface for the detail item.
     if (self.detailItem) {
-        [self.persistentDataCache loadDataForKey:[NSString stringWithFormat:@"%d", [self.detailItem hash]]
+        [self.persistentDataCache loadDataForKey:[NSString stringWithFormat:@"%lu", (unsigned long)[self.detailItem hash]]
                                     withCallback:^(SPTPersistentCacheResponse *response) {
                                         if (response.result != SPTDataCacheResponseCodeOperationSucceeded) {
                                             NSLog(@"Failed: %@", response.error);
