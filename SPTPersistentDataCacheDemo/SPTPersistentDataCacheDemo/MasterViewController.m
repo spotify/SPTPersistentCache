@@ -20,7 +20,7 @@
  */
 #import "MasterViewController.h"
 
-@import SPTPersistentDataCache;
+#import <SPTPersistentDataCache/SPTPersistentDataCache.h>;
 
 #import "DetailViewController.h"
 
