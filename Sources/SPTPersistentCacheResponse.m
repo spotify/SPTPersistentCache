@@ -22,7 +22,7 @@
 
 @interface SPTPersistentCacheResponse ()
 
-@property (nonatomic, assign, readwrite) SPTDataCacheResponseCode result;
+@property (nonatomic, assign, readwrite) SPTPersistentDataCacheResponseCode result;
 @property (nonatomic, strong, readwrite) NSError *error;
 @property (nonatomic, strong, readwrite) SPTDataCacheRecord *record;
 
@@ -30,7 +30,7 @@
 
 @implementation SPTPersistentCacheResponse
 
-- (instancetype)initWithResult:(SPTDataCacheResponseCode)result
+- (instancetype)initWithResult:(SPTPersistentDataCacheResponseCode)result
                          error:(NSError *)error
                         record:(SPTDataCacheRecord *)record
 {

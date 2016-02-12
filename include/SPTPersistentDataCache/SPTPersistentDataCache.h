@@ -20,7 +20,7 @@
  */
 #import <Foundation/Foundation.h>
 
-#import "SPTPersistentCacheTypes.h"
+#import "SPTPersistentDataCacheTypes.h"
 #import "SPTPersistentDataCacheOptions.h"
 
 /**

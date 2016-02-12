@@ -22,7 +22,7 @@
 
 @interface SPTPersistentCacheResponse (Private)
 
-- (instancetype)initWithResult:(SPTDataCacheResponseCode)result
+- (instancetype)initWithResult:(SPTPersistentDataCacheResponseCode)result
                          error:(NSError *)error
                         record:(SPTDataCacheRecord *)record;
 
