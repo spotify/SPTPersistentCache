@@ -25,7 +25,7 @@
 #import "SPTDataCacheRecord+Private.h"
 #import "SPTPersistentCacheResponse+Private.h"
 #import "SPTPersistentDataCache+Private.h"
-#import "SPTTimerProxy.h"
+#import "SPTPersistentDataCacheTimerProxy.h"
 #include <sys/stat.h>
 
 // Enable for more precise logging
@@ -483,8 +483,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         return;
     }
 
-    SPTTimerProxy *proxy = [[SPTTimerProxy alloc] initWithDataCache:self
-                                                              queue:self.workQueue];
+    SPTPersistentDataCacheTimerProxy *proxy = [[SPTPersistentDataCacheTimerProxy alloc] initWithDataCache:self
+                                                                                                    queue:self.workQueue];
 
     NSTimeInterval interval = self.options.gcIntervalSec;
     // clang diagnostics to workaround http://www.openradar.appspot.com/17806477 (-Wselector)
