@@ -103,7 +103,6 @@
 		696CD78F1C4707EA0071DD18 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
 		696CD7901C4707EA0071DD18 /* SPTPersistentDataCacheTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataCacheTypes.h; sourceTree = "<group>"; };
 		696CD7911C4707EA0071DD18 /* SPTPersistentDataCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataCache.h; sourceTree = "<group>"; };
-		696CD7921C4707EA0071DD18 /* SPTPersistentDataCacheConvenience.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataCacheConvenience.h; sourceTree = "<group>"; };
 		696CD7931C4707EA0071DD18 /* SPTPersistentDataCacheOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataCacheOptions.h; sourceTree = "<group>"; };
 		696CD7941C4707EA0071DD18 /* SPTPersistentDataHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataHeader.h; sourceTree = "<group>"; };
 		9C882A801C65422700D463BB /* project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = project.xcconfig; sourceTree = "<group>"; };
@@ -237,7 +236,6 @@
 				696CD78F1C4707EA0071DD18 /* module.modulemap */,
 				696CD7901C4707EA0071DD18 /* SPTPersistentDataCacheTypes.h */,
 				696CD7911C4707EA0071DD18 /* SPTPersistentDataCache.h */,
-				696CD7921C4707EA0071DD18 /* SPTPersistentDataCacheConvenience.h */,
 				696CD7931C4707EA0071DD18 /* SPTPersistentDataCacheOptions.h */,
 				696CD7941C4707EA0071DD18 /* SPTPersistentDataHeader.h */,
 				0595F0AA1C50081C0052328B /* SPTDataCacheRecord.h */,

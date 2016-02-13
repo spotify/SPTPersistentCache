@@ -48,7 +48,7 @@
     if (self.detailItem) {
         [self.persistentDataCache loadDataForKey:[NSString stringWithFormat:@"%u", [self.detailItem hash]]
                                     withCallback:^(SPTPersistentCacheResponse *response) {
-                                        if (response.result != SPTDataCacheResponseCodeOperationSucceeded) {
+                                        if (response.result != SPTPersistentDataCacheResponseCodeOperationSucceeded) {
                                             NSLog(@"Failed: %@", response.error);
                                             return;
                                         }

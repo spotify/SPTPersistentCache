@@ -20,8 +20,11 @@
  */
 #import <Foundation/Foundation.h>
 
-#import "SPTPersistentDataCacheTypes.h"
-#import "SPTPersistentDataCacheOptions.h"
+#import <SPTPersistentDataCache/SPTPersistentDataCacheTypes.h>
+#import <SPTPersistentDataCache/SPTPersistentDataCacheOptions.h>
+#import <SPTPersistentDataCache/SPTPersistentDataHeader.h>
+#import <SPTPersistentDataCache/SPTDataCacheRecord.h>
+#import <SPTPersistentDataCache/SPTPersistentCacheResponse.h>
 
 /**
  * @brief SPTPersistentDataCache
