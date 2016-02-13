@@ -28,7 +28,10 @@
 #define ImageClass NSImage
 #endif
 
-#import "SPTPersistentDataCacheConvenience.h"
+#import <SPTPersistentDataCache/SPTPersistentDataCache.h>
+#import <SPTPersistentDataCache/SPTPersistentCacheResponse.h>
+#import <SPTPersistentDataCache/SPTPersistentDataCacheTypes.h>
+#import <SPTPersistentDataCache/SPTDataCacheRecord.h>
 
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -654,7 +657,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     int __block notFoundCalls = 0;
     int __block errorCalls = 0;
     BOOL __block unlocked = YES;
-    // +1 stands for SPTDataCacheLoadingErrorWrongPayloadSize since technically it has corrent header.
+    // +1 stands for SPTPersistentDataCacheLoadingErrorWrongPayloadSize since technically it has corrent header.
     const int reallyUnlocked = params_GetFilesNumber(NO) + 1;
 
     const NSUInteger count = self.imageNames.count;
@@ -1312,11 +1315,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 }
 
 /*
-SPTDataCacheLoadingErrorMagicMismatch,
-SPTDataCacheLoadingErrorWrongHeaderSize,
-SPTDataCacheLoadingErrorWrongPayloadSize,
-SPTDataCacheLoadingErrorInvalidHeaderCRC,
-SPTDataCacheLoadingErrorNotEnoughDataToGetHeader,
+SPTPersistentDataCacheLoadingErrorMagicMismatch,
+SPTPersistentDataCacheLoadingErrorWrongHeaderSize,
+SPTPersistentDataCacheLoadingErrorWrongPayloadSize,
+SPTPersistentDataCacheLoadingErrorInvalidHeaderCRC,
+SPTPersistentDataCacheLoadingErrorNotEnoughDataToGetHeader,
 */
 
 - (void)corruptFile:(NSString *)filePath
