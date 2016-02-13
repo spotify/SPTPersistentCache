@@ -67,8 +67,8 @@ _Static_assert(sizeof(SPTPersistentRecordHeaderType)%4 == 0, "Struct size has to
 FOUNDATION_EXPORT SPTPersistentRecordHeaderType *pdc_GetHeaderFromData(void *data, size_t size);
 
 // Function validates header accoring to predefined rules used in production code
-// @return -1 if everything is ok, otherwise one of codes from SPTDataCacheLoadingError
-FOUNDATION_EXPORT int /*SPTDataCacheLoadingError*/ pdc_ValidateHeader(const SPTPersistentRecordHeaderType *header);
+// @return -1 if everything is ok, otherwise one of codes from SPTPersistentDataCacheLoadingError
+FOUNDATION_EXPORT int /*SPTPersistentDataCacheLoadingError*/ pdc_ValidateHeader(const SPTPersistentRecordHeaderType *header);
 
 // Function return calculated CRC for current header.
 FOUNDATION_EXPORT uint32_t pdc_CalculateHeaderCRC(const SPTPersistentRecordHeaderType *header);

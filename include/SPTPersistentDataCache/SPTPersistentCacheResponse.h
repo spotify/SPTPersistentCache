@@ -20,7 +20,7 @@
  */
 #import <Foundation/Foundation.h>
 
-#import "SPTPersistentDataCacheTypes.h"
+#import <SPTPersistentDataCache/SPTPersistentDataCacheTypes.h>
 
 @class SPTDataCacheRecord;
 
@@ -32,7 +32,7 @@
 @interface SPTPersistentCacheResponse : NSObject
 
 /**
- * @see SPTDataCacheResponseCode
+ * @see SPTPersistentDataCacheResponseCode
  */
 @property (nonatomic, assign, readonly) SPTPersistentDataCacheResponseCode result;
 /**

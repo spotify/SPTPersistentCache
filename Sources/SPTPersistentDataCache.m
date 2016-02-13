@@ -1301,7 +1301,7 @@ SPTPersistentRecordHeaderType *pdc_GetHeaderFromData(void *data, size_t size)
     return (SPTPersistentRecordHeaderType *)data;
 }
 
-int /*SPTDataCacheLoadingError*/ pdc_ValidateHeader(const SPTPersistentRecordHeaderType *header)
+int /*SPTPersistentDataCacheLoadingError*/ pdc_ValidateHeader(const SPTPersistentRecordHeaderType *header)
 {
     assert(header != NULL);
     if (header == NULL) {
