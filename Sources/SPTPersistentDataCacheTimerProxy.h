@@ -18,40 +18,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import "SPTTimerProxy.h"
+#import <Foundation/Foundation.h>
 
-#import "SPTPersistentDataCache+Private.h"
+@class SPTPersistentDataCache;
 
-@implementation SPTTimerProxy
+@interface SPTPersistentDataCacheTimerProxy : NSObject
 
+/**
+ *  Persistent Data Cache that will be used for garbage collection operations.
+ */
+@property (nonatomic, weak, readonly) SPTPersistentDataCache *dataCache;
+
+/**
+ *  Dispatch queue where the operations will take place.
+ */
+@property (nonatomic, strong, readonly) dispatch_queue_t queue;
+
+/**
+ *  Initializes the timer proxy on a specific queue using a specific data cache.
+ *  
+ *  @param dataCache Persistent Data Cache that will be used for garbage collection operations.
+ *  @param queue Dispatch queue where the operations will take place.
+ */
 - (instancetype)initWithDataCache:(SPTPersistentDataCache *)dataCache
-                            queue:(dispatch_queue_t)queue
-{
-    if (!(self = [super init])) {
-        return nil;
-    }
-    
-    _dataCache = dataCache;
-    _queue = queue;
-    
-    return self;
-}
+                            queue:(dispatch_queue_t)queue;
 
-- (void)enqueueGC:(NSTimer *)timer
-{
-    __weak __typeof(self) const weakSelf = self;
-    dispatch_barrier_async(self.queue, ^{
-        // We want to shadow `self` in this case.
-        _Pragma("clang diagnostic push");
-        _Pragma("clang diagnostic ignored \"-Wshadow\"");
-        __typeof(weakSelf) const self = weakSelf;
-        _Pragma("clang diagnostic pop");
-
-        SPTPersistentDataCache * const dataCache = self.dataCache;
-
-        [dataCache runRegularGC];
-        [dataCache pruneBySize];
-    });
-}
+- (void)enqueueGC:(NSTimer *)timer;
 
 @end

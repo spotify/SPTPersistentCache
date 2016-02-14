@@ -20,7 +20,7 @@
  */
 
 #import <XCTest/XCTest.h>
-#import "SPTTimerProxy.h"
+#import "SPTPersistentDataCacheTimerProxy.h"
 #import <SPTPersistentDataCache/SPTPersistentDataCache.h>
 
 @interface SPTPersistentDataCacheForUnitTests : SPTPersistentDataCache
@@ -48,13 +48,13 @@
 
 @end
 
-@interface SPTTimerProxyTests : XCTestCase
-@property (nonatomic, strong) SPTTimerProxy *timerProxy;
+@interface SPTPersistentDataCacheTimerProxyTests : XCTestCase
+@property (nonatomic, strong) SPTPersistentDataCacheTimerProxy *timerProxy;
 @property (nonatomic, strong) SPTPersistentDataCache *dataCache;
 @property (nonatomic, strong) dispatch_queue_t dispatchQueue;
 @end
 
-@implementation SPTTimerProxyTests
+@implementation SPTPersistentDataCacheTimerProxyTests
 
 - (void)setUp
 {
@@ -64,8 +64,8 @@
     
     self.dispatchQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
     
-    self.timerProxy = [[SPTTimerProxy alloc] initWithDataCache:self.dataCache
-                                                         queue:self.dispatchQueue];
+    self.timerProxy = [[SPTPersistentDataCacheTimerProxy alloc] initWithDataCache:self.dataCache
+                                                                            queue:self.dispatchQueue];
 }
 
 - (void)testDesignatedInitializer
