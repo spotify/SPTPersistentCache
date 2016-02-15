@@ -20,8 +20,8 @@
  */
 
 #import <XCTest/XCTest.h>
-#import "SPTDataCacheRecord+Private.h"
-#import <SPTPersistentDataCache/SPTDataCacheRecord.h>
+#import "SPTPersistentDataCacheRecord+Private.h"
+#import <SPTPersistentDataCache/SPTPersistentDataCacheRecord.h>
 #import "SPTPersistentCacheResponse+Private.h"
 #import <SPTPersistentDataCache/SPTPersistentCacheResponse.h>
 
@@ -31,7 +31,7 @@ static const SPTPersistentDataCacheResponseCode SPTPersistentCacheResponseTestsT
 @interface SPTPersistentCacheResponseTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentCacheResponse *persistentCacheResponse;
 @property (nonatomic, strong) NSError *testError;
-@property (nonatomic, strong) SPTDataCacheRecord *testCacheRecord;
+@property (nonatomic, strong) SPTPersistentDataCacheRecord *testCacheRecord;
 @end
 
 @implementation SPTPersistentCacheResponseTests
@@ -44,7 +44,7 @@ static const SPTPersistentDataCacheResponseCode SPTPersistentCacheResponseTestsT
                                          code:404
                                      userInfo:nil];
     
-    self.testCacheRecord = [[SPTDataCacheRecord alloc] init];
+    self.testCacheRecord = [[SPTPersistentDataCacheRecord alloc] init];
     
     self.persistentCacheResponse = [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseTestsTestCode
                                                                                 error:self.testError

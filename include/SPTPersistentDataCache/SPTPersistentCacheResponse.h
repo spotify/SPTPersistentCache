@@ -22,7 +22,7 @@
 
 #import <SPTPersistentDataCache/SPTPersistentDataCacheTypes.h>
 
-@class SPTDataCacheRecord;
+@class SPTPersistentDataCacheRecord;
 
 /**
  * @brief SPTPersistentCacheResponse
@@ -40,8 +40,8 @@
  */
 @property (nonatomic, strong, readonly) NSError *error;
 /**
- * @see SPTDataCacheRecord
+ * @see SPTPersistentDataCacheRecord
  */
-@property (nonatomic, strong, readonly) SPTDataCacheRecord *record;
+@property (nonatomic, strong, readonly) SPTPersistentDataCacheRecord *record;
 
 @end
