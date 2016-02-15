@@ -27,6 +27,7 @@
 #import "SPTPersistentCacheResponse+Private.h"
 #import "SPTPersistentDataCache+Private.h"
 #import "SPTPersistentDataCacheTimerProxy.h"
+#import "NSError+SPTPersistentDataCacheDomainErrors.h"
 #include <sys/stat.h>
 
 // Enable for more precise logging
@@ -638,7 +639,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
 
             // If not enough data to cast to header, its not the file we can process
             if (header == NULL) {
-                NSError *headerError = [self nsErrorWithCode:SPTPersistentDataCacheLoadingErrorNotEnoughDataToGetHeader];
+                NSError *headerError = [NSError spt_errorWithCode:SPTPersistentDataCacheLoadingErrorNotEnoughDataToGetHeader];
                 [self dispatchError:headerError result:SPTPersistentDataCacheResponseCodeOperationError callback:callback onQueue:queue];
                 return;
             }
@@ -668,7 +669,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
             // Check that payload is correct size
             if (localHeader.payloadSizeBytes != [rawData length] - SPTPersistentDataCacheRecordHeaderSize) {
                 [self debugOutput:@"PersistentDataCache: Error: Wrong payload size for key:%@ , will return error", key];
-                [self dispatchError:[self nsErrorWithCode:SPTPersistentDataCacheLoadingErrorWrongPayloadSize]
+                [self dispatchError:[NSError spt_errorWithCode:SPTPersistentDataCacheLoadingErrorWrongPayloadSize]
                              result:SPTPersistentDataCacheResponseCodeOperationError
                            callback:callback onQueue:queue];
                 return;
@@ -838,7 +839,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
         SPTPersistentDataCacheRecordHeaderType header;
         ssize_t readBytes = read(filedes, &header, SPTPersistentDataCacheRecordHeaderSize);
         if (readBytes != (ssize_t)SPTPersistentDataCacheRecordHeaderSize) {
-            NSError *error = [self nsErrorWithCode:SPTPersistentDataCacheLoadingErrorNotEnoughDataToGetHeader];
+            NSError *error = [NSError spt_errorWithCode:SPTPersistentDataCacheLoadingErrorNotEnoughDataToGetHeader];
             if (readBytes == -1) {
                 const int errn = errno;
                 const char* serr = strerror(errn);
@@ -927,13 +928,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
     return [subDir stringByAppendingPathComponent:key];
 }
 
-- (NSError *)nsErrorWithCode:(SPTPersistentDataCacheLoadingError)errorCode
-{
-    return [NSError errorWithDomain:SPTPersistentDataCacheErrorDomain
-                               code:errorCode
-                           userInfo:nil];
-}
-
 - (NSError *)checkHeaderValid:(SPTPersistentDataCacheRecordHeaderType *)header
 {
     int code = SPTPersistentDataCacheValidateHeader(header);
@@ -941,7 +935,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
         return nil;
     }
     
-    return [self nsErrorWithCode:code];
+    return [NSError spt_errorWithCode:code];
 }
 
 /**
@@ -1272,7 +1266,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
 - (BOOL)processKeyIfBusy:(NSString *)key callback:(SPTDataCacheResponseCallback)callback queue:(dispatch_queue_t)queue
 {
     if ([self.busyKeys containsObject:key]) {
-        NSError *nsError = [self nsErrorWithCode:SPTPersistentDataCacheLoadingErrorRecordIsStreamAndBusy];
+        NSError *nsError = [NSError spt_errorWithCode:SPTPersistentDataCacheLoadingErrorRecordIsStreamAndBusy];
         [self dispatchError:nsError result:SPTPersistentDataCacheResponseCodeOperationError callback:callback onQueue:queue];
         return YES;
     }
@@ -1281,3 +1275,4 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
 }
 
 @end
+
