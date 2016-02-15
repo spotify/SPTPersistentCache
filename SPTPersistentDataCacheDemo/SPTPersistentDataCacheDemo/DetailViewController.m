@@ -22,7 +22,7 @@
 
 #import <SPTPersistentDataCache/SPTPersistentDataCache.h>
 #import <SPTPersistentDataCache/SPTPersistentCacheResponse.h>
-#import <SPTPersistentDataCache/SPTDataCacheRecord.h>
+#import <SPTPersistentDataCache/SPTPersistentDataCacheRecord.h>
 
 @interface DetailViewController ()
 

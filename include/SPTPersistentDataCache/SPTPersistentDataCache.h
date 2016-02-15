@@ -23,7 +23,7 @@
 #import <SPTPersistentDataCache/SPTPersistentDataCacheTypes.h>
 #import <SPTPersistentDataCache/SPTPersistentDataCacheOptions.h>
 #import <SPTPersistentDataCache/SPTPersistentDataCacheHeader.h>
-#import <SPTPersistentDataCache/SPTDataCacheRecord.h>
+#import <SPTPersistentDataCache/SPTPersistentDataCacheRecord.h>
 #import <SPTPersistentDataCache/SPTPersistentCacheResponse.h>
 
 /**

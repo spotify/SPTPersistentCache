@@ -31,7 +31,7 @@
 #import <SPTPersistentDataCache/SPTPersistentDataCache.h>
 #import <SPTPersistentDataCache/SPTPersistentCacheResponse.h>
 #import <SPTPersistentDataCache/SPTPersistentDataCacheTypes.h>
-#import <SPTPersistentDataCache/SPTDataCacheRecord.h>
+#import <SPTPersistentDataCache/SPTPersistentDataCacheRecord.h>
 
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -102,7 +102,7 @@ static int params_GetFilesNumber(BOOL locked);
 static int params_GetCorruptedFilesNumber(void);
 static int params_GetDefaultExpireFilesNumber(void);
 
-static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentRecordHeaderType *header);
+static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentDataCacheRecordHeaderType *header);
 
 @interface SPTPersistentDataCache (Testing)
 - (NSString *)pathForKey:(NSString *)key;
@@ -748,7 +748,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             NSString *fileName = [self.thisBundle pathForResource:self.imageNames[i] ofType:nil];
             NSData *data = [NSData dataWithContentsOfFile:fileName];
             XCTAssertNotNil(data, @"Data must be valid");
-            expectedSize += ([data length] + (NSUInteger)kSPTPersistentRecordHeaderSize);
+            expectedSize += ([data length] + (NSUInteger)SPTPersistentDataCacheRecordHeaderSize);
         }
     }
 
@@ -1111,7 +1111,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     for (unsigned i = 0; i < count; ++i) {
         NSString *path = [cache pathForKey:self.imageNames[i]];
 
-        SPTPersistentRecordHeaderType header;
+        SPTPersistentDataCacheRecordHeaderType header;
         BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
         if (kParams[i].locked) {
             ++lockedCount;
@@ -1146,7 +1146,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     for (unsigned i = 0; i < count; ++i) {
         NSString *path = [cache pathForKey:self.imageNames[i]];
 
-        SPTPersistentRecordHeaderType header;
+        SPTPersistentDataCacheRecordHeaderType header;
         BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
         if (kParams[i].locked) {
             ++lockedCount;
@@ -1192,7 +1192,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     for (unsigned i = 0; i < count && i < dropCount; ++i) {
         NSUInteger size = [self dataSizeForItem:self.imageNames[i]];
-        expectedSize -= (size + (NSUInteger)kSPTPersistentRecordHeaderSize);
+        expectedSize -= (size + (NSUInteger)SPTPersistentDataCacheRecordHeaderSize);
         [savedItems addObject:self.imageNames[i]];
     }
 
@@ -1221,7 +1221,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         }
 
         NSString *path = [cache pathForKey:savedItems[i]];
-        SPTPersistentRecordHeaderType header;
+        SPTPersistentDataCacheRecordHeaderType header;
         BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
         XCTAssertTrue(opened, @"Saved files expected to in place");
     }
@@ -1261,7 +1261,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     // Check data
-    SPTPersistentRecordHeaderType header;
+    SPTPersistentDataCacheRecordHeaderType header;
     XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, YES, &header), @"Expect valid record");
     XCTAssertEqual(header.ttl, kTTL1, @"TTL must match");
     XCTAssertEqual(header.refCount, 1u, @"refCount must match");
@@ -1336,20 +1336,20 @@ SPTPersistentDataCacheLoadingErrorNotEnoughDataToGetHeader,
         return;
     }
 
-    SPTPersistentRecordHeaderType header;
-    memset(&header, 0, (size_t)kSPTPersistentRecordHeaderSize);
+    SPTPersistentDataCacheRecordHeaderType header;
+    memset(&header, 0, (size_t)SPTPersistentDataCacheRecordHeaderSize);
 
     if (pdcError != SPTPersistentDataCacheLoadingErrorNotEnoughDataToGetHeader) {
 
-        ssize_t readSize = read(fd, &header, (size_t)kSPTPersistentRecordHeaderSize);
-        if (readSize != kSPTPersistentRecordHeaderSize) {
-            XCTAssert(readSize == kSPTPersistentRecordHeaderSize, @"Header not read");
+        ssize_t readSize = read(fd, &header, (size_t)SPTPersistentDataCacheRecordHeaderSize);
+        if (readSize != (ssize_t)SPTPersistentDataCacheRecordHeaderSize) {
+            XCTAssert(readSize == (ssize_t)SPTPersistentDataCacheRecordHeaderSize, @"Header not read");
             close(fd);
             return;
         }
     }
 
-    NSUInteger headerSize = (NSUInteger)kSPTPersistentRecordHeaderSize;
+    NSUInteger headerSize = (NSUInteger)SPTPersistentDataCacheRecordHeaderSize;
 
     switch (pdcError) {
         case SPTPersistentDataCacheLoadingErrorMagicMismatch: {
@@ -1357,13 +1357,13 @@ SPTPersistentDataCacheLoadingErrorNotEnoughDataToGetHeader,
             break;
         }
         case SPTPersistentDataCacheLoadingErrorWrongHeaderSize: {
-            header.headerSize = (uint32_t)kSPTPersistentRecordHeaderSize + 1u + arc4random_uniform(106);
-            header.crc = pdc_CalculateHeaderCRC(&header);
+            header.headerSize = (uint32_t)SPTPersistentDataCacheRecordHeaderSize + 1u + arc4random_uniform(106);
+            header.crc = SPTPersistentDataCacheCalculateHeaderCRC(&header);
             break;
         }
         case SPTPersistentDataCacheLoadingErrorWrongPayloadSize: {
             header.payloadSizeBytes += (1 + (arc4random_uniform((uint32_t)header.payloadSizeBytes) - (header.payloadSizeBytes-1)/2));
-            header.crc = pdc_CalculateHeaderCRC(&header);
+            header.crc = SPTPersistentDataCacheCalculateHeaderCRC(&header);
             break;
         }
         case SPTPersistentDataCacheLoadingErrorInvalidHeaderCRC: {
@@ -1396,23 +1396,23 @@ SPTPersistentDataCacheLoadingErrorNotEnoughDataToGetHeader,
         return;
     }
 
-    SPTPersistentRecordHeaderType header;
-    memset(&header, 0, (size_t)kSPTPersistentRecordHeaderSize);
+    SPTPersistentDataCacheRecordHeaderType header;
+    memset(&header, 0, (size_t)SPTPersistentDataCacheRecordHeaderSize);
 
-    ssize_t readSize = read(fd, &header, (size_t)kSPTPersistentRecordHeaderSize);
-    if (readSize != kSPTPersistentRecordHeaderSize) {
+    ssize_t readSize = read(fd, &header, (size_t)SPTPersistentDataCacheRecordHeaderSize);
+    if (readSize != (ssize_t)SPTPersistentDataCacheRecordHeaderSize) {
         close(fd);
         return;
     }
 
     header.updateTimeSec = updateTime;
-    header.crc = pdc_CalculateHeaderCRC(&header);
+    header.crc = SPTPersistentDataCacheCalculateHeaderCRC(&header);
 
     off_t ret = lseek(fd, SEEK_SET, 0);
     XCTAssert(ret != -1);
 
-    ssize_t written = write(fd, &header, (size_t)kSPTPersistentRecordHeaderSize);
-    XCTAssert(written == kSPTPersistentRecordHeaderSize, @"header was not written");
+    ssize_t written = write(fd, &header, (size_t)SPTPersistentDataCacheRecordHeaderSize);
+    XCTAssert(written == (ssize_t)SPTPersistentDataCacheRecordHeaderSize, @"header was not written");
     fsync(fd);
     close(fd);
 }
@@ -1458,7 +1458,7 @@ SPTPersistentDataCacheLoadingErrorNotEnoughDataToGetHeader,
 - (void)checkUpdateTimeForFileAtPath:(NSString *)path validate:(BOOL)validate referenceTimeCheck:(void(^)(uint64_t updateTime))timeCheck
 {
     XCTAssertNotNil(path, @"Path is nil");
-    SPTPersistentRecordHeaderType header;
+    SPTPersistentDataCacheRecordHeaderType header;
     if (validate) {
         XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, validate, &header), @"Unable to read and validate header");
         timeCheck(header.updateTimeSec);
@@ -1481,7 +1481,7 @@ SPTPersistentDataCacheLoadingErrorNotEnoughDataToGetHeader,
         if (kParams[i].corruptReason == SPTPersistentDataCacheLoadingErrorNotEnoughDataToGetHeader) {
             expectedSize += kCorruptedFileSize;
         } else {
-            expectedSize += ([self dataSizeForItem:self.imageNames[i]] + (NSUInteger)kSPTPersistentRecordHeaderSize);
+            expectedSize += ([self dataSizeForItem:self.imageNames[i]] + (NSUInteger)SPTPersistentDataCacheRecordHeaderSize);
         }
     }
 
@@ -1491,7 +1491,7 @@ SPTPersistentDataCacheLoadingErrorNotEnoughDataToGetHeader,
 
 @end
 
-static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentRecordHeaderType *header)
+static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentDataCacheRecordHeaderType *header)
 {
     int fd = open(path, O_RDONLY);
     if (fd == -1) {
@@ -1499,20 +1499,20 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
 
     assert(header != NULL);
-    memset(header, 0, (size_t)kSPTPersistentRecordHeaderSize);
+    memset(header, 0, (size_t)SPTPersistentDataCacheRecordHeaderSize);
 
-    ssize_t readSize = read(fd, header, (size_t)kSPTPersistentRecordHeaderSize);
+    ssize_t readSize = read(fd, header, (size_t)SPTPersistentDataCacheRecordHeaderSize);
     close(fd);
 
-    if (readSize != kSPTPersistentRecordHeaderSize) {
+    if (readSize != (ssize_t)SPTPersistentDataCacheRecordHeaderSize) {
         return NO;
     }
 
-    if (validate && pdc_ValidateHeader(header) != -1) {
+    if (validate && SPTPersistentDataCacheValidateHeader(header) != -1) {
         return NO;
     }
 
-    uint32_t crc = pdc_CalculateHeaderCRC(header);
+    uint32_t crc = SPTPersistentDataCacheCalculateHeaderCRC(header);
     return crc == header->crc;
 }
 

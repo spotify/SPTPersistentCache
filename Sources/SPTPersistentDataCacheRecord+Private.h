@@ -18,27 +18,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import "SPTDataCacheRecord.h"
+#import "SPTPersistentDataCacheRecord.h"
 
-@implementation SPTDataCacheRecord
-
-#pragma mark SPTDataCacheRecord
+@interface SPTPersistentDataCacheRecord (Private)
 
 - (instancetype)initWithData:(NSData *)data
                          key:(NSString *)key
                     refCount:(NSUInteger)refCount
-                         ttl:(NSUInteger)ttl
-{
-    if (!(self = [super init])) {
-        return nil;
-    }
-
-    _refCount = refCount;
-    _ttl = ttl;
-    _key = [key copy];
-    _data = data;
-
-    return self;
-}
+                         ttl:(NSUInteger)ttl;
 
 @end

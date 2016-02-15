@@ -24,6 +24,6 @@
 
 - (instancetype)initWithResult:(SPTPersistentDataCacheResponseCode)result
                          error:(NSError *)error
-                        record:(SPTDataCacheRecord *)record;
+                        record:(SPTPersistentDataCacheRecord *)record;
 
 @end
