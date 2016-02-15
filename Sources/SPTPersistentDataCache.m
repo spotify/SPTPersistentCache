@@ -23,7 +23,7 @@
 #import <SPTPersistentDataCache/SPTPersistentDataCacheHeader.h>
 
 #import "crc32iso3309.h"
-#import "SPTDataCacheRecord+Private.h"
+#import "SPTPersistentDataCacheRecord+Private.h"
 #import "SPTPersistentCacheResponse+Private.h"
 #import "SPTPersistentDataCache+Private.h"
 #import "SPTPersistentDataCacheTimerProxy.h"
@@ -679,7 +679,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
             const NSUInteger ttl = (NSUInteger)localHeader.ttl;
 
 
-            SPTDataCacheRecord *record = [[SPTDataCacheRecord alloc] initWithData:payload
+            SPTPersistentDataCacheRecord *record = [[SPTPersistentDataCacheRecord alloc] initWithData:payload
                                                                               key:key
                                                                          refCount:refCount
                                                                               ttl:ttl];

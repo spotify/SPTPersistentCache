@@ -21,13 +21,13 @@
 #import <Foundation/Foundation.h>
 
 /**
- * @brief SPTDataCacheRecord
+ * @brief SPTPersistentDataCacheRecord
  *
  * @discussion Class defines one record in cache that is returned in response.
  *             Each record is represented by single file on disk.
  *             If file deleted from disk then cache assumes its never existed and return SPTPersistentDataCacheResponseCodeNotFound for load call.
  */
-@interface SPTDataCacheRecord : NSObject
+@interface SPTPersistentDataCacheRecord : NSObject
 
 /*
  * Defines the number of times external logical references to this cache item. Initially is 0 if locked flag on store is NO.

@@ -24,7 +24,7 @@
 
 @property (nonatomic, assign, readwrite) SPTPersistentDataCacheResponseCode result;
 @property (nonatomic, strong, readwrite) NSError *error;
-@property (nonatomic, strong, readwrite) SPTDataCacheRecord *record;
+@property (nonatomic, strong, readwrite) SPTPersistentDataCacheRecord *record;
 
 @end
 
@@ -32,7 +32,7 @@
 
 - (instancetype)initWithResult:(SPTPersistentDataCacheResponseCode)result
                          error:(NSError *)error
-                        record:(SPTDataCacheRecord *)record
+                        record:(SPTPersistentDataCacheRecord *)record
 {
     if (!(self = [super init])) {
         return nil;

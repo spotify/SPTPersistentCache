@@ -31,7 +31,7 @@
 #import <SPTPersistentDataCache/SPTPersistentDataCache.h>
 #import <SPTPersistentDataCache/SPTPersistentCacheResponse.h>
 #import <SPTPersistentDataCache/SPTPersistentDataCacheTypes.h>
-#import <SPTPersistentDataCache/SPTDataCacheRecord.h>
+#import <SPTPersistentDataCache/SPTPersistentDataCacheRecord.h>
 
 #include <sys/time.h>
 #include <sys/stat.h>
