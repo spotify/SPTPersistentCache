@@ -648,7 +648,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
             memcpy(&localHeader, header, sizeof(localHeader));
 
             // Check header is valid
-            NSError *headerError = [self checkHeaderValid:&localHeader];
+            NSError *headerError = SPTPersistentDataCacheCheckValidHeader(&localHeader);
             if (headerError != nil) {
                 [self dispatchError:headerError result:SPTPersistentDataCacheResponseCodeOperationError callback:callback onQueue:queue];
                 return;
@@ -852,7 +852,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
             return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentDataCacheResponseCodeOperationError error:error record:nil];
         }
 
-        NSError *nsError = [self checkHeaderValid:&header];
+        NSError *nsError = SPTPersistentDataCacheCheckValidHeader(&header);
         if (nsError != nil) {
             [self debugOutput:@"PersistentDataCache: Error checking header at file path:%@ , error:%@", filePath, nsError];
             return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentDataCacheResponseCodeOperationError error:nsError record:nil];
@@ -926,16 +926,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
 {
     NSString *subDir = [self subDirectoryPathForKey:key];
     return [subDir stringByAppendingPathComponent:key];
-}
-
-- (NSError *)checkHeaderValid:(SPTPersistentDataCacheRecordHeaderType *)header
-{
-    int code = SPTPersistentDataCacheValidateHeader(header);
-    if (code == -1) { // No error
-        return nil;
-    }
-    
-    return [NSError spt_errorWithCode:code];
 }
 
 /**

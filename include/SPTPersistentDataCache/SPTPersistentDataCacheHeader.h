@@ -64,3 +64,7 @@ FOUNDATION_EXPORT SPTPersistentDataCacheRecordHeaderType *SPTPersistentDataCache
 FOUNDATION_EXPORT int /*SPTPersistentDataCacheLoadingError*/ SPTPersistentDataCacheValidateHeader(const SPTPersistentDataCacheRecordHeaderType *header);
 // Function return calculated CRC for current header.
 FOUNDATION_EXPORT uint32_t SPTPersistentDataCacheCalculateHeaderCRC(const SPTPersistentDataCacheRecordHeaderType *header);
+
+/// Checks that a given header is valid.
+/// @return nil if everything is ok, otherwise will return an instance of NSError.
+FOUNDATION_EXPORT NSError * SPTPersistentDataCacheCheckValidHeader(SPTPersistentDataCacheRecordHeaderType *header);
