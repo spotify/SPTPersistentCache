@@ -18,10 +18,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import "SPTPersistentDataCache.h"
+#import <SPTPersistentDataCache/SPTPersistentDataCache.h>
+
+#import <SPTPersistentDataCache/SPTPersistentDataCacheHeader.h>
 
 #import "crc32iso3309.h"
-#import "SPTPersistentDataHeader.h"
 #import "SPTDataCacheRecord+Private.h"
 #import "SPTPersistentCacheResponse+Private.h"
 #import "SPTPersistentDataCache+Private.h"
@@ -47,9 +48,6 @@ static const uint64_t kTTLUpperBoundInSec = 86400 * 31 * 2;
 static const NSUInteger SPTPersistentDataCacheGCIntervalLimitSec = 60;
 static const NSUInteger SPTPersistentDataCacheDefaultExpirationLimitSec = 60;
 
-const MagicType kSPTPersistentDataCacheMagic = 0x46545053; // SPTF
-const int kSPTPersistentRecordHeaderSize = sizeof(SPTPersistentRecordHeaderType);
-
 typedef long long SPTDiskSizeType;
 static const double SPTDataCacheMinimumFreeDiskSpace = 0.1;
 
@@ -57,7 +55,7 @@ static NSString * const SPTDataCacheFileNameKey = @"SPTDataCacheFileNameKey";
 static NSString * const SPTDataCacheFileAttributesKey = @"SPTDataCacheFileAttributesKey";
 
 typedef SPTPersistentCacheResponse* (^FileProcessingBlockType)(int filedes);
-typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *header);
+typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderType *header);
 
 #pragma mark - SPTPersistentDataCache()
 
@@ -228,7 +226,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
             // WARNING: We may skip return result here bcuz in that case we will skip the key as invalid
             [self alterHeaderForFileAtPath:filePath
-                                 withBlock:^(SPTPersistentRecordHeaderType *header) {
+                                 withBlock:^(SPTPersistentDataCacheRecordHeaderType *header) {
                                      assert(header != nil);
 
                                      // Satisfy Req.#1.2
@@ -324,7 +322,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         BOOL __block expired = NO;
         SPTPersistentCacheResponse *response =
         [self alterHeaderForFileAtPath:filePath
-                             withBlock:^(SPTPersistentRecordHeaderType *header) {
+                             withBlock:^(SPTPersistentDataCacheRecordHeaderType *header) {
                                  assert(header != nil);
 
                                  // Satisfy Req.#1.2 and Req.#1.3
@@ -400,7 +398,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             BOOL __block expired = NO;
             SPTPersistentCacheResponse *response =
             [self alterHeaderForFileAtPath:filePath
-                                 withBlock:^(SPTPersistentRecordHeaderType *header) {
+                                 withBlock:^(SPTPersistentDataCacheRecordHeaderType *header) {
                                      assert(header != nil);
 
                                      // Satisfy Req.#1.2
@@ -451,7 +449,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
             SPTPersistentCacheResponse *response =
             [self alterHeaderForFileAtPath:filePath
-                                 withBlock:^(SPTPersistentRecordHeaderType *header){
+                                 withBlock:^(SPTPersistentDataCacheRecordHeaderType *header){
                                      assert(header != nil);
 
                                      if (header->refCount > 0) {
@@ -582,7 +580,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
                     BOOL __block locked = NO;
                     // WARNING: We may skip return result here bcuz in that case we will not count file as locked
-                    [self alterHeaderForFileAtPath:filePath withBlock:^(SPTPersistentRecordHeaderType *header) {
+                    [self alterHeaderForFileAtPath:filePath withBlock:^(SPTPersistentDataCacheRecordHeaderType *header) {
                         locked = header->refCount > 0;
                     }
                                          writeBack:NO
@@ -636,7 +634,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             // File read with error -> inform user
             [self dispatchError:error result:SPTPersistentDataCacheResponseCodeOperationError callback:callback onQueue:queue];
         } else {
-            SPTPersistentRecordHeaderType *header = pdc_GetHeaderFromData(rawData.mutableBytes, rawData.length);
+            SPTPersistentDataCacheRecordHeaderType *header = SPTPersistentDataCacheGetHeaderFromData(rawData.mutableBytes, rawData.length);
 
             // If not enough data to cast to header, its not the file we can process
             if (header == NULL) {
@@ -645,7 +643,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 return;
             }
 
-            SPTPersistentRecordHeaderType localHeader;
+            SPTPersistentDataCacheRecordHeaderType localHeader;
             memcpy(&localHeader, header, sizeof(localHeader));
 
             // Check header is valid
@@ -668,7 +666,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             }
 
             // Check that payload is correct size
-            if (localHeader.payloadSizeBytes != [rawData length] - kSPTPersistentRecordHeaderSize) {
+            if (localHeader.payloadSizeBytes != [rawData length] - SPTPersistentDataCacheRecordHeaderSize) {
                 [self debugOutput:@"PersistentDataCache: Error: Wrong payload size for key:%@ , will return error", key];
                 [self dispatchError:[self nsErrorWithCode:SPTPersistentDataCacheLoadingErrorWrongPayloadSize]
                              result:SPTPersistentDataCacheResponseCodeOperationError
@@ -676,7 +674,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 return;
             }
 
-            NSRange payloadRange = NSMakeRange(kSPTPersistentRecordHeaderSize, (NSUInteger)localHeader.payloadSizeBytes);
+            NSRange payloadRange = NSMakeRange(SPTPersistentDataCacheRecordHeaderSize, (NSUInteger)localHeader.payloadSizeBytes);
             NSData *payload = [rawData subdataWithRange:payloadRange];
             const NSUInteger ttl = (NSUInteger)localHeader.ttl;
 
@@ -692,7 +690,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
             // If data ttl == 0 we update access time
             if (ttl == 0) {
                 localHeader.updateTimeSec = spt_uint64rint(self.currentTime());
-                localHeader.crc = pdc_CalculateHeaderCRC(&localHeader);
+                localHeader.crc = SPTPersistentDataCacheCalculateHeaderCRC(&localHeader);
                 memcpy(header, &localHeader, sizeof(localHeader));
 
                 // Write back with updated access attributes
@@ -732,23 +730,23 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     uint32_t __block oldRefCount = 0;
     const NSUInteger payloadLen = [data length];
-    const NSUInteger rawdataLen = kSPTPersistentRecordHeaderSize + payloadLen;
+    const NSUInteger rawdataLen = SPTPersistentDataCacheRecordHeaderSize + payloadLen;
 
     NSMutableData *rawData = [NSMutableData dataWithCapacity:rawdataLen];
 
-    SPTPersistentRecordHeaderType dummy;
-    memset(&dummy, 0, kSPTPersistentRecordHeaderSize);
-    SPTPersistentRecordHeaderType *header = &dummy;
+    SPTPersistentDataCacheRecordHeaderType dummy;
+    memset(&dummy, 0, SPTPersistentDataCacheRecordHeaderSize);
+    SPTPersistentDataCacheRecordHeaderType *header = &dummy;
 
-    header->magic = kSPTPersistentDataCacheMagic;
-    header->headerSize = kSPTPersistentRecordHeaderSize;
+    header->magic = SPTPersistentDataCacheMagicValue;
+    header->headerSize = (uint32_t)SPTPersistentDataCacheRecordHeaderSize;
     header->refCount = oldRefCount + (locked ? 1 : 0);
     header->ttl = ttl;
     header->payloadSizeBytes = payloadLen;
     header->updateTimeSec = spt_uint64rint(self.currentTime());
-    header->crc = pdc_CalculateHeaderCRC(header);
+    header->crc = SPTPersistentDataCacheCalculateHeaderCRC(header);
 
-    [rawData appendBytes:&dummy length:kSPTPersistentRecordHeaderSize];
+    [rawData appendBytes:&dummy length:SPTPersistentDataCacheRecordHeaderSize];
     [rawData appendData:data];
 
     NSError *error = nil;
@@ -837,9 +835,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
     return [self guardOpenFileWithPath:filePath jobBlock:^SPTPersistentCacheResponse*(int filedes) {
 
-        SPTPersistentRecordHeaderType header;
-        ssize_t readBytes = read(filedes, &header, kSPTPersistentRecordHeaderSize);
-        if (readBytes != kSPTPersistentRecordHeaderSize) {
+        SPTPersistentDataCacheRecordHeaderType header;
+        ssize_t readBytes = read(filedes, &header, SPTPersistentDataCacheRecordHeaderSize);
+        if (readBytes != (ssize_t)SPTPersistentDataCacheRecordHeaderSize) {
             NSError *error = [self nsErrorWithCode:SPTPersistentDataCacheLoadingErrorNotEnoughDataToGetHeader];
             if (readBytes == -1) {
                 const int errn = errno;
@@ -864,7 +862,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
         if (needWriteBack) {
 
             uint32_t oldCRC = header.crc;
-            header.crc = pdc_CalculateHeaderCRC(&header);
+            header.crc = SPTPersistentDataCacheCalculateHeaderCRC(&header);
 
             // If nothing has changed we do nothing then
             if (oldCRC == header.crc) {
@@ -881,8 +879,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                 return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentDataCacheResponseCodeOperationError error:error record:nil];
 
             } else {
-                ssize_t writtenBytes = write(filedes, &header, kSPTPersistentRecordHeaderSize);
-                if (writtenBytes != kSPTPersistentRecordHeaderSize) {
+                ssize_t writtenBytes = write(filedes, &header, SPTPersistentDataCacheRecordHeaderSize);
+                if (writtenBytes != (ssize_t)SPTPersistentDataCacheRecordHeaderSize) {
                     const int errn = errno;
                     NSString *serr = @(strerror(errn));
                     [self debugOutput:@"PersistentDataCache: Error writting header at file path:%@ , error:%@", filePath, serr];
@@ -936,9 +934,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                            userInfo:nil];
 }
 
-- (NSError *)checkHeaderValid:(SPTPersistentRecordHeaderType *)header
+- (NSError *)checkHeaderValid:(SPTPersistentDataCacheRecordHeaderType *)header
 {
-    int code = pdc_ValidateHeader(header);
+    int code = SPTPersistentDataCacheValidateHeader(header);
     if (code == -1) { // No error
         return nil;
     }
@@ -949,7 +947,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 /**
  * Only this method check data expiration. Past check is also supported.
  */
-- (BOOL)isDataExpiredWithHeader:(SPTPersistentRecordHeaderType *)header
+- (BOOL)isDataExpiredWithHeader:(SPTPersistentDataCacheRecordHeaderType *)header
 {
     assert(header != nil);
     uint64_t ttl = header->ttl;
@@ -966,7 +964,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 /**
  * Methos checks whether data can be given to caller with accordance to API.
  */
-- (BOOL)isDataCanBeReturnedWithHeader:(SPTPersistentRecordHeaderType *)header
+- (BOOL)isDataCanBeReturnedWithHeader:(SPTPersistentDataCacheRecordHeaderType *)header
 {
     return !([self isDataExpiredWithHeader:header] && header->refCount == 0);
 }
@@ -1009,7 +1007,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
                     int __block reason = 0;
                     // WARNING: We may skip return result here bcuz in that case we won't remove file we do not know what is it
                     [self alterHeaderForFileAtPath:filePath
-                                         withBlock:^(SPTPersistentRecordHeaderType *header) {
+                                         withBlock:^(SPTPersistentDataCacheRecordHeaderType *header) {
 
                                              if (forceExpire && forceLocked) {
                                                  // delete all
@@ -1225,7 +1223,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 
                 // WARNING: We may skip return result here bcuz in that case we will remove unknown file as unlocked trash
                 [self alterHeaderForFileAtPath:[NSString stringWithUTF8String:theURL.fileSystemRepresentation]
-                                     withBlock:^(SPTPersistentRecordHeaderType *header) {
+                                     withBlock:^(SPTPersistentDataCacheRecordHeaderType *header) {
                                          locked = (header->refCount > 0);
                                      } writeBack:NO
                                       complain:YES];
@@ -1283,61 +1281,3 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentRecordHeaderType *heade
 }
 
 @end
-
-NS_INLINE BOOL PointerMagicAlignCheck(const void *ptr)
-{
-    const unsigned align = _Alignof(MagicType);
-    uint64_t v = (uint64_t)(ptr);
-    assert(v%align == 0);
-    return (v%align == 0);
-}
-
-SPTPersistentRecordHeaderType *pdc_GetHeaderFromData(void *data, size_t size)
-{
-    if (size < kSPTPersistentRecordHeaderSize) {
-        return NULL;
-    }
-
-    return (SPTPersistentRecordHeaderType *)data;
-}
-
-int /*SPTPersistentDataCacheLoadingError*/ pdc_ValidateHeader(const SPTPersistentRecordHeaderType *header)
-{
-    assert(header != NULL);
-    if (header == NULL) {
-        return SPTPersistentDataCacheLoadingErrorInternalInconsistency;
-    }
-
-    // Check that header could be read according to alignment
-    if (!PointerMagicAlignCheck(header)) {
-        return SPTPersistentDataCacheLoadingErrorHeaderAlignmentMismatch;
-    }
-
-    // 1. Check magic
-    if (header->magic != kSPTPersistentDataCacheMagic) {
-        return SPTPersistentDataCacheLoadingErrorMagicMismatch;
-    }
-
-    // 2. Check CRC
-    uint32_t crc = pdc_CalculateHeaderCRC(header);
-    if (crc != header->crc) {
-        return SPTPersistentDataCacheLoadingErrorInvalidHeaderCRC;
-    }
-
-    // 3. Check header size
-    if (header->headerSize != kSPTPersistentRecordHeaderSize) {
-        return SPTPersistentDataCacheLoadingErrorWrongHeaderSize;
-    }
-
-    return -1;
-}
-
-uint32_t pdc_CalculateHeaderCRC(const SPTPersistentRecordHeaderType *header)
-{
-    assert(header != NULL);
-    if (header == NULL) {
-        return 0;
-    }
-
-    return spt_crc32((const uint8_t *)header, kSPTPersistentRecordHeaderSize - sizeof(header->crc));
-}

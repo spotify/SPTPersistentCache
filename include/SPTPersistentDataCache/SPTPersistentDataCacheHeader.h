@@ -18,29 +18,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#ifndef SPTPERSISTENTDATAHEADER_H
-#define SPTPERSISTENTDATAHEADER_H
+#import <Foundation/Foundation.h>
 
-typedef uint32_t MagicType;
-FOUNDATION_EXPORT const MagicType kSPTPersistentDataCacheMagic;
+typedef uint32_t SPTPersistentDataCacheMagicType;
 
 /**
  * Describes different flags for record
  */
-typedef enum SPTPersistentRecordHeaderFlags {
+typedef NS_ENUM(NSInteger, SPTPersistentDataCacheRecordHeaderFlags) {
     // 0x0 means regular file
     /*
      * Indicates that record might not be completed last time it was written.
      * This is not an error state but more Application logic.
      */
-    SPTPersistentRecordHeaderFlagsStreamIncomplete = 0x1,
+    SPTPersistentDataCacheRecordHeaderFlagsStreamIncomplete = 0x1,
+};
 
-
-} SPTPersistentRecordHeaderFlags;
-
-typedef struct SPTPersistentRecordHeaderType {
+typedef struct SPTPersistentDataCacheRecordHeaderType {
     // Version 1:
-    MagicType magic;
+    SPTPersistentDataCacheMagicType magic;
     uint32_t headerSize;
     uint32_t refCount;
     uint32_t reserved1;
@@ -54,23 +50,17 @@ typedef struct SPTPersistentRecordHeaderType {
     uint32_t flags;         // See SPTPersistentRecordHeaderFlags
     uint32_t crc;
     // Version 2: Add fields here if required
-} SPTPersistentRecordHeaderType;
+} SPTPersistentDataCacheRecordHeaderType;
 
-FOUNDATION_EXPORT const int kSPTPersistentRecordHeaderSize;
-
-_Static_assert(sizeof(SPTPersistentRecordHeaderType) == 64, "Struct SPTPersistentRecordHeaderType has to be packed without padding");
-_Static_assert(sizeof(SPTPersistentRecordHeaderType)%4 == 0, "Struct size has to be multiple of 4");
+FOUNDATION_EXPORT const SPTPersistentDataCacheMagicType SPTPersistentDataCacheMagicValue;
+FOUNDATION_EXPORT const size_t SPTPersistentDataCacheRecordHeaderSize;
 
 // Following functions used internally and could be used for testing purposes also
-
 // Function return pointer to header if there are enough data otherwise NULL
-FOUNDATION_EXPORT SPTPersistentRecordHeaderType *pdc_GetHeaderFromData(void *data, size_t size);
-
+FOUNDATION_EXPORT SPTPersistentDataCacheRecordHeaderType *SPTPersistentDataCacheGetHeaderFromData(void *data,
+                                                                                                  size_t size);
 // Function validates header accoring to predefined rules used in production code
 // @return -1 if everything is ok, otherwise one of codes from SPTPersistentDataCacheLoadingError
-FOUNDATION_EXPORT int /*SPTPersistentDataCacheLoadingError*/ pdc_ValidateHeader(const SPTPersistentRecordHeaderType *header);
-
+FOUNDATION_EXPORT int /*SPTPersistentDataCacheLoadingError*/ SPTPersistentDataCacheValidateHeader(const SPTPersistentDataCacheRecordHeaderType *header);
 // Function return calculated CRC for current header.
-FOUNDATION_EXPORT uint32_t pdc_CalculateHeaderCRC(const SPTPersistentRecordHeaderType *header);
-
-#endif // SPTPERSISTENTDATAHEADER_H
+FOUNDATION_EXPORT uint32_t SPTPersistentDataCacheCalculateHeaderCRC(const SPTPersistentDataCacheRecordHeaderType *header);
