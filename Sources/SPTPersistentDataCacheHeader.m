@@ -21,6 +21,7 @@
 #import <SPTPersistentDataCache/SPTPersistentDataCacheHeader.h>
 
 #import <SPTPersistentDataCache/SPTPersistentDataCacheTypes.h>
+#import "NSError+SPTPersistentDataCacheDomainErrors.h"
 
 #include "crc32iso3309.h"
 
@@ -76,6 +77,16 @@ int /*SPTPersistentDataCacheLoadingError*/ SPTPersistentDataCacheValidateHeader(
     }
 
     return -1;
+}
+
+NSError * SPTPersistentDataCacheCheckValidHeader(SPTPersistentDataCacheRecordHeaderType *header)
+{
+    int code = SPTPersistentDataCacheValidateHeader(header);
+    if (code == -1) { // No error
+        return nil;
+    }
+    
+    return [NSError spt_persistentDataCacheErrorWithCode:code];
 }
 
 uint32_t SPTPersistentDataCacheCalculateHeaderCRC(const SPTPersistentDataCacheRecordHeaderType *header)

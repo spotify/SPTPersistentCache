@@ -36,8 +36,8 @@
 		696CD78C1C4707E20071DD18 /* SPTPersistentDataCacheOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = 696CD7871C4707E20071DD18 /* SPTPersistentDataCacheOptions.m */; };
 		C41237081C6A29FB00C1E9B8 /* SPTPersistentDataCacheTimerProxyTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C41237071C6A29FB00C1E9B8 /* SPTPersistentDataCacheTimerProxyTests.m */; };
 		C413BA011C71CBBA002D41FB /* SPTPersistentDataCacheHeaderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C413BA001C71CBBA002D41FB /* SPTPersistentDataCacheHeaderTests.m */; };
-		C4B4148C1C6A01970099FECD /* SPTDataCacheRecordTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C4B4148B1C6A01970099FECD /* SPTDataCacheRecordTests.m */; };
-		C4B4148C1C6A01970099FECD /* SPTPersistentDataCacheRecordTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C4B4148B1C6A01970099FECD /* SPTPersistentDataCacheRecordTests.m */; };
+		C413BA051C71E1A0002D41FB /* NSError+SPTPersistentDataCacheDomainErrors.m in Sources */ = {isa = PBXBuildFile; fileRef = C413BA041C71E1A0002D41FB /* NSError+SPTPersistentDataCacheDomainErrors.m */; };
+		C413BA071C71E2DC002D41FB /* NSError+SPTPersistentDataCacheDomainErrorsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C413BA061C71E2DC002D41FB /* NSError+SPTPersistentDataCacheDomainErrorsTests.m */; };
 		C4B4148F1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C4B4148E1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m */; };
 		C4B414911C6A24A10099FECD /* SPTPersistentDataCacheOptionsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C4B414901C6A24A10099FECD /* SPTPersistentDataCacheOptionsTests.m */; };
 /* End PBXBuildFile section */
@@ -113,7 +113,9 @@
 		9C882A811C65422700D463BB /* spotify_os.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = spotify_os.xcconfig; sourceTree = "<group>"; };
 		C41237071C6A29FB00C1E9B8 /* SPTPersistentDataCacheTimerProxyTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCacheTimerProxyTests.m; sourceTree = "<group>"; };
 		C413BA001C71CBBA002D41FB /* SPTPersistentDataCacheHeaderTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCacheHeaderTests.m; sourceTree = "<group>"; };
-		C4B4148B1C6A01970099FECD /* SPTDataCacheRecordTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTDataCacheRecordTests.m; sourceTree = "<group>"; };
+		C413BA031C71E1A0002D41FB /* NSError+SPTPersistentDataCacheDomainErrors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSError+SPTPersistentDataCacheDomainErrors.h"; path = "Categories/NSError+SPTPersistentDataCacheDomainErrors.h"; sourceTree = "<group>"; };
+		C413BA041C71E1A0002D41FB /* NSError+SPTPersistentDataCacheDomainErrors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSError+SPTPersistentDataCacheDomainErrors.m"; path = "Categories/NSError+SPTPersistentDataCacheDomainErrors.m"; sourceTree = "<group>"; };
+		C413BA061C71E2DC002D41FB /* NSError+SPTPersistentDataCacheDomainErrorsTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSError+SPTPersistentDataCacheDomainErrorsTests.m"; sourceTree = "<group>"; };
 		C4B4148B1C6A01970099FECD /* SPTPersistentDataCacheRecordTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCacheRecordTests.m; sourceTree = "<group>"; };
 		C4B4148E1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheResponseTests.m; sourceTree = "<group>"; };
 		C4B414901C6A24A10099FECD /* SPTPersistentDataCacheOptionsTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCacheOptionsTests.m; sourceTree = "<group>"; };
@@ -186,6 +188,7 @@
 				C4B414901C6A24A10099FECD /* SPTPersistentDataCacheOptionsTests.m */,
 				C41237071C6A29FB00C1E9B8 /* SPTPersistentDataCacheTimerProxyTests.m */,
 				C413BA001C71CBBA002D41FB /* SPTPersistentDataCacheHeaderTests.m */,
+				C413BA061C71E2DC002D41FB /* NSError+SPTPersistentDataCacheDomainErrorsTests.m */,
 				0510FF231BA2FF7A00ED0766 /* Supporting Files */,
 			);
 			path = Tests;
@@ -222,6 +225,7 @@
 		696CD7831C4707E20071DD18 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				C413BA021C71E0CF002D41FB /* Categories */,
 				696CD7841C4707E20071DD18 /* crc32iso3309.c */,
 				696CD7851C4707E20071DD18 /* crc32iso3309.h */,
 				0595F33B1C5011E30052328B /* SPTPersistentDataCache+Private.h */,
@@ -251,6 +255,15 @@
 			);
 			name = API;
 			path = include/SPTPersistentDataCache;
+			sourceTree = "<group>";
+		};
+		C413BA021C71E0CF002D41FB /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				C413BA031C71E1A0002D41FB /* NSError+SPTPersistentDataCacheDomainErrors.h */,
+				C413BA041C71E1A0002D41FB /* NSError+SPTPersistentDataCacheDomainErrors.m */,
+			);
+			name = Categories;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -359,6 +372,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C413BA051C71E1A0002D41FB /* NSError+SPTPersistentDataCacheDomainErrors.m in Sources */,
 				0595F33A1C50117B0052328B /* SPTPersistentDataCacheTimerProxy.m in Sources */,
 				0595F0A91C5008060052328B /* SPTPersistentDataCacheRecord.m in Sources */,
 				057AFD5B1C70F99A00350C9F /* SPTPersistentDataCacheHeader.m in Sources */,
@@ -377,7 +391,7 @@
 				0510FF6B1BA3073D00ED0766 /* SPTPersistentDataCacheTests.m in Sources */,
 				C413BA011C71CBBA002D41FB /* SPTPersistentDataCacheHeaderTests.m in Sources */,
 				C41237081C6A29FB00C1E9B8 /* SPTPersistentDataCacheTimerProxyTests.m in Sources */,
-				C4B4148C1C6A01970099FECD /* SPTPersistentDataCacheRecordTests.m in Sources */,
+				C413BA071C71E2DC002D41FB /* NSError+SPTPersistentDataCacheDomainErrorsTests.m in Sources */,
 				C4B4148F1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -454,6 +468,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = Tests/Info.plist;
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -465,6 +480,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Tests/Info.plist;
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
