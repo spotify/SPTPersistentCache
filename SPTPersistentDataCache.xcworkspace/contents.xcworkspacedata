@@ -10,4 +10,7 @@
    <FileRef
       location = "group:Viewer/PersistentDataCacheViewer.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:SPTPersistentDataCacheFramework/SPTPersistentDataCacheFramework.xcodeproj">
+   </FileRef>
 </Workspace>

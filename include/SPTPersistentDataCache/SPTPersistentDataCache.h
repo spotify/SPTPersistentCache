@@ -26,6 +26,17 @@
 #import <SPTPersistentDataCache/SPTPersistentDataCacheRecord.h>
 #import <SPTPersistentDataCache/SPTPersistentCacheResponse.h>
 
+#ifndef SPT_BUILDING_FRAMEWORK
+#define SPT_BUILDING_FRAMEWORK 0
+#endif
+#if SPT_BUILDING_FRAMEWORK
+//! Project version number for SPTDataLoader.
+FOUNDATION_EXPORT double SPTDataLoaderVersionNumber;
+
+//! Project version string for SPTDataLoader.
+FOUNDATION_EXPORT const unsigned char SPTDataLoaderVersionString[];
+#endif // SPT_BUILDING_FRAMEWORK
+
 /**
  * @brief SPTPersistentDataCache
  *

@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import "SPTPersistentCacheResponse.h"
+#import <SPTPersistentDataCache/SPTPersistentCacheResponse.h>
 
 @interface SPTPersistentCacheResponse ()
 
