@@ -13,7 +13,7 @@
 {
     SPTPersistentDataCacheLoadingError errorCode = SPTPersistentDataCacheLoadingErrorHeaderAlignmentMismatch;
     
-    NSError *error = [NSError spt_errorWithCode:SPTPersistentDataCacheLoadingErrorHeaderAlignmentMismatch];
+    NSError *error = [NSError spt_persistentDataCacheErrorWithCode:SPTPersistentDataCacheLoadingErrorHeaderAlignmentMismatch];
     
     XCTAssertEqual(error.domain, SPTPersistentDataCacheErrorDomain);
     XCTAssertEqual(error.code, errorCode);

@@ -86,7 +86,7 @@ NSError * SPTPersistentDataCacheCheckValidHeader(SPTPersistentDataCacheRecordHea
         return nil;
     }
     
-    return [NSError spt_errorWithCode:code];
+    return [NSError spt_persistentDataCacheErrorWithCode:code];
 }
 
 uint32_t SPTPersistentDataCacheCalculateHeaderCRC(const SPTPersistentDataCacheRecordHeaderType *header)

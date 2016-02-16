@@ -38,8 +38,6 @@
 		C413BA011C71CBBA002D41FB /* SPTPersistentDataCacheHeaderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C413BA001C71CBBA002D41FB /* SPTPersistentDataCacheHeaderTests.m */; };
 		C413BA051C71E1A0002D41FB /* NSError+SPTPersistentDataCacheDomainErrors.m in Sources */ = {isa = PBXBuildFile; fileRef = C413BA041C71E1A0002D41FB /* NSError+SPTPersistentDataCacheDomainErrors.m */; };
 		C413BA071C71E2DC002D41FB /* NSError+SPTPersistentDataCacheDomainErrorsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C413BA061C71E2DC002D41FB /* NSError+SPTPersistentDataCacheDomainErrorsTests.m */; };
-		C4B4148C1C6A01970099FECD /* SPTDataCacheRecordTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C4B4148B1C6A01970099FECD /* SPTDataCacheRecordTests.m */; };
-		C4B4148C1C6A01970099FECD /* SPTPersistentDataCacheRecordTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C4B4148B1C6A01970099FECD /* SPTPersistentDataCacheRecordTests.m */; };
 		C4B4148F1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C4B4148E1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m */; };
 		C4B414911C6A24A10099FECD /* SPTPersistentDataCacheOptionsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C4B414901C6A24A10099FECD /* SPTPersistentDataCacheOptionsTests.m */; };
 /* End PBXBuildFile section */
@@ -118,7 +116,6 @@
 		C413BA031C71E1A0002D41FB /* NSError+SPTPersistentDataCacheDomainErrors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSError+SPTPersistentDataCacheDomainErrors.h"; path = "Categories/NSError+SPTPersistentDataCacheDomainErrors.h"; sourceTree = "<group>"; };
 		C413BA041C71E1A0002D41FB /* NSError+SPTPersistentDataCacheDomainErrors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSError+SPTPersistentDataCacheDomainErrors.m"; path = "Categories/NSError+SPTPersistentDataCacheDomainErrors.m"; sourceTree = "<group>"; };
 		C413BA061C71E2DC002D41FB /* NSError+SPTPersistentDataCacheDomainErrorsTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSError+SPTPersistentDataCacheDomainErrorsTests.m"; sourceTree = "<group>"; };
-		C4B4148B1C6A01970099FECD /* SPTDataCacheRecordTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTDataCacheRecordTests.m; sourceTree = "<group>"; };
 		C4B4148B1C6A01970099FECD /* SPTPersistentDataCacheRecordTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCacheRecordTests.m; sourceTree = "<group>"; };
 		C4B4148E1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheResponseTests.m; sourceTree = "<group>"; };
 		C4B414901C6A24A10099FECD /* SPTPersistentDataCacheOptionsTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCacheOptionsTests.m; sourceTree = "<group>"; };
@@ -394,8 +391,6 @@
 				0510FF6B1BA3073D00ED0766 /* SPTPersistentDataCacheTests.m in Sources */,
 				C413BA011C71CBBA002D41FB /* SPTPersistentDataCacheHeaderTests.m in Sources */,
 				C41237081C6A29FB00C1E9B8 /* SPTPersistentDataCacheTimerProxyTests.m in Sources */,
-				C4B4148C1C6A01970099FECD /* SPTPersistentDataCacheRecordTests.m in Sources */,
-				C4B4148C1C6A01970099FECD /* SPTDataCacheRecordTests.m in Sources */,
 				C413BA071C71E2DC002D41FB /* NSError+SPTPersistentDataCacheDomainErrorsTests.m in Sources */,
 				C4B4148F1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m in Sources */,
 			);
@@ -473,7 +468,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = Tests/Info.plist;
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -485,7 +480,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Tests/Info.plist;
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

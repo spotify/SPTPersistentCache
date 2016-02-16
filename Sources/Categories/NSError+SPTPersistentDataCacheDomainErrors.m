@@ -3,10 +3,10 @@
 
 @implementation NSError (SPTPersistentDataCacheDomainErrors)
 
-+ (instancetype)spt_errorWithCode:(SPTPersistentDataCacheLoadingError)errorCode
++ (instancetype)spt_persistentDataCacheErrorWithCode:(SPTPersistentDataCacheLoadingError)persistentDataCacheLoadingError
 {
     return [NSError errorWithDomain:SPTPersistentDataCacheErrorDomain
-                               code:errorCode
+                               code:persistentDataCacheLoadingError
                            userInfo:nil];
 }
 

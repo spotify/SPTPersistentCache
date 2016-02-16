@@ -9,8 +9,9 @@
 /**
  *  Returns a new instance of NSError with a SPTPersistentDataCache domain and an error code.
  *
- *  @param errorCode The error code for the NSError object.
+ *  @param persistentDataCacheLoadingError The error code for the NSError object.
  */
-+ (instancetype)spt_errorWithCode:(SPTPersistentDataCacheLoadingError)errorCode;
++ (instancetype)spt_persistentDataCacheErrorWithCode:(SPTPersistentDataCacheLoadingError)persistentDataCacheLoadingError;
+
 
 @end
