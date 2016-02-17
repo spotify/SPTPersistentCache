@@ -20,24 +20,104 @@
  */
 #import "SPTPersistentDataCacheOptions.h"
 
+void SPTPersistentDataCacheOptionsDebug(NSString *debugMessage, SPTDataCacheDebugCallback debugCallback);
+
 const NSUInteger SPTPersistentDataCacheDefaultExpirationTimeSec = 10 * 60;
 const NSUInteger SPTPersistentDataCacheDefaultGCIntervalSec = 6 * 60 + 3;
 
+const NSUInteger SPTPersistentDataCacheMinimumGCIntervalLimit = 60;
+const NSUInteger SPTPersistentDataCacheMinimumExpirationLimit = 60;
+
 #pragma mark SPTPersistentDataCacheOptions
+
+@interface SPTPersistentDataCacheOptions ()
+@property (nonatomic) NSString *identifierForQueue;
+@property (nonatomic, copy) SPTDataCacheCurrentTimeSecCallback currentTimeSec;
+@end
+
 
 @implementation SPTPersistentDataCacheOptions
 
+#pragma mark - Initializers
+
 - (instancetype)init
+{
+    return [self initWithCachePath:nil
+                        identifier:nil
+               currentTimeCallback:nil
+                             debug:nil];
+}
+
+- (instancetype)initWithCachePath:(NSString *)cachePath
+                       identifier:(NSString *)cacheIdentifier
+              currentTimeCallback:(SPTDataCacheCurrentTimeSecCallback)currentTimeBlock
+                            debug:(SPTDataCacheDebugCallback)debugCallback
+{
+    return [self initWithCachePath:nil
+                        identifier:nil
+               currentTimeCallback:nil
+         defaultExpirationInterval:SPTPersistentDataCacheDefaultExpirationTimeSec
+          garbageCollectorInterval:SPTPersistentDataCacheDefaultGCIntervalSec
+                             debug:nil];
+}
+
+- (instancetype)initWithCachePath:(NSString *)cachePath
+                       identifier:(NSString *)cacheIdentifier
+              currentTimeCallback:(SPTDataCacheCurrentTimeSecCallback)currentTimeBlock
+        defaultExpirationInterval:(NSUInteger)defaultExpirationInterval
+         garbageCollectorInterval:(NSUInteger)garbageCollectorInterval
+                            debug:(SPTDataCacheDebugCallback)debugCallback
 {
     if (!(self = [super init])) {
         return nil;
     }
     
-    _defaultExpirationPeriodSec = SPTPersistentDataCacheDefaultExpirationTimeSec;
-    _gcIntervalSec = SPTPersistentDataCacheDefaultGCIntervalSec;
+    _cachePath = (cachePath ?
+                  [cachePath copy] :
+                  [NSTemporaryDirectory() stringByAppendingPathComponent:@"/com.spotify.temppersistent.image.cache"]);
+    
+    _cacheIdentifier = (cacheIdentifier ?
+                        [cacheIdentifier copy] :
+                        @"persistent.cache");
+    
+    _defaultExpirationPeriodSec = defaultExpirationInterval;
+    _gcIntervalSec = garbageCollectorInterval;
     _folderSeparationEnabled = YES;
+    
+    _debugOutput = [debugCallback copy];
+    
+    self.currentTimeSec = (currentTimeBlock ?
+                           currentTimeBlock :
+                           ^NSTimeInterval() { return [[NSDate date] timeIntervalSince1970]; });
+    
+    if (defaultExpirationInterval < SPTPersistentDataCacheMinimumExpirationLimit) {
+        SPTPersistentDataCacheOptionsDebug([NSString stringWithFormat:@"PersistentDataCache: Forcing defaultExpirationPeriodSec to %lu sec", (unsigned long)SPTPersistentDataCacheMinimumExpirationLimit],
+                                            debugCallback);
+        _defaultExpirationPeriodSec = SPTPersistentDataCacheMinimumExpirationLimit;
+    } else {
+        _defaultExpirationPeriodSec = defaultExpirationInterval;
+    }
+    
+    if (garbageCollectorInterval < SPTPersistentDataCacheMinimumGCIntervalLimit) {
+        SPTPersistentDataCacheOptionsDebug([NSString stringWithFormat:@"PersistentDataCache: Forcing gcIntervalSec to %lu sec", (unsigned long)SPTPersistentDataCacheMinimumGCIntervalLimit], debugCallback);
+        _gcIntervalSec = SPTPersistentDataCacheMinimumGCIntervalLimit;
+    } else {
+        _gcIntervalSec = garbageCollectorInterval;
+    }
+    
+    _identifierForQueue = [NSString stringWithFormat:@"%@.queue.%lu.%lu.%p", _cacheIdentifier,
+                           (unsigned long)_gcIntervalSec, (unsigned long)_defaultExpirationPeriodSec, (void *)self];
     
     return self;
 }
 
 @end
+
+#pragma mark - Logging
+
+void SPTPersistentDataCacheOptionsDebug(NSString *debugMessage, SPTDataCacheDebugCallback debugCallback)
+{
+    if (debugCallback) {
+        debugCallback(debugMessage);
+    }
+}

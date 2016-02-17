@@ -46,8 +46,6 @@ NS_INLINE uint64_t spt_uint64rint(double value)
 
 NSString *const SPTPersistentDataCacheErrorDomain = @"persistent.cache.error";
 static const uint64_t kTTLUpperBoundInSec = 86400 * 31 * 2;
-static const NSUInteger SPTPersistentDataCacheGCIntervalLimitSec = 60;
-static const NSUInteger SPTPersistentDataCacheDefaultExpirationLimitSec = 60;
 
 typedef long long SPTDiskSizeType;
 static const double SPTDataCacheMinimumFreeDiskSpace = 0.1;
@@ -75,36 +73,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
 @end
 
 #pragma mark - SPTPersistentDataCache
+
 @implementation SPTPersistentDataCache
 
 - (instancetype)init
 {
-    if (!(self = [super init])) {
-        return nil;
-    }
-
-    _options = [SPTPersistentDataCacheOptions new];
-    self.options.defaultExpirationPeriodSec = SPTPersistentDataCacheDefaultExpirationTimeSec;
-    self.options.gcIntervalSec = SPTPersistentDataCacheDefaultGCIntervalSec;
-    self.fileManager = [NSFileManager defaultManager];
-    NSString *cachePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"/com.spotify.temppersistent.image.cache"];
-    self.options.cachePath = cachePath;
-    if (self.options.cacheIdentifier == nil) {
-        self.options.cacheIdentifier = @"persistent.cache";
-    }
-    assert(self.options.cachePath != nil);
-    
-    NSString *name = [NSString stringWithFormat:@"%@.queue.%lu.%lu.%p", self.options.cacheIdentifier,
-                      (unsigned long)self.options.gcIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, (void *)self];
-    _workQueue = dispatch_queue_create([name UTF8String], DISPATCH_QUEUE_CONCURRENT);
-    _busyKeys = [NSMutableSet set];
-
-    self.currentTime = self.options.currentTimeSec;
-    if (self.currentTime == nil) {
-        self.currentTime = ^NSTimeInterval(){ return [[NSDate date] timeIntervalSince1970]; };
-    }
-
-    return self;
+    return [self initWithOptions:nil];
 }
 
 - (instancetype)initWithOptions:(SPTPersistentDataCacheOptions *)options
@@ -113,24 +87,16 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
         return nil;
     }
 
-    _options = options;
-    if (self.options.cacheIdentifier == nil) {
-        self.options.cacheIdentifier = @"persistent.cache";
-    }
-    NSString *name = [NSString stringWithFormat:@"%@.queue.%lu.%lu.%p", self.options.cacheIdentifier,
-                      (unsigned long)self.options.gcIntervalSec, (unsigned long)self.options.defaultExpirationPeriodSec, (void *)self];
-    _workQueue = dispatch_queue_create([name UTF8String], DISPATCH_QUEUE_CONCURRENT);
+    _options = (options ? options : [SPTPersistentDataCacheOptions new]);
+
+    _workQueue = dispatch_queue_create([options.identifierForQueue UTF8String], DISPATCH_QUEUE_CONCURRENT);
     assert(_workQueue != nil);
     self.fileManager = [NSFileManager defaultManager];
-    _debugOutput = self.options.debugOutput;
+
     _busyKeys = [NSMutableSet set];
 
-    self.currentTime = self.options.currentTimeSec;
-    if (self.currentTime == nil) {
-        self.currentTime = ^NSTimeInterval(){ return [[NSDate date] timeIntervalSince1970]; };
-    }
-
-    assert(self.options.cachePath != nil);
+    _currentTime = [self.options.currentTimeSec copy];
+    _debugOutput = [self.options.debugOutput copy];
 
     BOOL isDir = NO;
     BOOL exist = [self.fileManager fileExistsAtPath:self.options.cachePath isDirectory:&isDir];
@@ -144,16 +110,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
             [self debugOutput:@"PersistentDataCache: Unable to create dir: %@ with error:%@", self.options.cachePath, error];
             return nil;
         }
-    }
-
-    if (self.options.defaultExpirationPeriodSec < SPTPersistentDataCacheDefaultExpirationLimitSec) {
-        [self debugOutput:@"PersistentDataCache: Forcing defaultExpirationPeriodSec to %lu sec", (unsigned long)SPTPersistentDataCacheDefaultExpirationLimitSec];
-        self.options.defaultExpirationPeriodSec = SPTPersistentDataCacheDefaultExpirationLimitSec;
-    }
-
-    if (self.options.gcIntervalSec < SPTPersistentDataCacheGCIntervalLimitSec) {
-        [self debugOutput:@"PersistentDataCache: Forcing gcIntervalSec to %lu sec", (unsigned long)SPTPersistentDataCacheGCIntervalLimitSec];
-        self.options.gcIntervalSec = SPTPersistentDataCacheGCIntervalLimitSec;
     }
 
     return self;
