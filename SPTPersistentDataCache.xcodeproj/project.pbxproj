@@ -103,7 +103,6 @@
 		696CD7851C4707E20071DD18 /* crc32iso3309.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crc32iso3309.h; sourceTree = "<group>"; };
 		696CD7861C4707E20071DD18 /* SPTPersistentDataCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCache.m; sourceTree = "<group>"; };
 		696CD7871C4707E20071DD18 /* SPTPersistentDataCacheOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentDataCacheOptions.m; sourceTree = "<group>"; };
-		696CD78F1C4707EA0071DD18 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
 		696CD7901C4707EA0071DD18 /* SPTPersistentDataCacheTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataCacheTypes.h; sourceTree = "<group>"; };
 		696CD7911C4707EA0071DD18 /* SPTPersistentDataCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataCache.h; sourceTree = "<group>"; };
 		696CD7931C4707EA0071DD18 /* SPTPersistentDataCacheOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentDataCacheOptions.h; sourceTree = "<group>"; };
@@ -243,7 +242,6 @@
 		696CD78E1C4707EA0071DD18 /* API */ = {
 			isa = PBXGroup;
 			children = (
-				696CD78F1C4707EA0071DD18 /* module.modulemap */,
 				696CD7901C4707EA0071DD18 /* SPTPersistentDataCacheTypes.h */,
 				696CD7911C4707EA0071DD18 /* SPTPersistentDataCache.h */,
 				696CD7931C4707EA0071DD18 /* SPTPersistentDataCacheOptions.h */,
@@ -438,7 +436,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				DEFINES_MODULE = YES;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -449,7 +446,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				DEFINES_MODULE = YES;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

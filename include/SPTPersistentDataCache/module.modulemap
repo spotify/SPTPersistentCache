@@ -1,8 +1,0 @@
-module SPTPersistentDataCache {
-    umbrella header "SPTPersistentDataCache.h"
-    
-    export *
-    module * {
-        export *
-    }
-}
