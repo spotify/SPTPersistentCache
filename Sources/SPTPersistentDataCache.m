@@ -28,6 +28,7 @@
 #import "SPTPersistentDataCache+Private.h"
 #import "SPTPersistentDataCacheTimerProxy.h"
 #import "NSError+SPTPersistentDataCacheDomainErrors.h"
+#import "SPTPersistentDataCacheFileManager.h"
 #include <sys/stat.h>
 
 // Enable for more precise logging
@@ -59,7 +60,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
 #pragma mark - SPTPersistentDataCache()
 
 @interface SPTPersistentDataCache ()
-
 @property (nonatomic, copy) SPTPersistentDataCacheOptions *options;
 // Serial queue used to run all internall stuff
 @property (nonatomic, strong) dispatch_queue_t workQueue;
@@ -67,6 +67,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
 @property (nonatomic, strong) NSTimer *gcTimer;
 @property (nonatomic, copy) SPTDataCacheDebugCallback debugOutput;
 @property (nonatomic, copy) SPTDataCacheCurrentTimeSecCallback currentTime;
+@property (nonatomic, strong) SPTPersistentDataCacheFileManager *dataCacheFileManager;
 // Keys that are currently shouldn't be opened bcuz its busy by streams for example
 @property (nonatomic, strong) NSMutableSet *busyKeys;
 
@@ -97,19 +98,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
 
     _currentTime = [self.options.currentTimeSec copy];
     _debugOutput = [self.options.debugOutput copy];
-
-    BOOL isDir = NO;
-    BOOL exist = [self.fileManager fileExistsAtPath:self.options.cachePath isDirectory:&isDir];
-    if (exist == NO) {
-        NSError *error = nil;
-        BOOL created = [self.fileManager createDirectoryAtPath:self.options.cachePath
-                                   withIntermediateDirectories:YES
-                                                    attributes:nil
-                                                         error:&error];
-        if (created == NO) {
-            [self debugOutput:@"PersistentDataCache: Unable to create dir: %@ with error:%@", self.options.cachePath, error];
-            return nil;
-        }
+    
+    _dataCacheFileManager = [[SPTPersistentDataCacheFileManager alloc] initWithOptions:_options];
+    
+    if (![_dataCacheFileManager createCacheDirectory]) {
+        return nil;
     }
 
     return self;
@@ -149,7 +142,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
 
     dispatch_async(self.workQueue, ^{
 
-        NSString *path = [self subDirectoryPathForKey:prefix];
+        NSString *path = [self.dataCacheFileManager subDirectoryPathForKey:prefix];
         NSMutableArray * __block keys = [NSMutableArray array];
 
         // WARNING: Do not use enumeratorAtURL never ever. Its unsafe bcuz gets locked forever
@@ -179,7 +172,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
         // Validate keys for expiration before giving it back to caller. Its important since giving expired keys
         // is wrong since caller can miss data that are no expired by picking expired key.
         for (NSString *key in keys) {
-            NSString *filePath = [self pathForKey:key];
+            NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
             // WARNING: We may skip return result here bcuz in that case we will skip the key as invalid
             [self alterHeaderForFileAtPath:filePath
@@ -274,7 +267,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
             return;
         }
 
-        NSString *filePath = [self pathForKey:key];
+        NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
         BOOL __block expired = NO;
         SPTPersistentCacheResponse *response =
@@ -317,12 +310,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
         if ([self processKeyIfBusy:key callback:nil queue:nil]) {
             continue;
         }
-
-        NSError *error = nil;
-        NSString *filePath = [self pathForKey:key];
-        if (![self.fileManager removeItemAtPath:filePath error:&error]) {
-            [self debugOutput:@"PersistentDataCache: Error removing data for Key:%@ , error:%@", key, error];
-        }
+        
+        [self.dataCacheFileManager removeDataForKey:key];
     }
 }
 
@@ -350,7 +339,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
                 continue;
             }
 
-            NSString *filePath = [self pathForKey:key];
+            NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
             BOOL __block expired = NO;
             SPTPersistentCacheResponse *response =
@@ -402,7 +391,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
                 continue;
             }
 
-            NSString *filePath = [self pathForKey:key];
+            NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
             SPTPersistentCacheResponse *response =
             [self alterHeaderForFileAtPath:filePath
@@ -484,32 +473,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
 
 - (NSUInteger)totalUsedSizeInBytes
 {
-    NSUInteger size = 0;
-    NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
-    NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
-                                                  includingPropertiesForKeys:@[NSURLIsDirectoryKey]
-                                                                     options:NSDirectoryEnumerationSkipsHiddenFiles
-                                                                errorHandler:nil];
-
-    // Enumerate the dirEnumerator results, each value is stored in allURLs
-    NSURL *theURL = nil;
-    while ((theURL = [dirEnumerator nextObject])) {
-
-        // Retrieve the file name. From cached during the enumeration.
-        NSNumber *isDirectory;
-        if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
-            if ([isDirectory boolValue] == NO) {
-                NSString *key = theURL.lastPathComponent;
-
-                NSString *filePath = [self pathForKey:key];
-                size += [self getFileSizeAtPath:filePath];
-            }
-        } else {
-            [self debugOutput:@"Unable to fetch isDir#2 attribute:%@", theURL];
-        }
-    }
-
-    return size;
+    return self.dataCacheFileManager.totalUsedSizeInBytes;
 }
 
 - (NSUInteger)lockedItemsSizeInBytes
@@ -533,7 +497,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
                 NSString *key = theURL.lastPathComponent;
                 // That satisfies Req.#1.3
                 if (![self.busyKeys containsObject:key]) {
-                    NSString *filePath = [self pathForKey:key];
+                    NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
                     BOOL __block locked = NO;
                     // WARNING: We may skip return result here bcuz in that case we will not count file as locked
@@ -543,7 +507,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
                                          writeBack:NO
                                           complain:YES];
                     if (locked) {
-                        size += [self getFileSizeAtPath:filePath];
+                        size += [self.dataCacheFileManager getFileSizeAtPath:filePath];
                     }
                 }
             }
@@ -569,7 +533,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
  */
 - (void)loadDataForKeySync:(NSString *)key withCallback:(SPTDataCacheResponseCallback)callback onQueue:(dispatch_queue_t)queue
 {
-    NSString *filePath = [self pathForKey:key];
+    NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
     // File not exist -> inform user
     if (![self.fileManager fileExistsAtPath:filePath]) {
@@ -680,9 +644,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
               withCallback:(SPTDataCacheResponseCallback)callback
                    onQueue:(dispatch_queue_t)queue
 {
-    NSString *filePath = [self pathForKey:key];
+    NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
-    NSString *subDir = [self subDirectoryPathForKey:key];
+    NSString *subDir = [self.dataCacheFileManager subDirectoryPathForKey:key];
     [self.fileManager createDirectoryAtPath:subDir withIntermediateDirectories:YES attributes:nil error:nil];
 
     uint32_t __block oldRefCount = 0;
@@ -864,27 +828,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
 }
 
 /**
- * 2 letter separation is handled only by this method. All other code is agnostic to this fact.
- */
-- (NSString *)subDirectoryPathForKey:(NSString *)key
-{
-    // make folder tree: xx/  zx/  xy/  yz/ etc.
-    NSString *subDir = self.options.cachePath;
-
-    if (self.options.folderSeparationEnabled && [key length] >= 2) {
-        subDir = [self.options.cachePath stringByAppendingPathComponent:[key substringToIndex:2]];
-    }
-
-    return subDir;
-}
-
-- (NSString *)pathForKey:(NSString *)key
-{
-    NSString *subDir = [self subDirectoryPathForKey:key];
-    return [subDir stringByAppendingPathComponent:key];
-}
-
-/**
  * Only this method check data expiration. Past check is also supported.
  */
 - (BOOL)isDataExpiredWithHeader:(SPTPersistentDataCacheRecordHeaderType *)header
@@ -941,7 +884,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
                 // That satisfies Req.#1.3
                 if (![self.busyKeys containsObject:key]) {
 
-                    NSString *filePath = [self pathForKey:key];
+                    NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
                     BOOL __block needRemove = NO;
                     int __block reason = 0;
@@ -972,11 +915,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
 
                     if (needRemove) {
                         [self debugOutput:@"PersistentDataCache: gc removing record: %@, reason:%d", filePath.lastPathComponent, reason];
-
-                        NSError *error= nil;
-                        if (![self.fileManager removeItemAtPath:filePath error:&error]) {
-                            [self debugOutput:@"PersistentDataCache: GC error removing record:%@ ,error:%@", filePath.lastPathComponent, error];
-                        }
+                        
+                        [self.dataCacheFileManager removeDataForKey:key];
                     }
                 }
             } // is dir
@@ -1005,11 +945,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
 
                 // That satisfies Req.#1.3
                 if (![self.busyKeys containsObject:key]) {
-                    NSString *filePath = [self pathForKey:key];
-                    NSError *error = nil;
-                    if (![self.fileManager removeItemAtPath:filePath error:&error]) {
-                        [self debugOutput:@"PersistentDataCache: Error cleaning record: %@ , %@", filePath.lastPathComponent, error];
-                    }
+                    [self.dataCacheFileManager removeDataForKey:key];
                 }
             }
         }
@@ -1043,16 +979,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
             callback(response);
         });
     }
-}
-
-- (NSUInteger)getFileSizeAtPath:(NSString *)filePath
-{
-    NSError *error = nil;
-    NSDictionary *attrs = [self.fileManager attributesOfItemAtPath:filePath error:&error];
-    if (attrs == nil) {
-        [self debugOutput:@"PersistentDataCache: Error getting attributes for file: %@, error: %@", filePath, error];
-    }
-    return (NSUInteger)[attrs fileSize];
 }
 
 - (void)debugOutput:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2)
