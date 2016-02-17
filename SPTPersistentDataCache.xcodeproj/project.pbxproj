@@ -26,7 +26,6 @@
 		0510FF681BA3073600ED0766 /* f50512901688b79a7852999d384d097a71fad788 in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF571BA3073600ED0766 /* f50512901688b79a7852999d384d097a71fad788 */; };
 		0510FF691BA3073600ED0766 /* fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c in Resources */ = {isa = PBXBuildFile; fileRef = 0510FF581BA3073600ED0766 /* fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c */; };
 		0510FF6B1BA3073D00ED0766 /* SPTPersistentDataCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0510FF6A1BA3073D00ED0766 /* SPTPersistentDataCacheTests.m */; };
-		057AF8541C6E18AC00350C9F /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 057AF8531C6E18AC00350C9F /* AppKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		057AFD5B1C70F99A00350C9F /* SPTPersistentDataCacheHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 057AFD5A1C70F99A00350C9F /* SPTPersistentDataCacheHeader.m */; };
 		0595F0A91C5008060052328B /* SPTPersistentDataCacheRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 0595F0A81C5008060052328B /* SPTPersistentDataCacheRecord.m */; };
 		0595F0B01C5009800052328B /* SPTPersistentCacheResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 0595F0AF1C5009800052328B /* SPTPersistentCacheResponse.m */; };
@@ -133,7 +132,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				057AF8541C6E18AC00350C9F /* AppKit.framework in Frameworks */,
 				0510FF1F1BA2FF7A00ED0766 /* libSPTPersistentDataCache.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
