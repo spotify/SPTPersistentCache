@@ -1,6 +1,9 @@
 #import "SPTPersistentDataCacheFileManager.h"
 #import "SPTPersistentDataCacheOptions.h"
 
+
+static const double SPTPersistentDataCacheFileManagerMinFreeDiskSpace = 0.1;
+
 const NSUInteger SPTPersistentDataCacheFileManagerSubDirNameLength = 2;
 
 
@@ -122,6 +125,33 @@ const NSUInteger SPTPersistentDataCacheFileManagerSubDirNameLength = 2;
     }
     
     return size;
+}
+
+- (SPTPersistentDataCacheDiskSize)optimizedDiskSizeForCacheSize:(SPTPersistentDataCacheDiskSize)currentCacheSize
+{
+    SPTPersistentDataCacheDiskSize tempCacheSize = (SPTPersistentDataCacheDiskSize)self.options.sizeConstraintBytes;
+    
+    NSError *error = nil;
+    
+    NSDictionary *fileSystemAttributes = [self.fileManager attributesOfFileSystemForPath:self.options.cachePath
+                                                                                   error:&error];
+    if (fileSystemAttributes) {
+        // Never use the last SPTImageLoaderMinimumFreeDiskSpace of the disk for caching
+        NSNumber *fileSystemSize = fileSystemAttributes[NSFileSystemSize];
+        NSNumber *fileSystemFreeSpace = fileSystemAttributes[NSFileSystemFreeSize];
+        
+        SPTPersistentDataCacheDiskSize totalSpace = fileSystemSize.longLongValue;
+        SPTPersistentDataCacheDiskSize freeSpace = fileSystemFreeSpace.longLongValue + currentCacheSize;
+        SPTPersistentDataCacheDiskSize proposedCacheSize = freeSpace - llrint(totalSpace *
+                                                                              SPTPersistentDataCacheFileManagerMinFreeDiskSpace);
+        
+        tempCacheSize = MAX(0, proposedCacheSize);
+        
+    } else {
+        [self debugOutput:@"PersistentDataCache: %@ ERROR %@", @(__PRETTY_FUNCTION__), [error localizedDescription]];
+    }
+    
+    return MIN(tempCacheSize, (SPTPersistentDataCacheDiskSize)self.options.sizeConstraintBytes);
 }
 
 #pragma mark - Debugger

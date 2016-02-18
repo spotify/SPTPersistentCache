@@ -24,9 +24,12 @@ void SPTPersistentDataCacheOptionsDebug(NSString *debugMessage, SPTDataCacheDebu
 
 const NSUInteger SPTPersistentDataCacheDefaultExpirationTimeSec = 10 * 60;
 const NSUInteger SPTPersistentDataCacheDefaultGCIntervalSec = 6 * 60 + 3;
+const NSUInteger SPTPersistentDataCacheDefaultCacheSizeInBytes = 0; // unbounded
 
 const NSUInteger SPTPersistentDataCacheMinimumGCIntervalLimit = 60;
 const NSUInteger SPTPersistentDataCacheMinimumExpirationLimit = 60;
+
+
 
 #pragma mark SPTPersistentDataCacheOptions
 
@@ -71,6 +74,8 @@ const NSUInteger SPTPersistentDataCacheMinimumExpirationLimit = 60;
     if (!(self = [super init])) {
         return nil;
     }
+    
+    _sizeConstraintBytes = SPTPersistentDataCacheDefaultCacheSizeInBytes;
     
     _cachePath = (cachePath ?
                   [cachePath copy] :
