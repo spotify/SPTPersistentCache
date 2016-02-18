@@ -21,6 +21,7 @@
 
 #import <XCTest/XCTest.h>
 #import <SPTPersistentDataCache/SPTPersistentDataCacheOptions.h>
+#import <SPTPersistentDataCache/SPTPersistentDataCacheTypes.h>
 
 @interface SPTPersistentDataCacheOptionsTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentDataCacheOptions *dataCacheOptions;
@@ -28,18 +29,44 @@
 
 @implementation SPTPersistentDataCacheOptionsTests
 
-- (void)setUp
+- (void)testDefaultInitializer
 {
-    [super setUp];
-    
     self.dataCacheOptions = [[SPTPersistentDataCacheOptions alloc] init];
-}
-
-- (void)testDesignatedInitializer
-{
+    
     XCTAssertEqual(self.dataCacheOptions.folderSeparationEnabled, YES);
     XCTAssertEqual(self.dataCacheOptions.gcIntervalSec, SPTPersistentDataCacheDefaultGCIntervalSec);
-    XCTAssertEqual(self.dataCacheOptions.defaultExpirationPeriodSec, SPTPersistentDataCacheDefaultExpirationTimeSec);
+    XCTAssertEqual(self.dataCacheOptions.defaultExpirationPeriodSec,
+                   SPTPersistentDataCacheDefaultExpirationTimeSec);
+    XCTAssertNotNil(self.dataCacheOptions.cachePath, @"The cache path cannot be nil");
+    XCTAssertNotNil(self.dataCacheOptions.cacheIdentifier, @"The cache identifier cannot be nil");
+    XCTAssertNotNil(self.dataCacheOptions.identifierForQueue, @"The identifier for queue shouldn't be nil");
 }
+
+- (void)testMinimumGarbageColectorInterval
+{
+    self.dataCacheOptions = [[SPTPersistentDataCacheOptions alloc] initWithCachePath:nil
+                                                                          identifier:nil
+
+                                                                 currentTimeCallback:nil
+                                                           defaultExpirationInterval:1
+                                                            garbageCollectorInterval:1
+                                                                               debug:nil];
+    XCTAssertEqual(self.dataCacheOptions.gcIntervalSec,
+                   SPTPersistentDataCacheMinimumGCIntervalLimit);
+}
+
+- (void)testMinimumDefaultExpirationInterval
+{
+    self.dataCacheOptions = [[SPTPersistentDataCacheOptions alloc] initWithCachePath:nil
+                                                                          identifier:nil
+                             
+                                                                 currentTimeCallback:nil
+                                                           defaultExpirationInterval:1
+                                                            garbageCollectorInterval:1
+                                                                               debug:nil];
+    XCTAssertEqual(self.dataCacheOptions.defaultExpirationPeriodSec,
+                   SPTPersistentDataCacheMinimumExpirationLimit);
+}
+
 
 @end

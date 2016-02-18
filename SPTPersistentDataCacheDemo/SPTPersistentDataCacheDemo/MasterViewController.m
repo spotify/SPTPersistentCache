@@ -39,15 +39,17 @@
 {
     [super viewDidLoad];
     self.objects = [NSMutableArray new];
-    SPTPersistentDataCacheOptions *options = [SPTPersistentDataCacheOptions new];
-    options.cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory,
-                                                             NSUserDomainMask,
-                                                             YES).firstObject stringByAppendingString:@"com.spotify.demo.image.cache"];
-    options.defaultExpirationPeriodSec = 60 * 60 * 24 * 30; // 30 days
+    NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory,
+                                                               NSUserDomainMask,
+                                                               YES).firstObject stringByAppendingString:@"com.spotify.demo.image.cache"];
+    
+    SPTPersistentDataCacheOptions *options = [[SPTPersistentDataCacheOptions alloc] initWithCachePath:cachePath
+                                                                                           identifier:@"com.spotify.demo.image.cache"
+                                                                                  currentTimeCallback:nil
+                                                                            defaultExpirationInterval:(60 * 60 * 24 * 30) garbageCollectorInterval:(1.5 * SPTPersistentDataCacheDefaultGCIntervalSec)
+                                                                                                debug:^(NSString *string) { NSLog(@"%@", string); }];
     options.sizeConstraintBytes = 1024 * 1024 * 10; // 10 MiB
-    options.cacheIdentifier = @"com.spotify.demo.image.cache";
-    options.gcIntervalSec = (NSUInteger)(1.5 * SPTPersistentDataCacheDefaultGCIntervalSec);
-    options.debugOutput = ^(NSString *string) { NSLog(@"%@", string); };
+
     self.cache = [[SPTPersistentDataCache alloc] initWithOptions:options];
     self.navigationItem.leftBarButtonItem = self.editButtonItem;
 

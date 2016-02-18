@@ -1196,11 +1196,14 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [savedItems addObject:self.imageNames[i]];
     }
 
-    SPTPersistentDataCacheOptions *options = [SPTPersistentDataCacheOptions new];
-    options.cachePath = self.cachePath;
-    options.debugOutput = ^(NSString *str) {
-        NSLog(@"%@", str);
-    };
+    SPTPersistentDataCacheOptions *options = [[SPTPersistentDataCacheOptions alloc] initWithCachePath:self.cachePath
+                                                                                           identifier:nil
+                                                                                  currentTimeCallback:nil
+                                                                            defaultExpirationInterval:SPTPersistentDataCacheDefaultExpirationTimeSec
+                                                                             garbageCollectorInterval:SPTPersistentDataCacheDefaultGCIntervalSec
+                                                                                                debug:^(NSString *str) {
+                                                                                                    NSLog(@"%@", str);
+                                                                                                }];
     options.sizeConstraintBytes = expectedSize;
 
     cache = [[SPTPersistentDataCache alloc] initWithOptions:options];
@@ -1420,13 +1423,14 @@ SPTPersistentDataCacheLoadingErrorNotEnoughDataToGetHeader,
 - (SPTPersistentDataCache *)createCacheWithTimeCallback:(SPTDataCacheCurrentTimeSecCallback)currentTime
                                          expirationTime:(NSTimeInterval)expirationTimeSec
 {
-    SPTPersistentDataCacheOptions *options = [SPTPersistentDataCacheOptions new];
-    options.cachePath = self.cachePath;
-    options.debugOutput = ^(NSString *str) {
-        NSLog(@"%@", str);
-    };
-    options.currentTimeSec = currentTime;
-    options.defaultExpirationPeriodSec = (NSUInteger)expirationTimeSec;
+    SPTPersistentDataCacheOptions *options = [[SPTPersistentDataCacheOptions alloc] initWithCachePath:self.cachePath
+                                                                                           identifier:nil
+                                                                                  currentTimeCallback:currentTime
+                                                                            defaultExpirationInterval:(NSUInteger)expirationTimeSec
+                                                                             garbageCollectorInterval:SPTPersistentDataCacheDefaultGCIntervalSec
+                                                                                                debug:^(NSString *str) {
+                                                                                      NSLog(@"%@", str);
+                                                                                  }];
 
     return [[SPTPersistentDataCache alloc] initWithOptions:options];
 }
