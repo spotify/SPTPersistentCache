@@ -46,7 +46,7 @@
 		69A726AC1C470B56005FC024 /* MainWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainWindowController.m; sourceTree = "<group>"; };
 		69A726AD1C470B56005FC024 /* MainWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainWindowController.xib; sourceTree = "<group>"; };
 		69FD59D81C4F0CA70052626E /* SPTPersistentDataCache.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SPTPersistentDataCache.xcodeproj; path = ../SPTPersistentDataCache.xcodeproj; sourceTree = "<group>"; };
-		C48AE7AC1C76152200814D7D /* libSPTPersistentCache.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSPTPersistentCache.a; path = "../../../../../Library/Developer/Xcode/DerivedData/SPTPersistentCache-baozpsdxvsedctakhrddpkmkyjzd/Build/Products/Debug/libSPTPersistentCache.a"; sourceTree = "<group>"; };
+		C48AE7AC1C76152200814D7D /* libSPTPersistentCache.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSPTPersistentCache.a; path = "/Library/Developer/Xcode/DerivedData/SPTPersistentCache-baozpsdxvsedctakhrddpkmkyjzd/Build/Products/Debug/libSPTPersistentCache.a"; sourceTree = "<absolute>"; };
 		DDBCF5F31C68E2A300693038 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -66,8 +66,6 @@
 		0510FF0A1BA2FF7A00ED0766 = {
 			isa = PBXGroup;
 			children = (
-				C48AE7AC1C76152200814D7D /* libSPTPersistentCache.a */,
-				DDBCF5F31C68E2A300693038 /* Cocoa.framework */,
 				696CD79B1C4708ED0071DD18 /* Sources */,
 				69FD59D71C4F0C970052626E /* Dependencies */,
 				0510FF141BA2FF7A00ED0766 /* Products */,
@@ -109,6 +107,8 @@
 		69FD59D71C4F0C970052626E /* Dependencies */ = {
 			isa = PBXGroup;
 			children = (
+				DDBCF5F31C68E2A300693038 /* Cocoa.framework */,
+				C48AE7AC1C76152200814D7D /* libSPTPersistentCache.a */,
 				69FD59D81C4F0CA70052626E /* SPTPersistentDataCache.xcodeproj */,
 			);
 			name = Dependencies;
