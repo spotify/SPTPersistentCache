@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:/Users/hector/Documents/Dev/Spotify/SPTPersistentDataCache/SPTPersistentCache.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:SPTPersistentCacheDemo/SPTPersistentCacheDemo.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:/Users/hector/Documents/Dev/Spotify/SPTPersistentDataCache/Viewer/PersistentCacheViewer.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:SPTPersistentCacheFramework/SPTPersistentCacheFramework.xcodeproj">
+   </FileRef>
+</Workspace>

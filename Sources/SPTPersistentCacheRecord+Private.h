@@ -18,12 +18,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <SPTPersistentCache/SPTPersistentCacheResponse.h>
+#import "SPTPersistentCacheRecord.h"
 
-@interface SPTPersistentCacheResponse (Private)
+@interface SPTPersistentCacheRecord (Private)
 
-- (instancetype)initWithResult:(SPTPersistentCacheResponseCode)result
-                         error:(NSError *)error
-                        record:(SPTPersistentCacheRecord *)record;
+- (instancetype)initWithData:(NSData *)data
+                         key:(NSString *)key
+                    refCount:(NSUInteger)refCount
+                         ttl:(NSUInteger)ttl;
 
 @end

@@ -20,18 +20,18 @@
  */
 
 #import <XCTest/XCTest.h>
-#import "SPTPersistentDataCacheRecord+Private.h"
-#import <SPTPersistentDataCache/SPTPersistentDataCacheRecord.h>
+#import "SPTPersistentCacheRecord+Private.h"
+#import <SPTPersistentCache/SPTPersistentCacheRecord.h>
 #import "SPTPersistentCacheResponse+Private.h"
-#import <SPTPersistentDataCache/SPTPersistentCacheResponse.h>
+#import <SPTPersistentCache/SPTPersistentCacheResponse.h>
 
 
-static const SPTPersistentDataCacheResponseCode SPTPersistentCacheResponseTestsTestCode   = SPTPersistentDataCacheResponseCodeNotFound;
+static const SPTPersistentCacheResponseCode SPTPersistentCacheResponseTestsTestCode   = SPTPersistentCacheResponseCodeNotFound;
 
 @interface SPTPersistentCacheResponseTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentCacheResponse *persistentCacheResponse;
 @property (nonatomic, strong) NSError *testError;
-@property (nonatomic, strong) SPTPersistentDataCacheRecord *testCacheRecord;
+@property (nonatomic, strong) SPTPersistentCacheRecord *testCacheRecord;
 @end
 
 @implementation SPTPersistentCacheResponseTests
@@ -44,7 +44,7 @@ static const SPTPersistentDataCacheResponseCode SPTPersistentCacheResponseTestsT
                                          code:404
                                      userInfo:nil];
     
-    self.testCacheRecord = [[SPTPersistentDataCacheRecord alloc] init];
+    self.testCacheRecord = [[SPTPersistentCacheRecord alloc] init];
     
     self.persistentCacheResponse = [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseTestsTestCode
                                                                                 error:self.testError

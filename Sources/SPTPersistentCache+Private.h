@@ -18,12 +18,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <SPTPersistentCache/SPTPersistentCacheResponse.h>
 
-@interface SPTPersistentCacheResponse (Private)
+#import <SPTPersistentCache/SPTPersistentCache.h>
 
-- (instancetype)initWithResult:(SPTPersistentCacheResponseCode)result
-                         error:(NSError *)error
-                        record:(SPTPersistentCacheRecord *)record;
+@interface SPTPersistentCache (Private)
+
+@property (nonatomic, copy, readonly) SPTPersistentCacheOptions *options;
+
+- (void)runRegularGC;
+- (void)pruneBySize;
 
 @end
