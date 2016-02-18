@@ -29,9 +29,12 @@
 #endif
 
 #import <SPTPersistentDataCache/SPTPersistentDataCache.h>
+#import <SPTPersistentDataCache/SPTPersistentDataCache.h>
 #import <SPTPersistentDataCache/SPTPersistentCacheResponse.h>
 #import <SPTPersistentDataCache/SPTPersistentDataCacheTypes.h>
 #import <SPTPersistentDataCache/SPTPersistentDataCacheRecord.h>
+#import "SPTPersistentDataCache+Private.h"
+#import "SPTPersistentDataCacheFileManager.h"
 
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -105,7 +108,6 @@ static int params_GetDefaultExpireFilesNumber(void);
 static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentDataCacheRecordHeaderType *header);
 
 @interface SPTPersistentDataCache (Testing)
-- (NSString *)pathForKey:(NSString *)key;
 - (void)runRegularGC;
 - (void)pruneBySize;
 @end
@@ -168,6 +170,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     self.cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return kTestEpochTime; }
                                     expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+    SPTPersistentDataCacheFileManager *fileManager = [[SPTPersistentDataCacheFileManager alloc] initWithOptions:self.cache.options];
 
     self.thisBundle = [NSBundle bundleForClass:[self class]];
 
@@ -187,7 +190,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     for (unsigned i = 0; !kParams[i].last; ++i) {
         if (kParams[i].corruptReason > -1) {
-            NSString *filePath = [self.cache pathForKey:self.imageNames[i]];
+            NSString *filePath = [fileManager pathForKey:self.imageNames[i]];
             [self corruptFile:filePath pdcError:kParams[i].corruptReason];
         }
     }
@@ -216,7 +219,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         return [NSDate timeIntervalSinceReferenceDate];
     }
                                                        expirationTime:[NSDate timeIntervalSinceReferenceDate]];
-
+    SPTPersistentDataCacheFileManager *fileManager = [[SPTPersistentDataCacheFileManager alloc] initWithOptions:cache.options];
     int __block calls = 0;
     int __block errorCalls = 0;
 
@@ -264,7 +267,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     // Check that updat time was modified when access cache (both case ttl==0, ttl>0)
     for (unsigned i = 0; i < count; ++i) {
-        NSString *path = [cache pathForKey:self.imageNames[i]];
+        NSString *path = [fileManager pathForKey:self.imageNames[i]];
         [self checkUpdateTimeForFileAtPath:path validate:kParams[i].corruptReason == -1 referenceTimeCheck:^(uint64_t updateTime) {
             if (kParams[i].ttl > 0) {
                 XCTAssertEqual(updateTime, kTestEpochTime, @"Time must not be altered for records with TTL > 0 on cache access");
@@ -291,7 +294,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
         return [NSDate timeIntervalSinceReferenceDate];
     } expirationTime:[NSDate timeIntervalSinceReferenceDate]];
-
+    
     XCTestExpectation *expectation = [self expectationWithDescription:@"testLoadWithPrefixesSuccess"];
 
     // Thas hardcode logic: 10th element should be safe to get
@@ -391,6 +394,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         return kTestEpochTime + SPTPersistentDataCacheDefaultExpirationTimeSec - 1;
     }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+    
+    SPTPersistentDataCacheFileManager *fileManager = [[SPTPersistentDataCacheFileManager alloc] initWithOptions:cache.options];
 
     NSMutableArray *toLock = [NSMutableArray array];
     NSMutableArray *toUnlock = [NSMutableArray array];
@@ -425,7 +430,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     // Now check that updateTime is not altered by lock unlock calls for all not corrupted files
     for (unsigned i = 0; i < count; ++i) {
-        NSString *path = [cache pathForKey:self.imageNames[i]];
+        NSString *path = [fileManager pathForKey:self.imageNames[i]];
         [self checkUpdateTimeForFileAtPath:path validate:kParams[i].corruptReason == -1 referenceTimeCheck:^(uint64_t updateTime) {
             XCTAssertEqual(updateTime, kTestEpochTime, @"Time must match for initial value i.e. not altering");
         }];
@@ -895,6 +900,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         return kTestEpochTime + SPTPersistentDataCacheDefaultExpirationTimeSec - 1;
     }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
+    
+    SPTPersistentDataCacheFileManager *fileManager = [[SPTPersistentDataCacheFileManager alloc] initWithOptions:cache.options];
 
     const NSUInteger count = self.imageNames.count;
 
@@ -911,7 +918,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     // Now check that updateTime is not altered for files with TTL
     for (unsigned i = 0; i < count; ++i) {
-        NSString *path = [cache pathForKey:self.imageNames[i]];
+        NSString *path = [fileManager pathForKey:self.imageNames[i]];
         [self checkUpdateTimeForFileAtPath:path validate:kParams[i].corruptReason == -1 referenceTimeCheck:^(uint64_t updateTime) {
             if (kParams[i].ttl == 0) {
                 XCTAssertNotEqual(updateTime, kTestEpochTime, @"Time must not match for initial value i.e. touched");
@@ -983,6 +990,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
+    SPTPersistentDataCacheFileManager *fileManager = [[SPTPersistentDataCacheFileManager alloc] initWithOptions:cache.options];
+    
     // Try to touch the data that is expired
     const NSInteger count = (NSInteger)self.imageNames.count;
 
@@ -1024,7 +1033,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     // Now check that updateTime is not altered for files with TTL
     for (unsigned i = 0; i < count; ++i) {
-        NSString *path = [cache pathForKey:self.imageNames[i]];
+        NSString *path = [fileManager pathForKey:self.imageNames[i]];
 
         [self checkUpdateTimeForFileAtPath:path validate:kParams[i].corruptReason == -1 referenceTimeCheck:^(uint64_t updateTime) {
 
@@ -1099,7 +1108,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
-
+    SPTPersistentDataCacheFileManager *fileManager = [[SPTPersistentDataCacheFileManager alloc] initWithOptions:cache.options];
+    
     const NSUInteger count = self.imageNames.count;
 
     [cache runRegularGC];
@@ -1109,7 +1119,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     int removedCount = 0;
 
     for (unsigned i = 0; i < count; ++i) {
-        NSString *path = [cache pathForKey:self.imageNames[i]];
+        NSString *path = [fileManager pathForKey:self.imageNames[i]];
 
         SPTPersistentDataCacheRecordHeaderType header;
         BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
@@ -1135,6 +1145,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
 
+    SPTPersistentDataCacheFileManager *fileManager = [[SPTPersistentDataCacheFileManager alloc] initWithOptions:cache.options];
+    
     const NSUInteger count = self.imageNames.count;
 
     [cache runRegularGC];
@@ -1144,7 +1156,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     int removedCount = 0;
 
     for (unsigned i = 0; i < count; ++i) {
-        NSString *path = [cache pathForKey:self.imageNames[i]];
+        NSString *path = [fileManager pathForKey:self.imageNames[i]];
 
         SPTPersistentDataCacheRecordHeaderType header;
         BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
@@ -1172,9 +1184,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     // Just dummy cache to get path to items
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:nil expirationTime:0];
 
+    SPTPersistentDataCacheFileManager *fileManager = [[SPTPersistentDataCacheFileManager alloc] initWithOptions:cache.options];
+    
     // Alter update time for our data set so it monotonically increase from the past starting at index 0 to count-1
     for (unsigned i = 0; i < count; ++i) {
-        NSString *path = [cache pathForKey:self.imageNames[i]];
+        NSString *path = [fileManager pathForKey:self.imageNames[i]];
 
         struct timeval t[2];
         t[0].tv_sec = kTestEpochTime - 5*(i+1);
@@ -1223,7 +1237,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             continue;
         }
 
-        NSString *path = [cache pathForKey:savedItems[i]];
+        NSString *path = [fileManager pathForKey:savedItems[i]];
         SPTPersistentDataCacheRecordHeaderType header;
         BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
         XCTAssertTrue(opened, @"Saved files expected to in place");
@@ -1246,12 +1260,13 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     const NSTimeInterval refTime = kTestEpochTime + 1.0;
     SPTPersistentDataCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
                                                        expirationTime:SPTPersistentDataCacheDefaultExpirationTimeSec];
-
+    
+    SPTPersistentDataCacheFileManager *fileManager = [[SPTPersistentDataCacheFileManager alloc] initWithOptions:cache.options];
     // Index of file to put. It should be file without any problems.
     const int putIndex = 2;
     NSString *key = self.imageNames[putIndex];
     NSString *fileName = [self.thisBundle pathForResource:key ofType:nil];
-    NSString *path = [cache pathForKey:key];
+    NSString *path = [fileManager pathForKey:key];
 
     // Check that image is valid just in case
     NSData *data = [NSData dataWithContentsOfFile:fileName];

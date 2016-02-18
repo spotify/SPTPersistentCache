@@ -18,9 +18,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 #import <SPTPersistentDataCache/SPTPersistentDataCache.h>
 
 @interface SPTPersistentDataCache (Private)
+
+@property (nonatomic, copy, readonly) SPTPersistentDataCacheOptions *options;
 
 - (void)runRegularGC;
 - (void)pruneBySize;
