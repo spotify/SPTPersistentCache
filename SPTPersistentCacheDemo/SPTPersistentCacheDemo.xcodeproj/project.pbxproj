@@ -1,0 +1,380 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		055725FF1C65280000EF6787 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 055725FE1C65280000EF6787 /* main.m */; };
+		055726021C65280000EF6787 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 055726011C65280000EF6787 /* AppDelegate.m */; };
+		055726051C65280000EF6787 /* MasterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 055726041C65280000EF6787 /* MasterViewController.m */; };
+		055726081C65280000EF6787 /* DetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 055726071C65280000EF6787 /* DetailViewController.m */; };
+		0557260B1C65280000EF6787 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 055726091C65280000EF6787 /* Main.storyboard */; };
+		0557260D1C65280000EF6787 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0557260C1C65280000EF6787 /* Assets.xcassets */; };
+		055726101C65280000EF6787 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0557260E1C65280000EF6787 /* LaunchScreen.storyboard */; };
+		C48AE7AF1C76159000814D7D /* libSPTPersistentCache.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C48AE7AE1C76159000814D7D /* libSPTPersistentCache.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C48AE7B51C7615E900814D7D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 055726181C65283200EF6787 /* SPTPersistentCache.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0510FF131BA2FF7A00ED0766;
+			remoteInfo = SPTPersistentCache;
+		};
+		C48AE7B71C7615E900814D7D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 055726181C65283200EF6787 /* SPTPersistentCache.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0510FF1E1BA2FF7A00ED0766;
+			remoteInfo = SPTPersistentCacheTests;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		055725FA1C65280000EF6787 /* SPTPersistentCacheDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SPTPersistentCacheDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		055725FE1C65280000EF6787 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		055726001C65280000EF6787 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		055726011C65280000EF6787 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		055726031C65280000EF6787 /* MasterViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MasterViewController.h; sourceTree = "<group>"; };
+		055726041C65280000EF6787 /* MasterViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MasterViewController.m; sourceTree = "<group>"; };
+		055726061C65280000EF6787 /* DetailViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DetailViewController.h; sourceTree = "<group>"; };
+		055726071C65280000EF6787 /* DetailViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DetailViewController.m; sourceTree = "<group>"; };
+		0557260A1C65280000EF6787 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		0557260C1C65280000EF6787 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		0557260F1C65280000EF6787 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		055726111C65280000EF6787 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		055726181C65283200EF6787 /* SPTPersistentCache.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SPTPersistentCache.xcodeproj; path = ../SPTPersistentCache.xcodeproj; sourceTree = "<group>"; };
+		C48AE7AE1C76159000814D7D /* libSPTPersistentCache.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSPTPersistentCache.a; path = "../../../../../Library/Developer/Xcode/DerivedData/SPTPersistentCache-baozpsdxvsedctakhrddpkmkyjzd/Build/Products/Debug/libSPTPersistentCache.a"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		055725F71C65280000EF6787 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C48AE7AF1C76159000814D7D /* libSPTPersistentCache.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		055725F11C65280000EF6787 = {
+			isa = PBXGroup;
+			children = (
+				C48AE7AE1C76159000814D7D /* libSPTPersistentCache.a */,
+				055725FC1C65280000EF6787 /* SPTPersistentDataCacheDemo */,
+				055725FB1C65280000EF6787 /* Products */,
+				055726171C65282100EF6787 /* Build System */,
+			);
+			sourceTree = "<group>";
+		};
+		055725FB1C65280000EF6787 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				055725FA1C65280000EF6787 /* SPTPersistentCacheDemo.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		055725FC1C65280000EF6787 /* SPTPersistentDataCacheDemo */ = {
+			isa = PBXGroup;
+			children = (
+				055726001C65280000EF6787 /* AppDelegate.h */,
+				055726011C65280000EF6787 /* AppDelegate.m */,
+				055726031C65280000EF6787 /* MasterViewController.h */,
+				055726041C65280000EF6787 /* MasterViewController.m */,
+				055726061C65280000EF6787 /* DetailViewController.h */,
+				055726071C65280000EF6787 /* DetailViewController.m */,
+				055726091C65280000EF6787 /* Main.storyboard */,
+				0557260C1C65280000EF6787 /* Assets.xcassets */,
+				0557260E1C65280000EF6787 /* LaunchScreen.storyboard */,
+				055726111C65280000EF6787 /* Info.plist */,
+				055725FD1C65280000EF6787 /* Supporting Files */,
+			);
+			name = SPTPersistentDataCacheDemo;
+			path = SPTPersistentCacheDemo;
+			sourceTree = "<group>";
+		};
+		055725FD1C65280000EF6787 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				055725FE1C65280000EF6787 /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		055726171C65282100EF6787 /* Build System */ = {
+			isa = PBXGroup;
+			children = (
+				055726181C65283200EF6787 /* SPTPersistentCache.xcodeproj */,
+			);
+			name = "Build System";
+			sourceTree = "<group>";
+		};
+		C48AE7B11C7615E900814D7D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C48AE7B61C7615E900814D7D /* libSPTPersistentCache.a */,
+				C48AE7B81C7615E900814D7D /* SPTPersistentCacheTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		055725F91C65280000EF6787 /* SPTPersistentCacheDemo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 055726141C65280000EF6787 /* Build configuration list for PBXNativeTarget "SPTPersistentCacheDemo" */;
+			buildPhases = (
+				055725F61C65280000EF6787 /* Sources */,
+				055725F71C65280000EF6787 /* Frameworks */,
+				055725F81C65280000EF6787 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SPTPersistentCacheDemo;
+			productName = SPTPersistentDataCacheDemo;
+			productReference = 055725FA1C65280000EF6787 /* SPTPersistentCacheDemo.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		055725F21C65280000EF6787 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0720;
+				ORGANIZATIONNAME = "Will Sackfield";
+				TargetAttributes = {
+					055725F91C65280000EF6787 = {
+						CreatedOnToolsVersion = 7.2;
+					};
+				};
+			};
+			buildConfigurationList = 055725F51C65280000EF6787 /* Build configuration list for PBXProject "SPTPersistentCacheDemo" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 055725F11C65280000EF6787;
+			productRefGroup = 055725FB1C65280000EF6787 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = C48AE7B11C7615E900814D7D /* Products */;
+					ProjectRef = 055726181C65283200EF6787 /* SPTPersistentCache.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				055725F91C65280000EF6787 /* SPTPersistentCacheDemo */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		C48AE7B61C7615E900814D7D /* libSPTPersistentCache.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libSPTPersistentCache.a;
+			remoteRef = C48AE7B51C7615E900814D7D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C48AE7B81C7615E900814D7D /* SPTPersistentCacheTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = SPTPersistentCacheTests.xctest;
+			remoteRef = C48AE7B71C7615E900814D7D /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXResourcesBuildPhase section */
+		055725F81C65280000EF6787 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				055726101C65280000EF6787 /* LaunchScreen.storyboard in Resources */,
+				0557260D1C65280000EF6787 /* Assets.xcassets in Resources */,
+				0557260B1C65280000EF6787 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		055725F61C65280000EF6787 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				055726021C65280000EF6787 /* AppDelegate.m in Sources */,
+				055726051C65280000EF6787 /* MasterViewController.m in Sources */,
+				055725FF1C65280000EF6787 /* main.m in Sources */,
+				055726081C65280000EF6787 /* DetailViewController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		055726091C65280000EF6787 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0557260A1C65280000EF6787 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		0557260E1C65280000EF6787 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0557260F1C65280000EF6787 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		055726121C65280000EF6787 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		055726131C65280000EF6787 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		055726151C65280000EF6787 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				HEADER_SEARCH_PATHS = ../include;
+				INFOPLIST_FILE = SPTPersistentCacheDemo/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.spotify.SPTPersistentCacheDemo;
+				PRODUCT_NAME = SPTPersistentCacheDemo;
+			};
+			name = Debug;
+		};
+		055726161C65280000EF6787 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				HEADER_SEARCH_PATHS = ../include;
+				INFOPLIST_FILE = SPTPersistentCacheDemo/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.spotify.SPTPersistentCacheDemo;
+				PRODUCT_NAME = SPTPersistentCacheDemo;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		055725F51C65280000EF6787 /* Build configuration list for PBXProject "SPTPersistentCacheDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				055726121C65280000EF6787 /* Debug */,
+				055726131C65280000EF6787 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		055726141C65280000EF6787 /* Build configuration list for PBXNativeTarget "SPTPersistentCacheDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				055726151C65280000EF6787 /* Debug */,
+				055726161C65280000EF6787 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 055725F21C65280000EF6787 /* Project object */;
+}

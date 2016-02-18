@@ -18,12 +18,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <SPTPersistentCache/SPTPersistentCacheResponse.h>
+#import <UIKit/UIKit.h>
 
-@interface SPTPersistentCacheResponse (Private)
+@class SPTPersistentCache;
 
-- (instancetype)initWithResult:(SPTPersistentCacheResponseCode)result
-                         error:(NSError *)error
-                        record:(SPTPersistentCacheRecord *)record;
+@interface DetailViewController : UIViewController
+
+@property (nonatomic, strong) SPTPersistentCache *persistentDataCache;
+@property (strong, nonatomic) id detailItem;
+@property (nonatomic, weak, readwrite) IBOutlet UIImageView *detailImageView;
 
 @end
+

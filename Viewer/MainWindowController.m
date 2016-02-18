@@ -7,7 +7,7 @@
 //
 
 #import "MainWindowController.h"
-#import <SPTPersistentDataCache/SPTPersistentDataCache.h>
+#import <SPTPersistentCache/SPTPersistentCache.h>
 
 @interface MainWindowController () <NSTableViewDataSource, NSTableViewDelegate>
 @property (nonatomic, strong) NSMutableArray *cacheFiles;
@@ -34,7 +34,7 @@
 
 @implementation MainWindowController
 {
-    SPTPersistentDataCacheRecordHeaderType _currHeader;
+    SPTPersistentCacheRecordHeaderType _currHeader;
     BOOL _crcValid;
 }
 
@@ -130,19 +130,19 @@
     NSString *fullFilePath = [self.cacheFiles objectAtIndex:idx];
     NSData *rawData = [NSData dataWithContentsOfFile:fullFilePath];
 
-    SPTPersistentDataCacheRecordHeaderType *h = SPTPersistentDataCacheGetHeaderFromData(__DECONST(void*, [rawData bytes]), [rawData length]);
+    SPTPersistentCacheRecordHeaderType *h = SPTPersistentCacheGetHeaderFromData(__DECONST(void*, [rawData bytes]), [rawData length]);
 
     if (h == NULL) {
         // TODO: error
         return;
     }
 
-    if (-1 != SPTPersistentDataCacheValidateHeader(h)) {
+    if (-1 != SPTPersistentCacheValidateHeader(h)) {
         // TODO: error
         return;
     }
 
-    memcpy(&_currHeader, h, SPTPersistentDataCacheRecordHeaderSize);
+    memcpy(&_currHeader, h, SPTPersistentCacheRecordHeaderSize);
 
     self.magic = [NSString stringWithFormat:@"0x%X", _currHeader.magic];
     self.headerSize = [NSString stringWithFormat:@"%u", _currHeader.headerSize];
@@ -155,7 +155,7 @@
                                                        dateStyle:NSDateFormatterMediumStyle
                                                        timeStyle:NSDateFormatterLongStyle];
 
-    NSRange payloadRange = NSMakeRange(SPTPersistentDataCacheRecordHeaderSize, _currHeader.payloadSizeBytes);
+    NSRange payloadRange = NSMakeRange(SPTPersistentCacheRecordHeaderSize, _currHeader.payloadSizeBytes);
     self.payload = [rawData subdataWithRange:payloadRange];
 
     self.object = [[NSImage alloc] initWithData:self.payload];
