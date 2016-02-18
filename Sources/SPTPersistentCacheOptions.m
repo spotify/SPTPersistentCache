@@ -56,8 +56,8 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
               currentTimeCallback:(SPTDataCacheCurrentTimeSecCallback)currentTimeBlock
                             debug:(SPTDataCacheDebugCallback)debugCallback
 {
-    return [self initWithCachePath:nil
-                        identifier:nil
+    return [self initWithCachePath:cachePath
+                        identifier:cacheIdentifier
                currentTimeCallback:nil
          defaultExpirationInterval:SPTPersistentCacheDefaultExpirationTimeSec
           garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
