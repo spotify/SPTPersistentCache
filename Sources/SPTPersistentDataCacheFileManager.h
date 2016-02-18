@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 
+typedef long long SPTPersistentDataCacheDiskSize;
 
 extern const NSUInteger SPTPersistentDataCacheFileManagerSubDirNameLength;
 
@@ -48,6 +49,8 @@ extern const NSUInteger SPTPersistentDataCacheFileManagerSubDirNameLength;
  *  @param key Key of the data you are looking for.
  */
 - (void)removeDataForKey:(NSString *)key;
+
+- (SPTPersistentDataCacheDiskSize)optimizedDiskSizeForCacheSize:(SPTPersistentDataCacheDiskSize)currentCacheSize;
 
 /**
  *  Returns the size of some data located at a specific path.

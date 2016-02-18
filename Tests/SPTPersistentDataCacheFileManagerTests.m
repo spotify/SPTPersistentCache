@@ -134,4 +134,22 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_dir
     XCTAssertFalse([[NSFileManager defaultManager] fileExistsAtPath:pathForKey]);
 }
 
+- (void)testOptimizedDiskSizeForCacheSizeInsanelyBig
+{
+    SPTPersistentDataCacheDiskSize insanelyBigCacheSize = LONG_LONG_MAX;
+    
+    SPTPersistentDataCacheDiskSize optimizedSize = [self.cacheFileManager optimizedDiskSizeForCacheSize:insanelyBigCacheSize];
+    
+    XCTAssertEqual(optimizedSize, (SPTPersistentDataCacheDiskSize)self.options.sizeConstraintBytes);
+}
+
+- (void)testOptimizedDiskSizeForCacheSizeSmall
+{
+    SPTPersistentDataCacheDiskSize smallCacheSize = 1024 * 1024 * 1;
+    
+    SPTPersistentDataCacheDiskSize optimizedSize = [self.cacheFileManager optimizedDiskSizeForCacheSize:smallCacheSize];
+    
+    XCTAssertEqual(optimizedSize, (SPTPersistentDataCacheDiskSize)0);
+}
+
 @end

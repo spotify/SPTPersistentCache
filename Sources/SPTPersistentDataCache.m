@@ -48,9 +48,6 @@ NS_INLINE uint64_t spt_uint64rint(double value)
 NSString *const SPTPersistentDataCacheErrorDomain = @"persistent.cache.error";
 static const uint64_t kTTLUpperBoundInSec = 86400 * 31 * 2;
 
-typedef long long SPTDiskSizeType;
-static const double SPTDataCacheMinimumFreeDiskSpace = 0.1;
-
 static NSString * const SPTDataCacheFileNameKey = @"SPTDataCacheFileNameKey";
 static NSString * const SPTDataCacheFileAttributesKey = @"SPTDataCacheFileAttributesKey";
 
@@ -1002,12 +999,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
     NSMutableArray *images = [self storedImageNamesAndAttributes];
 
     // Find the free space on the disk
-    SPTDiskSizeType currentCacheSize = (SPTDiskSizeType)[self lockedItemsSizeInBytes];
+    SPTPersistentDataCacheDiskSize currentCacheSize = (SPTPersistentDataCacheDiskSize)[self lockedItemsSizeInBytes];
     for (NSDictionary *image in images) {
         currentCacheSize += [image[SPTDataCacheFileAttributesKey][NSFileSize] integerValue];
     }
 
-    SPTDiskSizeType optimalCacheSize = [self optimalSizeForCache:currentCacheSize];
+    SPTPersistentDataCacheDiskSize optimalCacheSize = [self.dataCacheFileManager optimizedDiskSizeForCacheSize:currentCacheSize];
 
     // Remove oldest data until we reach acceptable cache size
     while (currentCacheSize > optimalCacheSize && images.count) {
@@ -1025,31 +1022,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentDataCacheRecordHeaderTy
 
         currentCacheSize -= [image[SPTDataCacheFileAttributesKey][NSFileSize] integerValue];
     }
-}
-
-- (SPTDiskSizeType)optimalSizeForCache:(SPTDiskSizeType)currentCacheSize
-{
-    SPTDiskSizeType tempCacheSize = (SPTDiskSizeType)self.options.sizeConstraintBytes;
-
-    NSError *error = nil;
-    NSDictionary *fileSystemAttributes = [self.fileManager attributesOfFileSystemForPath:self.options.cachePath
-                                                                                   error:&error];
-    if (fileSystemAttributes) {
-        // Never use the last SPTImageLoaderMinimumFreeDiskSpace of the disk for caching
-        NSNumber *fileSystemSize = fileSystemAttributes[NSFileSystemSize];
-        NSNumber *fileSystemFreeSpace = fileSystemAttributes[NSFileSystemFreeSize];
-
-        SPTDiskSizeType totalSpace = fileSystemSize.longLongValue;
-        SPTDiskSizeType freeSpace = fileSystemFreeSpace.longLongValue + currentCacheSize;
-        SPTDiskSizeType proposedCacheSize = freeSpace - llrint(totalSpace * SPTDataCacheMinimumFreeDiskSpace);
-
-        tempCacheSize = MAX(0, proposedCacheSize);
-
-    } else {
-        [self debugOutput:@"PersistentDataCache: %@ ERROR %@", @(__PRETTY_FUNCTION__), [error localizedDescription]];
-    }
-
-    return MIN(tempCacheSize, (SPTDiskSizeType)self.options.sizeConstraintBytes);
 }
 
 - (NSMutableArray *)storedImageNamesAndAttributes
