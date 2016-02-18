@@ -35,7 +35,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		696CD79A1C4708ED0071DD18 /* PersistentCacheViewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PersistentCacheViewer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		696CD79A1C4708ED0071DD18 /* SPTPersistentCacheViewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SPTPersistentCacheViewer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		696CD79C1C4708ED0071DD18 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		696CD79D1C4708ED0071DD18 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		696CD7A01C4708ED0071DD18 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -46,7 +46,7 @@
 		69A726AC1C470B56005FC024 /* MainWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainWindowController.m; sourceTree = "<group>"; };
 		69A726AD1C470B56005FC024 /* MainWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainWindowController.xib; sourceTree = "<group>"; };
 		69FD59D81C4F0CA70052626E /* SPTPersistentDataCache.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SPTPersistentDataCache.xcodeproj; path = ../SPTPersistentDataCache.xcodeproj; sourceTree = "<group>"; };
-		C48AE7AC1C76152200814D7D /* libSPTPersistentCache.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSPTPersistentCache.a; path = "../../../../../Library/Developer/Xcode/DerivedData/SPTPersistentCache-baozpsdxvsedctakhrddpkmkyjzd/Build/Products/Debug/libSPTPersistentCache.a"; sourceTree = "<group>"; };
+		C48AE7AC1C76152200814D7D /* libSPTPersistentCache.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSPTPersistentCache.a; path = "/Library/Developer/Xcode/DerivedData/SPTPersistentCache-baozpsdxvsedctakhrddpkmkyjzd/Build/Products/Debug/libSPTPersistentCache.a"; sourceTree = "<absolute>"; };
 		DDBCF5F31C68E2A300693038 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -66,8 +66,6 @@
 		0510FF0A1BA2FF7A00ED0766 = {
 			isa = PBXGroup;
 			children = (
-				C48AE7AC1C76152200814D7D /* libSPTPersistentCache.a */,
-				DDBCF5F31C68E2A300693038 /* Cocoa.framework */,
 				696CD79B1C4708ED0071DD18 /* Sources */,
 				69FD59D71C4F0C970052626E /* Dependencies */,
 				0510FF141BA2FF7A00ED0766 /* Products */,
@@ -77,7 +75,7 @@
 		0510FF141BA2FF7A00ED0766 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				696CD79A1C4708ED0071DD18 /* PersistentCacheViewer.app */,
+				696CD79A1C4708ED0071DD18 /* SPTPersistentCacheViewer.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -109,6 +107,8 @@
 		69FD59D71C4F0C970052626E /* Dependencies */ = {
 			isa = PBXGroup;
 			children = (
+				DDBCF5F31C68E2A300693038 /* Cocoa.framework */,
+				C48AE7AC1C76152200814D7D /* libSPTPersistentCache.a */,
 				69FD59D81C4F0CA70052626E /* SPTPersistentDataCache.xcodeproj */,
 			);
 			name = Dependencies;
@@ -126,9 +126,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		696CD7991C4708ED0071DD18 /* PersistentCacheViewer */ = {
+		696CD7991C4708ED0071DD18 /* SPTPersistentCacheViewer */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 696CD7AA1C4708ED0071DD18 /* Build configuration list for PBXNativeTarget "PersistentCacheViewer" */;
+			buildConfigurationList = 696CD7AA1C4708ED0071DD18 /* Build configuration list for PBXNativeTarget "SPTPersistentCacheViewer" */;
 			buildPhases = (
 				696CD7961C4708ED0071DD18 /* Sources */,
 				696CD7981C4708ED0071DD18 /* Resources */,
@@ -138,9 +138,9 @@
 			);
 			dependencies = (
 			);
-			name = PersistentCacheViewer;
+			name = SPTPersistentCacheViewer;
 			productName = PersistentDataCacheViewer;
-			productReference = 696CD79A1C4708ED0071DD18 /* PersistentCacheViewer.app */;
+			productReference = 696CD79A1C4708ED0071DD18 /* SPTPersistentCacheViewer.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -157,7 +157,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 0510FF0E1BA2FF7A00ED0766 /* Build configuration list for PBXProject "PersistentCacheViewer" */;
+			buildConfigurationList = 0510FF0E1BA2FF7A00ED0766 /* Build configuration list for PBXProject "SPTPersistentCacheViewer" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -176,7 +176,7 @@
 			);
 			projectRoot = "";
 			targets = (
-				696CD7991C4708ED0071DD18 /* PersistentCacheViewer */,
+				696CD7991C4708ED0071DD18 /* SPTPersistentCacheViewer */,
 			);
 		};
 /* End PBXProject section */
@@ -325,7 +325,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.spotify.PersistentDataCacheViewer;
-				PRODUCT_NAME = PersistentCacheViewer;
+				PRODUCT_NAME = SPTPersistentCacheViewer;
 			};
 			name = Debug;
 		};
@@ -343,14 +343,14 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.spotify.PersistentDataCacheViewer;
-				PRODUCT_NAME = PersistentCacheViewer;
+				PRODUCT_NAME = SPTPersistentCacheViewer;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		0510FF0E1BA2FF7A00ED0766 /* Build configuration list for PBXProject "PersistentCacheViewer" */ = {
+		0510FF0E1BA2FF7A00ED0766 /* Build configuration list for PBXProject "SPTPersistentCacheViewer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0510FF251BA2FF7A00ED0766 /* Debug */,
@@ -359,7 +359,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		696CD7AA1C4708ED0071DD18 /* Build configuration list for PBXNativeTarget "PersistentCacheViewer" */ = {
+		696CD7AA1C4708ED0071DD18 /* Build configuration list for PBXNativeTarget "SPTPersistentCacheViewer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				696CD7A81C4708ED0071DD18 /* Debug */,

@@ -48,7 +48,7 @@
 		0557260F1C65280000EF6787 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		055726111C65280000EF6787 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		055726181C65283200EF6787 /* SPTPersistentCache.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SPTPersistentCache.xcodeproj; path = ../SPTPersistentCache.xcodeproj; sourceTree = "<group>"; };
-		C48AE7AE1C76159000814D7D /* libSPTPersistentCache.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSPTPersistentCache.a; path = "../../../../../Library/Developer/Xcode/DerivedData/SPTPersistentCache-baozpsdxvsedctakhrddpkmkyjzd/Build/Products/Debug/libSPTPersistentCache.a"; sourceTree = "<group>"; };
+		C48AE7AE1C76159000814D7D /* libSPTPersistentCache.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSPTPersistentCache.a; path = "/Library/Developer/Xcode/DerivedData/SPTPersistentCache-baozpsdxvsedctakhrddpkmkyjzd/Build/Products/Debug/libSPTPersistentCache.a"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,7 +66,6 @@
 		055725F11C65280000EF6787 = {
 			isa = PBXGroup;
 			children = (
-				C48AE7AE1C76159000814D7D /* libSPTPersistentCache.a */,
 				055725FC1C65280000EF6787 /* SPTPersistentDataCacheDemo */,
 				055725FB1C65280000EF6787 /* Products */,
 				055726171C65282100EF6787 /* Build System */,
@@ -111,6 +110,7 @@
 		055726171C65282100EF6787 /* Build System */ = {
 			isa = PBXGroup;
 			children = (
+				C48AE7AE1C76159000814D7D /* libSPTPersistentCache.a */,
 				055726181C65283200EF6787 /* SPTPersistentCache.xcodeproj */,
 			);
 			name = "Build System";

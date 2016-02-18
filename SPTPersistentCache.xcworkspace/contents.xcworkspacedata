@@ -2,13 +2,13 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:/Users/hector/Documents/Dev/Spotify/SPTPersistentDataCache/SPTPersistentCache.xcodeproj">
+      location = "group:SPTPersistentCache.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:SPTPersistentCacheDemo/SPTPersistentCacheDemo.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:/Users/hector/Documents/Dev/Spotify/SPTPersistentDataCache/Viewer/PersistentCacheViewer.xcodeproj">
+      location = "group:/Users/sackfield/dev/SPTPersistentDataCache/Viewer/SPTPersistentCacheViewer.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:SPTPersistentCacheFramework/SPTPersistentCacheFramework.xcodeproj">
