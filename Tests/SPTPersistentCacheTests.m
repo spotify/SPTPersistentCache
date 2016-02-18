@@ -64,19 +64,19 @@ static const char* kImages[] = {
 #pragma pack(1)
 typedef struct
 {
-    uint64_t ttl;
+    NSUInteger ttl;
     BOOL locked;
     BOOL last;
     int corruptReason; // -1 not currupted
 } StoreParamsType;
 #pragma pack()
 
-static const uint64_t kTTL1 = 7200;
-static const uint64_t kTTL2 = 604800;
-static const uint64_t kTTL3 = 1495;
-static const uint64_t kTTL4 = 86400;
-static const NSInteger kCorruptedFileSize = 15;
-static const uint64_t kTestEpochTime = 1488;
+static const NSUInteger kTTL1 = 7200;
+static const NSUInteger kTTL2 = 604800;
+static const NSUInteger kTTL3 = 1495;
+static const NSUInteger kTTL4 = 86400;
+static const NSUInteger kCorruptedFileSize = 15;
+static const NSUInteger kTestEpochTime = 1488;
 static const NSTimeInterval kDefaultWaitTime = 6.0; //sec
 
 static const StoreParamsType kParams[] = {
@@ -101,9 +101,9 @@ static const StoreParamsType kParams[] = {
     {kTTL4, NO, YES, -1}
 };
 
-static int params_GetFilesNumber(BOOL locked);
-static int params_GetCorruptedFilesNumber(void);
-static int params_GetDefaultExpireFilesNumber(void);
+static NSUInteger params_GetFilesNumber(BOOL locked);
+static NSUInteger params_GetCorruptedFilesNumber(void);
+static NSUInteger params_GetDefaultExpireFilesNumber(void);
 
 static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentCacheRecordHeaderType *header);
 
@@ -176,7 +176,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     const NSUInteger count = self.imageNames.count;
 
-    for (unsigned i = 0; i < count; ++i) {
+    for (NSUInteger i = 0; i < count; ++i) {
         XCTAssert(kParams[i].last != YES, @"Last param element reached");
         NSString *fileName = [self.thisBundle pathForResource:self.imageNames[i] ofType:nil];
         XCTestExpectation *expectation = [self expectationWithDescription:fileName];
@@ -188,7 +188,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
-    for (unsigned i = 0; !kParams[i].last; ++i) {
+    for (NSUInteger i = 0; !kParams[i].last; ++i) {
         if (kParams[i].corruptReason > -1) {
             NSString *filePath = [fileManager pathForKey:self.imageNames[i]];
             [self corruptFile:filePath pdcError:kParams[i].corruptReason];
@@ -220,12 +220,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
                                                        expirationTime:[NSDate timeIntervalSinceReferenceDate]];
     SPTPersistentCacheFileManager *fileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:cache.options];
-    int __block calls = 0;
-    int __block errorCalls = 0;
+    NSUInteger __block calls = 0;
+    NSUInteger __block errorCalls = 0;
 
     const NSUInteger count = self.imageNames.count;
 
-    for (unsigned i = 0; i < count; ++i) {
+    for (NSUInteger i = 0; i < count; ++i) {
 
         NSString *cacheKey = self.imageNames[i];
         XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
@@ -266,7 +266,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     // Check that updat time was modified when access cache (both case ttl==0, ttl>0)
-    for (unsigned i = 0; i < count; ++i) {
+    for (NSUInteger i = 0; i < count; ++i) {
         NSString *path = [fileManager pathForKey:self.imageNames[i]];
         [self checkUpdateTimeForFileAtPath:path validate:kParams[i].corruptReason == -1 referenceTimeCheck:^(uint64_t updateTime) {
             if (kParams[i].ttl > 0) {
@@ -277,7 +277,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         }];
     }
 
-    XCTAssertEqual(calls, (NSInteger)self.imageNames.count, @"Number of checked files must match");
+    XCTAssertEqual(calls, self.imageNames.count, @"Number of checked files must match");
     XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
 }
 
@@ -298,7 +298,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTestExpectation *expectation = [self expectationWithDescription:@"testLoadWithPrefixesSuccess"];
 
     // Thas hardcode logic: 10th element should be safe to get
-    const int index = 10;
+    const NSUInteger index = 10;
     NSString *prefix = self.imageNames[index];
     prefix = [prefix substringToIndex:2];
     NSString * __block key = nil;
@@ -351,7 +351,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTestExpectation *expectation = [self expectationWithDescription:@"testLoadWithPrefixesFail"];
 
     // Thas hardcode logic: 10th element should be safe to get
-    const int index = 9;
+    const NSUInteger index = 9;
     NSString *prefix = self.imageNames[index];
     prefix = [prefix substringToIndex:2];
     NSString * __block key = nil;
@@ -401,7 +401,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     NSMutableArray *toUnlock = [NSMutableArray array];
 
     const NSUInteger count = self.imageNames.count;
-    for (unsigned i = 0; i < count; ++i) {
+    for (NSUInteger i = 0; i < count; ++i) {
         if (kParams[i].locked) {
             [toUnlock addObject:self.imageNames[i]];
         } else {
@@ -429,17 +429,17 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     // Now check that updateTime is not altered by lock unlock calls for all not corrupted files
-    for (unsigned i = 0; i < count; ++i) {
+    for (NSUInteger i = 0; i < count; ++i) {
         NSString *path = [fileManager pathForKey:self.imageNames[i]];
         [self checkUpdateTimeForFileAtPath:path validate:kParams[i].corruptReason == -1 referenceTimeCheck:^(uint64_t updateTime) {
             XCTAssertEqual(updateTime, kTestEpochTime, @"Time must match for initial value i.e. not altering");
         }];
     }
 
-    int __block calls = 0;
-    int __block errorCalls = 0;
+    NSUInteger __block calls = 0;
+    NSUInteger __block errorCalls = 0;
 
-    for (unsigned i = 0; i < count; ++i) {
+    for (NSUInteger i = 0; i < count; ++i) {
 
         NSString *cacheKey = self.imageNames[i];
         XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
@@ -476,7 +476,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
-    XCTAssertEqual(calls, (NSInteger)self.imageNames.count, @"Number of checked files must match");
+    XCTAssertEqual(calls, self.imageNames.count, @"Number of checked files must match");
     XCTAssertEqual(errorCalls, params_GetCorruptedFilesNumber(), @"Number of checked files must match");
 }
 
@@ -495,11 +495,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     [cache removeDataForKeys:self.imageNames];
 
-    int __block calls = 0;
+    NSUInteger __block calls = 0;
 
     const NSUInteger count = self.imageNames.count;
 
-    for (unsigned i = 0; i < count; ++i) {
+    for (NSUInteger i = 0; i < count; ++i) {
 
         NSString *cacheKey = self.imageNames[i];
         XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
@@ -516,7 +516,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
-    XCTAssert(calls == (NSInteger)self.imageNames.count, @"Number of checked files must match");
+    XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
 
     // Check file syste, that there are no files left
     NSUInteger files = [self getFilesNumberAtPath:self.cachePath];
@@ -538,11 +538,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     [cache prune];
 
-    int __block calls = 0;
+    NSUInteger __block calls = 0;
 
     const NSUInteger count = self.imageNames.count;
 
-    for (unsigned i = 0; i < count; ++i) {
+    for (NSUInteger i = 0; i < count; ++i) {
 
         NSString *cacheKey = self.imageNames[i];
         XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
@@ -562,7 +562,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
-    XCTAssert(calls == (NSInteger)self.imageNames.count, @"Number of checked files must match");
+    XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
 
     // Check file syste, that there are no files left
     NSUInteger files = [self getFilesNumberAtPath:self.cachePath];
@@ -588,12 +588,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     [cache wipeLockedFiles];
 
-    int __block calls = 0;
-    int __block notFoundCalls = 0;
-    int __block errorCalls = 0;
+    NSUInteger __block calls = 0;
+    NSUInteger __block notFoundCalls = 0;
+    NSUInteger __block errorCalls = 0;
 
     BOOL __block locked = NO;
-    const int reallyLocked = params_GetFilesNumber(YES);
+    const NSUInteger reallyLocked = params_GetFilesNumber(YES);
 
     const NSUInteger count = self.imageNames.count;
 
@@ -633,7 +633,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
-    XCTAssert(calls == (NSInteger)self.imageNames.count, @"Number of checked files must match");
+    XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
     XCTAssertEqual(notFoundCalls, reallyLocked, @"Number of really locked files files is not the same we deleted");
 
     // Check file syste, that there are no files left
@@ -658,12 +658,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     [cache wipeNonLockedFiles];
 
-    int __block calls = 0;
-    int __block notFoundCalls = 0;
-    int __block errorCalls = 0;
+    NSUInteger __block calls = 0;
+    NSUInteger __block notFoundCalls = 0;
+    NSUInteger __block errorCalls = 0;
     BOOL __block unlocked = YES;
     // +1 stands for SPTPersistentCacheLoadingErrorWrongPayloadSize since technically it has corrent header.
-    const int reallyUnlocked = params_GetFilesNumber(NO) + 1;
+    const NSUInteger reallyUnlocked = params_GetFilesNumber(NO) + 1;
 
     const NSUInteger count = self.imageNames.count;
 
@@ -706,7 +706,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
-    XCTAssert(calls == (NSInteger)self.imageNames.count, @"Number of checked files must match");
+    XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
     XCTAssertEqual(notFoundCalls, reallyUnlocked, @"Number of really locked files files is not the same we deleted");
 
     // Check file system, that there are no files left
@@ -773,10 +773,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                                                        expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
 
     const NSUInteger count = self.imageNames.count;
-    int __block calls = 0;
-    int __block notFoundCalls = 0;
-    int __block errorCalls = 0;
-    int __block successCalls = 0;
+    NSUInteger __block calls = 0;
+    NSUInteger __block notFoundCalls = 0;
+    NSUInteger __block errorCalls = 0;
+    NSUInteger __block successCalls = 0;
     BOOL __block unlocked = YES;
 
     for (unsigned i = 0; i < count; ++i) {
@@ -817,11 +817,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
-    const int normalFilesCount = params_GetDefaultExpireFilesNumber();
-    const int corrupted = params_GetCorruptedFilesNumber();
+    const NSUInteger normalFilesCount = params_GetDefaultExpireFilesNumber();
+    const NSUInteger corrupted = params_GetCorruptedFilesNumber();
 
-    XCTAssert(calls == (NSInteger)count, @"Number of checked files must match");
-    XCTAssertEqual(successCalls, (NSInteger)count-normalFilesCount-corrupted, @"There should be exact number of locked files");
+    XCTAssert(calls == count, @"Number of checked files must match");
+    XCTAssertEqual(successCalls, count-normalFilesCount-corrupted, @"There should be exact number of locked files");
     // -1 stands for payload error since technically header is correct and returned as Not found
     XCTAssertEqual(notFoundCalls-1, normalFilesCount, @"Number of not found files must match");
     // -1 stands for payload error since technically header is correct
@@ -837,10 +837,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                                                        expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
 
     const NSUInteger count = self.imageNames.count;
-    int __block calls = 0;
-    int __block notFoundCalls = 0;
-    int __block errorCalls = 0;
-    int __block successCalls = 0;
+    NSUInteger __block calls = 0;
+    NSUInteger __block notFoundCalls = 0;
+    NSUInteger __block errorCalls = 0;
+    NSUInteger __block successCalls = 0;
     BOOL __block unlocked = YES;
 
     for (unsigned i = 0; i < count; ++i) {
@@ -881,9 +881,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
-    const int normalFilesCount = params_GetFilesNumber(NO);
+    const NSUInteger normalFilesCount = params_GetFilesNumber(NO);
 
-    XCTAssert(calls == (NSInteger)count, @"Number of checked files must match");
+    XCTAssert(calls == count, @"Number of checked files must match");
     XCTAssertEqual(successCalls, params_GetFilesNumber(YES), @"There should be exact number of locked files");
     // -1 stands for payload error since technically header is correct and returned as Not found
     XCTAssertEqual(notFoundCalls-1, normalFilesCount, @"Number of not found files must match");
@@ -929,10 +929,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
 
     // Now do regular check of data integrity after touch
-    int __block calls = 0;
-    int __block notFoundCalls = 0;
-    int __block errorCalls = 0;
-    int __block successCalls = 0;
+    NSUInteger __block calls = 0;
+    NSUInteger __block notFoundCalls = 0;
+    NSUInteger __block errorCalls = 0;
+    NSUInteger __block successCalls = 0;
     BOOL __block unlocked = YES;
 
     for (unsigned i = 0; i < count; ++i) {
@@ -973,11 +973,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
-    const int corrupted = params_GetCorruptedFilesNumber();
+    const NSUInteger corrupted = params_GetCorruptedFilesNumber();
 
-    XCTAssert(calls == (NSInteger)count, @"Number of checked files must match");
-    XCTAssertEqual(successCalls, (NSInteger)count-corrupted, @"There should be exact number of locked files");
-    XCTAssertEqual(notFoundCalls, 0, @"Number of not found files must match");
+    XCTAssert(calls == count, @"Number of checked files must match");
+    XCTAssertEqual(successCalls, count-corrupted, @"There should be exact number of locked files");
+    XCTAssertEqual(notFoundCalls, (NSUInteger)0, @"Number of not found files must match");
     XCTAssertEqual(errorCalls, corrupted, @"Number of not found files must match");
 }
 
@@ -993,14 +993,14 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     SPTPersistentCacheFileManager *fileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:cache.options];
     
     // Try to touch the data that is expired
-    const NSInteger count = (NSInteger)self.imageNames.count;
+    const NSUInteger count = self.imageNames.count;
 
-    int __block calls = 0;
-    int __block notFoundCalls = 0;
-    int __block errorCalls = 0;
-    int __block successCalls = 0;
+    NSUInteger __block calls = 0;
+    NSUInteger __block notFoundCalls = 0;
+    NSUInteger __block errorCalls = 0;
+    NSUInteger __block successCalls = 0;
 
-    for (unsigned i = 0; i < count; ++i) {
+    for (NSUInteger i = 0; i < count; ++i) {
         NSString *cacheKey = self.imageNames[i];
         XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
@@ -1021,18 +1021,18 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
-    const int lockedFilesCount = params_GetFilesNumber(YES);
-    const int corrupted = params_GetCorruptedFilesNumber();
+    const NSUInteger lockedFilesCount = params_GetFilesNumber(YES);
+    const NSUInteger corrupted = params_GetCorruptedFilesNumber();
 
     XCTAssertEqual(successCalls, lockedFilesCount);
     // -1 for payload error
-    XCTAssertEqual(notFoundCalls - 1, (NSInteger)count - lockedFilesCount - corrupted);
+    XCTAssertEqual(notFoundCalls - 1, count - lockedFilesCount - corrupted);
     // -1 for payload error
     XCTAssertEqual(errorCalls, corrupted -1);
 
 
     // Now check that updateTime is not altered for files with TTL
-    for (unsigned i = 0; i < count; ++i) {
+    for (NSUInteger i = 0; i < count; ++i) {
         NSString *path = [fileManager pathForKey:self.imageNames[i]];
 
         [self checkUpdateTimeForFileAtPath:path validate:kParams[i].corruptReason == -1 referenceTimeCheck:^(uint64_t updateTime) {
@@ -1115,8 +1115,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [cache runRegularGC];
 
     // After GC we have to have only locked files and corrupted
-    int lockedCount = 0;
-    int removedCount = 0;
+    NSUInteger lockedCount = 0;
+    NSUInteger removedCount = 0;
 
     for (unsigned i = 0; i < count; ++i) {
         NSString *path = [fileManager pathForKey:self.imageNames[i]];
@@ -1152,8 +1152,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [cache runRegularGC];
 
     // After GC we have to have only locked files and corrupted
-    int lockedCount = 0;
-    int removedCount = 0;
+    NSUInteger lockedCount = 0;
+    NSUInteger removedCount = 0;
 
     for (unsigned i = 0; i < count; ++i) {
         NSString *path = [fileManager pathForKey:self.imageNames[i]];
@@ -1191,7 +1191,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         NSString *path = [fileManager pathForKey:self.imageNames[i]];
 
         struct timeval t[2];
-        t[0].tv_sec = kTestEpochTime - 5*(i+1);
+        t[0].tv_sec = (__darwin_time_t)(kTestEpochTime - 5*(i+1));
         t[0].tv_usec = 0;
         t[1] = t[0];
         int ret = utimes(path.UTF8String, t);
@@ -1263,7 +1263,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     
     SPTPersistentCacheFileManager *fileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:cache.options];
     // Index of file to put. It should be file without any problems.
-    const int putIndex = 2;
+    const NSUInteger putIndex = 2;
     NSString *key = self.imageNames[putIndex];
     NSString *fileName = [self.thisBundle pathForResource:key ofType:nil];
     NSString *path = [fileManager pathForKey:key];
@@ -1496,7 +1496,7 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
 {
     NSUInteger expectedSize = 0;
 
-    for (unsigned i = 0; i < self.imageNames.count; ++i) {
+    for (NSUInteger i = 0; i < self.imageNames.count; ++i) {
         if (kParams[i].corruptReason == SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader) {
             expectedSize += kCorruptedFileSize;
         } else {
@@ -1535,10 +1535,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     return crc == header->crc;
 }
 
-static int params_GetFilesNumber(BOOL locked)
+static NSUInteger params_GetFilesNumber(BOOL locked)
 {
-    int c = 0;
-    for (unsigned i = 0; kParams[i].last != YES; ++i) {
+    NSUInteger c = 0;
+    for (NSUInteger i = 0; kParams[i].last != YES; ++i) {
         if (kParams[i].corruptReason == -1) {
             c += (kParams[i].locked == locked) ? 1 : 0;
         }
@@ -1546,10 +1546,10 @@ static int params_GetFilesNumber(BOOL locked)
     return c;
 }
 
-static int params_GetCorruptedFilesNumber(void)
+static NSUInteger params_GetCorruptedFilesNumber(void)
 {
-    int c = 0;
-    for (unsigned i = 0; kParams[i].last != YES; ++i) {
+    NSUInteger c = 0;
+    for (NSUInteger i = 0; kParams[i].last != YES; ++i) {
         if (kParams[i].corruptReason != -1) {
             c += 1;
         }
@@ -1557,10 +1557,10 @@ static int params_GetCorruptedFilesNumber(void)
     return c;
 }
 
-static int params_GetDefaultExpireFilesNumber(void)
+static NSUInteger params_GetDefaultExpireFilesNumber(void)
 {
-    int c = 0;
-    for (unsigned i = 0; kParams[i].last != YES; ++i) {
+    NSUInteger c = 0;
+    for (NSUInteger i = 0; kParams[i].last != YES; ++i) {
         if (kParams[i].ttl == 0 &&
             kParams[i].corruptReason == -1 &&
             kParams[i].locked == NO) {
