@@ -126,7 +126,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  - Randomly generate data set
  - Use concurrent write
  */
-- (void)setUp {
+- (void)setUp
+{
     [super setUp];
 
     time_t seed = time(NULL);
@@ -144,14 +145,13 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
 
     @autoreleasepool {
-
-        NSInteger count = self.imageNames.count-1;
-        while (count >= 0) {
-            uint32_t idx = rand() % ((uint32_t)(count+1));
-            NSString * tmp = self.imageNames[count];
-            self.imageNames[count] = self.imageNames[idx];
-            self.imageNames[idx] = tmp;
-            count--;
+        NSUInteger count = self.imageNames.count;
+        if (count > 1) {
+            for (NSUInteger oldIdx = 0; oldIdx < count - 1; ++oldIdx) {
+                NSUInteger remainingCount = count - oldIdx;
+                NSUInteger exchangeIdx = oldIdx + arc4random_uniform((u_int32_t)remainingCount);
+                [self.imageNames exchangeObjectAtIndex:oldIdx withObjectAtIndex:exchangeIdx];
+            }
         }
     }
 
