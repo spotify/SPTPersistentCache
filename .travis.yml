@@ -44,8 +44,8 @@ env:
     - BUILD_TEST="build test"
     - ENABLE_CODE_COVERAGE="-enableCodeCoverage YES"
     - PROJECT_LIBRARY="SPTPersistentCache.xcodeproj"
-    - PROJECT_DEMO="SPTPersistentCacheDemo.xcodeproj"
-    - PROJECT_FRAMEWORK="SPTPersistentCacheFramework.xcodeproj"
+    - PROJECT_DEMO="SPTPersistentCacheDemo/SPTPersistentCacheDemo.xcodeproj"
+    - PROJECT_FRAMEWORK="SPTPersistentCacheFramework/SPTPersistentCacheFramework.xcodeproj"
     - PODSPEC="SPTPersistentCache.podspec"
   matrix:
     - TEST_SDK=iphonesimulator  TEST_DEST="platform=iOS Simulator,OS=8.1,name=iPhone 6"   SCHEME="$SCHEME_IOS_LIBRARY"            BUILD_ACTIONS="$BUILD_TEST" EXTRA_ARGUMENTS="$ENABLE_CODE_COVERAGE" PROJECT="$PROJECT_LIBRARY"
