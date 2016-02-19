@@ -1,6 +1,6 @@
 <img alt="SPTPersistentCache" src="banner@2x.png" width="100%" max-width="888">
 
-Everyone tries to implement a cache at some point in their apps lifecycle, and this is ours. This is a library that allows people to cache NSData with TTL values and semantics for disk management.
+Everyone tries to implement a cache at some point in their app's lifecycle, and this is ours. This is a library that allows people to cache NSData with TTL values and semantics for disk management.
 
 - [x] 📱 iOS 7.0+
 - [x] 💻 OS X 10.9+
