@@ -15,6 +15,7 @@
 		0557260D1C65280000EF6787 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0557260C1C65280000EF6787 /* Assets.xcassets */; };
 		055726101C65280000EF6787 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0557260E1C65280000EF6787 /* LaunchScreen.storyboard */; };
 		C48AE7AF1C76159000814D7D /* libSPTPersistentCache.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C48AE7AE1C76159000814D7D /* libSPTPersistentCache.a */; };
+		DD1D23C41C779D4000D0477A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD1D23C31C779D4000D0477A /* UIKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +51,7 @@
 		055726181C65283200EF6787 /* SPTPersistentCache.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SPTPersistentCache.xcodeproj; path = ../SPTPersistentCache.xcodeproj; sourceTree = "<group>"; };
 		C48AE7AE1C76159000814D7D /* libSPTPersistentCache.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSPTPersistentCache.a; path = "/Library/Developer/Xcode/DerivedData/SPTPersistentCache-baozpsdxvsedctakhrddpkmkyjzd/Build/Products/Debug/libSPTPersistentCache.a"; sourceTree = "<absolute>"; };
 		DD1D23C21C779BAE00D0477A /* project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = project.xcconfig; path = ../project.xcconfig; sourceTree = "<group>"; };
+		DD1D23C31C779D4000D0477A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DD1D23C41C779D4000D0477A /* UIKit.framework in Frameworks */,
 				C48AE7AF1C76159000814D7D /* libSPTPersistentCache.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -110,6 +113,7 @@
 		055726171C65282100EF6787 /* Build System */ = {
 			isa = PBXGroup;
 			children = (
+				DD1D23C31C779D4000D0477A /* UIKit.framework */,
 				DD1D23C21C779BAE00D0477A /* project.xcconfig */,
 				C48AE7AE1C76159000814D7D /* libSPTPersistentCache.a */,
 				055726181C65283200EF6787 /* SPTPersistentCache.xcodeproj */,
