@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 47;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -149,8 +149,9 @@
 		0510FF0B1BA2FF7A00ED0766 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				CLASSPREFIX = SPTPersistentCache;
 				LastUpgradeCheck = 0700;
-				ORGANIZATIONNAME = spotify;
+				ORGANIZATIONNAME = Spotify;
 				TargetAttributes = {
 					696CD7991C4708ED0071DD18 = {
 						CreatedOnToolsVersion = 7.2;
@@ -158,7 +159,7 @@
 				};
 			};
 			buildConfigurationList = 0510FF0E1BA2FF7A00ED0766 /* Build configuration list for PBXProject "SPTPersistentCacheViewer" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 6.3";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
