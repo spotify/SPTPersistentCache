@@ -8,7 +8,7 @@
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 [![Spotify FOSS Slack](https://slackin.spotify.com/badge.svg)](https://slackin.spotify.com)
 
-Everyone tries to implement a cache at some point in their apps lifecycle, and this is ours. This is a library that allows people to cache NSData with TTL values and semantics for disk management.
+Everyone tries to implement a cache at some point in their app’s lifecycle, and this is ours. This is a library that allows people to cache `NSData` with time to live (TTL) values and semantics for disk management.
 
 - [x] 📱 iOS 7.0+
 - [x] 💻 OS X 10.9+
@@ -17,7 +17,7 @@ Everyone tries to implement a cache at some point in their apps lifecycle, and t
 `SPTPersistentCache` is designed as an LRU cache which stores all the data in a single binary file, with entries containing the length, last accessed time and a CRC check designed to prevent corruption. It can be used to automatically schedule garbage collection and invoke pruning.
 
 ## Installation
-SPTPersistentCache can be installed in a variety of ways including traditional static libraries and dynamic frameworks.
+`SPTPersistentCache` can be installed in a variety of ways including traditional static libraries and dynamic frameworks.
 
 ### Static Library
 Simply include `SPTPersistentCache.xcodeproj` in your App’s Xcode project, and link your app with the library in the “Build Phases” section.
