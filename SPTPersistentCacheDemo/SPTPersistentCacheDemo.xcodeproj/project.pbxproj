@@ -95,7 +95,7 @@
 				055726111C65280000EF6787 /* Info.plist */,
 				055725FD1C65280000EF6787 /* Supporting Files */,
 			);
-			name = SPTPersistentCacheDemo;
+			path = SPTPersistentCacheDemo;
 			sourceTree = "<group>";
 		};
 		055725FD1C65280000EF6787 /* Supporting Files */ = {
