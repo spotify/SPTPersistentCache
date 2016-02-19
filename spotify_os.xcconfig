@@ -69,10 +69,12 @@ SPOTIFY_OS_CONFIG_PREPROCESSOR_DEFINITIONS = $(SPOTIFY_OS_CONFIG_PREPROCESSOR_DE
 
 GCC_PREPROCESSOR_DEFINITIONS = $SPOTIFY_OS_CONFIG_PREPROCESSOR_DEFINITIONS
 
+OTHER_LDFLAGS = -ObjC
+
 // Warnings:
 // Attribution: https://github.com/jonreid/XcodeWarnings
 
-WARNING_CFLAGS = -Weverything -Wno-error=deprecated -Wno-objc-missing-property-synthesis -Wno-gnu-conditional-omitted-operand -Wno-gnu -Wno-documentation-unknown-command -Wno-reserved-id-macro -Wno-auto-import -Wno-missing-variable-declarations -Werror
+WARNING_CFLAGS = -Weverything -Wno-error=deprecated -Wno-objc-missing-property-synthesis -Wno-gnu-conditional-omitted-operand -Wno-gnu -Wno-documentation-unknown-command -Wno-reserved-id-macro -Wno-auto-import -Wno-missing-variable-declarations -Wno-c++98-compat -Werror
 
 // Apple LLVM 7.0 - Warnings - All languages
 GCC_WARN_CHECK_SWITCH_STATEMENTS = YES
