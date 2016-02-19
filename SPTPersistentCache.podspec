@@ -20,6 +20,5 @@ Pod::Spec.new do |s|
     s.source_files = "include/SPTPersistentCache/*.h", "Sources/*.{h,m}"
     s.public_header_files = "include/SPTPersistentCache/*.h"
     s.xcconfig = { 'OTHER_LDFLAGS' => '-lObjC' }
-    s.module_map = 'include/SPTPersistentCache/module.modulemap'
 
 end
