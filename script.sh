@@ -30,14 +30,15 @@ travis_fold_close "License conformance"
 
 # Executing build actions
 echo "Executing build actions: $BUILD_ACTIONS"
-xcrun xcodebuild $BUILD_ACTIONS \
+xcrun xcodebuild
+    "$BUILD_ACTIONS" \
     NSUnbufferedIO=YES \
     -project "$PROJECT" \
     -scheme "$SCHEME" \
     -sdk "$TEST_SDK" \
     -destination "$TEST_DEST" \
-    $EXTRA_ARGUMENTS \
-        | xcpretty -c -f `xcpretty-travis-formatter`
+    "$EXTRA_ARGUMENTS" \
+        | xcpretty -c -f "$(xcpretty-travis-formatter)"
 
 # Linting
 travis_fold_open "Linting" "Linting CocoaPods specification…"
