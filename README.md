@@ -7,6 +7,7 @@
 [![CocoaPods](https://img.shields.io/cocoapods/v/SPTPersistentCache.svg)](https://cocoapods.org/?q=SPTPersistentCache)
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 [![Spotify FOSS Slack](https://slackin.spotify.com/badge.svg)](https://slackin.spotify.com)
+[![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=https://github.com/spotify/sptpersistentcache)](http://clayallsopp.github.io/readme-score?url=https://github.com/spotify/sptpersistentcache)
 
 Everyone tries to implement a cache at some point in their app’s lifecycle, and this is ours. This is a library that allows people to cache `NSData` with time to live (TTL) values and semantics for disk management.
 
