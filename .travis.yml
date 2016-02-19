@@ -46,6 +46,8 @@ env:
     - SCHEME_OSX_FRAMEWORK="SPTPersistentCache-OSX"
     - SCHEME_DEMO="SPTPersistentCacheDemo"
     - PODSPEC="SPTPersistentCache.podspec"
+    - EXPECTED_LICENSE_HEADER_FILE="./ci/expected_license_header.txt"
+    - LICENSED_SOURCE_FILES_GLOB="{{Sources,Viewer}/*.{h,m},Tests/*.m,include/*/*.h,SPTPersistentCacheDemo/*/*.{h,m}}"
   matrix:
     - TEST_SDK=iphonesimulator  TEST_DEST="platform='iOS Simulator',OS=8.1,name='iPhone 6'"   SCHEME="$SCHEME_IOS_LIBRARY"            BUILD_ACTIONS="$BUILD_TEST" EXTRA_ARGUMENTS="$ENABLE_CODE_COVERAGE" PROJECT="$PROJECT_LIBRARY"
     - TEST_SDK=iphonesimulator  TEST_DEST="platform='iOS Simulator',OS=8.2,name='iPhone 4s'"  SCHEME="$SCHEME_IOS_LIBRARY"            BUILD_ACTIONS="$BUILD_TEST" EXTRA_ARGUMENTS="$ENABLE_CODE_COVERAGE" PROJECT="$PROJECT_LIBRARY"
