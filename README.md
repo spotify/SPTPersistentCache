@@ -1,5 +1,4 @@
-<img alt="SPTPersistentCache" src="SPTPersistentCache.jpg">
-<img alt="SPTPersistentCache" src="SPTPersistentCacheTitle.png">
+<img alt="SPTPersistentCache" src="banner@2x.png" width="100%" max-width="888">
 
 Everyone tries to implement a cache at some point in their apps lifecycle, and this is ours. This is a library that allows people to cache NSData with TTL values and semantics for disk management.
 
@@ -25,3 +24,7 @@ Contributions are welcomed, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md
 
 ## License :memo:
 The project is available under the [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0) license.
+
+### Acknowledgements
+- Font in readme banner is “[Kyrilla Sans-Serif Bold](http://www.1001freefonts.com/kyrilla_sans_serif.font)” by [Manfred Klein](http://manfred-klein.ina-mar.com/).
+- Icon in readme banner is “[Treasure Chest](https://thenounproject.com/term/treasure-chest/168777)” by Richard Cordero from the Noun Project.
