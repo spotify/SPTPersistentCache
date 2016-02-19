@@ -492,6 +492,12 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SPT_PC_NON_ERROR_WARNINGS_0720 = "";
+				SPT_PC_NON_ERROR_WARNINGS_0730 = "$(SPT_PC_NON_ERROR_WARNING_0720) -Wno-error=partial-availability";
+				WARNING_CFLAGS = (
+					"$(inherited)",
+					"$(SPT_PC_NON_ERROR_WARNINGS_$(XCODE_VERSION_MINOR))",
+				);
 			};
 			name = Debug;
 		};
@@ -513,6 +519,12 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SPT_PC_NON_ERROR_WARNINGS_0720 = "";
+				SPT_PC_NON_ERROR_WARNINGS_0730 = "$(SPT_PC_NON_ERROR_WARNING_0720) -Wno-error=partial-availability";
+				WARNING_CFLAGS = (
+					"$(inherited)",
+					"$(SPT_PC_NON_ERROR_WARNINGS_$(XCODE_VERSION_MINOR))",
+				);
 			};
 			name = Release;
 		};
