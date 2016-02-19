@@ -115,19 +115,7 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_dir
     
     NSString *pathForKey = [self.cacheFileManager pathForKey:shortKey];
     
-    NSError *error;
-    
-    [[NSFileManager defaultManager] createDirectoryAtPath:[pathForKey stringByDeletingLastPathComponent]
-                              withIntermediateDirectories:YES
-                                               attributes:nil
-                                                    error:nil];
-    
-    BOOL didCreateFile = [@"TestString" writeToFile:pathForKey
-                                         atomically:YES
-                                           encoding:NSUTF8StringEncoding
-                                              error:&error];
-    
-    XCTAssertTrue(didCreateFile, @"%@", [error localizedDescription]);
+    [self createFileForKey:shortKey];
     
     [self.cacheFileManager removeDataForKey:shortKey];
     
@@ -150,6 +138,86 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_dir
     SPTPersistentCacheDiskSize optimizedSize = [self.cacheFileManager optimizedDiskSizeForCacheSize:smallCacheSize];
     
     XCTAssertEqual(optimizedSize, (SPTPersistentCacheDiskSize)0);
+}
+
+- (void)testRemoveAllDataButKeysWithoutKeys
+{
+    NSString *keyOne = @"AA";
+    NSString *pathForDirectoryOne = [self createFileForKey:keyOne];
+    
+    NSString *keyTwo = @"AB";
+    NSString *pathForDirectoryTwo = [self createFileForKey:keyTwo];
+    
+    [self.cacheFileManager removeAllDataButKeys:nil];
+    
+    BOOL isFileOneAtPath = [[NSFileManager defaultManager] fileExistsAtPath:pathForDirectoryOne
+                                                                isDirectory:nil];
+    
+    BOOL isFileTwoAtPath = [[NSFileManager defaultManager] fileExistsAtPath:pathForDirectoryTwo
+                                                                isDirectory:nil];
+    
+    XCTAssertTrue(!isFileOneAtPath && !isFileTwoAtPath,
+                  @"Removing all keys with nil or empty argument should have removed all data");
+}
+
+- (void)testRemoveAllDataButKeys
+{
+    NSString *keyOne = @"AA";
+    NSString *pathForDirectoryOne = [self createFileForKey:keyOne];
+    
+    NSString *keyTwo = @"AB";
+    NSString *pathForDirectoryTwo = [self createFileForKey:keyTwo];
+    
+    [self.cacheFileManager removeAllDataButKeys:[NSSet setWithObject:keyOne]];
+    
+    BOOL isFileOneAtPath = [[NSFileManager defaultManager] fileExistsAtPath:pathForDirectoryOne
+                                                                isDirectory:nil];
+    
+    BOOL isFileTwoAtPath = [[NSFileManager defaultManager] fileExistsAtPath:pathForDirectoryTwo
+                                                                isDirectory:nil];
+    
+    XCTAssertTrue(isFileOneAtPath && !isFileTwoAtPath,
+                  @"Removing all keys should skip keys send as arguments");
+}
+
+#pragma mark - Helper Functions
+
+- (NSString *)createFileForKey:(NSString *)key
+{
+    NSError *error;
+    
+    NSString *pathForKey = [self.cacheFileManager pathForKey:key];
+    
+    [self createDirectoryForKey:key];
+    
+    BOOL didCreateFile = [@"TestString" writeToFile:pathForKey
+                                         atomically:YES
+                                           encoding:NSUTF8StringEncoding
+                                              error:&error];
+    
+    XCTAssertTrue(didCreateFile,
+                  @"Error while creating test file for key. %@", error);
+    
+    return didCreateFile ? pathForKey: nil;
+}
+
+- (NSString *)createDirectoryForKey:(NSString *)key
+{
+    NSString *pathForKey = [self.cacheFileManager pathForKey:key];
+    
+    NSError *error;
+    
+    NSString *pathForDirectory = [pathForKey stringByDeletingLastPathComponent];
+    
+    BOOL didCreateDirectory = [[NSFileManager defaultManager] createDirectoryAtPath:pathForDirectory
+                                                        withIntermediateDirectories:YES
+                                                                         attributes:nil
+                                                                              error:&error];
+    
+    XCTAssertTrue(didCreateDirectory,
+                 @"Error while creating test directory for key. %@", error);
+    
+    return didCreateDirectory ? pathForDirectory : nil;
 }
 
 @end

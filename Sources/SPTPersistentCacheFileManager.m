@@ -96,6 +96,37 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
     return [subDirectoryPathForKey stringByAppendingPathComponent:key];
 }
 
+- (void)removeAllDataButKeys:(NSSet *)busyKeys
+{
+    if (!busyKeys) {
+        busyKeys = [NSSet set];
+    }
+    
+    NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
+    
+    NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
+                                                  includingPropertiesForKeys:@[NSURLIsDirectoryKey]
+                                                                     options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                errorHandler:nil];
+    
+    // Enumerate the dirEnumerator results, each value is stored in allURLs
+    NSURL *theURL = nil;
+    while ((theURL = [dirEnumerator nextObject])) {
+        // Retrieve the file name. From cached during the enumeration.
+        NSNumber *isDirectory;
+        if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
+            if ([isDirectory boolValue] == NO) {
+                NSString *key = theURL.lastPathComponent;
+                
+                // That satisfies Req.#1.3
+                if (![busyKeys containsObject:key]) {
+                    [self removeDataForKey:key];
+                }
+            }
+        }
+    }
+}
+
 - (void)removeDataForKey:(NSString *)key
 {
     NSError *error = nil;
