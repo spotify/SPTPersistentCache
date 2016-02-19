@@ -20,17 +20,17 @@
 /* Begin PBXContainerItemProxy section */
 		69FD59DD1C4F0CA80052626E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 69FD59D81C4F0CA70052626E /* SPTPersistentDataCache.xcodeproj */;
+			containerPortal = 69FD59D81C4F0CA70052626E /* SPTPersistentCache.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 0510FF131BA2FF7A00ED0766;
-			remoteInfo = SPTPersistentDataCache;
+			remoteInfo = SPTPersistentCache;
 		};
 		69FD59DF1C4F0CA80052626E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 69FD59D81C4F0CA70052626E /* SPTPersistentDataCache.xcodeproj */;
+			containerPortal = 69FD59D81C4F0CA70052626E /* SPTPersistentCache.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 0510FF1E1BA2FF7A00ED0766;
-			remoteInfo = SPTPersistentDataCacheTests;
+			remoteInfo = SPTPersistentCacheTests;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -45,7 +45,7 @@
 		69A726AB1C470B56005FC024 /* MainWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainWindowController.h; sourceTree = "<group>"; };
 		69A726AC1C470B56005FC024 /* MainWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainWindowController.m; sourceTree = "<group>"; };
 		69A726AD1C470B56005FC024 /* MainWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainWindowController.xib; sourceTree = "<group>"; };
-		69FD59D81C4F0CA70052626E /* SPTPersistentDataCache.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SPTPersistentDataCache.xcodeproj; path = ../SPTPersistentDataCache.xcodeproj; sourceTree = "<group>"; };
+		69FD59D81C4F0CA70052626E /* SPTPersistentCache.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SPTPersistentCache.xcodeproj; path = ../SPTPersistentCache.xcodeproj; sourceTree = "<group>"; };
 		C48AE7AC1C76152200814D7D /* libSPTPersistentCache.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSPTPersistentCache.a; path = "/Library/Developer/Xcode/DerivedData/SPTPersistentCache-baozpsdxvsedctakhrddpkmkyjzd/Build/Products/Debug/libSPTPersistentCache.a"; sourceTree = "<absolute>"; };
 		DDBCF5F31C68E2A300693038 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -109,7 +109,7 @@
 			children = (
 				DDBCF5F31C68E2A300693038 /* Cocoa.framework */,
 				C48AE7AC1C76152200814D7D /* libSPTPersistentCache.a */,
-				69FD59D81C4F0CA70052626E /* SPTPersistentDataCache.xcodeproj */,
+				69FD59D81C4F0CA70052626E /* SPTPersistentCache.xcodeproj */,
 			);
 			name = Dependencies;
 			sourceTree = "<group>";
@@ -117,8 +117,8 @@
 		69FD59D91C4F0CA70052626E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				69FD59DE1C4F0CA80052626E /* libSPTPersistentDataCache.a */,
-				69FD59E01C4F0CA80052626E /* SPTPersistentDataCacheTests.xctest */,
+				69FD59DE1C4F0CA80052626E /* libSPTPersistentCache.a */,
+				69FD59E01C4F0CA80052626E /* SPTPersistentCacheTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -172,7 +172,7 @@
 			projectReferences = (
 				{
 					ProductGroup = 69FD59D91C4F0CA70052626E /* Products */;
-					ProjectRef = 69FD59D81C4F0CA70052626E /* SPTPersistentDataCache.xcodeproj */;
+					ProjectRef = 69FD59D81C4F0CA70052626E /* SPTPersistentCache.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -183,17 +183,17 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		69FD59DE1C4F0CA80052626E /* libSPTPersistentDataCache.a */ = {
+		69FD59DE1C4F0CA80052626E /* libSPTPersistentCache.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = libSPTPersistentDataCache.a;
+			path = libSPTPersistentCache.a;
 			remoteRef = 69FD59DD1C4F0CA80052626E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		69FD59E01C4F0CA80052626E /* SPTPersistentDataCacheTests.xctest */ = {
+		69FD59E01C4F0CA80052626E /* SPTPersistentCacheTests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
-			path = SPTPersistentDataCacheTests.xctest;
+			path = SPTPersistentCacheTests.xctest;
 			remoteRef = 69FD59DF1C4F0CA80052626E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};

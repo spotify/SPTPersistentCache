@@ -66,7 +66,7 @@
 		055725F11C65280000EF6787 = {
 			isa = PBXGroup;
 			children = (
-				055725FC1C65280000EF6787 /* SPTPersistentDataCacheDemo */,
+				055725FC1C65280000EF6787 /* SPTPersistentCacheDemo */,
 				055725FB1C65280000EF6787 /* Products */,
 				055726171C65282100EF6787 /* Build System */,
 			);
@@ -80,7 +80,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		055725FC1C65280000EF6787 /* SPTPersistentDataCacheDemo */ = {
+		055725FC1C65280000EF6787 /* SPTPersistentCacheDemo */ = {
 			isa = PBXGroup;
 			children = (
 				055726001C65280000EF6787 /* AppDelegate.h */,
@@ -95,8 +95,7 @@
 				055726111C65280000EF6787 /* Info.plist */,
 				055725FD1C65280000EF6787 /* Supporting Files */,
 			);
-			name = SPTPersistentDataCacheDemo;
-			path = SPTPersistentCacheDemo;
+			name = SPTPersistentCacheDemo;
 			sourceTree = "<group>";
 		};
 		055725FD1C65280000EF6787 /* Supporting Files */ = {
@@ -141,7 +140,7 @@
 			dependencies = (
 			);
 			name = SPTPersistentCacheDemo;
-			productName = SPTPersistentDataCacheDemo;
+			productName = SPTPersistentCacheDemo;
 			productReference = 055725FA1C65280000EF6787 /* SPTPersistentCacheDemo.app */;
 			productType = "com.apple.product-type.application";
 		};
