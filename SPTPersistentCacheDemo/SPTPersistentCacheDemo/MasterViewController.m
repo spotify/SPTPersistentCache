@@ -26,7 +26,7 @@
 
 @interface MasterViewController () <UIAlertViewDelegate>
 
-@property NSMutableArray *objects;
+@property (nonatomic, strong) NSMutableArray *objects;
 @property (nonatomic, strong) SPTPersistentCache *cache;
 
 @end
@@ -44,10 +44,11 @@
                                                                YES).firstObject stringByAppendingString:@"com.spotify.demo.image.cache"];
     
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:cachePath
-                                                                                           identifier:@"com.spotify.demo.image.cache"
-                                                                                  currentTimeCallback:nil
-                                                                            defaultExpirationInterval:(60 * 60 * 24 * 30) garbageCollectorInterval:(1.5 * SPTPersistentCacheDefaultGCIntervalSec)
-                                                                                                debug:^(NSString *string) { NSLog(@"%@", string); }];
+                                                                                   identifier:@"com.spotify.demo.image.cache"
+                                                                          currentTimeCallback:nil
+                                                                    defaultExpirationInterval:(60 * 60 * 24 * 30)
+                                                                     garbageCollectorInterval:(NSUInteger)(1.5 * SPTPersistentCacheDefaultGCIntervalSec)
+                                                                                        debug:^(NSString *string) { NSLog(@"%@", string); }];
     options.sizeConstraintBytes = 1024 * 1024 * 10; // 10 MiB
 
     self.cache = [[SPTPersistentCache alloc] initWithOptions:options];
@@ -91,7 +92,7 @@
 {
     if ([[segue identifier] isEqualToString:@"showDetail"]) {
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-        NSString *object = self.objects[indexPath.row];
+        NSString *object = self.objects[(NSUInteger)indexPath.row];
         DetailViewController *controller = (DetailViewController *)[[segue destinationViewController] topViewController];
         controller.persistentDataCache = self.cache;
         [controller setDetailItem:object];
@@ -109,14 +110,14 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return self.objects.count;
+    return (NSInteger)self.objects.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
 
-    NSDate *object = self.objects[indexPath.row];
+    NSDate *object = self.objects[(NSUInteger)indexPath.row];
     cell.textLabel.text = [object description];
     return cell;
 }
@@ -132,8 +133,10 @@ commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
 forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        [self.cache removeDataForKeys:@[ self.objects[indexPath.row] ]];
-        [self.objects removeObjectAtIndex:indexPath.row];
+        NSUInteger row = (NSUInteger)indexPath.row;
+
+        [self.cache removeDataForKeys:@[ self.objects[row] ]];
+        [self.objects removeObjectAtIndex:row];
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
     } else if (editingStyle == UITableViewCellEditingStyleInsert) {
         // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
@@ -150,13 +153,17 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     }
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration];
-    [[session dataTaskWithURL:[NSURL URLWithString:imageURL]
+    NSURL *url = [NSURL URLWithString:imageURL];
+
+    NSAssert(url != nil, @"Couldn’t create a wellformed URL from the image URL string \"%@\"", imageURL);
+
+    [[session dataTaskWithURL:url
             completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
                 [self.cache storeData:data
-                               forKey:[NSString stringWithFormat:@"%d", imageURL.hash]
+                               forKey:[NSString stringWithFormat:@"%lu", (unsigned long)imageURL.hash]
                                locked:YES
-                         withCallback:^(SPTPersistentCacheResponse *response) {
-                             NSLog(@"response = %@", response);
+                         withCallback:^(SPTPersistentCacheResponse *cacheResponse) {
+                             NSLog(@"cacheResponse = %@", cacheResponse);
                          } onQueue:dispatch_get_main_queue()];
                 dispatch_async(dispatch_get_main_queue(), ^ {
                     [self.objects insertObject:imageURL atIndex:0];
