@@ -1,5 +1,13 @@
 <img alt="SPTPersistentCache" src="banner@2x.png" width="100%" max-width="888">
 
+[![Build Status](https://api.travis-ci.org/spotify/SPTPersistentCache.svg)](https://travis-ci.org/spotify/SPTPersistentCache)
+[![Coverage Status](https://coveralls.io/repos/spotify/SPTPersistentCache/badge.svg?branch=master&service=github)](https://coveralls.io/github/spotify/SPTPersistentCache?branch=master)
+[![Documentation](https://img.shields.io/cocoapods/metrics/doc-percent/SPTPersistentCache.svg)](http://cocoadocs.org/docsets/SPTPersistentCache/)
+[![License](https://img.shields.io/github/license/spotify/SPTPersistentCache.svg)](LICENSE)
+[![CocoaPods](https://img.shields.io/cocoapods/v/SPTPersistentCache.svg)](https://cocoapods.org/?q=SPTPersistentCache)
+[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
+[![Spotify FOSS Slack](https://slackin.spotify.com/badge.svg)](https://slackin.spotify.com)
+
 Everyone tries to implement a cache at some point in their apps lifecycle, and this is ours. This is a library that allows people to cache NSData with TTL values and semantics for disk management.
 
 - [x] 📱 iOS 7.0+
