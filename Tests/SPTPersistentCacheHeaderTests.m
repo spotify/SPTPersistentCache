@@ -50,7 +50,7 @@
     free(data);
 }
 
-- (void)testSPTPersistentCacheRecordHeaderTypeMake
+- (void)testSPTPersistentCacheRecordHeaderMake
 {
     uint64_t ttl = 64;
     uint64_t payloadSize = 400;
@@ -58,9 +58,10 @@
     BOOL isLocked = YES;
     
     
-    SPTPersistentCacheRecordHeaderType header = SPTPersistentCacheRecordHeaderTypeMake(ttl,
-                                                                                       payloadSize, updateTime,
-                                                                                       isLocked);
+    SPTPersistentCacheRecordHeader header = SPTPersistentCacheRecordHeaderMake(ttl,
+                                                                               payloadSize,
+                                                                               updateTime,
+                                                                               isLocked);
     
     XCTAssertEqual(header.reserved1, (uint64_t)0);
     XCTAssertEqual(header.reserved2, (uint64_t)0);

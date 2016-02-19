@@ -26,11 +26,11 @@
 #include "crc32iso3309.h"
 
 const SPTPersistentCacheMagicType SPTPersistentCacheMagicValue = 0x46545053; // SPTF
-const size_t SPTPersistentCacheRecordHeaderSize = sizeof(SPTPersistentCacheRecordHeaderType);
+const size_t SPTPersistentCacheRecordHeaderSize = sizeof(SPTPersistentCacheRecordHeader);
 
-_Static_assert(sizeof(SPTPersistentCacheRecordHeaderType) == 64,
-               "Struct SPTPersistentCacheRecordHeaderType has to be packed without padding");
-_Static_assert(sizeof(SPTPersistentCacheRecordHeaderType) % 4 == 0,
+_Static_assert(sizeof(SPTPersistentCacheRecordHeader) == 64,
+               "Struct SPTPersistentCacheRecordHeader has to be packed without padding");
+_Static_assert(sizeof(SPTPersistentCacheRecordHeader) % 4 == 0,
                "Struct size has to be multiple of 4");
 
 NS_INLINE BOOL SPTPersistentCachePointerMagicAlignCheck(const void *ptr)
@@ -40,14 +40,15 @@ NS_INLINE BOOL SPTPersistentCachePointerMagicAlignCheck(const void *ptr)
     return (v % align == 0);
 }
 
-SPTPersistentCacheRecordHeaderType SPTPersistentCacheRecordHeaderTypeMake(uint64_t ttl,
-                                                                          uint64_t payloadSize,
-                                                                          uint64_t updateTime,
-                                                                          BOOL isLocked)
+SPTPersistentCacheRecordHeader SPTPersistentCacheRecordHeaderMake(uint64_t ttl,
+                                                                  uint64_t payloadSize,
+                                                                  uint64_t updateTime,
+                                                                  BOOL isLocked)
+
 {
-    SPTPersistentCacheRecordHeaderType dummy;
+    SPTPersistentCacheRecordHeader dummy;
     memset(&dummy, 0, SPTPersistentCacheRecordHeaderSize);
-    SPTPersistentCacheRecordHeaderType *header = &dummy;
+    SPTPersistentCacheRecordHeader *header = &dummy;
     
     header->magic = SPTPersistentCacheMagicValue;
     header->headerSize = (uint32_t)SPTPersistentCacheRecordHeaderSize;
@@ -60,16 +61,16 @@ SPTPersistentCacheRecordHeaderType SPTPersistentCacheRecordHeaderTypeMake(uint64
     return dummy;
 }
 
-SPTPersistentCacheRecordHeaderType *SPTPersistentCacheGetHeaderFromData(void *data, size_t size)
+SPTPersistentCacheRecordHeader *SPTPersistentCacheGetHeaderFromData(void *data, size_t size)
 {
     if (size < SPTPersistentCacheRecordHeaderSize) {
         return NULL;
     }
 
-    return (SPTPersistentCacheRecordHeaderType *)data;
+    return (SPTPersistentCacheRecordHeader *)data;
 }
 
-int /*SPTPersistentCacheLoadingError*/ SPTPersistentCacheValidateHeader(const SPTPersistentCacheRecordHeaderType *header)
+int /*SPTPersistentCacheLoadingError*/ SPTPersistentCacheValidateHeader(const SPTPersistentCacheRecordHeader *header)
 {
     if (header == NULL) {
         return SPTPersistentCacheLoadingErrorInternalInconsistency;
@@ -99,7 +100,7 @@ int /*SPTPersistentCacheLoadingError*/ SPTPersistentCacheValidateHeader(const SP
     return -1;
 }
 
-NSError * SPTPersistentCacheCheckValidHeader(SPTPersistentCacheRecordHeaderType *header)
+NSError * SPTPersistentCacheCheckValidHeader(SPTPersistentCacheRecordHeader *header)
 {
     int code = SPTPersistentCacheValidateHeader(header);
     if (code == -1) { // No error
@@ -109,7 +110,7 @@ NSError * SPTPersistentCacheCheckValidHeader(SPTPersistentCacheRecordHeaderType 
     return [NSError spt_persistentDataCacheErrorWithCode:code];
 }
 
-uint32_t SPTPersistentCacheCalculateHeaderCRC(const SPTPersistentCacheRecordHeaderType *header)
+uint32_t SPTPersistentCacheCalculateHeaderCRC(const SPTPersistentCacheRecordHeader *header)
 {
     if (header == NULL) {
         return 0;
