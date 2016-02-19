@@ -18,12 +18,13 @@
 # specific language governing permissions and limitations
 # under the License.
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PATH="$SCRIPT_DIR/bin:$PATH"
+# Opens a Travis-CI fold, iff we’re running on Travis-CI.
+#
+# @param $1 The name of the fold, should be matched by a call to travis_fold_close() with the same
+#            parameter.
+# @param $2 The header which should be shown on the first line of the group.
+travis_fold_open() {
+	travis_fold start "$1" "$2"
+}
 
-set -euo pipefail
-
-travis_fold_open "Slather" "Publishing test coverage data…"
-bundle exec slather coverage \
-    --input-format profdata
-travis_fold_close "Slather"
+travis_fold_open "$1" "$2"
