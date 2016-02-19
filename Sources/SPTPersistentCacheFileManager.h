@@ -63,12 +63,24 @@ extern const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength;
 - (NSString *)pathForKey:(NSString *)key;
 
 /**
+ *  Removes all data files in the cache, but skipping the data for keys set as an argument.
+ *
+ *  @param busyKeys Keys to be exempted from being deleted.
+ */
+- (void)removeAllDataButKeys:(NSSet *)busyKeys;
+
+/**
  *  Removes the associated cached file for a key.
  *  
  *  @param key Key of the data you are looking for.
  */
 - (void)removeDataForKey:(NSString *)key;
 
+/**
+ *  Based on a specific cache size, return a size optimized for the disk space. 
+ *
+ *  @param currentCacheSize Cache size to be optimized
+ */
 - (SPTPersistentCacheDiskSize)optimizedDiskSizeForCacheSize:(SPTPersistentCacheDiskSize)currentCacheSize;
 
 /**

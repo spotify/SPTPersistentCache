@@ -451,7 +451,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
 - (void)prune
 {
     dispatch_barrier_async(self.workQueue, ^{
-        [self cleanCacheData];
+        [self.dataCacheFileManager removeAllDataButKeys:self.busyKeys];
     });
 }
 
@@ -921,32 +921,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
             [self debugOutput:@"Unable to fetch isDir#4 attribute:%@", theURL];
         }
     } // for
-}
-
-- (void)cleanCacheData
-{
-    NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
-    NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
-                                                  includingPropertiesForKeys:@[NSURLIsDirectoryKey]
-                                                                     options:NSDirectoryEnumerationSkipsHiddenFiles
-                                                                errorHandler:nil];
-
-    // Enumerate the dirEnumerator results, each value is stored in allURLs
-    NSURL *theURL = nil;
-    while ((theURL = [dirEnumerator nextObject])) {
-        // Retrieve the file name. From cached during the enumeration.
-        NSNumber *isDirectory;
-        if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
-            if ([isDirectory boolValue] == NO) {
-                NSString *key = theURL.lastPathComponent;
-
-                // That satisfies Req.#1.3
-                if (![self.busyKeys containsObject:key]) {
-                    [self.dataCacheFileManager removeDataForKey:key];
-                }
-            }
-        }
-    }
 }
 
 - (void)dispatchEmptyResponseWithResult:(SPTPersistentCacheResponseCode)result
