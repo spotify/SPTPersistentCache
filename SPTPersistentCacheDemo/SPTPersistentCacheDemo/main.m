@@ -18,10 +18,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <Cocoa/Cocoa.h>
+#import <UIKit/UIKit.h>
+#import "AppDelegate.h"
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
-
-
-@end
-
+int main(int argc, char * argv[]) {
+    @autoreleasepool {
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
+    }
+}

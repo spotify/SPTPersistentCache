@@ -18,9 +18,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <Cocoa/Cocoa.h>
+#import <UIKit/UIKit.h>
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
+@class DetailViewController;
+
+@interface MasterViewController : UITableViewController
+
+@property (strong, nonatomic) DetailViewController *detailViewController;
 
 
 @end

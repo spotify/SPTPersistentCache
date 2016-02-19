@@ -18,10 +18,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <Cocoa/Cocoa.h>
+#import "NSError+SPTPersistentCacheDomainErrors.h"
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
+@implementation NSError (SPTPersistentCacheDomainErrors)
 
++ (instancetype)spt_persistentDataCacheErrorWithCode:(SPTPersistentCacheLoadingError)persistentDataCacheLoadingError
+{
+    return [NSError errorWithDomain:SPTPersistentCacheErrorDomain
+                               code:persistentDataCacheLoadingError
+                           userInfo:nil];
+}
 
 @end
-

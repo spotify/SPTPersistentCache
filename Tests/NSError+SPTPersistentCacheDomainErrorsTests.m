@@ -18,10 +18,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <Cocoa/Cocoa.h>
+#import <XCTest/XCTest.h>
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
+#import "NSError+SPTPersistentCacheDomainErrors.h"
 
+@interface NSError_SPTPersistentCacheDomainErrorsTests : XCTestCase
 
 @end
 
+@implementation NSError_SPTPersistentCacheDomainErrorsTests
+
+
+- (void)testPersistentDataCacheErrorFactoryMethod
+{
+    SPTPersistentCacheLoadingError errorCode = SPTPersistentCacheLoadingErrorHeaderAlignmentMismatch;
+    
+    NSError *error = [NSError spt_persistentDataCacheErrorWithCode:SPTPersistentCacheLoadingErrorHeaderAlignmentMismatch];
+    
+    XCTAssertEqual(error.domain, SPTPersistentCacheErrorDomain);
+    XCTAssertEqual(error.code, errorCode);
+}
+
+
+@end

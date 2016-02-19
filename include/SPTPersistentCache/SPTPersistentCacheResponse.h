@@ -18,10 +18,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
+#import <SPTPersistentCache/SPTPersistentCacheTypes.h>
 
+@class SPTPersistentCacheRecord;
+
+/**
+ * @brief SPTPersistentCacheResponse
+ *
+ * @discussion Class defines one response passed in callback to call loadDataForKey:
+ */
+@interface SPTPersistentCacheResponse : NSObject
+
+/**
+ * @see SPTPersistentCacheResponseCode
+ */
+@property (nonatomic, assign, readonly) SPTPersistentCacheResponseCode result;
+/**
+ * Defines error of response if appliable
+ */
+@property (nonatomic, strong, readonly) NSError *error;
+/**
+ * @see SPTPersistentCacheRecord
+ */
+@property (nonatomic, strong, readonly) SPTPersistentCacheRecord *record;
 
 @end
-

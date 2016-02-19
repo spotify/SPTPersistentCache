@@ -1,5 +1,0 @@
-module SPTPersistentDataCache {
-    umbrella header "SPTPersistentDataCacheConvenience.h"
-    
-    export *
-}

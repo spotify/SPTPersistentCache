@@ -18,10 +18,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <Cocoa/Cocoa.h>
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
+#import <SPTPersistentCache/SPTPersistentCache.h>
 
+@interface SPTPersistentCache (Private)
+
+@property (nonatomic, copy, readonly) SPTPersistentCacheOptions *options;
+
+- (void)runRegularGC;
+- (void)pruneBySize;
 
 @end
-

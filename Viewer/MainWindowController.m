@@ -1,14 +1,25 @@
-//
-//  MainWindowController.m
-//  PersistentDataCacheViewer
-//
-//  Created by Dmitry Ponomarev on 10/11/14.
-//  Copyright (c) 2014 Dmitry Ponomarev. All rights reserved.
-//
-
+/*
+ * Copyright (c) 2016 Spotify AB.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 #import "MainWindowController.h"
-#import <SPTPersistentDataCache/SPTPersistentDataCache.h>
-#import <SPTPersistentDataCache/SPTPersistentDataHeader.h>
+#import <SPTPersistentCache/SPTPersistentCache.h>
 
 @interface MainWindowController () <NSTableViewDataSource, NSTableViewDelegate>
 @property (nonatomic, strong) NSMutableArray *cacheFiles;
@@ -35,7 +46,7 @@
 
 @implementation MainWindowController
 {
-    SPTPersistentRecordHeaderType _currHeader;
+    SPTPersistentCacheRecordHeaderType _currHeader;
     BOOL _crcValid;
 }
 
@@ -131,19 +142,19 @@
     NSString *fullFilePath = [self.cacheFiles objectAtIndex:idx];
     NSData *rawData = [NSData dataWithContentsOfFile:fullFilePath];
 
-    SPTPersistentRecordHeaderType *h = pdc_GetHeaderFromData(__DECONST(void*, [rawData bytes]), [rawData length]);
+    SPTPersistentCacheRecordHeaderType *h = SPTPersistentCacheGetHeaderFromData(__DECONST(void*, [rawData bytes]), [rawData length]);
 
     if (h == NULL) {
         // TODO: error
         return;
     }
 
-    if (-1 != pdc_ValidateHeader(h)) {
+    if (-1 != SPTPersistentCacheValidateHeader(h)) {
         // TODO: error
         return;
     }
 
-    memcpy(&_currHeader, h, kSPTPersistentRecordHeaderSize);
+    memcpy(&_currHeader, h, SPTPersistentCacheRecordHeaderSize);
 
     self.magic = [NSString stringWithFormat:@"0x%X", _currHeader.magic];
     self.headerSize = [NSString stringWithFormat:@"%u", _currHeader.headerSize];
@@ -156,7 +167,7 @@
                                                        dateStyle:NSDateFormatterMediumStyle
                                                        timeStyle:NSDateFormatterLongStyle];
 
-    NSRange payloadRange = NSMakeRange(kSPTPersistentRecordHeaderSize, _currHeader.payloadSizeBytes);
+    NSRange payloadRange = NSMakeRange(SPTPersistentCacheRecordHeaderSize, _currHeader.payloadSizeBytes);
     self.payload = [rawData subdataWithRange:payloadRange];
 
     self.object = [[NSImage alloc] initWithData:self.payload];

@@ -18,31 +18,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <SPTPersistentCache/SPTPersistentCacheResponse.h>
+#import "SPTPersistentCacheTimerProxy.h"
 
-@interface SPTPersistentCacheResponse ()
+#import "SPTPersistentCache+Private.h"
 
-@property (nonatomic, assign, readwrite) SPTPersistentCacheResponseCode result;
-@property (nonatomic, strong, readwrite) NSError *error;
-@property (nonatomic, strong, readwrite) SPTPersistentCacheRecord *record;
+@implementation SPTPersistentCacheTimerProxy
 
-@end
-
-@implementation SPTPersistentCacheResponse
-
-- (instancetype)initWithResult:(SPTPersistentCacheResponseCode)result
-                         error:(NSError *)error
-                        record:(SPTPersistentCacheRecord *)record
+- (instancetype)initWithDataCache:(SPTPersistentCache *)dataCache
+                            queue:(dispatch_queue_t)queue
 {
     if (!(self = [super init])) {
         return nil;
     }
-
-    _result = result;
-    _error = error;
-    _record = record;
-
+    
+    _dataCache = dataCache;
+    _queue = queue;
+    
     return self;
+}
+
+- (void)enqueueGC:(NSTimer *)timer
+{
+    __weak __typeof(self) const weakSelf = self;
+    dispatch_barrier_async(self.queue, ^{
+        // We want to shadow `self` in this case.
+        _Pragma("clang diagnostic push");
+        _Pragma("clang diagnostic ignored \"-Wshadow\"");
+        __typeof(weakSelf) const self = weakSelf;
+        _Pragma("clang diagnostic pop");
+
+        SPTPersistentCache * const dataCache = self.dataCache;
+
+        [dataCache runRegularGC];
+        [dataCache pruneBySize];
+    });
 }
 
 @end

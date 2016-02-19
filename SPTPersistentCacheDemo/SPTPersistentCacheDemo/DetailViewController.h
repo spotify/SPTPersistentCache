@@ -18,10 +18,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <Cocoa/Cocoa.h>
+#import <UIKit/UIKit.h>
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
+@class SPTPersistentCache;
 
+@interface DetailViewController : UIViewController
+
+@property (nonatomic, strong) SPTPersistentCache *persistentDataCache;
+@property (strong, nonatomic) id detailItem;
+@property (nonatomic, weak, readwrite) IBOutlet UIImageView *detailImageView;
 
 @end
 

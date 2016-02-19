@@ -18,10 +18,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <Cocoa/Cocoa.h>
+#import "SPTPersistentCacheRecord.h"
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
+@interface SPTPersistentCacheRecord (Private)
 
+- (instancetype)initWithData:(NSData *)data
+                         key:(NSString *)key
+                    refCount:(NSUInteger)refCount
+                         ttl:(NSUInteger)ttl;
 
 @end
-
