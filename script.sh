@@ -25,7 +25,7 @@ set -euo pipefail
 
 # License conformance
 travis_fold_open "License conformance" "Validating source files for license compliance…"
-./ci/validate_license_conformance.sh {demo/*{h,m},include/SPTDataLoader/*.h,SPTDataLoader/*.{h,m},SPTDataLoaderTests/*.{h,m}}
+validate_license_conformance.sh "$EXPECTED_LICENSE_HEADER_FILE" "$(eval ls "$LICENSED_SOURCE_FILES_GLOB")"
 travis_fold_close "License conformance"
 
 # Executing build actions
