@@ -30,20 +30,11 @@
 #import "NSError+SPTPersistentCacheDomainErrors.h"
 #import "SPTPersistentCacheFileManager.h"
 #include <sys/stat.h>
+#import "SPTPersistentCacheTypeUtilities.h"
+
 
 // Enable for more precise logging
 //#define DEBUG_OUTPUT_ENABLED
-
-/**
- * Converts the given `double` _value_ to an `uint64_t` value.
- *
- * @param value The value as a `double`.
- * @return The value as an `uint64_t`.
- */
-uint64_t spt_uint64rint(double value)
-{
-    return (uint64_t)llrint(value);
-}
 
 NSString *const SPTPersistentCacheErrorDomain = @"persistent.cache.error";
 static const uint64_t kTTLUpperBoundInSec = 86400 * 31 * 2;

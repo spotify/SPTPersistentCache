@@ -22,6 +22,7 @@
 
 #import "SPTPersistentCacheHeader.h"
 #import <SPTPersistentCache/SPTPersistentCache.h>
+#import "SPTPersistentCacheTypeUtilities.h"
 
 
 @interface SPTPersistentCacheHeaderTests : XCTestCase

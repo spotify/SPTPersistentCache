@@ -37,8 +37,6 @@ FOUNDATION_EXPORT double SPTDataLoaderVersionNumber;
 FOUNDATION_EXPORT const unsigned char SPTDataLoaderVersionString[];
 #endif // SPT_BUILDING_FRAMEWORK
 
-uint64_t spt_uint64rint(double value);
-
 /**
  * @brief SPTPersistentCache
  *
