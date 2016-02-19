@@ -18,7 +18,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
-source "./ci/lib/travis_helpers.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PATH="$SCRIPT_DIR/bin:$PATH"
 
 set -euo pipefail
 

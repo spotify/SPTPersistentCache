@@ -18,31 +18,36 @@
 # specific language governing permissions and limitations
 # under the License.
 
-source "./ci/lib/travis_helpers.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PATH="$SCRIPT_DIR/bin:$PATH"
 
 set -euo pipefail
 
 # License conformance
 travis_fold_open "License conformance" "Validating source files for license compliance…"
-./ci/validate_license_conformance.sh {demo/*{h,m},include/SPTDataLoader/*.h,SPTDataLoader/*.{h,m},SPTDataLoaderTests/*.{h,m}}
+validate_license_conformance.sh "$EXPECTED_LICENSE_HEADER_FILE" "$(eval ls "$LICENSED_SOURCE_FILES_GLOB")"
 travis_fold_close "License conformance"
 
+
 # Executing build actions
-echo "Executing build actions: $BUILD_ACTIONS"
-retry_attempts=0
-until [ $retry_attempts -ge 2 ]
-do
-    xcrun xcodebuild $BUILD_ACTIONS \
-        NSUnbufferedIO=YES \
-        -project "$PROJECT" \
-        -scheme "$SCHEME" \
-        -sdk "$TEST_SDK" \
-        -destination "$TEST_DEST" \
-        $EXTRA_ARGUMENTS \
-            | xcpretty -c -f `xcpretty-travis-formatter` && break
-    retry_attempts=$[$retry_attempts+1]
-    sleep $retry_attempts
-done
+echo -e "\nExecuting build actions: $BUILD_ACTIONS"
+build_cmd="xcrun xcodebuild NSUnbufferedIO=YES"
+build_cmd+=" $BUILD_ACTIONS"
+build_cmd+=" -project ";        build_cmd+="$PROJECT"
+build_cmd+=" -scheme ";         build_cmd+="$SCHEME"
+build_cmd+=" -sdk ";            build_cmd+="$TEST_SDK"
+build_cmd+=" -destination ";    build_cmd+="$TEST_DEST"
+
+: "${EXTRA_ARGUMENTS:=}"
+if [ -n "$EXTRA_ARGUMENTS" ]; then
+    echo "Adding extra arguments: $EXTRA_ARGUMENTS"
+    build_cmd+=" $EXTRA_ARGUMENTS"
+fi
+
+echo "Build command: $build_cmd"
+echo
+eval "$build_cmd" | xcpretty -c -f "$(xcpretty-travis-formatter)"
+
 
 # Linting
 travis_fold_open "Linting" "Linting CocoaPods specification…"

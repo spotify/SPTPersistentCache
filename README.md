@@ -1,5 +1,7 @@
 # ios-ci
 
+[![Build Status](https://travis-ci.org/spotify/ios-ci.svg?branch=master)](https://travis-ci.org/spotify/ios-ci)
+
 A collection of scripts Spotify runs on its Open Source iOS projects.
 
 ## Contributing :mailbox_with_mail:

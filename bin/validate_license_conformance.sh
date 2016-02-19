@@ -20,8 +20,8 @@
 
 set -uo pipefail
 
-LICENSED_SOURCE_FILES="$@"
-LICENSE_HEADER_TEMPLATE_FILE="./ci/expected_license_header.txt"
+LICENSE_HEADER_TEMPLATE_FILE="$1"
+LICENSED_SOURCE_FILES="${*:2}"
 
 FORMAT_FAIL="\033[31;1m"
 FORMAT_SUCCESS="\033[32m"
@@ -43,7 +43,7 @@ for SOURCE_FILE in $LICENSED_SOURCE_FILES; do
         --brief \
         "$LICENSE_HEADER_TEMPLATE_FILE" \
         <(head -n \
-            $(wc -l "$LICENSE_HEADER_TEMPLATE_FILE" | awk '{print $1}') \
+            "$(wc -l "$LICENSE_HEADER_TEMPLATE_FILE" | awk '{print $1}')" \
             "$SOURCE_FILE") \
         &> /dev/null
 
