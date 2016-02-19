@@ -1,4 +1,5 @@
 <img alt="SPTPersistentCache" src="SPTPersistentCache.jpg">
+<img alt="SPTPersistentCache" src="SPTPersistentCacheTitle.png">
 
 Everyone tries to implement a cache at some point in their apps lifecycle, and this is ours. This is a library that allows people to cache NSData with TTL values and semantics for disk management.
 
