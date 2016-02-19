@@ -46,7 +46,7 @@
 {
     // Update the user interface for the detail item.
     if (self.detailItem) {
-        [self.persistentDataCache loadDataForKey:[NSString stringWithFormat:@"%u", [self.detailItem hash]]
+        [self.persistentDataCache loadDataForKey:[NSString stringWithFormat:@"%lu", (unsigned long)[self.detailItem hash]]
                                     withCallback:^(SPTPersistentCacheResponse *response) {
                                         if (response.result != SPTPersistentCacheResponseCodeOperationSucceeded) {
                                             NSLog(@"Failed: %@", response.error);
