@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 47;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -87,7 +87,7 @@
 			isa = PBXGroup;
 			children = (
 				052021A81C737E1E003A4FB4 /* Public API */,
-				052021B61C737E3E003A4FB4 /* SPTPersistentDataCache */,
+				052021B61C737E3E003A4FB4 /* SPTPersistentCache */,
 				052021FA1C7382B5003A4FB4 /* Supporting Files */,
 				0520219D1C737DBE003A4FB4 /* Products */,
 			);
@@ -115,7 +115,7 @@
 			name = "Public API";
 			sourceTree = "<group>";
 		};
-		052021B61C737E3E003A4FB4 /* SPTPersistentDataCache */ = {
+		052021B61C737E3E003A4FB4 /* SPTPersistentCache */ = {
 			isa = PBXGroup;
 			children = (
 				052021B71C737E66003A4FB4 /* crc32iso3309.c */,
@@ -133,7 +133,7 @@
 				052021CF1C737E6E003A4FB4 /* NSError+SPTPersistentCacheDomainErrors.h */,
 				052021D01C737E6E003A4FB4 /* NSError+SPTPersistentCacheDomainErrors.m */,
 			);
-			name = SPTPersistentDataCache;
+			name = SPTPersistentCache;
 			sourceTree = "<group>";
 		};
 		052021FA1C7382B5003A4FB4 /* Supporting Files */ = {
@@ -192,7 +192,7 @@
 			dependencies = (
 			);
 			name = SPTPersistentCacheFramework;
-			productName = SPTPersistentDataCacheFramework;
+			productName = SPTPersistentCacheFramework;
 			productReference = 0520219C1C737DBE003A4FB4 /* SPTPersistentCacheFramework.framework */;
 			productType = "com.apple.product-type.framework";
 		};
@@ -210,7 +210,7 @@
 			dependencies = (
 			);
 			name = SPTPersistentCacheOSXFramework;
-			productName = SPTPersistentDataCacheOSXFramework;
+			productName = SPTPersistentCacheOSXFramework;
 			productReference = 052021F21C738048003A4FB4 /* SPTPersistentCacheOSXFramework.framework */;
 			productType = "com.apple.product-type.framework";
 		};
@@ -220,8 +220,9 @@
 		052021931C737DBD003A4FB4 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0720;
-				ORGANIZATIONNAME = "Will Sackfield";
+				CLASSPREFIX = SPTPersistentCache;
+				LastUpgradeCheck = 0730;
+				ORGANIZATIONNAME = Spotify;
 				TargetAttributes = {
 					0520219B1C737DBE003A4FB4 = {
 						CreatedOnToolsVersion = 7.2.1;
@@ -232,7 +233,7 @@
 				};
 			};
 			buildConfigurationList = 052021961C737DBD003A4FB4 /* Build configuration list for PBXProject "SPTPersistentCacheFramework" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 6.3";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (

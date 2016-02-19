@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 47;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -49,7 +49,7 @@
 			containerPortal = 0510FF0B1BA2FF7A00ED0766 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 0510FF121BA2FF7A00ED0766;
-			remoteInfo = SPTPersistentDataCache;
+			remoteInfo = SPTPersistentCache;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -294,7 +294,7 @@
 			dependencies = (
 			);
 			name = SPTPersistentCache;
-			productName = SPTPersistentDataCache;
+			productName = SPTPersistentCache;
 			productReference = 0510FF131BA2FF7A00ED0766 /* libSPTPersistentCache.a */;
 			productType = "com.apple.product-type.library.static";
 		};
@@ -312,7 +312,7 @@
 				0510FF211BA2FF7A00ED0766 /* PBXTargetDependency */,
 			);
 			name = SPTPersistentCacheTests;
-			productName = SPTPersistentDataCacheTests;
+			productName = SPTPersistentCacheTests;
 			productReference = 0510FF1E1BA2FF7A00ED0766 /* SPTPersistentCacheTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
@@ -322,8 +322,9 @@
 		0510FF0B1BA2FF7A00ED0766 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				CLASSPREFIX = SPTPersistentCache;
 				LastUpgradeCheck = 0730;
-				ORGANIZATIONNAME = spotify;
+				ORGANIZATIONNAME = Spotify;
 				TargetAttributes = {
 					0510FF121BA2FF7A00ED0766 = {
 						CreatedOnToolsVersion = 6.4;
@@ -334,7 +335,7 @@
 				};
 			};
 			buildConfigurationList = 0510FF0E1BA2FF7A00ED0766 /* Build configuration list for PBXProject "SPTPersistentCache" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 6.3";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -492,6 +493,12 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SPT_PC_NON_ERROR_WARNINGS_0720 = "";
+				SPT_PC_NON_ERROR_WARNINGS_0730 = "$(SPT_PC_NON_ERROR_WARNING_0720) -Wno-error=partial-availability";
+				WARNING_CFLAGS = (
+					"$(inherited)",
+					"$(SPT_PC_NON_ERROR_WARNINGS_$(XCODE_VERSION_MINOR))",
+				);
 			};
 			name = Debug;
 		};
@@ -513,6 +520,12 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SPT_PC_NON_ERROR_WARNINGS_0720 = "";
+				SPT_PC_NON_ERROR_WARNINGS_0730 = "$(SPT_PC_NON_ERROR_WARNING_0720) -Wno-error=partial-availability";
+				WARNING_CFLAGS = (
+					"$(inherited)",
+					"$(SPT_PC_NON_ERROR_WARNINGS_$(XCODE_VERSION_MINOR))",
+				);
 			};
 			name = Release;
 		};

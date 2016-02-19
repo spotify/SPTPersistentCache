@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 47;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -66,7 +66,7 @@
 		055725F11C65280000EF6787 = {
 			isa = PBXGroup;
 			children = (
-				055725FC1C65280000EF6787 /* SPTPersistentDataCacheDemo */,
+				055725FC1C65280000EF6787 /* SPTPersistentCacheDemo */,
 				055725FB1C65280000EF6787 /* Products */,
 				055726171C65282100EF6787 /* Build System */,
 			);
@@ -80,7 +80,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		055725FC1C65280000EF6787 /* SPTPersistentDataCacheDemo */ = {
+		055725FC1C65280000EF6787 /* SPTPersistentCacheDemo */ = {
 			isa = PBXGroup;
 			children = (
 				055726001C65280000EF6787 /* AppDelegate.h */,
@@ -95,8 +95,7 @@
 				055726111C65280000EF6787 /* Info.plist */,
 				055725FD1C65280000EF6787 /* Supporting Files */,
 			);
-			name = SPTPersistentDataCacheDemo;
-			path = SPTPersistentCacheDemo;
+			name = SPTPersistentCacheDemo;
 			sourceTree = "<group>";
 		};
 		055725FD1C65280000EF6787 /* Supporting Files */ = {
@@ -141,7 +140,7 @@
 			dependencies = (
 			);
 			name = SPTPersistentCacheDemo;
-			productName = SPTPersistentDataCacheDemo;
+			productName = SPTPersistentCacheDemo;
 			productReference = 055725FA1C65280000EF6787 /* SPTPersistentCacheDemo.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -151,8 +150,9 @@
 		055725F21C65280000EF6787 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0720;
-				ORGANIZATIONNAME = "Will Sackfield";
+				CLASSPREFIX = SPT;
+				LastUpgradeCheck = 0730;
+				ORGANIZATIONNAME = Spotify;
 				TargetAttributes = {
 					055725F91C65280000EF6787 = {
 						CreatedOnToolsVersion = 7.2;
@@ -160,7 +160,7 @@
 				};
 			};
 			buildConfigurationList = 055725F51C65280000EF6787 /* Build configuration list for PBXProject "SPTPersistentCacheDemo" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 6.3";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (

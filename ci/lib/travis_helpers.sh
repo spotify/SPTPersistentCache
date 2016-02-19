@@ -1,3 +1,6 @@
+# Make sure we can execute this even if the `TRAVIS` variable isn’t set. It should default to false.
+: ${TRAVIS:=false}
+
 # Opens a Travis-CI fold, iff we’re running on Travis-CI.
 #
 # @param $1 The name of the fold, should be matched by a call to travis_fold_close() with the same
