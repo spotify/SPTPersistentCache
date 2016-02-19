@@ -38,7 +38,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		0520219C1C737DBE003A4FB4 /* SPTPersistentCacheFramework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SPTPersistentCacheFramework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		0520219C1C737DBE003A4FB4 /* SPTPersistentCache.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SPTPersistentCache.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		052021B71C737E66003A4FB4 /* crc32iso3309.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = crc32iso3309.c; path = ../Sources/crc32iso3309.c; sourceTree = "<group>"; };
 		052021B81C737E66003A4FB4 /* crc32iso3309.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = crc32iso3309.h; path = ../Sources/crc32iso3309.h; sourceTree = "<group>"; };
 		052021B91C737E66003A4FB4 /* SPTPersistentCacheResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPTPersistentCacheResponse.m; path = ../Sources/SPTPersistentCacheResponse.m; sourceTree = "<group>"; };
@@ -53,7 +53,7 @@
 		052021C21C737E66003A4FB4 /* SPTPersistentCacheTimerProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SPTPersistentCacheTimerProxy.m; path = ../Sources/SPTPersistentCacheTimerProxy.m; sourceTree = "<group>"; };
 		052021CF1C737E6E003A4FB4 /* NSError+SPTPersistentCacheDomainErrors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSError+SPTPersistentCacheDomainErrors.h"; path = "../Sources/Categories/NSError+SPTPersistentCacheDomainErrors.h"; sourceTree = "<group>"; };
 		052021D01C737E6E003A4FB4 /* NSError+SPTPersistentCacheDomainErrors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSError+SPTPersistentCacheDomainErrors.m"; path = "../Sources/Categories/NSError+SPTPersistentCacheDomainErrors.m"; sourceTree = "<group>"; };
-		052021F21C738048003A4FB4 /* SPTPersistentCacheOSXFramework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SPTPersistentCacheOSXFramework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		052021F21C738048003A4FB4 /* SPTPersistentCache.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SPTPersistentCache.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		052021FB1C7382C6003A4FB4 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		052022061C738600003A4FB4 /* project.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = project.xcconfig; path = ../project.xcconfig; sourceTree = "<group>"; };
 		052022091C738637003A4FB4 /* spotify_os.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = spotify_os.xcconfig; path = ../spotify_os.xcconfig; sourceTree = "<group>"; };
@@ -96,8 +96,8 @@
 		0520219D1C737DBE003A4FB4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				0520219C1C737DBE003A4FB4 /* SPTPersistentCacheFramework.framework */,
-				052021F21C738048003A4FB4 /* SPTPersistentCacheOSXFramework.framework */,
+				0520219C1C737DBE003A4FB4 /* SPTPersistentCache.framework */,
+				052021F21C738048003A4FB4 /* SPTPersistentCache.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -178,9 +178,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		0520219B1C737DBE003A4FB4 /* SPTPersistentCacheFramework */ = {
+		0520219B1C737DBE003A4FB4 /* SPTPersistentCache-iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 052021A41C737DBE003A4FB4 /* Build configuration list for PBXNativeTarget "SPTPersistentCacheFramework" */;
+			buildConfigurationList = 052021A41C737DBE003A4FB4 /* Build configuration list for PBXNativeTarget "SPTPersistentCache-iOS" */;
 			buildPhases = (
 				052021971C737DBE003A4FB4 /* Sources */,
 				052021981C737DBE003A4FB4 /* Frameworks */,
@@ -191,14 +191,14 @@
 			);
 			dependencies = (
 			);
-			name = SPTPersistentCacheFramework;
+			name = "SPTPersistentCache-iOS";
 			productName = SPTPersistentCacheFramework;
-			productReference = 0520219C1C737DBE003A4FB4 /* SPTPersistentCacheFramework.framework */;
+			productReference = 0520219C1C737DBE003A4FB4 /* SPTPersistentCache.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		052021F11C738048003A4FB4 /* SPTPersistentCacheOSXFramework */ = {
+		052021F11C738048003A4FB4 /* SPTPersistentCache-OSX */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 052021F71C738048003A4FB4 /* Build configuration list for PBXNativeTarget "SPTPersistentCacheOSXFramework" */;
+			buildConfigurationList = 052021F71C738048003A4FB4 /* Build configuration list for PBXNativeTarget "SPTPersistentCache-OSX" */;
 			buildPhases = (
 				052021ED1C738048003A4FB4 /* Sources */,
 				052021EE1C738048003A4FB4 /* Frameworks */,
@@ -209,9 +209,9 @@
 			);
 			dependencies = (
 			);
-			name = SPTPersistentCacheOSXFramework;
+			name = "SPTPersistentCache-OSX";
 			productName = SPTPersistentCacheOSXFramework;
-			productReference = 052021F21C738048003A4FB4 /* SPTPersistentCacheOSXFramework.framework */;
+			productReference = 052021F21C738048003A4FB4 /* SPTPersistentCache.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -244,8 +244,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				0520219B1C737DBE003A4FB4 /* SPTPersistentCacheFramework */,
-				052021F11C738048003A4FB4 /* SPTPersistentCacheOSXFramework */,
+				0520219B1C737DBE003A4FB4 /* SPTPersistentCache-iOS */,
+				052021F11C738048003A4FB4 /* SPTPersistentCache-OSX */,
 			);
 		};
 /* End PBXProject section */
@@ -305,12 +305,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 052022061C738600003A4FB4 /* project.xcconfig */;
 			buildSettings = {
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				COPY_PHASE_STRIP = NO;
 				HEADER_SEARCH_PATHS = ../include;
 				INFOPLIST_FILE = Info.plist;
-				MODULEMAP_FILE = ../include/SPTPersistentCache/module.modulemap;
 			};
 			name = Debug;
 		};
@@ -318,12 +314,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 052022061C738600003A4FB4 /* project.xcconfig */;
 			buildSettings = {
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				COPY_PHASE_STRIP = NO;
 				HEADER_SEARCH_PATHS = ../include;
 				INFOPLIST_FILE = Info.plist;
-				MODULEMAP_FILE = ../include/SPTPersistentCache/module.modulemap;
 			};
 			name = Release;
 		};
@@ -331,13 +323,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEFINES_MODULE = YES;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MODULEMAP_FILE = ../include/SPTPersistentCache/module.modulemap;
-				PRODUCT_BUNDLE_IDENTIFIER = com.spotify.SPTPersistentCacheiOSFramework;
-				PRODUCT_NAME = SPTPersistentCacheFramework;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.SPTPersistentCache-iOS";
+				PRODUCT_NAME = SPTPersistentCache;
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -346,13 +334,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEFINES_MODULE = YES;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MODULEMAP_FILE = ../include/SPTPersistentCache/module.modulemap;
-				PRODUCT_BUNDLE_IDENTIFIER = com.spotify.SPTPersistentCacheiOSFramework;
-				PRODUCT_NAME = SPTPersistentCacheFramework;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.SPTPersistentCache-iOS";
+				PRODUCT_NAME = SPTPersistentCache;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -367,11 +351,8 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				PRODUCT_BUNDLE_IDENTIFIER = com.spotify.SPTPersistentCacheOSXFramework;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.SPTPersistentCache-OSX";
+				PRODUCT_NAME = SPTPersistentCache;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 			};
@@ -387,11 +368,8 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				PRODUCT_BUNDLE_IDENTIFIER = com.spotify.SPTPersistentCacheOSXFramework;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.SPTPersistentCache-OSX";
+				PRODUCT_NAME = SPTPersistentCache;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 			};
@@ -409,7 +387,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		052021A41C737DBE003A4FB4 /* Build configuration list for PBXNativeTarget "SPTPersistentCacheFramework" */ = {
+		052021A41C737DBE003A4FB4 /* Build configuration list for PBXNativeTarget "SPTPersistentCache-iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				052021A51C737DBE003A4FB4 /* Debug */,
@@ -418,7 +396,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		052021F71C738048003A4FB4 /* Build configuration list for PBXNativeTarget "SPTPersistentCacheOSXFramework" */ = {
+		052021F71C738048003A4FB4 /* Build configuration list for PBXNativeTarget "SPTPersistentCache-OSX" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				052021F81C738048003A4FB4 /* Debug */,
