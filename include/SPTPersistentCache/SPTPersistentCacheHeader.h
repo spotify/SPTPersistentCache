@@ -55,6 +55,11 @@ typedef struct SPTPersistentCacheRecordHeaderType {
 FOUNDATION_EXPORT const SPTPersistentCacheMagicType SPTPersistentCacheMagicValue;
 FOUNDATION_EXPORT const size_t SPTPersistentCacheRecordHeaderSize;
 
+FOUNDATION_EXPORT SPTPersistentCacheRecordHeaderType SPTPersistentCacheRecordHeaderTypeMake(uint64_t ttl,
+                                                                                            uint64_t payloadSize,
+                                                                                            uint64_t updateTime,
+                                                                                            BOOL isLocked);
+
 // Following functions used internally and could be used for testing purposes also
 // Function return pointer to header if there are enough data otherwise NULL
 FOUNDATION_EXPORT SPTPersistentCacheRecordHeaderType *SPTPersistentCacheGetHeaderFromData(void *data,

@@ -40,6 +40,26 @@ NS_INLINE BOOL SPTPersistentCachePointerMagicAlignCheck(const void *ptr)
     return (v % align == 0);
 }
 
+SPTPersistentCacheRecordHeaderType SPTPersistentCacheRecordHeaderTypeMake(uint64_t ttl,
+                                                                          uint64_t payloadSize,
+                                                                          uint64_t updateTime,
+                                                                          BOOL isLocked)
+{
+    SPTPersistentCacheRecordHeaderType dummy;
+    memset(&dummy, 0, SPTPersistentCacheRecordHeaderSize);
+    SPTPersistentCacheRecordHeaderType *header = &dummy;
+    
+    header->magic = SPTPersistentCacheMagicValue;
+    header->headerSize = (uint32_t)SPTPersistentCacheRecordHeaderSize;
+    header->refCount = (isLocked ? 1 : 0);
+    header->ttl = ttl;
+    header->payloadSizeBytes = payloadSize;
+    header->updateTimeSec = updateTime;
+    header->crc = SPTPersistentCacheCalculateHeaderCRC(header);
+    
+    return dummy;
+}
+
 SPTPersistentCacheRecordHeaderType *SPTPersistentCacheGetHeaderFromData(void *data, size_t size)
 {
     if (size < SPTPersistentCacheRecordHeaderSize) {

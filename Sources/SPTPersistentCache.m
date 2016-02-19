@@ -40,7 +40,7 @@
  * @param value The value as a `double`.
  * @return The value as an `uint64_t`.
  */
-NS_INLINE uint64_t spt_uint64rint(double value)
+uint64_t spt_uint64rint(double value)
 {
     return (uint64_t)llrint(value);
 }
@@ -637,7 +637,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
 - (NSError *)storeDataSync:(NSData *)data
                     forKey:(NSString *)key
                        ttl:(NSUInteger)ttl
-                    locked:(BOOL)locked
+                    locked:(BOOL)isLocked
               withCallback:(SPTDataCacheResponseCallback)callback
                    onQueue:(dispatch_queue_t)queue
 {
@@ -646,25 +646,17 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
     NSString *subDir = [self.dataCacheFileManager subDirectoryPathForKey:key];
     [self.fileManager createDirectoryAtPath:subDir withIntermediateDirectories:YES attributes:nil error:nil];
 
-    uint32_t __block oldRefCount = 0;
-    const NSUInteger payloadLen = [data length];
-    const NSUInteger rawdataLen = SPTPersistentCacheRecordHeaderSize + payloadLen;
+    const NSUInteger payloadLength = [data length];
+    const NSUInteger rawDataLength = SPTPersistentCacheRecordHeaderSize + payloadLength;
 
-    NSMutableData *rawData = [NSMutableData dataWithCapacity:rawdataLen];
+    NSMutableData *rawData = [NSMutableData dataWithCapacity:rawDataLength];
 
-    SPTPersistentCacheRecordHeaderType dummy;
-    memset(&dummy, 0, SPTPersistentCacheRecordHeaderSize);
-    SPTPersistentCacheRecordHeaderType *header = &dummy;
+    SPTPersistentCacheRecordHeaderType header = SPTPersistentCacheRecordHeaderTypeMake(ttl,
+                                                                                       payloadLength,
+                                                                                       spt_uint64rint(self.currentTime()),
+                                                                                       isLocked);
 
-    header->magic = SPTPersistentCacheMagicValue;
-    header->headerSize = (uint32_t)SPTPersistentCacheRecordHeaderSize;
-    header->refCount = oldRefCount + (locked ? 1 : 0);
-    header->ttl = ttl;
-    header->payloadSizeBytes = payloadLen;
-    header->updateTimeSec = spt_uint64rint(self.currentTime());
-    header->crc = SPTPersistentCacheCalculateHeaderCRC(header);
-
-    [rawData appendBytes:&dummy length:SPTPersistentCacheRecordHeaderSize];
+    [rawData appendBytes:&header length:SPTPersistentCacheRecordHeaderSize];
     [rawData appendData:data];
 
     NSError *error = nil;
