@@ -23,6 +23,36 @@ Everyone tries to implement a cache at some point in their app’s lifecycle, an
 ### Static Library
 Simply include `SPTPersistentCache.xcodeproj` in your App’s Xcode project, and link your app with the library in the “Build Phases” section.
 
+### CocoaPods
+We are indexed on [CocoaPods](http://cocoapods.org), which can be installed using [Ruby gems](https://rubygems.org/):
+```shell
+$ gem install cocoapods
+```
+Then simply add `SPTPersistentCache` to your `Podfile`.
+```
+pod 'SPTPersistentCache', '~> 1.0'
+```
+Lastly let CocoaPods do it's thing by running:
+```shell
+$ cocoapods update
+```
+
+### Carthage
+We support [Carthage](https://github.con/Carthage/Carthage) and provide pre-built binary frameworks for all new releases. Start by making sure you have the latest version of Carthage installed, e.g. using [Homebrew](http://brew.sh/):
+```shell
+$ brew update
+$ brew install carthage
+```
+You will also need to add `SPTPersistentCache` to your `Cartfile`:
+```
+github 'spotify/SPTPersistentCache' ~> 1.0
+```
+After that is all said and done, let Carthage pull in SPTPersistentCache like so:
+```shell
+$ carthage update
+```
+Next up, you need to add the framework to the Xcode project of your App. Lastly link the framework with your App and copy it to the App’s Frameworks directory under the “Build Phases”.
+
 ## Background story :book:
 At Spotify we began to standardise the way we handled images in a centralised way, and in doing so we initially created a component that was handling images and their caching. But then our requirements changed, and we began to need caching for our backend calls and preview MP3 downloads as well. In doing so, we managed to separate out our caching logic into a generic component that can be used for any piece of data.
 
