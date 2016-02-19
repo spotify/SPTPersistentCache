@@ -1,5 +1,6 @@
 cache:
   - bundler
+
 sudo: false
 branches:
   only:
@@ -23,11 +24,11 @@ after_success: ./ci/after_success.sh
 deploy:
   provider: releases
   api_key:
-    secure: <todo>
+    secure: ANvlZh4vgRuTeUE9IenqsiKU0iqHVVJGDmqjvqmg0PMcN6QgR7leAAf45cQvPwKeJqS7DeXHFLq7gs0c7gfofBluFpt/UdCcHb1L7aXG+14uPVp6f5ggK5ZUxXwWfkW4s1xtAvDvQmGo7qB9Q/EaUSHJvH2vOBPlaaFc+h6C7M4=
   file:
-    SPTPersistentCache.framework.zip
+    SPTDataLoader.framework.zip
   on:
-    repo: spotify/SPTPersistentCache
+    repo: spotify/SPTDataLoader
     tags: true
   script: ./ci/deploy.sh
 
@@ -38,16 +39,18 @@ env:
     - BUILD="build"
     - BUILD_TEST="build test"
     - ENABLE_CODE_COVERAGE="-enableCodeCoverage YES"
-    - PROJECT_LIBRARY="SPTPersistentCache.xcodeproj"
-    - PROJECT_DEMO="SPTPersistentCacheDemo/SPTPersistentCacheDemo.xcodeproj"
-    - PROJECT_FRAMEWORK="SPTPersistentCacheFramework/SPTPersistentCacheFramework.xcodeproj"
-    - SCHEME_IOS_LIBRARY="SPTPersistentCache"
-    - SCHEME_IOS_FRAMEWORK="SPTPersistentCache-iOS"
-    - SCHEME_OSX_FRAMEWORK="SPTPersistentCache-OSX"
-    - SCHEME_DEMO="SPTPersistentCacheDemo"
-    - PODSPEC="SPTPersistentCache.podspec"
+    - PROJECT_LIBRARY="SPTAwesome.xcodeproj"
+    - PROJECT_DEMO="SPTAwesomeDemo.xcodeproj"
+    - PROJECT_FRAMEWORK="SPTAwesomeFramework.xcodeproj"
+    - SCHEME_IOS_LIBRARY="SPTAwesome"
+    - SCHEME_IOS_FRAMEWORK="SPTAwesome-iOS"
+    - SCHEME_OSX_FRAMEWORK="SPTAwesome-OSX"
+    - SCHEME_TV_FRAMEWORK="SPTAwesome-TV"
+    - SCHEME_WATCH_FRAMEWORK="SPTAwesome-Watch"
+    - SCHEME_DEMO="SPTAwesomeDemo"
+    - PODSPEC="SPTAwesome.podspec"
     - EXPECTED_LICENSE_HEADER_FILE="./other/expected_license_header.txt"
-    - LICENSED_SOURCE_FILES_GLOB="{{Sources,Viewer}/*.{h,m},Tests/*.m,include/*/*.h,SPTPersistentCacheDemo/*/*.{h,m}}"
+    - LICENSED_SOURCE_FILES_GLOB="{{SPTAwesome,SPTAwesomeTests,SPTAwesomeDemo}/*.{h,m},include/*/*.h}"
   matrix:
     - TEST_SDK=iphonesimulator  TEST_DEST="platform='iOS Simulator',OS=8.1,name='iPhone 6'"   SCHEME="$SCHEME_IOS_LIBRARY"            BUILD_ACTIONS="$BUILD_TEST" EXTRA_ARGUMENTS="$ENABLE_CODE_COVERAGE" PROJECT="$PROJECT_LIBRARY"
     - TEST_SDK=iphonesimulator  TEST_DEST="platform='iOS Simulator',OS=8.2,name='iPhone 4s'"  SCHEME="$SCHEME_IOS_LIBRARY"            BUILD_ACTIONS="$BUILD_TEST" EXTRA_ARGUMENTS="$ENABLE_CODE_COVERAGE" PROJECT="$PROJECT_LIBRARY"
@@ -57,6 +60,12 @@ env:
     - TEST_SDK=iphonesimulator  TEST_DEST="platform='iOS Simulator',OS=9.1,name='iPhone 5'"   SCHEME="$SCHEME_IOS_LIBRARY"            BUILD_ACTIONS="$BUILD_TEST" EXTRA_ARGUMENTS="$ENABLE_CODE_COVERAGE" PROJECT="$PROJECT_LIBRARY"
     - TEST_SDK=iphonesimulator  TEST_DEST="platform='iOS Simulator',OS=9.2,name='iPhone 6s'"  SCHEME="$SCHEME_IOS_LIBRARY"            BUILD_ACTIONS="$BUILD_TEST" EXTRA_ARGUMENTS="$ENABLE_CODE_COVERAGE" PROJECT="$PROJECT_LIBRARY"
     - TEST_SDK=macosx           TEST_DEST="platform='OS X',arch=x86_64"                       SCHEME="$SCHEME_IOS_LIBRARY"            BUILD_ACTIONS="$BUILD_TEST" EXTRA_ARGUMENTS="$ENABLE_CODE_COVERAGE" PROJECT="$PROJECT_LIBRARY"
+    - TEST_SDK=watchsimulator   TEST_DEST="OS=2.1,name='Apple Watch - 38mm'"                  SCHEME="$SCHEME_IOS_LIBRARY"            BUILD_ACTIONS="$BUILD"      EXTRA_ARGUMENTS=""                      PROJECT="$PROJECT_LIBRARY"
+    - TEST_SDK=watchsimulator   TEST_DEST="OS=2.0,name='Apple Watch - 38mm'"                  SCHEME="$SCHEME_IOS_LIBRARY"            BUILD_ACTIONS="$BUILD"      EXTRA_ARGUMENTS=""                      PROJECT="$PROJECT_LIBRARY"
+    - TEST_SDK=appletvsimulator TEST_DEST="OS=9.1,name='Apple TV 1080p'"                      SCHEME="$SCHEME_IOS_LIBRARY"            BUILD_ACTIONS="$BUILD_TEST" EXTRA_ARGUMENTS="$ENABLE_CODE_COVERAGE" PROJECT="$PROJECT_LIBRARY"
+    - TEST_SDK=appletvsimulator TEST_DEST="OS=9.0,name='Apple TV 1080p'"                      SCHEME="$SCHEME_IOS_LIBRARY"            BUILD_ACTIONS="$BUILD_TEST" EXTRA_ARGUMENTS="$ENABLE_CODE_COVERAGE" PROJECT="$PROJECT_LIBRARY"
     - TEST_SDK=iphonesimulator  TEST_DEST="platform='iOS Simulator',OS=8.1,name='iPhone 6'"   SCHEME="$SCHEME_DEMO"                   BUILD_ACTIONS="$BUILD"      EXTRA_ARGUMENTS=""                      PROJECT="$PROJECT_DEMO"
     - TEST_SDK=iphonesimulator  TEST_DEST="platform='iOS Simulator',OS=8.1,name='iPhone 6'"   SCHEME="$SCHEME_IOS_FRAMEWORK"          BUILD_ACTIONS="$BUILD"      EXTRA_ARGUMENTS=""                      PROJECT="$PROJECT_FRAMEWORK"
     - TEST_SDK=macosx           TEST_DEST="platform='OS X',arch=x86_64"                       SCHEME="$SCHEME_OSX_FRAMEWORK"          BUILD_ACTIONS="$BUILD"      EXTRA_ARGUMENTS=""                      PROJECT="$PROJECT_FRAMEWORK"
+    - TEST_SDK=watchsimulator   TEST_DEST="OS=2.0,name='Apple Watch - 38mm'"                  SCHEME="$SCHEME_WATCH_FRAMEWORK"        BUILD_ACTIONS="$BUILD"      EXTRA_ARGUMENTS=""                      PROJECT="$PROJECT_FRAMEWORK"
+    - TEST_SDK=appletvsimulator TEST_DEST="OS=9.0,name='Apple TV 1080p'"                      SCHEME="$SCHEME_TV_FRAMEWORK"           BUILD_ACTIONS="$BUILD"      EXTRA_ARGUMENTS=""                      PROJECT="$PROJECT_FRAMEWORK"

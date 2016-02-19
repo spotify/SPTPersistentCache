@@ -1,1 +1,1 @@
-#include "spotify_os.xcconfig"
+#include "ci/spotify_os.xcconfig"
