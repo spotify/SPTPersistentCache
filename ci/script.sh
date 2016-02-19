@@ -6,7 +6,7 @@ set -euo pipefail
 
 # License conformance
 travis_fold_open "License conformance" "Validating source files for license compliance…"
-./ci/validate_license_conformance.sh {Sources/*{h,m},include/*/*.h,Tests/*.{h,m},Viewer/*.{h,m}}
+./ci/validate_license_conformance.sh {*/*.{c,h,m},*/**/*.{h,m}}
 travis_fold_close "License conformance"
 
 # Executing build actions
