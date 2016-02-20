@@ -36,6 +36,7 @@
 		9C9E70711C78D39900E1CBE6 /* SPTPersistentCacheObjectDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C9E70701C78D39900E1CBE6 /* SPTPersistentCacheObjectDescription.m */; };
 		9C9E70731C78D5AA00E1CBE6 /* SPTPersistentCacheObjectDescriptionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C9E70721C78D5AA00E1CBE6 /* SPTPersistentCacheObjectDescriptionTests.m */; };
 		9C9E70761C78FD9700E1CBE6 /* SPTPersistentCacheObjectDescriptionStyleValidator.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C9E70751C78FD9700E1CBE6 /* SPTPersistentCacheObjectDescriptionStyleValidator.m */; };
+		9C9E70781C790ED900E1CBE6 /* SPTPersistentCacheRecordTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C4B4148B1C6A01970099FECD /* SPTPersistentCacheRecordTests.m */; };
 		C41237081C6A29FB00C1E9B8 /* SPTPersistentCacheTimerProxyTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C41237071C6A29FB00C1E9B8 /* SPTPersistentCacheTimerProxyTests.m */; };
 		C413BA011C71CBBA002D41FB /* SPTPersistentCacheHeaderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C413BA001C71CBBA002D41FB /* SPTPersistentCacheHeaderTests.m */; };
 		C413BA051C71E1A0002D41FB /* NSError+SPTPersistentCacheDomainErrors.m in Sources */ = {isa = PBXBuildFile; fileRef = C413BA041C71E1A0002D41FB /* NSError+SPTPersistentCacheDomainErrors.m */; };
@@ -419,6 +420,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9C9E70781C790ED900E1CBE6 /* SPTPersistentCacheRecordTests.m in Sources */,
 				C4B414911C6A24A10099FECD /* SPTPersistentCacheOptionsTests.m in Sources */,
 				0510FF6B1BA3073D00ED0766 /* SPTPersistentCacheTests.m in Sources */,
 				C413BA011C71CBBA002D41FB /* SPTPersistentCacheHeaderTests.m in Sources */,

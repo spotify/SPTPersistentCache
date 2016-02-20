@@ -19,6 +19,7 @@
  * under the License.
  */
 #import "SPTPersistentCacheRecord.h"
+#import "SPTPersistentCacheObjectDescription.h"
 
 @implementation SPTPersistentCacheRecord
 
@@ -39,6 +40,18 @@
     _data = data;
 
     return self;
+}
+
+#pragma mark Describing Object
+
+- (NSString *)description
+{
+    return SPTPersistentCacheObjectDescription(self, self.key, @"key", @"lol", @"wut");
+}
+
+- (NSString *)debugDescription
+{
+    return SPTPersistentCacheObjectDescription(self, self.key, @"key", @(self.ttl), @"ttl", @(self.refCount), @"ref-count");
 }
 
 @end
