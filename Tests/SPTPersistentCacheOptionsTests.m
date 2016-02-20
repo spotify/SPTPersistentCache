@@ -21,6 +21,7 @@
 #import <XCTest/XCTest.h>
 
 #import <SPTPersistentCache/SPTPersistentCacheOptions.h>
+#import "SPTPersistentCacheObjectDescriptionStyleValidator.h"
 
 @interface SPTPersistentCacheOptionsTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentCacheOptions *dataCacheOptions;
@@ -28,10 +29,15 @@
 
 @implementation SPTPersistentCacheOptionsTests
 
+- (void)setUp
+{
+    [super setUp];
+
+    self.dataCacheOptions = [SPTPersistentCacheOptions new];
+}
+
 - (void)testDefaultInitializer
 {
-    self.dataCacheOptions = [[SPTPersistentCacheOptions alloc] init];
-    
     XCTAssertEqual(self.dataCacheOptions.folderSeparationEnabled, YES);
     XCTAssertEqual(self.dataCacheOptions.gcIntervalSec, SPTPersistentCacheDefaultGCIntervalSec);
     XCTAssertEqual(self.dataCacheOptions.defaultExpirationPeriodSec,
@@ -43,29 +49,62 @@
 
 - (void)testMinimumGarbageColectorInterval
 {
-    self.dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
-                                                                          identifier:nil
-
-                                                                 currentTimeCallback:nil
-                                                           defaultExpirationInterval:1
-                                                            garbageCollectorInterval:1
-                                                                               debug:nil];
-    XCTAssertEqual(self.dataCacheOptions.gcIntervalSec,
+    SPTPersistentCacheOptions *dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
+                                                                                            identifier:nil
+                                                                                   currentTimeCallback:nil
+                                                                             defaultExpirationInterval:1
+                                                                              garbageCollectorInterval:1
+                                                                                                 debug:nil];
+    XCTAssertEqual(dataCacheOptions.gcIntervalSec,
                    SPTPersistentCacheMinimumGCIntervalLimit);
 }
 
 - (void)testMinimumDefaultExpirationInterval
 {
-    self.dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
-                                                                          identifier:nil
-                             
-                                                                 currentTimeCallback:nil
-                                                           defaultExpirationInterval:1
-                                                            garbageCollectorInterval:1
-                                                                               debug:nil];
-    XCTAssertEqual(self.dataCacheOptions.defaultExpirationPeriodSec,
+    SPTPersistentCacheOptions *dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
+                                                                                            identifier:nil
+                                                                                   currentTimeCallback:nil
+                                                                             defaultExpirationInterval:1
+                                                                              garbageCollectorInterval:1
+                                                                                                 debug:nil];
+    XCTAssertEqual(dataCacheOptions.defaultExpirationPeriodSec,
                    SPTPersistentCacheMinimumExpirationLimit);
 }
 
+#pragma mark Test describing objects
+
+- (void)testDescriptionAdheresToStyle
+{
+    SPTPersistentCacheObjectDescriptionStyleValidator *styleValidator = [SPTPersistentCacheObjectDescriptionStyleValidator new];
+
+    NSString * const description = self.dataCacheOptions.description;
+
+    XCTAssertTrue([styleValidator isValidStyleDescription:description], @"The description string should follow our style.");
+}
+
+- (void)testDescriptionContainsClassName
+{
+    NSString * const description = self.dataCacheOptions.description;
+
+    const NSRange classNameRange = [description rangeOfString:@"SPTPersistentCacheOptions"];
+    XCTAssertNotEqual(classNameRange.location, NSNotFound, @"The class name should exist in the description");
+}
+
+- (void)testDebugDescriptionAdheresToStyle
+{
+    SPTPersistentCacheObjectDescriptionStyleValidator *styleValidator = [SPTPersistentCacheObjectDescriptionStyleValidator new];
+
+    NSString * const debugDescription = self.dataCacheOptions.debugDescription;
+
+    XCTAssertTrue([styleValidator isValidStyleDescription:debugDescription], @"The debugDescription string should follow our style.");
+}
+
+- (void)testDebugDescriptionContainsClassName
+{
+    NSString * const debugDescription = self.dataCacheOptions.debugDescription;
+
+    const NSRange classNameRange = [debugDescription rangeOfString:@"SPTPersistentCacheOptions"];
+    XCTAssertNotEqual(classNameRange.location, NSNotFound, @"The class name should exist in the debugDescription");
+}
 
 @end

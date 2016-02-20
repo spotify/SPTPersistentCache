@@ -19,6 +19,7 @@
  * under the License.
  */
 #import "SPTPersistentCacheOptions.h"
+#import "SPTPersistentCacheObjectDescription.h"
 
 void SPTPersistentCacheOptionsDebug(NSString *debugMessage, SPTPersistentCacheDebugCallback debugCallback);
 
@@ -116,6 +117,25 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
                            (unsigned long)_gcIntervalSec, (unsigned long)_defaultExpirationPeriodSec, (void *)self];
     
     return self;
+}
+
+#pragma mark Describing Object
+
+- (NSString *)description
+{
+    return SPTPersistentCacheObjectDescription(self, self.cacheIdentifier, @"cache-identifier");
+}
+
+- (NSString *)debugDescription
+{
+    return SPTPersistentCacheObjectDescription(self,
+                                               self.cacheIdentifier, @"cache-identifier",
+                                               self.cachePath, @"cache-path",
+                                               self.identifierForQueue, @"identifier-for-queue",
+                                               @(self.folderSeparationEnabled), @"folder-separation",
+                                               @(self.gcIntervalSec), @"gc-interval-seconds",
+                                               @(self.defaultExpirationPeriodSec), @"default-expiration-period-seconds",
+                                               @(self.sizeConstraintBytes), @"size-constraint-bytes");
 }
 
 @end
