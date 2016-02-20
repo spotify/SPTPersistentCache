@@ -20,10 +20,10 @@
  */
 
 #import <XCTest/XCTest.h>
-#import "SPTPersistentCacheTimerProxy.h"
+#import "SPTPersistentCacheGarbageCollectorScheduler.h"
 #import <SPTPersistentCache/SPTPersistentCache.h>
 
-@interface SPTPersistentCacheTimerProxy ()
+@interface SPTPersistentCacheGarbageCollectorScheduler ()
 @property (nonatomic, strong) NSTimer *timer;
 - (void)enqueueGarbageCollection:(NSTimer *)timer;
 @end
@@ -57,7 +57,7 @@
 
 @interface SPTPersistentCacheTimerProxyTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentCacheOptions *options;
-@property (nonatomic, strong) SPTPersistentCacheTimerProxy *timerProxy;
+@property (nonatomic, strong) SPTPersistentCacheGarbageCollectorScheduler *timerProxy;
 @property (nonatomic, strong) SPTPersistentCache *dataCache;
 @property (nonatomic, strong) dispatch_queue_t dispatchQueue;
 @end
@@ -74,7 +74,7 @@
     
     self.dispatchQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
     
-    self.timerProxy = [[SPTPersistentCacheTimerProxy alloc] initWithDataCache:self.dataCache
+    self.timerProxy = [[SPTPersistentCacheGarbageCollectorScheduler alloc] initWithDataCache:self.dataCache
                        options:self.options
                                                                             queue:self.dispatchQueue];
 }

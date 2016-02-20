@@ -35,8 +35,8 @@
 		DD1D23AB1C7785A900D0477A /* SPTPersistentCacheRecord+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D23991C7785A900D0477A /* SPTPersistentCacheRecord+Private.h */; };
 		DD1D23AC1C7785A900D0477A /* SPTPersistentCacheResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = DD1D239A1C7785A900D0477A /* SPTPersistentCacheResponse.m */; };
 		DD1D23AD1C7785A900D0477A /* SPTPersistentCacheResponse+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D239B1C7785A900D0477A /* SPTPersistentCacheResponse+Private.h */; };
-		DD1D23AE1C7785A900D0477A /* SPTPersistentCacheTimerProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D239C1C7785A900D0477A /* SPTPersistentCacheTimerProxy.h */; };
-		DD1D23AF1C7785A900D0477A /* SPTPersistentCacheTimerProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = DD1D239D1C7785A900D0477A /* SPTPersistentCacheTimerProxy.m */; };
+		DD1D23AE1C7785A900D0477A /* SPTPersistentCacheGarbageCollectorScheduler.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D239C1C7785A900D0477A /* SPTPersistentCacheGarbageCollectorScheduler.h */; };
+		DD1D23AF1C7785A900D0477A /* SPTPersistentCacheGarbageCollectorScheduler.m in Sources */ = {isa = PBXBuildFile; fileRef = DD1D239D1C7785A900D0477A /* SPTPersistentCacheGarbageCollectorScheduler.m */; };
 		DD1D23B21C7785AE00D0477A /* crc32iso3309.c in Sources */ = {isa = PBXBuildFile; fileRef = DD1D23901C7785A900D0477A /* crc32iso3309.c */; };
 		DD1D23B31C7785AE00D0477A /* crc32iso3309.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D23911C7785A900D0477A /* crc32iso3309.h */; };
 		DD1D23B41C7785AE00D0477A /* SPTPersistentCache.m in Sources */ = {isa = PBXBuildFile; fileRef = DD1D23921C7785A900D0477A /* SPTPersistentCache.m */; };
@@ -49,8 +49,8 @@
 		DD1D23BB1C7785AE00D0477A /* SPTPersistentCacheRecord+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D23991C7785A900D0477A /* SPTPersistentCacheRecord+Private.h */; };
 		DD1D23BC1C7785AE00D0477A /* SPTPersistentCacheResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = DD1D239A1C7785A900D0477A /* SPTPersistentCacheResponse.m */; };
 		DD1D23BD1C7785AE00D0477A /* SPTPersistentCacheResponse+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D239B1C7785A900D0477A /* SPTPersistentCacheResponse+Private.h */; };
-		DD1D23BE1C7785AE00D0477A /* SPTPersistentCacheTimerProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D239C1C7785A900D0477A /* SPTPersistentCacheTimerProxy.h */; };
-		DD1D23BF1C7785AE00D0477A /* SPTPersistentCacheTimerProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = DD1D239D1C7785A900D0477A /* SPTPersistentCacheTimerProxy.m */; };
+		DD1D23BE1C7785AE00D0477A /* SPTPersistentCacheGarbageCollectorScheduler.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D239C1C7785A900D0477A /* SPTPersistentCacheGarbageCollectorScheduler.h */; };
+		DD1D23BF1C7785AE00D0477A /* SPTPersistentCacheGarbageCollectorScheduler.m in Sources */ = {isa = PBXBuildFile; fileRef = DD1D239D1C7785A900D0477A /* SPTPersistentCacheGarbageCollectorScheduler.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -80,8 +80,8 @@
 		DD1D23991C7785A900D0477A /* SPTPersistentCacheRecord+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SPTPersistentCacheRecord+Private.h"; sourceTree = "<group>"; };
 		DD1D239A1C7785A900D0477A /* SPTPersistentCacheResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheResponse.m; sourceTree = "<group>"; };
 		DD1D239B1C7785A900D0477A /* SPTPersistentCacheResponse+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SPTPersistentCacheResponse+Private.h"; sourceTree = "<group>"; };
-		DD1D239C1C7785A900D0477A /* SPTPersistentCacheTimerProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheTimerProxy.h; sourceTree = "<group>"; };
-		DD1D239D1C7785A900D0477A /* SPTPersistentCacheTimerProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheTimerProxy.m; sourceTree = "<group>"; };
+		DD1D239C1C7785A900D0477A /* SPTPersistentCacheGarbageCollectorScheduler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheGarbageCollectorScheduler.h; sourceTree = "<group>"; };
+		DD1D239D1C7785A900D0477A /* SPTPersistentCacheGarbageCollectorScheduler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheGarbageCollectorScheduler.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -150,8 +150,8 @@
 				DD1D23991C7785A900D0477A /* SPTPersistentCacheRecord+Private.h */,
 				DD1D239A1C7785A900D0477A /* SPTPersistentCacheResponse.m */,
 				DD1D239B1C7785A900D0477A /* SPTPersistentCacheResponse+Private.h */,
-				DD1D239C1C7785A900D0477A /* SPTPersistentCacheTimerProxy.h */,
-				DD1D239D1C7785A900D0477A /* SPTPersistentCacheTimerProxy.m */,
+				DD1D239C1C7785A900D0477A /* SPTPersistentCacheGarbageCollectorScheduler.h */,
+				DD1D239D1C7785A900D0477A /* SPTPersistentCacheGarbageCollectorScheduler.m */,
 				C45526B21C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h */,
 				C45526B31C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.m */,
 			);
@@ -195,7 +195,7 @@
 				DD1D23AD1C7785A900D0477A /* SPTPersistentCacheResponse+Private.h in Headers */,
 				DD1D23821C77857900D0477A /* SPTPersistentCacheRecord.h in Headers */,
 				DD1D23A31C7785A900D0477A /* crc32iso3309.h in Headers */,
-				DD1D23AE1C7785A900D0477A /* SPTPersistentCacheTimerProxy.h in Headers */,
+				DD1D23AE1C7785A900D0477A /* SPTPersistentCacheGarbageCollectorScheduler.h in Headers */,
 				DD1D23A51C7785A900D0477A /* SPTPersistentCache+Private.h in Headers */,
 				DD1D23811C77857900D0477A /* SPTPersistentCacheOptions.h in Headers */,
 			);
@@ -205,7 +205,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DD1D23BE1C7785AE00D0477A /* SPTPersistentCacheTimerProxy.h in Headers */,
+				DD1D23BE1C7785AE00D0477A /* SPTPersistentCacheGarbageCollectorScheduler.h in Headers */,
 				DD1D23B61C7785AE00D0477A /* SPTPersistentCacheFileManager.h in Headers */,
 				DD1D23851C77857E00D0477A /* SPTPersistentCache.h in Headers */,
 				DD1D23B51C7785AE00D0477A /* SPTPersistentCache+Private.h in Headers */,
@@ -319,7 +319,7 @@
 			files = (
 				DD1D23AA1C7785A900D0477A /* SPTPersistentCacheRecord.m in Sources */,
 				DD1D23A21C7785A900D0477A /* crc32iso3309.c in Sources */,
-				DD1D23AF1C7785A900D0477A /* SPTPersistentCacheTimerProxy.m in Sources */,
+				DD1D23AF1C7785A900D0477A /* SPTPersistentCacheGarbageCollectorScheduler.m in Sources */,
 				DD1D23A71C7785A900D0477A /* SPTPersistentCacheFileManager.m in Sources */,
 				DD1D239F1C7785A900D0477A /* NSError+SPTPersistentCacheDomainErrors.m in Sources */,
 				DD1D23A81C7785A900D0477A /* SPTPersistentCacheHeader.m in Sources */,
@@ -334,7 +334,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DD1D23BF1C7785AE00D0477A /* SPTPersistentCacheTimerProxy.m in Sources */,
+				DD1D23BF1C7785AE00D0477A /* SPTPersistentCacheGarbageCollectorScheduler.m in Sources */,
 				DD1D23B21C7785AE00D0477A /* crc32iso3309.c in Sources */,
 				DD1D23B81C7785AE00D0477A /* SPTPersistentCacheHeader.m in Sources */,
 				DD1D23BC1C7785AE00D0477A /* SPTPersistentCacheResponse.m in Sources */,

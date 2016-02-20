@@ -18,20 +18,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import "SPTPersistentCacheTimerProxy.h"
+#import "SPTPersistentCacheGarbageCollectorScheduler.h"
 
 #import "SPTPersistentCache+Private.h"
 
 const NSTimeInterval SPTPersistentCacheTimerProxyTimerToleranceInterval = 300;
 
-@interface SPTPersistentCacheTimerProxy ()
+@interface SPTPersistentCacheGarbageCollectorScheduler ()
 @property (nonatomic, copy) SPTDataCacheDebugCallback debugOutput;
 @property (nonatomic, strong) NSTimer *timer;
 @property (nonatomic, strong) SPTPersistentCacheOptions *options;
 @end
 
 
-@implementation SPTPersistentCacheTimerProxy
+@implementation SPTPersistentCacheGarbageCollectorScheduler
 
 #pragma mark - Initializer
 

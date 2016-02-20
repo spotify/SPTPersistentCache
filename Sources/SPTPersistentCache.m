@@ -26,7 +26,7 @@
 #import "SPTPersistentCacheRecord+Private.h"
 #import "SPTPersistentCacheResponse+Private.h"
 #import "SPTPersistentCache+Private.h"
-#import "SPTPersistentCacheTimerProxy.h"
+#import "SPTPersistentCacheGarbageCollectorScheduler.h"
 #import "NSError+SPTPersistentCacheDomainErrors.h"
 #import "SPTPersistentCacheFileManager.h"
 #include <sys/stat.h>
@@ -57,7 +57,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 @property (nonatomic, strong) SPTPersistentCacheFileManager *dataCacheFileManager;
 // Keys that are currently shouldn't be opened bcuz its busy by streams for example
 @property (nonatomic, strong) NSMutableSet *busyKeys;
-@property (nonatomic, strong) SPTPersistentCacheTimerProxy *timerProxy;
+@property (nonatomic, strong) SPTPersistentCacheGarbageCollectorScheduler *garbageCollectorScheduler;
 @end
 
 #pragma mark - SPTPersistentCache
@@ -92,7 +92,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
         return nil;
     }
     
-    _timerProxy = [[SPTPersistentCacheTimerProxy alloc]
+    _garbageCollectorScheduler = [[SPTPersistentCacheGarbageCollectorScheduler alloc]
                  initWithDataCache:self
                                                                   options:_options
                                                                     queue:_workQueue];
@@ -410,12 +410,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
 - (void)scheduleGarbageCollector
 {
-    [self.timerProxy scheduleGarbageCollection];
+    [self.garbageCollectorScheduler scheduleGarbageCollection];
 }
 
 - (void)unscheduleGarbageCollector
 {
-    [self.timerProxy unscheduleGarbageCollection];
+    [self.garbageCollectorScheduler unscheduleGarbageCollection];
 }
 
 - (void)prune
