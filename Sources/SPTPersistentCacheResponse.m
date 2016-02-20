@@ -19,6 +19,8 @@
  * under the License.
  */
 #import <SPTPersistentCache/SPTPersistentCacheResponse.h>
+#import <SPTPersistentCache/SPTPersistentCacheRecord.h>
+#import "SPTPersistentCacheObjectDescription.h"
 
 @interface SPTPersistentCacheResponse ()
 
@@ -43,6 +45,30 @@
     _record = record;
 
     return self;
+}
+
+#pragma mark Describing Object
+
+NS_INLINE NSString *NSStringFromSPTPersistentCacheResponseCode(SPTPersistentCacheResponseCode code)
+{
+    switch (code) {
+        case SPTPersistentCacheResponseCodeNotFound:            return @"not-found";
+        case SPTPersistentCacheResponseCodeOperationError:      return @"operation-error";
+        case SPTPersistentCacheResponseCodeOperationSucceeded:  return @"operation-success";
+    }
+}
+
+- (NSString *)description
+{
+    return SPTPersistentCacheObjectDescription(self, NSStringFromSPTPersistentCacheResponseCode(self.result), @"result");
+}
+
+- (NSString *)debugDescription
+{
+    return SPTPersistentCacheObjectDescription(self,
+                                               NSStringFromSPTPersistentCacheResponseCode(self.result), @"result",
+                                               self.record.debugDescription, @"record",
+                                               self.error.debugDescription, @"error");
 }
 
 @end

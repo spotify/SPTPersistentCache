@@ -18,40 +18,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import "SPTPersistentCacheRecord.h"
-#import "SPTPersistentCacheObjectDescription.h"
+#import <Foundation/Foundation.h>
 
-@implementation SPTPersistentCacheRecord
+/**
+ * Class which validates object descriptions for conformance to the expected style.
+ *
+ * A valid description adheres to the following pattern:
+ * - <ClassName: 0x0123456789abcdefABCDEF>`
+ * - <ClassName: 0x0123456789abcdefABCDEF; key = "foo">
+ * - <ClassName: 0x0123456789abcdefABCDEF; key = "foo"; bar-bar = "hello">
+ */
+@interface SPTPersistentCacheObjectDescriptionStyleValidator : NSObject
 
-#pragma mark SPTPersistentCacheRecord
-
-- (instancetype)initWithData:(NSData *)data
-                         key:(NSString *)key
-                    refCount:(NSUInteger)refCount
-                         ttl:(NSUInteger)ttl
-{
-    if (!(self = [super init])) {
-        return nil;
-    }
-
-    _refCount = refCount;
-    _ttl = ttl;
-    _key = [key copy];
-    _data = data;
-
-    return self;
-}
-
-#pragma mark Describing Object
-
-- (NSString *)description
-{
-    return SPTPersistentCacheObjectDescription(self, self.key, @"key");
-}
-
-- (NSString *)debugDescription
-{
-    return SPTPersistentCacheObjectDescription(self, self.key, @"key", @(self.ttl), @"ttl", @(self.refCount), @"ref-count");
-}
+/**
+ * Valides the given _description_ for style conformance.
+ *
+ * @param description A string description of an object which should be validated.
+ *
+ * @return A boolean indicating if the _description_ is valid stylewise.
+ */
+- (BOOL)isValidStyleDescription:(NSString *)description;
 
 @end

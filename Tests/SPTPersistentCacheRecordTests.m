@@ -22,6 +22,7 @@
 #import <XCTest/XCTest.h>
 #import "SPTPersistentCacheRecord.h"
 #import "SPTPersistentCacheRecord+Private.h"
+#import "SPTPersistentCacheObjectDescriptionStyleValidator.h"
 
 
 static const NSUInteger SPTPersistentCacheRecordTestRefCount = 43244555;
@@ -53,6 +54,42 @@ static NSString * const SPTPersistentCacheRecordTestDataString = @"https://spoti
     XCTAssertEqualObjects(self.dataCacheRecord.key, SPTPersistentCacheRecordTestKey);
     XCTAssertEqual(self.dataCacheRecord.refCount, SPTPersistentCacheRecordTestRefCount);
     XCTAssertEqual(self.dataCacheRecord.ttl, SPTPersistentCacheRecordTestTTL);
+}
+
+#pragma mark Test describing objects
+
+- (void)testDescriptionAdheresToStyle
+{
+    SPTPersistentCacheObjectDescriptionStyleValidator *styleValidator = [SPTPersistentCacheObjectDescriptionStyleValidator new];
+
+    NSString * const description = self.dataCacheRecord.description;
+
+    XCTAssertTrue([styleValidator isValidStyleDescription:description], @"The description string should follow our style.");
+}
+
+- (void)testDescriptionContainsClassName
+{
+    NSString * const description = self.dataCacheRecord.description;
+
+    const NSRange classNameRange = [description rangeOfString:@"SPTPersistentCacheRecord"];
+    XCTAssertNotEqual(classNameRange.location, NSNotFound, @"The class name should exist in the description");
+}
+
+- (void)testDebugDescriptionAdheresToStyle
+{
+    SPTPersistentCacheObjectDescriptionStyleValidator *styleValidator = [SPTPersistentCacheObjectDescriptionStyleValidator new];
+
+    NSString * const debugDescription = self.dataCacheRecord.debugDescription;
+
+    XCTAssertTrue([styleValidator isValidStyleDescription:debugDescription], @"The debugDescription string should follow our style.");
+}
+
+- (void)testDebugDescriptionContainsClassName
+{
+    NSString * const debugDescription = self.dataCacheRecord.debugDescription;
+
+    const NSRange classNameRange = [debugDescription rangeOfString:@"SPTPersistentCacheRecord"];
+    XCTAssertNotEqual(classNameRange.location, NSNotFound, @"The class name should exist in the debugDescription");
 }
 
 @end
