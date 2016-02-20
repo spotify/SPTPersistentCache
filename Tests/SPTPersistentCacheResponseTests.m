@@ -24,6 +24,7 @@
 #import <SPTPersistentCache/SPTPersistentCacheRecord.h>
 #import "SPTPersistentCacheResponse+Private.h"
 #import <SPTPersistentCache/SPTPersistentCacheResponse.h>
+#import "SPTPersistentCacheObjectDescriptionStyleValidator.h"
 
 
 static const SPTPersistentCacheResponseCode SPTPersistentCacheResponseTestsTestCode   = SPTPersistentCacheResponseCodeNotFound;
@@ -57,5 +58,33 @@ static const SPTPersistentCacheResponseCode SPTPersistentCacheResponseTestsTestC
     XCTAssertEqualObjects(self.persistentCacheResponse.error, self.testError);
     XCTAssertEqualObjects(self.persistentCacheResponse.record, self.testCacheRecord);
 }
+
+#pragma mark Test describing objects
+
+- (void)testDescriptionAdheresToStyle
+{
+    SPTPersistentCacheObjectDescriptionStyleValidator *styleValidator = [SPTPersistentCacheObjectDescriptionStyleValidator new];
+
+    NSString * const description = self.persistentCacheResponse.description;
+
+    XCTAssertTrue([styleValidator isValidStyleDescription:description], @"The description string should follow our style.");
+}
+
+- (void)testDescriptionContainsClassName
+{
+    NSString * const description = self.persistentCacheResponse.description;
+
+    const NSRange classNameRange = [description rangeOfString:@"SPTPersistentCacheResponse"];
+    XCTAssertNotEqual(classNameRange.location, NSNotFound, @"The class name should exist in the description");
+}
+
+- (void)testDebugDescriptionContainsClassName
+{
+    NSString * const debugDescription = self.persistentCacheResponse.debugDescription;
+
+    const NSRange classNameRange = [debugDescription rangeOfString:@"SPTPersistentCacheResponse"];
+    XCTAssertNotEqual(classNameRange.location, NSNotFound, @"The class name should exist in the debugDescription");
+}
+
 
 @end

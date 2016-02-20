@@ -19,8 +19,9 @@
  * under the License.
  */
 #import "SPTPersistentCacheOptions.h"
+#import "SPTPersistentCacheObjectDescription.h"
 
-void SPTPersistentCacheOptionsDebug(NSString *debugMessage, SPTDataCacheDebugCallback debugCallback);
+void SPTPersistentCacheOptionsDebug(NSString *debugMessage, SPTPersistentCacheDebugCallback debugCallback);
 
 const NSUInteger SPTPersistentCacheDefaultExpirationTimeSec = 10 * 60;
 const NSUInteger SPTPersistentCacheDefaultGCIntervalSec = 6 * 60 + 3;
@@ -34,8 +35,10 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
 #pragma mark SPTPersistentCacheOptions
 
 @interface SPTPersistentCacheOptions ()
+
 @property (nonatomic) NSString *identifierForQueue;
-@property (nonatomic, copy) SPTDataCacheCurrentTimeSecCallback currentTimeSec;
+@property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback currentTimeSec;
+
 @end
 
 
@@ -53,8 +56,8 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
 
 - (instancetype)initWithCachePath:(NSString *)cachePath
                        identifier:(NSString *)cacheIdentifier
-              currentTimeCallback:(SPTDataCacheCurrentTimeSecCallback)currentTimeBlock
-                            debug:(SPTDataCacheDebugCallback)debugCallback
+              currentTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTimeBlock
+                            debug:(SPTPersistentCacheDebugCallback)debugCallback
 {
     return [self initWithCachePath:cachePath
                         identifier:cacheIdentifier
@@ -66,10 +69,10 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
 
 - (instancetype)initWithCachePath:(NSString *)cachePath
                        identifier:(NSString *)cacheIdentifier
-              currentTimeCallback:(SPTDataCacheCurrentTimeSecCallback)currentTimeBlock
+              currentTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTimeBlock
         defaultExpirationInterval:(NSUInteger)defaultExpirationInterval
          garbageCollectorInterval:(NSUInteger)garbageCollectorInterval
-                            debug:(SPTDataCacheDebugCallback)debugCallback
+                            debug:(SPTPersistentCacheDebugCallback)debugCallback
 {
     if (!(self = [super init])) {
         return nil;
@@ -116,11 +119,30 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
     return self;
 }
 
+#pragma mark Describing Object
+
+- (NSString *)description
+{
+    return SPTPersistentCacheObjectDescription(self, self.cacheIdentifier, @"cache-identifier");
+}
+
+- (NSString *)debugDescription
+{
+    return SPTPersistentCacheObjectDescription(self,
+                                               self.cacheIdentifier, @"cache-identifier",
+                                               self.cachePath, @"cache-path",
+                                               self.identifierForQueue, @"identifier-for-queue",
+                                               @(self.folderSeparationEnabled), @"folder-separation",
+                                               @(self.gcIntervalSec), @"gc-interval-seconds",
+                                               @(self.defaultExpirationPeriodSec), @"default-expiration-period-seconds",
+                                               @(self.sizeConstraintBytes), @"size-constraint-bytes");
+}
+
 @end
 
 #pragma mark - Logging
 
-void SPTPersistentCacheOptionsDebug(NSString *debugMessage, SPTDataCacheDebugCallback debugCallback)
+void SPTPersistentCacheOptionsDebug(NSString *debugMessage, SPTPersistentCacheDebugCallback debugCallback)
 {
     if (debugCallback) {
         debugCallback(debugMessage);

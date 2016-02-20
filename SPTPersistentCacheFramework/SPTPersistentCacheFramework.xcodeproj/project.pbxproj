@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9C9E707B1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C9E70791C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m */; };
+		9C9E707C1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C9E707A1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h */; };
+		9C9E707D1C790F3700E1CBE6 /* SPTPersistentCacheObjectDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C9E70791C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m */; };
+		9C9E707E1C790F3B00E1CBE6 /* SPTPersistentCacheObjectDescription.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C9E707A1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h */; };
 		C45526B41C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = C45526B21C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h */; };
 		C45526B51C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = C45526B21C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h */; };
 		C45526B61C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = C45526B31C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.m */; };
@@ -59,6 +63,8 @@
 		052021FB1C7382C6003A4FB4 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		052022061C738600003A4FB4 /* project.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = project.xcconfig; path = ../project.xcconfig; sourceTree = "<group>"; };
 		052022091C738637003A4FB4 /* spotify_os.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = spotify_os.xcconfig; path = ../spotify_os.xcconfig; sourceTree = "<group>"; };
+		9C9E70791C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheObjectDescription.m; sourceTree = "<group>"; };
+		9C9E707A1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheObjectDescription.h; sourceTree = "<group>"; };
 		C45526B21C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheTypeUtilities.h; sourceTree = "<group>"; };
 		C45526B31C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheTypeUtilities.m; sourceTree = "<group>"; };
 		DD1D23791C77857900D0477A /* SPTPersistentCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCache.h; sourceTree = "<group>"; };
@@ -145,6 +151,8 @@
 				DD1D23941C7785A900D0477A /* SPTPersistentCacheFileManager.h */,
 				DD1D23951C7785A900D0477A /* SPTPersistentCacheFileManager.m */,
 				DD1D23961C7785A900D0477A /* SPTPersistentCacheHeader.m */,
+				9C9E707A1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h */,
+				9C9E70791C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m */,
 				DD1D23971C7785A900D0477A /* SPTPersistentCacheOptions.m */,
 				DD1D23981C7785A900D0477A /* SPTPersistentCacheRecord.m */,
 				DD1D23991C7785A900D0477A /* SPTPersistentCacheRecord+Private.h */,
@@ -197,6 +205,7 @@
 				DD1D23A31C7785A900D0477A /* crc32iso3309.h in Headers */,
 				DD1D23AE1C7785A900D0477A /* SPTPersistentCacheTimerProxy.h in Headers */,
 				DD1D23A51C7785A900D0477A /* SPTPersistentCache+Private.h in Headers */,
+				9C9E707C1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h in Headers */,
 				DD1D23811C77857900D0477A /* SPTPersistentCacheOptions.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -213,6 +222,7 @@
 				DD1D23B31C7785AE00D0477A /* crc32iso3309.h in Headers */,
 				DD1D23BD1C7785AE00D0477A /* SPTPersistentCacheResponse+Private.h in Headers */,
 				DD1D23871C77857E00D0477A /* SPTPersistentCacheOptions.h in Headers */,
+				9C9E707E1C790F3B00E1CBE6 /* SPTPersistentCacheObjectDescription.h in Headers */,
 				DD1D23891C77857E00D0477A /* SPTPersistentCacheResponse.h in Headers */,
 				C45526B51C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h in Headers */,
 				DD1D23861C77857E00D0477A /* SPTPersistentCacheHeader.h in Headers */,
@@ -319,6 +329,7 @@
 			files = (
 				DD1D23AA1C7785A900D0477A /* SPTPersistentCacheRecord.m in Sources */,
 				DD1D23A21C7785A900D0477A /* crc32iso3309.c in Sources */,
+				9C9E707B1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m in Sources */,
 				DD1D23AF1C7785A900D0477A /* SPTPersistentCacheTimerProxy.m in Sources */,
 				DD1D23A71C7785A900D0477A /* SPTPersistentCacheFileManager.m in Sources */,
 				DD1D239F1C7785A900D0477A /* NSError+SPTPersistentCacheDomainErrors.m in Sources */,
@@ -343,6 +354,7 @@
 				DD1D23B91C7785AE00D0477A /* SPTPersistentCacheOptions.m in Sources */,
 				DD1D23B41C7785AE00D0477A /* SPTPersistentCache.m in Sources */,
 				C45526B71C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.m in Sources */,
+				9C9E707D1C790F3700E1CBE6 /* SPTPersistentCacheObjectDescription.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -377,6 +389,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.SPTPersistentCache-iOS";
 				PRODUCT_NAME = SPTPersistentCache;
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				VALID_ARCHS = "i386 x86_64 armv7 arm64 armv7s";
 			};
 			name = Debug;
 		};
@@ -388,6 +402,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.SPTPersistentCache-iOS";
 				PRODUCT_NAME = SPTPersistentCache;
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				VALID_ARCHS = "i386 x86_64 armv7 arm64 armv7s";
 			};
 			name = Release;
 		};
@@ -405,6 +421,8 @@
 				PRODUCT_NAME = SPTPersistentCache;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = macosx;
+				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Debug;
 		};
@@ -422,6 +440,8 @@
 				PRODUCT_NAME = SPTPersistentCache;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = macosx;
+				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Release;
 		};

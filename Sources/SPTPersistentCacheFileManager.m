@@ -28,9 +28,11 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
 
 
 @interface SPTPersistentCacheFileManager ()
+
 @property (nonatomic, strong) SPTPersistentCacheOptions *options;
 @property (nonatomic, strong) NSFileManager *fileManager;
-@property (nonatomic, copy) SPTDataCacheDebugCallback debugOutput;
+@property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
+
 @end
 
 @implementation SPTPersistentCacheFileManager
