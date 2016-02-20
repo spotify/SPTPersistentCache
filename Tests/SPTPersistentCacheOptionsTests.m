@@ -28,10 +28,15 @@
 
 @implementation SPTPersistentCacheOptionsTests
 
+- (void)setUp
+{
+    [super setUp];
+
+    self.dataCacheOptions = [SPTPersistentCacheOptions new];
+}
+
 - (void)testDefaultInitializer
 {
-    self.dataCacheOptions = [[SPTPersistentCacheOptions alloc] init];
-    
     XCTAssertEqual(self.dataCacheOptions.folderSeparationEnabled, YES);
     XCTAssertEqual(self.dataCacheOptions.gcIntervalSec, SPTPersistentCacheDefaultGCIntervalSec);
     XCTAssertEqual(self.dataCacheOptions.defaultExpirationPeriodSec,
@@ -43,27 +48,25 @@
 
 - (void)testMinimumGarbageColectorInterval
 {
-    self.dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
-                                                                          identifier:nil
-
-                                                                 currentTimeCallback:nil
-                                                           defaultExpirationInterval:1
-                                                            garbageCollectorInterval:1
-                                                                               debug:nil];
-    XCTAssertEqual(self.dataCacheOptions.gcIntervalSec,
+    SPTPersistentCacheOptions *dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
+                                                                                            identifier:nil
+                                                                                   currentTimeCallback:nil
+                                                                             defaultExpirationInterval:1
+                                                                              garbageCollectorInterval:1
+                                                                                                 debug:nil];
+    XCTAssertEqual(dataCacheOptions.gcIntervalSec,
                    SPTPersistentCacheMinimumGCIntervalLimit);
 }
 
 - (void)testMinimumDefaultExpirationInterval
 {
-    self.dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
-                                                                          identifier:nil
-                             
-                                                                 currentTimeCallback:nil
-                                                           defaultExpirationInterval:1
-                                                            garbageCollectorInterval:1
-                                                                               debug:nil];
-    XCTAssertEqual(self.dataCacheOptions.defaultExpirationPeriodSec,
+    SPTPersistentCacheOptions *dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
+                                                                                            identifier:nil
+                                                                                   currentTimeCallback:nil
+                                                                             defaultExpirationInterval:1
+                                                                              garbageCollectorInterval:1
+                                                                                                 debug:nil];
+    XCTAssertEqual(dataCacheOptions.defaultExpirationPeriodSec,
                    SPTPersistentCacheMinimumExpirationLimit);
 }
 
