@@ -112,6 +112,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 @property (nonatomic, strong) dispatch_queue_t workQueue;
 @property (nonatomic, strong) NSFileManager *fileManager;
+@property (nonatomic, strong) NSTimer *gcTimer;
 
 - (void)runRegularGC;
 - (void)pruneBySize;
@@ -1304,6 +1305,19 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         XCTAssertFalse(called);
         break;
     }
+}
+
+- (void)testScheduleGarbageCollection
+{
+    [self.cache scheduleGarbageCollector];
+    XCTAssertNotNil(self.cache.gcTimer);
+}
+
+- (void)testUnscheduleGarbageCollection
+{
+    [self.cache scheduleGarbageCollector];
+    [self.cache unscheduleGarbageCollector];
+    XCTAssertNil(self.cache.gcTimer);
 }
 
 #pragma mark - Internal methods
