@@ -105,7 +105,7 @@ static NSUInteger params_GetFilesNumber(BOOL locked);
 static NSUInteger params_GetCorruptedFilesNumber(void);
 static NSUInteger params_GetDefaultExpireFilesNumber(void);
 
-static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentCacheRecordHeaderType *header);
+static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentCacheRecordHeader *header);
 
 @interface SPTPersistentCache (Testing)
 - (void)runRegularGC;
@@ -1121,7 +1121,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     for (unsigned i = 0; i < count; ++i) {
         NSString *path = [fileManager pathForKey:self.imageNames[i]];
 
-        SPTPersistentCacheRecordHeaderType header;
+        SPTPersistentCacheRecordHeader header;
         BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
         if (kParams[i].locked) {
             ++lockedCount;
@@ -1158,7 +1158,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     for (unsigned i = 0; i < count; ++i) {
         NSString *path = [fileManager pathForKey:self.imageNames[i]];
 
-        SPTPersistentCacheRecordHeaderType header;
+        SPTPersistentCacheRecordHeader header;
         BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
         if (kParams[i].locked) {
             ++lockedCount;
@@ -1238,7 +1238,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         }
 
         NSString *path = [fileManager pathForKey:savedItems[i]];
-        SPTPersistentCacheRecordHeaderType header;
+        SPTPersistentCacheRecordHeader header;
         BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
         XCTAssertTrue(opened, @"Saved files expected to in place");
     }
@@ -1279,7 +1279,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     // Check data
-    SPTPersistentCacheRecordHeaderType header;
+    SPTPersistentCacheRecordHeader header;
     XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, YES, &header), @"Expect valid record");
     XCTAssertEqual(header.ttl, kTTL1, @"TTL must match");
     XCTAssertEqual(header.refCount, 1u, @"refCount must match");
@@ -1354,7 +1354,7 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
         return;
     }
 
-    SPTPersistentCacheRecordHeaderType header;
+    SPTPersistentCacheRecordHeader header;
     memset(&header, 0, (size_t)SPTPersistentCacheRecordHeaderSize);
 
     if (pdcError != SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader) {
@@ -1414,7 +1414,7 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
         return;
     }
 
-    SPTPersistentCacheRecordHeaderType header;
+    SPTPersistentCacheRecordHeader header;
     memset(&header, 0, (size_t)SPTPersistentCacheRecordHeaderSize);
 
     ssize_t readSize = read(fd, &header, (size_t)SPTPersistentCacheRecordHeaderSize);
@@ -1477,7 +1477,7 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
 - (void)checkUpdateTimeForFileAtPath:(NSString *)path validate:(BOOL)validate referenceTimeCheck:(void(^)(uint64_t updateTime))timeCheck
 {
     XCTAssertNotNil(path, @"Path is nil");
-    SPTPersistentCacheRecordHeaderType header;
+    SPTPersistentCacheRecordHeader header;
     if (validate) {
         XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, validate, &header), @"Unable to read and validate header");
         timeCheck(header.updateTimeSec);
@@ -1510,7 +1510,7 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
 
 @end
 
-static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentCacheRecordHeaderType *header)
+static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentCacheRecordHeader *header)
 {
     int fd = open(path, O_RDONLY);
     if (fd == -1) {

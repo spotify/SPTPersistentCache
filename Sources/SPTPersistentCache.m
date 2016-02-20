@@ -30,20 +30,11 @@
 #import "NSError+SPTPersistentCacheDomainErrors.h"
 #import "SPTPersistentCacheFileManager.h"
 #include <sys/stat.h>
+#import "SPTPersistentCacheTypeUtilities.h"
+
 
 // Enable for more precise logging
 //#define DEBUG_OUTPUT_ENABLED
-
-/**
- * Converts the given `double` _value_ to an `uint64_t` value.
- *
- * @param value The value as a `double`.
- * @return The value as an `uint64_t`.
- */
-NS_INLINE uint64_t spt_uint64rint(double value)
-{
-    return (uint64_t)llrint(value);
-}
 
 NSString *const SPTPersistentCacheErrorDomain = @"persistent.cache.error";
 static const uint64_t kTTLUpperBoundInSec = 86400 * 31 * 2;
@@ -52,7 +43,7 @@ static NSString * const SPTDataCacheFileNameKey = @"SPTDataCacheFileNameKey";
 static NSString * const SPTDataCacheFileAttributesKey = @"SPTDataCacheFileAttributesKey";
 
 typedef SPTPersistentCacheResponse* (^FileProcessingBlockType)(int filedes);
-typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *header);
+typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *header);
 
 #pragma mark - SPTPersistentCache()
 
@@ -173,7 +164,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
 
             // WARNING: We may skip return result here bcuz in that case we will skip the key as invalid
             [self alterHeaderForFileAtPath:filePath
-                                 withBlock:^(SPTPersistentCacheRecordHeaderType *header) {
+                                 withBlock:^(SPTPersistentCacheRecordHeader *header) {
                                      assert(header != nil);
 
                                      // Satisfy Req.#1.2
@@ -269,7 +260,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
         BOOL __block expired = NO;
         SPTPersistentCacheResponse *response =
         [self alterHeaderForFileAtPath:filePath
-                             withBlock:^(SPTPersistentCacheRecordHeaderType *header) {
+                             withBlock:^(SPTPersistentCacheRecordHeader *header) {
                                  assert(header != nil);
 
                                  // Satisfy Req.#1.2 and Req.#1.3
@@ -341,7 +332,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
             BOOL __block expired = NO;
             SPTPersistentCacheResponse *response =
             [self alterHeaderForFileAtPath:filePath
-                                 withBlock:^(SPTPersistentCacheRecordHeaderType *header) {
+                                 withBlock:^(SPTPersistentCacheRecordHeader *header) {
                                      assert(header != nil);
 
                                      // Satisfy Req.#1.2
@@ -392,7 +383,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
 
             SPTPersistentCacheResponse *response =
             [self alterHeaderForFileAtPath:filePath
-                                 withBlock:^(SPTPersistentCacheRecordHeaderType *header){
+                                 withBlock:^(SPTPersistentCacheRecordHeader *header){
                                      assert(header != nil);
 
                                      if (header->refCount > 0) {
@@ -498,7 +489,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
 
                     BOOL __block locked = NO;
                     // WARNING: We may skip return result here bcuz in that case we will not count file as locked
-                    [self alterHeaderForFileAtPath:filePath withBlock:^(SPTPersistentCacheRecordHeaderType *header) {
+                    [self alterHeaderForFileAtPath:filePath withBlock:^(SPTPersistentCacheRecordHeader *header) {
                         locked = header->refCount > 0;
                     }
                                          writeBack:NO
@@ -552,7 +543,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
             // File read with error -> inform user
             [self dispatchError:error result:SPTPersistentCacheResponseCodeOperationError callback:callback onQueue:queue];
         } else {
-            SPTPersistentCacheRecordHeaderType *header = SPTPersistentCacheGetHeaderFromData(rawData.mutableBytes, rawData.length);
+            SPTPersistentCacheRecordHeader *header = SPTPersistentCacheGetHeaderFromData(rawData.mutableBytes, rawData.length);
 
             // If not enough data to cast to header, its not the file we can process
             if (header == NULL) {
@@ -561,7 +552,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
                 return;
             }
 
-            SPTPersistentCacheRecordHeaderType localHeader;
+            SPTPersistentCacheRecordHeader localHeader;
             memcpy(&localHeader, header, sizeof(localHeader));
 
             // Check header is valid
@@ -637,7 +628,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
 - (NSError *)storeDataSync:(NSData *)data
                     forKey:(NSString *)key
                        ttl:(NSUInteger)ttl
-                    locked:(BOOL)locked
+                    locked:(BOOL)isLocked
               withCallback:(SPTDataCacheResponseCallback)callback
                    onQueue:(dispatch_queue_t)queue
 {
@@ -646,25 +637,17 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
     NSString *subDir = [self.dataCacheFileManager subDirectoryPathForKey:key];
     [self.fileManager createDirectoryAtPath:subDir withIntermediateDirectories:YES attributes:nil error:nil];
 
-    uint32_t __block oldRefCount = 0;
-    const NSUInteger payloadLen = [data length];
-    const NSUInteger rawdataLen = SPTPersistentCacheRecordHeaderSize + payloadLen;
+    const NSUInteger payloadLength = [data length];
+    const NSUInteger rawDataLength = SPTPersistentCacheRecordHeaderSize + payloadLength;
 
-    NSMutableData *rawData = [NSMutableData dataWithCapacity:rawdataLen];
+    NSMutableData *rawData = [NSMutableData dataWithCapacity:rawDataLength];
 
-    SPTPersistentCacheRecordHeaderType dummy;
-    memset(&dummy, 0, SPTPersistentCacheRecordHeaderSize);
-    SPTPersistentCacheRecordHeaderType *header = &dummy;
+    SPTPersistentCacheRecordHeader header = SPTPersistentCacheRecordHeaderMake(ttl,
+                                                                               payloadLength,
+                                                                               spt_uint64rint(self.currentTime()),
+                                                                               isLocked);
 
-    header->magic = SPTPersistentCacheMagicValue;
-    header->headerSize = (uint32_t)SPTPersistentCacheRecordHeaderSize;
-    header->refCount = oldRefCount + (locked ? 1 : 0);
-    header->ttl = ttl;
-    header->payloadSizeBytes = payloadLen;
-    header->updateTimeSec = spt_uint64rint(self.currentTime());
-    header->crc = SPTPersistentCacheCalculateHeaderCRC(header);
-
-    [rawData appendBytes:&dummy length:SPTPersistentCacheRecordHeaderSize];
+    [rawData appendBytes:&header length:SPTPersistentCacheRecordHeaderSize];
     [rawData appendData:data];
 
     NSError *error = nil;
@@ -753,7 +736,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
 
     return [self guardOpenFileWithPath:filePath jobBlock:^SPTPersistentCacheResponse*(int filedes) {
 
-        SPTPersistentCacheRecordHeaderType header;
+        SPTPersistentCacheRecordHeader header;
         ssize_t readBytes = read(filedes, &header, SPTPersistentCacheRecordHeaderSize);
         if (readBytes != (ssize_t)SPTPersistentCacheRecordHeaderSize) {
             NSError *error = [NSError spt_persistentDataCacheErrorWithCode:SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader];
@@ -827,7 +810,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
 /**
  * Only this method check data expiration. Past check is also supported.
  */
-- (BOOL)isDataExpiredWithHeader:(SPTPersistentCacheRecordHeaderType *)header
+- (BOOL)isDataExpiredWithHeader:(SPTPersistentCacheRecordHeader *)header
 {
     assert(header != nil);
     uint64_t ttl = header->ttl;
@@ -844,7 +827,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
 /**
  * Methos checks whether data can be given to caller with accordance to API.
  */
-- (BOOL)isDataCanBeReturnedWithHeader:(SPTPersistentCacheRecordHeaderType *)header
+- (BOOL)isDataCanBeReturnedWithHeader:(SPTPersistentCacheRecordHeader *)header
 {
     return !([self isDataExpiredWithHeader:header] && header->refCount == 0);
 }
@@ -887,7 +870,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
                     int __block reason = 0;
                     // WARNING: We may skip return result here bcuz in that case we won't remove file we do not know what is it
                     [self alterHeaderForFileAtPath:filePath
-                                         withBlock:^(SPTPersistentCacheRecordHeaderType *header) {
+                                         withBlock:^(SPTPersistentCacheRecordHeader *header) {
 
                                              if (forceExpire && forceLocked) {
                                                  // delete all
@@ -1035,7 +1018,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeaderType *
 
                 // WARNING: We may skip return result here bcuz in that case we will remove unknown file as unlocked trash
                 [self alterHeaderForFileAtPath:[NSString stringWithUTF8String:theURL.fileSystemRepresentation]
-                                     withBlock:^(SPTPersistentCacheRecordHeaderType *header) {
+                                     withBlock:^(SPTPersistentCacheRecordHeader *header) {
                                          locked = (header->refCount > 0);
                                      } writeBack:NO
                                       complain:YES];

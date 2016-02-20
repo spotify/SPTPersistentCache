@@ -46,7 +46,7 @@
 
 @implementation MainWindowController
 {
-    SPTPersistentCacheRecordHeaderType _currHeader;
+    SPTPersistentCacheRecordHeader _currHeader;
     BOOL _crcValid;
 }
 
@@ -142,7 +142,7 @@
     NSString *fullFilePath = [self.cacheFiles objectAtIndex:idx];
     NSData *rawData = [NSData dataWithContentsOfFile:fullFilePath];
 
-    SPTPersistentCacheRecordHeaderType *h = SPTPersistentCacheGetHeaderFromData(__DECONST(void*, [rawData bytes]), [rawData length]);
+    SPTPersistentCacheRecordHeader *h = SPTPersistentCacheGetHeaderFromData(__DECONST(void*, [rawData bytes]), [rawData length]);
 
     if (h == NULL) {
         // TODO: error
