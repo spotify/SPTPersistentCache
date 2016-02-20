@@ -981,39 +981,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(errorCalls, corrupted, @"Number of not found files must match");
 }
 
-- (void)testRegularGC
-{
-    SPTPersistentCache *cache = [self createCacheWithTimeCallback:nil
-                                                       expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
-
-    SPTPersistentCacheFileManager *fileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:cache.options];
-    
-    const NSUInteger count = self.imageNames.count;
-
-    [cache runRegularGC];
-
-    // After GC we have to have only locked files and corrupted
-    NSUInteger lockedCount = 0;
-    NSUInteger removedCount = 0;
-
-    for (unsigned i = 0; i < count; ++i) {
-        NSString *path = [fileManager pathForKey:self.imageNames[i]];
-
-        SPTPersistentCacheRecordHeader header;
-        BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
-        if (kParams[i].locked) {
-            ++lockedCount;
-            XCTAssertTrue(opened, @"Locked files expected to be at place");
-        } else {
-            ++removedCount;
-            XCTAssertFalse(opened, @"Not locked files expected to removed thus unable to be opened");
-        }
-    }
-
-    XCTAssertEqual(lockedCount, params_GetFilesNumber(YES), @"Locked files count must match");
-    XCTAssertEqual(removedCount, params_GetFilesNumber(NO)+params_GetCorruptedFilesNumber(), @"Removed files count must match");
-}
-
 // WARNING: This test is dependent on hardcoded data TTL4
 - (void)testRegularGCWithTTL
 {
