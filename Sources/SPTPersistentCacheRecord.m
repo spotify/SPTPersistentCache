@@ -46,7 +46,7 @@
 
 - (NSString *)description
 {
-    return SPTPersistentCacheObjectDescription(self, self.key, @"key", @"lol", @"wut");
+    return SPTPersistentCacheObjectDescription(self, self.key, @"key");
 }
 
 - (NSString *)debugDescription
