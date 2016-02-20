@@ -355,6 +355,7 @@
 			buildSettings = {
 				HEADER_SEARCH_PATHS = ../include;
 				INFOPLIST_FILE = Info.plist;
+				SPT_BUILDING_FRAMEWORK = 1;
 			};
 			name = Debug;
 		};
@@ -364,6 +365,7 @@
 			buildSettings = {
 				HEADER_SEARCH_PATHS = ../include;
 				INFOPLIST_FILE = Info.plist;
+				SPT_BUILDING_FRAMEWORK = 1;
 			};
 			name = Release;
 		};
