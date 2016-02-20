@@ -96,20 +96,21 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     return self;
 }
 
-- (void)loadDataForKey:(NSString *)key
+- (BOOL)loadDataForKey:(NSString *)key
           withCallback:(SPTDataCacheResponseCallback)callback
                onQueue:(dispatch_queue_t)queue
 {
-    assert(callback != nil);
-    assert(queue != nil);
+    NSParameterAssert(callback);
+    NSParameterAssert(queue);
     if (callback == nil || queue == nil) {
-        return;
+        return NO;
     }
 
     callback = [callback copy];
     dispatch_async(self.workQueue, ^{
         [self loadDataForKeySync:key withCallback:callback onQueue:queue];
     });
+    return YES;
 }
 
 - (void)loadDataForKeysWithPrefix:(NSString *)prefix

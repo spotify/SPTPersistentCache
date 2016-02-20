@@ -1170,6 +1170,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertNil(cache, @"The cache should be nil if it could not create the directory");
 }
 
+- (void)testFailToLoadDataWhenCallbackAbsent
+{
+    BOOL result = [self.cache loadDataForKey:@"Thing" withCallback:nil onQueue:nil];
+    XCTAssertFalse(result);
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file

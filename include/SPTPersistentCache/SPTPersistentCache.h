@@ -105,7 +105,7 @@ FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
  * @param callback callback to call once data is loaded. It mustn't be nil.
  * @param queue Queue on which to run the callback. Mustn't be nil.
  */
-- (void)loadDataForKey:(NSString *)key
+- (BOOL)loadDataForKey:(NSString *)key
           withCallback:(SPTDataCacheResponseCallback)callback
                onQueue:(dispatch_queue_t)queue;
 
