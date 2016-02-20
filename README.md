@@ -53,6 +53,25 @@ $ carthage update
 ```
 Next up, you need to add the framework to the Xcode project of your App. Lastly link the framework with your App and copy it to the App’s Frameworks directory under the “Build Phases”.
 
+## Usage example :eyes:
+For an example of this framework's usage, see the demo application `SPTPersistentCacheDemo` in `SPTPersistentCache.xcworkspace`.
+
+### Creating the SPTPersistentCache
+It is best to use different caches for different types of data you want to store, and not just one big cache for your entire application. However, only create one `SPTPersistentCache` instance for each cache, otherwise you might encounter anomalies when the two different caches end up writing to the same file.
+```objc
+SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:cachePath
+                                                                               identifier:@"com.spotify.demo.image.cache"
+                                                                      currentTimeCallback:nil
+                                                                defaultExpirationInterval:(60 * 60 * 24 * 30)
+                                                                 garbageCollectorInterval:(NSUInteger)(1.5 * SPTPersistentCacheDefaultGCIntervalSec)
+                                                                                    debug:^(NSString *string) {
+                                                                                              NSLog(@"%@", string);
+                                                                                          }];
+options.sizeConstraintBytes = 1024 * 1024 * 10; // 10 MiB
+SPTPersistentCache *cache = [[SPTPersistentCache alloc] initWithOptions:options];
+```
+Note that in  the above example, the `currentTimeCallback` is `nil`. When this is nil it will default to using `NSDate` for its current time.
+
 ## Background story :book:
 At Spotify we began to standardise the way we handled images in a centralised way, and in doing so we initially created a component that was handling images and their caching. But then our requirements changed, and we began to need caching for our backend calls and preview MP3 downloads as well. In doing so, we managed to separate out our caching logic into a generic component that can be used for any piece of data.
 
