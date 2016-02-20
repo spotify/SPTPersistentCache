@@ -222,32 +222,26 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                 onQueue:(dispatch_queue_t)queue
 {
     if (callback != nil) {
-        assert(queue);
+        NSAssert(queue, @"You must specify the queue");
     }
 
 
-    dispatch_barrier_async(self.workQueue, ^{
+    [self dispatchBlock:^{
         NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
         BOOL __block expired = NO;
         SPTPersistentCacheResponse *response =
-        [self alterHeaderForFileAtPath:filePath
-                             withBlock:^(SPTPersistentCacheRecordHeader *header) {
-                                 assert(header != nil);
-
-                                 // Satisfy Req.#1.2 and Req.#1.3
-                                 if (![self isDataCanBeReturnedWithHeader:header]) {
-                                     expired = YES;
-                                     return;
-                                 }
-
-                                 // Touch files that have default expiration policy
-                                 if (header->ttl == 0) {
-                                     header->updateTimeSec = spt_uint64rint(self.currentTime());
-                                 }
-                             }
-                             writeBack:YES
-                              complain:NO];
+        [self alterHeaderForFileAtPath:filePath withBlock:^(SPTPersistentCacheRecordHeader *header) {
+            // Satisfy Req.#1.2 and Req.#1.3
+            if (![self isDataCanBeReturnedWithHeader:header]) {
+                expired = YES;
+                return;
+            }
+            // Touch files that have default expiration policy
+            if (header->ttl == 0) {
+                header->updateTimeSec = spt_uint64rint(self.currentTime());
+            }
+        } writeBack:YES complain:NO];
 
         // Satisfy Req.#1.2
         if (expired) {
@@ -255,11 +249,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
         }
 
         if (callback) {
-            dispatch_async(queue, ^{
+            [self dispatchBlock:^ {
                 callback(response);
-            });
+            } on:queue];
         }
-    });
+    } on:self.workQueue];
 }
 
 - (void)removeDataForKeysSync:(NSArray *)keys
