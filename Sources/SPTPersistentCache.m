@@ -131,7 +131,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
         if (content == nil) {
             // If no directory is exist its fine, say not found to user
             if (error.code == NSFileReadNoSuchFileError || error.code == NSFileNoSuchFileError) {
-                [self dispatchEmptyResponseWithResult:SPTPersistentCacheResponseCodeNotFound callback:callback onQueue:queue];
+                [self dispatchEmptyResponseWithResult:SPTPersistentCacheResponseCodeNotFound
+                                             callback:callback
+                                              onQueue:queue];
             } else {
                 [self debugOutput:@"PersistentDataCache: Unable to get dir contents: %@, error: %@", path, [error localizedDescription]];
                 [self dispatchError:error result:SPTPersistentCacheResponseCodeOperationError callback:callback onQueue:queue];

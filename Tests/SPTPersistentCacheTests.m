@@ -1203,6 +1203,20 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertTrue(called);
 }
 
+- (void)testNotFoundIfCacheDirectoryIsDeleted
+{
+    self.cache.workQueue = dispatch_get_main_queue();
+    [[NSFileManager defaultManager] removeItemAtPath:self.cachePath error:nil];
+    __block BOOL called = NO;
+    [self.cache loadDataForKeysWithPrefix:@"T" chooseKeyCallback:^ NSString *(NSArray *keys) {
+        return keys.firstObject;
+    } withCallback:^ (SPTPersistentCacheResponse *response) {
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeNotFound);
+        called = YES;
+    } onQueue:dispatch_get_main_queue()];
+    XCTAssertTrue(called);
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
