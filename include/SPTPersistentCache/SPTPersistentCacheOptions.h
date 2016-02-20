@@ -22,6 +22,15 @@
 
 @class SPTPersistentCacheResponse;
 
+/**
+ * Default garbage collection interval. Some sane implementation defined value you should not care about.
+ */
+FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheDefaultGCIntervalSec;
+/**
+ * Default exparation interval for all cache items. Particular record's TTL takes precedence over this value.
+ * Items stored without (tt=0) TTL considered as expired if following is true: current_time - update_time > ExpInterval.
+ */
+FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheDefaultExpirationTimeSec;
 extern const NSUInteger SPTPersistentCacheMinimumGCIntervalLimit;
 extern const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
 

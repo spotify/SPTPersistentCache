@@ -20,7 +20,7 @@
  */
 #import <Foundation/Foundation.h>
 
-#import <SPTPersistentCache/SPTPersistentCacheTypes.h>
+#import <SPTPersistentCache/SPTPersistentCache.h>
 
 /**
  *  Category to instantiate NSError objects with a specific domain for SPTPersistentCache.

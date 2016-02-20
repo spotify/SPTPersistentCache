@@ -16,13 +16,11 @@
 		DD1D23811C77857900D0477A /* SPTPersistentCacheOptions.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D237B1C77857900D0477A /* SPTPersistentCacheOptions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DD1D23821C77857900D0477A /* SPTPersistentCacheRecord.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D237C1C77857900D0477A /* SPTPersistentCacheRecord.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DD1D23831C77857900D0477A /* SPTPersistentCacheResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D237D1C77857900D0477A /* SPTPersistentCacheResponse.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		DD1D23841C77857900D0477A /* SPTPersistentCacheTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D237E1C77857900D0477A /* SPTPersistentCacheTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DD1D23851C77857E00D0477A /* SPTPersistentCache.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D23791C77857900D0477A /* SPTPersistentCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DD1D23861C77857E00D0477A /* SPTPersistentCacheHeader.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D237A1C77857900D0477A /* SPTPersistentCacheHeader.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DD1D23871C77857E00D0477A /* SPTPersistentCacheOptions.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D237B1C77857900D0477A /* SPTPersistentCacheOptions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DD1D23881C77857E00D0477A /* SPTPersistentCacheRecord.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D237C1C77857900D0477A /* SPTPersistentCacheRecord.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DD1D23891C77857E00D0477A /* SPTPersistentCacheResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D237D1C77857900D0477A /* SPTPersistentCacheResponse.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		DD1D238A1C77857E00D0477A /* SPTPersistentCacheTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D237E1C77857900D0477A /* SPTPersistentCacheTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DD1D239E1C7785A900D0477A /* NSError+SPTPersistentCacheDomainErrors.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D238C1C7785A900D0477A /* NSError+SPTPersistentCacheDomainErrors.h */; };
 		DD1D239F1C7785A900D0477A /* NSError+SPTPersistentCacheDomainErrors.m in Sources */ = {isa = PBXBuildFile; fileRef = DD1D238D1C7785A900D0477A /* NSError+SPTPersistentCacheDomainErrors.m */; };
 		DD1D23A21C7785A900D0477A /* crc32iso3309.c in Sources */ = {isa = PBXBuildFile; fileRef = DD1D23901C7785A900D0477A /* crc32iso3309.c */; };
@@ -68,7 +66,6 @@
 		DD1D237B1C77857900D0477A /* SPTPersistentCacheOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheOptions.h; sourceTree = "<group>"; };
 		DD1D237C1C77857900D0477A /* SPTPersistentCacheRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheRecord.h; sourceTree = "<group>"; };
 		DD1D237D1C77857900D0477A /* SPTPersistentCacheResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheResponse.h; sourceTree = "<group>"; };
-		DD1D237E1C77857900D0477A /* SPTPersistentCacheTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheTypes.h; sourceTree = "<group>"; };
 		DD1D238C1C7785A900D0477A /* NSError+SPTPersistentCacheDomainErrors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSError+SPTPersistentCacheDomainErrors.h"; sourceTree = "<group>"; };
 		DD1D238D1C7785A900D0477A /* NSError+SPTPersistentCacheDomainErrors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSError+SPTPersistentCacheDomainErrors.m"; sourceTree = "<group>"; };
 		DD1D23901C7785A900D0477A /* crc32iso3309.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = crc32iso3309.c; sourceTree = "<group>"; };
@@ -132,7 +129,6 @@
 				DD1D237B1C77857900D0477A /* SPTPersistentCacheOptions.h */,
 				DD1D237C1C77857900D0477A /* SPTPersistentCacheRecord.h */,
 				DD1D237D1C77857900D0477A /* SPTPersistentCacheResponse.h */,
-				DD1D237E1C77857900D0477A /* SPTPersistentCacheTypes.h */,
 			);
 			name = API;
 			path = ../include/SPTPersistentCache;
@@ -191,7 +187,6 @@
 			files = (
 				DD1D239E1C7785A900D0477A /* NSError+SPTPersistentCacheDomainErrors.h in Headers */,
 				DD1D23AB1C7785A900D0477A /* SPTPersistentCacheRecord+Private.h in Headers */,
-				DD1D23841C77857900D0477A /* SPTPersistentCacheTypes.h in Headers */,
 				DD1D23A61C7785A900D0477A /* SPTPersistentCacheFileManager.h in Headers */,
 				DD1D23831C77857900D0477A /* SPTPersistentCacheResponse.h in Headers */,
 				C45526B41C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h in Headers */,
@@ -211,7 +206,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				DD1D23BE1C7785AE00D0477A /* SPTPersistentCacheTimerProxy.h in Headers */,
-				DD1D238A1C77857E00D0477A /* SPTPersistentCacheTypes.h in Headers */,
 				DD1D23B61C7785AE00D0477A /* SPTPersistentCacheFileManager.h in Headers */,
 				DD1D23851C77857E00D0477A /* SPTPersistentCache.h in Headers */,
 				DD1D23B51C7785AE00D0477A /* SPTPersistentCache+Private.h in Headers */,

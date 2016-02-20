@@ -20,7 +20,6 @@
  */
 #import <SPTPersistentCache/SPTPersistentCacheHeader.h>
 
-#import <SPTPersistentCache/SPTPersistentCacheTypes.h>
 #import "NSError+SPTPersistentCacheDomainErrors.h"
 
 #include "crc32iso3309.h"

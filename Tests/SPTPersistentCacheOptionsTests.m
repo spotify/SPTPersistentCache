@@ -18,10 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 #import <XCTest/XCTest.h>
+
 #import <SPTPersistentCache/SPTPersistentCacheOptions.h>
-#import <SPTPersistentCache/SPTPersistentCacheTypes.h>
 
 @interface SPTPersistentCacheOptionsTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentCacheOptions *dataCacheOptions;
