@@ -96,40 +96,31 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     return self;
 }
 
-- (void)loadDataForKey:(NSString *)key
+- (BOOL)loadDataForKey:(NSString *)key
           withCallback:(SPTDataCacheResponseCallback)callback
                onQueue:(dispatch_queue_t)queue
 {
-    assert(callback != nil);
-    assert(queue != nil);
     if (callback == nil || queue == nil) {
-        return;
+        return NO;
     }
 
     callback = [callback copy];
     dispatch_async(self.workQueue, ^{
         [self loadDataForKeySync:key withCallback:callback onQueue:queue];
     });
+    return YES;
 }
 
-- (void)loadDataForKeysWithPrefix:(NSString *)prefix
+- (BOOL)loadDataForKeysWithPrefix:(NSString *)prefix
                 chooseKeyCallback:(SPTDataCacheChooseKeyCallback)chooseKeyCallback
                      withCallback:(SPTDataCacheResponseCallback)callback
                           onQueue:(dispatch_queue_t)queue
 {
-    assert(callback != nil);
-    assert(chooseKeyCallback != nil);
-    assert(queue != nil);
-    if (callback == nil || queue == nil) {
-        return;
+    if (callback == nil || queue == nil || chooseKeyCallback == nil) {
+        return NO;
     }
 
-    if (chooseKeyCallback == nil) {
-        return;
-    }
-
-    dispatch_async(self.workQueue, ^{
-
+    [self dispatchBlock:^{
         NSString *path = [self.dataCacheFileManager subDirectoryPathForKey:prefix];
         NSMutableArray * __block keys = [NSMutableArray array];
 
@@ -190,9 +181,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
             [self dispatchEmptyResponseWithResult:SPTPersistentCacheResponseCodeNotFound callback:callback onQueue:queue];
             return;
         }
-
+        
         [self loadDataForKeySync:keyToOpen withCallback:callback onQueue:queue];
-    });
+    } on:self.workQueue];
+
+    return YES;
 }
 
 - (void)storeData:(NSData *)data
@@ -910,14 +903,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                                callback:(SPTDataCacheResponseCallback)callback
                                 onQueue:(dispatch_queue_t)queue
 {
-    if (callback != nil) {
+    [self dispatchBlock:^ {
         SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:result
                                                                                             error:nil
                                                                                            record:nil];
-        dispatch_async(queue, ^{
-            callback(response);
-        });
-    }
+        callback(response);
+    } on:queue];
 }
 
 - (void)dispatchError:(NSError *)error
@@ -925,14 +916,16 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
              callback:(SPTDataCacheResponseCallback)callback
               onQueue:(dispatch_queue_t)queue
 {
-    if (callback != nil) {
+    if (!callback) {
+        return;
+    }
+    
+    [self dispatchBlock:^{
         SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:result
                                                                                             error:error
                                                                                            record:nil];
-        dispatch_async(queue, ^{
-            callback(response);
-        });
-    }
+        callback(response);
+    } on:queue];
 }
 
 - (void)debugOutput:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2)
@@ -1075,5 +1068,15 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     return NO;
 }
 
-@end
+#pragma mark SPTPersistentCache
 
+- (void)dispatchBlock:(dispatch_block_t)block on:(dispatch_queue_t)queue
+{
+    if (queue == dispatch_get_main_queue() && [NSThread isMainThread]) {
+        block();
+    } else {
+        dispatch_async(queue, block);
+    }
+}
+
+@end
