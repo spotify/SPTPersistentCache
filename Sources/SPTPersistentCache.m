@@ -56,8 +56,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 @property (nonatomic, copy) SPTDataCacheDebugCallback debugOutput;
 @property (nonatomic, copy) SPTDataCacheCurrentTimeSecCallback currentTime;
 @property (nonatomic, strong) SPTPersistentCacheFileManager *dataCacheFileManager;
-// Keys that are currently shouldn't be opened bcuz its busy by streams for example
-@property (nonatomic, strong) NSMutableSet *busyKeys;
 
 @end
 
@@ -81,8 +79,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     _workQueue = dispatch_queue_create([options.identifierForQueue UTF8String], DISPATCH_QUEUE_CONCURRENT);
     assert(_workQueue != nil);
     self.fileManager = [NSFileManager defaultManager];
-
-    _busyKeys = [NSMutableSet set];
 
     _currentTime = [self.options.currentTimeSec copy];
     _debugOutput = [self.options.debugOutput copy];
@@ -214,11 +210,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
     callback = [callback copy];
     [self dispatchBlock:^{
-        // That satisfies Req.#1.3
-        if ([self processKeyIfBusy:key callback:callback queue:queue]) {
-            return;
-        }
-
         [self storeDataSync:data forKey:key ttl:ttl locked:locked withCallback:callback onQueue:queue];
     } on:self.workQueue];
     return YES;
@@ -236,11 +227,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
 
     dispatch_barrier_async(self.workQueue, ^{
-        // That satisfies Req.#1.3
-        if ([self processKeyIfBusy:key callback:callback queue:queue]) {
-            return;
-        }
-
         NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
         BOOL __block expired = NO;
@@ -279,12 +265,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 - (void)removeDataForKeysSync:(NSArray *)keys
 {
     for (NSString *key in keys) {
-
-        // That satisfies Req.#1.3
-        if ([self processKeyIfBusy:key callback:nil queue:nil]) {
-            continue;
-        }
-        
         [self.dataCacheFileManager removeDataForKey:key];
     }
 }
@@ -307,12 +287,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     
     dispatch_barrier_async(self.workQueue, ^{
         for (NSString *key in keys) {
-
-            // That satisfies Req.#1.3
-            if ([self processKeyIfBusy:key callback:callback queue:queue]) {
-                continue;
-            }
-
             NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
             BOOL __block expired = NO;
@@ -359,12 +333,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
     dispatch_barrier_async(self.workQueue, ^{
         for (NSString *key in keys) {
-
-            // That satisfies Req.#1.3
-            if ([self processKeyIfBusy:key callback:callback queue:queue]) {
-                continue;
-            }
-
             NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
             SPTPersistentCacheResponse *response =
@@ -428,7 +396,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 - (void)prune
 {
     dispatch_barrier_async(self.workQueue, ^{
-        [self.dataCacheFileManager removeAllDataButKeys:self.busyKeys];
+        [self.dataCacheFileManager removeAllData];
     });
 }
 
@@ -470,19 +438,14 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
                 NSString *key = theURL.lastPathComponent;
                 // That satisfies Req.#1.3
-                if (![self.busyKeys containsObject:key]) {
-                    NSString *filePath = [self.dataCacheFileManager pathForKey:key];
-
-                    BOOL __block locked = NO;
-                    // WARNING: We may skip return result here bcuz in that case we will not count file as locked
-                    [self alterHeaderForFileAtPath:filePath withBlock:^(SPTPersistentCacheRecordHeader *header) {
-                        locked = header->refCount > 0;
-                    }
-                                         writeBack:NO
-                                          complain:YES];
-                    if (locked) {
-                        size += [self.dataCacheFileManager getFileSizeAtPath:filePath];
-                    }
+                NSString *filePath = [self.dataCacheFileManager pathForKey:key];
+                BOOL __block locked = NO;
+                // WARNING: We may skip return result here bcuz in that case we will not count file as locked
+                [self alterHeaderForFileAtPath:filePath withBlock:^(SPTPersistentCacheRecordHeader *header) {
+                    locked = header->refCount > 0;
+                } writeBack:NO complain:YES];
+                if (locked) {
+                    size += [self.dataCacheFileManager getFileSizeAtPath:filePath];
                 }
             }
         } else {
@@ -514,12 +477,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
         [self dispatchEmptyResponseWithResult:SPTPersistentCacheResponseCodeNotFound callback:callback onQueue:queue];
         return;
     } else {
-
-        // That satisfies Req.#1.3
-        if ([self processKeyIfBusy:key callback:callback queue:queue]) {
-            return;
-        }
-
         // File exist
         NSError *error = nil;
         NSMutableData *rawData = [NSMutableData dataWithContentsOfFile:filePath
@@ -848,42 +805,32 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
                 NSString *key = theURL.lastPathComponent;
                 // That satisfies Req.#1.3
-                if (![self.busyKeys containsObject:key]) {
-
-                    NSString *filePath = [self.dataCacheFileManager pathForKey:key];
-
-                    BOOL __block needRemove = NO;
-                    int __block reason = 0;
-                    // WARNING: We may skip return result here bcuz in that case we won't remove file we do not know what is it
-                    [self alterHeaderForFileAtPath:filePath
-                                         withBlock:^(SPTPersistentCacheRecordHeader *header) {
-
-                                             if (forceExpire && forceLocked) {
-                                                 // delete all
-                                                 needRemove = YES;
-                                                 reason = 1;
-                                             } else if (forceExpire && !forceLocked) {
-                                                 // delete those: header->refCount == 0
-                                                 needRemove = header->refCount == 0;
-                                                 reason = 2;
-                                             } else if (!forceExpire && forceLocked) {
-                                                 // delete those: header->refCount > 0
-                                                 needRemove = header->refCount > 0;
-                                                 reason = 3;
-                                             } else {
-                                                 // delete those: [self isDataExpiredWithHeader:header] && header->refCount == 0
-                                                 needRemove = (![self isDataCanBeReturnedWithHeader:header]);
-                                                 reason = 4;
-                                             }
-
-                                         } writeBack:NO
-                                          complain:YES];
-
-                    if (needRemove) {
-                        [self debugOutput:@"PersistentDataCache: gc removing record: %@, reason:%d", filePath.lastPathComponent, reason];
-                        
-                        [self.dataCacheFileManager removeDataForKey:key];
+                NSString *filePath = [self.dataCacheFileManager pathForKey:key];
+                BOOL __block needRemove = NO;
+                int __block reason = 0;
+                // WARNING: We may skip return result here bcuz in that case we won't remove file we do not know what is it
+                [self alterHeaderForFileAtPath:filePath withBlock:^(SPTPersistentCacheRecordHeader *header) {
+                    if (forceExpire && forceLocked) {
+                        // delete all
+                        needRemove = YES;
+                        reason = 1;
+                    } else if (forceExpire && !forceLocked) {
+                        // delete those: header->refCount == 0
+                        needRemove = header->refCount == 0;
+                        reason = 2;
+                    } else if (!forceExpire && forceLocked) {
+                        // delete those: header->refCount > 0
+                        needRemove = header->refCount > 0;
+                        reason = 3;
+                    } else {
+                        // delete those: [self isDataExpiredWithHeader:header] && header->refCount == 0
+                        needRemove = ![self isDataCanBeReturnedWithHeader:header];
+                        reason = 4;
                     }
+                } writeBack:NO complain:YES];
+                if (needRemove) {
+                    [self debugOutput:@"PersistentDataCache: gc removing record: %@, reason:%d", filePath.lastPathComponent, reason];
+                    [self.dataCacheFileManager removeDataForKey:key];
                 }
             } // is dir
         } else {
@@ -995,13 +942,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                 // We skip locked files always
                 BOOL __block locked = NO;
 
-                // Here we skip streams
-                NSString *key = [NSString stringWithUTF8String:theURL.fileSystemRepresentation].lastPathComponent;
-                // That satisfies Req.#1.3
-                if ([self.busyKeys containsObject:key]) {
-                    continue;
-                }
-
                 // WARNING: We may skip return result here bcuz in that case we will remove unknown file as unlocked trash
                 [self alterHeaderForFileAtPath:[NSString stringWithUTF8String:theURL.fileSystemRepresentation]
                                      withBlock:^(SPTPersistentCacheRecordHeader *header) {
@@ -1047,18 +987,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     NSArray *sortedImages = [images sortedArrayUsingComparator:SPTSortFilesByModificationDate];
 
     return [sortedImages mutableCopy];
-}
-
-// That satisfies Req.#1.3
-- (BOOL)processKeyIfBusy:(NSString *)key callback:(SPTDataCacheResponseCallback)callback queue:(dispatch_queue_t)queue
-{
-    if ([self.busyKeys containsObject:key]) {
-        NSError *nsError = [NSError spt_persistentDataCacheErrorWithCode:SPTPersistentCacheLoadingErrorRecordIsStreamAndBusy];
-        [self dispatchError:nsError result:SPTPersistentCacheResponseCodeOperationError callback:callback onQueue:queue];
-        return YES;
-    }
-
-    return NO;
 }
 
 #pragma mark SPTPersistentCache
