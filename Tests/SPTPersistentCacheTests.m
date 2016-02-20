@@ -1203,6 +1203,39 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertTrue(called);
 }
 
+- (void)testNotFoundIfCacheDirectoryIsDeleted
+{
+    self.cache.workQueue = dispatch_get_main_queue();
+    [[NSFileManager defaultManager] removeItemAtPath:self.cachePath error:nil];
+    __block BOOL called = NO;
+    [self.cache loadDataForKeysWithPrefix:@"T" chooseKeyCallback:^ NSString *(NSArray *keys) {
+        return keys.firstObject;
+    } withCallback:^ (SPTPersistentCacheResponse *response) {
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeNotFound);
+        called = YES;
+    } onQueue:dispatch_get_main_queue()];
+    XCTAssertTrue(called);
+}
+
+- (void)testNoValidKeys
+{
+    self.cache.workQueue = dispatch_get_main_queue();
+    __block BOOL called = NO;
+    [self.cache loadDataForKeysWithPrefix:@"T" chooseKeyCallback:^ NSString *(NSArray *keys) {
+        return keys.firstObject;
+    } withCallback:^ (SPTPersistentCacheResponse *response) {
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeNotFound);
+        called = YES;
+    } onQueue:dispatch_get_main_queue()];
+    XCTAssertTrue(called);
+}
+
+- (void)testNoDataStoredWhenDataIsNil
+{
+    BOOL result = [self.cache storeData:nil forKey:nil locked:NO withCallback:nil onQueue:nil];
+    XCTAssertFalse(result);
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
@@ -1215,8 +1248,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     NSData *data = [NSData dataWithContentsOfFile:file];
     XCTAssertNotNil(data, @"Unable to get data from file:%@", file);
     XCTAssertNotNil(key, @"Key must be specified");
-
-    [cache storeData:data forKey:key ttl:ttl locked:locked withCallback:^(SPTPersistentCacheResponse *response) {
+    SPTDataCacheResponseCallback callback = ^(SPTPersistentCacheResponse *response) {
         if (response.result == SPTPersistentCacheResponseCodeOperationSucceeded) {
             XCTAssertNil(response.record, @"record expected to be nil");
             XCTAssertNil(response.error, @"error xpected to be nil");
@@ -1227,7 +1259,13 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             XCTAssert(NO, @"This is not expected result code for STORE operation");
         }
         [expectation fulfill];
-    } onQueue:dispatch_get_main_queue()];
+    };
+
+    if (ttl == 0) {
+        [cache storeData:data forKey:key locked:locked withCallback:callback onQueue:dispatch_get_main_queue()];
+    } else {
+        [cache storeData:data forKey:key ttl:ttl locked:locked withCallback:callback onQueue:dispatch_get_main_queue()];
+    }
 }
 
 /*
