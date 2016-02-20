@@ -22,22 +22,47 @@
 
 #import "SPTPersistentCache+Private.h"
 
+const NSTimeInterval SPTPersistentCacheTimerProxyTimerToleranceInterval = 300;
+
+@interface SPTPersistentCacheTimerProxy ()
+@property (nonatomic, copy) SPTDataCacheDebugCallback debugOutput;
+@property (nonatomic, strong) NSTimer *timer;
+@property (nonatomic, strong) SPTPersistentCacheOptions *options;
+@end
+
+
 @implementation SPTPersistentCacheTimerProxy
 
+#pragma mark - Initializer
+
 - (instancetype)initWithDataCache:(SPTPersistentCache *)dataCache
+                          options:(SPTPersistentCacheOptions *)options
                             queue:(dispatch_queue_t)queue
 {
     if (!(self = [super init])) {
         return nil;
     }
     
+    _options = options;
     _dataCache = dataCache;
     _queue = queue;
+    _debugOutput = [options.debugOutput copy];
     
     return self;
 }
 
-- (void)enqueueGC:(NSTimer *)timer
+- (void)dealloc
+{
+    NSTimer *timer = self.timer;
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [timer invalidate];
+    });
+}
+
+#pragma mark -
+
+- (void)enqueueGarbageCollection:(NSTimer *)timer
 {
     __weak __typeof(self) const weakSelf = self;
     dispatch_barrier_async(self.queue, ^{
@@ -53,5 +78,56 @@
         [dataCache pruneBySize];
     });
 }
+
+- (void)scheduleGarbageCollection
+{
+    assert([NSThread isMainThread]);
+    
+    [self debugOutput:@"runGarbageCollector:%@", self.timer];
+    
+    if (self.isGarbageCollectionScheduled) {
+        return;
+    }
+
+    self.timer = [NSTimer timerWithTimeInterval:self.options.gcIntervalSec
+                                         target:self
+                                       selector:@selector(enqueueGarbageCollection:)
+                                       userInfo:nil
+                                        repeats:YES];
+    
+    self.timer.tolerance = SPTPersistentCacheTimerProxyTimerToleranceInterval;
+    
+    [[NSRunLoop mainRunLoop] addTimer:self.timer forMode:NSDefaultRunLoopMode];
+}
+
+- (void)unscheduleGarbageCollection
+{
+    assert([NSThread isMainThread]);
+    
+    [self debugOutput:@"stopGarbageCollector:%@", self.timer];
+    
+    [self.timer invalidate];
+    
+    self.timer = nil;
+}
+
+- (BOOL)isGarbageCollectionScheduled
+{
+    return (self.timer != nil);
+}
+
+#pragma mark - Debug Logs
+
+- (void)debugOutput:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2)
+{
+    va_list list;
+    va_start(list, format);
+    NSString * str = [[NSString alloc ] initWithFormat:format arguments:list];
+    va_end(list);
+    if (self.debugOutput) {
+        self.debugOutput(str);
+    }
+}
+
 
 @end

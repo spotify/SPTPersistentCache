@@ -23,6 +23,13 @@
 #import "SPTPersistentCacheTimerProxy.h"
 #import <SPTPersistentCache/SPTPersistentCache.h>
 
+@interface SPTPersistentCacheTimerProxy ()
+@property (nonatomic, strong) NSTimer *timer;
+- (void)enqueueGarbageCollection:(NSTimer *)timer;
+@end
+    
+
+
 @interface SPTPersistentCacheForUnitTests : SPTPersistentCache
 @property (nonatomic) dispatch_queue_t queue;
 @property (nonatomic) XCTestExpectation *testExpectation;
@@ -49,6 +56,7 @@
 @end
 
 @interface SPTPersistentCacheTimerProxyTests : XCTestCase
+@property (nonatomic, strong) SPTPersistentCacheOptions *options;
 @property (nonatomic, strong) SPTPersistentCacheTimerProxy *timerProxy;
 @property (nonatomic, strong) SPTPersistentCache *dataCache;
 @property (nonatomic, strong) dispatch_queue_t dispatchQueue;
@@ -62,9 +70,12 @@
     
     self.dataCache = [[SPTPersistentCacheForUnitTests alloc] init];
     
+    self.options = [SPTPersistentCacheOptions new];
+    
     self.dispatchQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
     
     self.timerProxy = [[SPTPersistentCacheTimerProxy alloc] initWithDataCache:self.dataCache
+                       options:self.options
                                                                             queue:self.dispatchQueue];
 }
 
@@ -74,6 +85,7 @@
     
     XCTAssertEqual(self.timerProxy.queue, self.dispatchQueue);
     XCTAssertEqualObjects(strongDataCache, self.dataCache);
+    XCTAssertNil(self.timerProxy.timer);
 }
 
 - (void)testGarbageCollectorEnqueue
@@ -83,7 +95,7 @@
     SPTPersistentCacheForUnitTests *dataCacheForUnitTests = (SPTPersistentCacheForUnitTests *)self.timerProxy.dataCache;
     dataCacheForUnitTests.queue = self.timerProxy.queue;
     dataCacheForUnitTests.testExpectation = expectation;
-    [self.timerProxy enqueueGC:nil];
+    [self.timerProxy enqueueGarbageCollection:nil];
     
     [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error) {
         XCTAssertTrue(dataCacheForUnitTests.wasRunRegularGCCalled);
@@ -91,5 +103,44 @@
         XCTAssertFalse(dataCacheForUnitTests.wasCalledFromIncorrectQueue);
     }];
 }
+
+- (void)testIsGarbageCollectionScheduled
+{
+    XCTAssertFalse(self.timerProxy.isGarbageCollectionScheduled);
+    [self.timerProxy scheduleGarbageCollection];
+    XCTAssertTrue(self.timerProxy.isGarbageCollectionScheduled);
+    [self.timerProxy unscheduleGarbageCollection];
+    XCTAssertFalse(self.timerProxy.isGarbageCollectionScheduled);
+}
+
+- (void)testScheduleGarbageCollection
+{
+    [self.timerProxy scheduleGarbageCollection];
+    XCTAssertNotNil(self.timerProxy.timer);
+    XCTAssertTrue(self.timerProxy.timer.isValid);
+    XCTAssertEqualWithAccuracy(self.timerProxy.timer.timeInterval, self.options.gcIntervalSec, 0.0);
+}
+
+- (void)testRepeatedScheduleGarbageCollection
+{
+    [self.timerProxy scheduleGarbageCollection];
+    
+    NSTimer *timerFirstCall = self.timerProxy.timer;
+    
+    [self.timerProxy scheduleGarbageCollection];
+    
+    NSTimer *timerSecondCall = self.timerProxy.timer;
+    
+    XCTAssertEqualObjects(timerFirstCall, timerSecondCall);
+}
+
+
+- (void)testUnscheduleGarbageCollection
+{
+    [self.timerProxy scheduleGarbageCollection];
+    [self.timerProxy unscheduleGarbageCollection];
+    XCTAssertNil(self.timerProxy.timer);
+}
+
 
 @end

@@ -52,13 +52,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 // Serial queue used to run all internall stuff
 @property (nonatomic, strong) dispatch_queue_t workQueue;
 @property (nonatomic, strong) NSFileManager *fileManager;
-@property (nonatomic, strong) NSTimer *gcTimer;
 @property (nonatomic, copy) SPTDataCacheDebugCallback debugOutput;
 @property (nonatomic, copy) SPTDataCacheCurrentTimeSecCallback currentTime;
 @property (nonatomic, strong) SPTPersistentCacheFileManager *dataCacheFileManager;
 // Keys that are currently shouldn't be opened bcuz its busy by streams for example
 @property (nonatomic, strong) NSMutableSet *busyKeys;
-
+@property (nonatomic, strong) SPTPersistentCacheTimerProxy *timerProxy;
 @end
 
 #pragma mark - SPTPersistentCache
@@ -92,6 +91,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     if (![_dataCacheFileManager createCacheDirectory]) {
         return nil;
     }
+    
+    _timerProxy = [[SPTPersistentCacheTimerProxy alloc]
+                 initWithDataCache:self
+                                                                  options:_options
+                                                                    queue:_workQueue];
 
     return self;
 }
@@ -406,37 +410,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
 - (void)scheduleGarbageCollector
 {
-    assert([NSThread isMainThread]);
-
-    [self debugOutput:@"runGarbageCollector:%@", self.gcTimer];
-
-    // if gc process already running to nothing
-    if (self.gcTimer != nil) {
-        return;
-    }
-
-    SPTPersistentCacheTimerProxy *proxy = [[SPTPersistentCacheTimerProxy alloc] initWithDataCache:self
-                                                                                                    queue:self.workQueue];
-
-    NSTimeInterval interval = self.options.gcIntervalSec;
-    // clang diagnostics to workaround http://www.openradar.appspot.com/17806477 (-Wselector)
-    _Pragma("clang diagnostic push");
-    _Pragma("clang diagnostic ignored \"-Wselector\"");
-    self.gcTimer = [NSTimer timerWithTimeInterval:interval target:proxy selector:@selector(enqueueGC:) userInfo:nil repeats:YES];
-    _Pragma("clang diagnostic pop");
-    self.gcTimer.tolerance = 300;
-    
-    [[NSRunLoop mainRunLoop] addTimer:self.gcTimer forMode:NSDefaultRunLoopMode];
+    [self.timerProxy scheduleGarbageCollection];
 }
 
 - (void)unscheduleGarbageCollector
 {
-    assert([NSThread isMainThread]);
-
-    [self debugOutput:@"stopGarbageCollector:%@", self.gcTimer];
-
-    [self.gcTimer invalidate];
-    self.gcTimer = nil;
+    [self.timerProxy unscheduleGarbageCollection];
 }
 
 - (void)prune
@@ -505,14 +484,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     }
 
     return size;
-}
-
-- (void)dealloc
-{
-    NSTimer *timer = self.gcTimer;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [timer invalidate];
-    });
 }
 
 #pragma mark - Private methods

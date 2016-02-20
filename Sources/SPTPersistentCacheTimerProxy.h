@@ -21,6 +21,7 @@
 #import <Foundation/Foundation.h>
 
 @class SPTPersistentCache;
+@class SPTPersistentCacheOptions;
 
 @interface SPTPersistentCacheTimerProxy : NSObject
 
@@ -35,14 +36,28 @@
 @property (nonatomic, strong, readonly) dispatch_queue_t queue;
 
 /**
+ *  Returns YES if the internal timer of proxy is scheduled to perform garbage collection of the cache.
+ */
+@property (nonatomic, readonly, getter=isGarbageCollectionScheduled) BOOL garbageCollectionScheduled;
+
+/**
  *  Initializes the timer proxy on a specific queue using a specific data cache.
  *  
  *  @param cache Persistent Cache that will be used for garbage collection operations.
  *  @param queue Dispatch queue where the operations will take place.
  */
 - (instancetype)initWithDataCache:(SPTPersistentCache *)cache
+                          options:(SPTPersistentCacheOptions *)options
                             queue:(dispatch_queue_t)queue;
 
-- (void)enqueueGC:(NSTimer *)timer;
+/**
+ *  Schedules the garbage collection operation.
+ */
+- (void)scheduleGarbageCollection;
+
+/**
+ *  Unschedules the garbage collection operation.
+ */
+- (void)unscheduleGarbageCollection;
 
 @end
