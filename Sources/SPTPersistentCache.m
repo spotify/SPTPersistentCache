@@ -190,17 +190,17 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     return YES;
 }
 
-- (void)storeData:(NSData *)data
+- (BOOL)storeData:(NSData *)data
            forKey:(NSString *)key
            locked:(BOOL)locked
      withCallback:(SPTDataCacheResponseCallback)callback
           onQueue:(dispatch_queue_t)queue
 
 {
-    [self storeData:data forKey:key ttl:0 locked:locked withCallback:callback onQueue:queue];
+    return [self storeData:data forKey:key ttl:0 locked:locked withCallback:callback onQueue:queue];
 }
 
-- (void)storeData:(NSData *)data
+- (BOOL)storeData:(NSData *)data
            forKey:(NSString *)key
               ttl:(NSUInteger)ttl
            locked:(BOOL)locked
@@ -208,29 +208,20 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
           onQueue:(dispatch_queue_t)queue
 
 {
-    assert(data != nil);
-    assert(key != nil);
-
-    if (callback != nil) {
-        assert(queue != nil);
-    }
-
-    if (data == nil || key == nil) {
-        return;
-    }
-    if (callback != nil && queue == nil) {
-        return;
+    if (data == nil || key == nil || (callback != nil && queue == nil)) {
+        return NO;
     }
 
     callback = [callback copy];
-    dispatch_barrier_async(self.workQueue, ^{
+    [self dispatchBlock:^{
         // That satisfies Req.#1.3
         if ([self processKeyIfBusy:key callback:callback queue:queue]) {
             return;
         }
 
         [self storeDataSync:data forKey:key ttl:ttl locked:locked withCallback:callback onQueue:queue];
-    });
+    } on:self.workQueue];
+    return YES;
 }
 
 

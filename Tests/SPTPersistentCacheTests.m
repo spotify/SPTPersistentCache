@@ -1230,6 +1230,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertTrue(called);
 }
 
+- (void)testNoDataStoredWhenDataIsNil
+{
+    BOOL result = [self.cache storeData:nil forKey:nil locked:NO withCallback:nil onQueue:nil];
+    XCTAssertFalse(result);
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
