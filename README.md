@@ -72,6 +72,19 @@ SPTPersistentCache *cache = [[SPTPersistentCache alloc] initWithOptions:options]
 ```
 Note that in  the above example, the `currentTimeCallback` is `nil`. When this is nil it will default to using `NSDate` for its current time.
 
+### Storing Data in the SPTPersistentCache
+When storing data in the `SPTPersistentCache`, you must be aware of the file system semantics. The key will be used as the file name within the cache directory to save. The reason we did not implement a hash function under the hood is because we wanted to give the option of what hash function to use to the user, so it is recommended that when you insert data into the cache for a key, that you create the key using your own hashing function (at Spotify we use SHA1, although better hashing functions exist these days). If you want the cache record, i.e. file, to exist without any TTL make sure you store it as a locked file.
+```objc
+NSData *data = UIImagePNGRepresentation([UIImage imageNamed:@"my-image"]);
+NSString *key = @"MyHashValue";
+[self.cache storeData:data
+              forKey:key
+              locked:YES
+        withCallback:^(SPTPersistentCacheResponse *cacheResponse) {
+             NSLog(@"cacheResponse = %@", cacheResponse);
+        } onQueue:dispatch_get_main_queue()];
+```
+
 ## Background story :book:
 At Spotify we began to standardise the way we handled images in a centralised way, and in doing so we initially created a component that was handling images and their caching. But then our requirements changed, and we began to need caching for our backend calls and preview MP3 downloads as well. In doing so, we managed to separate out our caching logic into a generic component that can be used for any piece of data.
 
