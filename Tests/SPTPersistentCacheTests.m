@@ -31,7 +31,6 @@
 #import <SPTPersistentCache/SPTPersistentCache.h>
 #import <SPTPersistentCache/SPTPersistentCache.h>
 #import <SPTPersistentCache/SPTPersistentCacheResponse.h>
-#import <SPTPersistentCache/SPTPersistentCacheTypes.h>
 #import <SPTPersistentCache/SPTPersistentCacheRecord.h>
 #import "SPTPersistentCache+Private.h"
 #import "SPTPersistentCacheFileManager.h"

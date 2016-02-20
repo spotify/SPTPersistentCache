@@ -20,11 +20,49 @@
  */
 #import <Foundation/Foundation.h>
 
-#import <SPTPersistentCache/SPTPersistentCacheTypes.h>
 #import <SPTPersistentCache/SPTPersistentCacheOptions.h>
 #import <SPTPersistentCache/SPTPersistentCacheHeader.h>
 #import <SPTPersistentCache/SPTPersistentCacheRecord.h>
 #import <SPTPersistentCache/SPTPersistentCacheResponse.h>
+
+/**
+ * The SPTPersistentCacheLoadingError enum defines constants that identify NSError's in SPTPersistentCacheErrorDomain.
+ */
+typedef NS_ENUM(NSInteger, SPTPersistentCacheLoadingError) {
+    /**
+     * Magic number in record header is not as expected which means file is not readable by this cache.
+     */
+    SPTPersistentCacheLoadingErrorMagicMismatch = 100,
+    /**
+     * Alignment of pointer which casted to header is not compatible with alignment of first header field.
+     */
+    SPTPersistentCacheLoadingErrorHeaderAlignmentMismatch,
+    /**
+     * Size of header is not as expected. This is possibly because of a version change.
+     */
+    SPTPersistentCacheLoadingErrorWrongHeaderSize,
+    /**
+     * Payload size in header is not the same as stored in cache record.
+     */
+    SPTPersistentCacheLoadingErrorWrongPayloadSize,
+    /**
+     * CRC calculated for reader and contained in header are different.
+     */
+    SPTPersistentCacheLoadingErrorInvalidHeaderCRC,
+    /**
+     * Binary data size read as header is less then current header size which means we can't proceed further with this
+     * file.
+     */
+    SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
+    /**
+     * Record is opened as stream and busy right now.
+     */
+    SPTPersistentCacheLoadingErrorRecordIsStreamAndBusy,
+    /**
+     * Something bad has happened that shouldn't.
+     */
+    SPTPersistentCacheLoadingErrorInternalInconsistency
+};
 
 #ifndef SPT_BUILDING_FRAMEWORK
 #define SPT_BUILDING_FRAMEWORK 0
@@ -36,6 +74,10 @@ FOUNDATION_EXPORT double SPTDataLoaderVersionNumber;
 //! Project version string for SPTDataLoader.
 FOUNDATION_EXPORT const unsigned char SPTDataLoaderVersionString[];
 #endif // SPT_BUILDING_FRAMEWORK
+/**
+ * The error domain for errors produced by the persistent cache.
+ */
+FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
 
 /**
  * @brief SPTPersistentCache
