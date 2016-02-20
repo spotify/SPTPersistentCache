@@ -148,7 +148,7 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_dir
     NSString *keyTwo = @"AB";
     NSString *pathForDirectoryTwo = [self createFileForKey:keyTwo];
     
-    [self.cacheFileManager removeAllDataButKeys:nil];
+    [self.cacheFileManager removeAllData];
     
     BOOL isFileOneAtPath = [[NSFileManager defaultManager] fileExistsAtPath:pathForDirectoryOne
                                                                 isDirectory:nil];
@@ -158,26 +158,6 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_dir
     
     XCTAssertTrue(!isFileOneAtPath && !isFileTwoAtPath,
                   @"Removing all keys with nil or empty argument should have removed all data");
-}
-
-- (void)testRemoveAllDataButKeys
-{
-    NSString *keyOne = @"AA";
-    NSString *pathForDirectoryOne = [self createFileForKey:keyOne];
-    
-    NSString *keyTwo = @"AB";
-    NSString *pathForDirectoryTwo = [self createFileForKey:keyTwo];
-    
-    [self.cacheFileManager removeAllDataButKeys:[NSSet setWithObject:keyOne]];
-    
-    BOOL isFileOneAtPath = [[NSFileManager defaultManager] fileExistsAtPath:pathForDirectoryOne
-                                                                isDirectory:nil];
-    
-    BOOL isFileTwoAtPath = [[NSFileManager defaultManager] fileExistsAtPath:pathForDirectoryTwo
-                                                                isDirectory:nil];
-    
-    XCTAssertTrue(isFileOneAtPath && !isFileTwoAtPath,
-                  @"Removing all keys should skip keys send as arguments");
 }
 
 #pragma mark - Helper Functions
