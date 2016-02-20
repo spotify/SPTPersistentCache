@@ -23,7 +23,6 @@ PATH="$SCRIPT_DIR/bin:$PATH"
 
 set -euo pipefail
 
-travis_fold_open "Slather" "Publishing test coverage data…"
-bundle exec slather coverage \
-    --input-format profdata
-travis_fold_close "Slather"
+travis_fold_open "Codecov" "Publishing test coverage data…"
+bash <(curl -s https://codecov.io/bash)
+travis_fold_close "Codecov"

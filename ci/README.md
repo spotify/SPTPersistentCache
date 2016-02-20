@@ -9,8 +9,7 @@ We’re currently using the following stack:
 - OS X (as this is for Apple platforms).
 - Travis-CI for running the CI jobs.
   - Other CI provides might work.
-- Slather for handling code coverage reporting.
-  - We’re currently sending ours to Coveralls but you should be able to use any Slather supports.
+- Codecov for code coverage reporting and visualization.
 
 ## Installing
 There are primarily two routes on how to add the scripts to your repository. Either as a git submodule (only appropriate for apps) or using git subtree merging.
@@ -48,7 +47,7 @@ $ cp ci/sample/Gemfile .
 $ bundle update
 ```
 
-Next you should configure [Travis-CI](#travis---ci) and [Slather](slather)
+Next you should configure Travis-CI.
 
 ### Travis-CI
 Also have a look at the [travis.yml](sample/travis.yml) file.
@@ -66,9 +65,6 @@ The important environment variables you need to have set are:
 | `PODSPEC`                      	| The path to the project’s [CocoaPods](https://cocoapods.org/) podspec file.                	|
 | `EXPECTED_LICENSE_HEADER_FILE` 	| The path to a file containing the license header source files are expected to include.     	|
 | `LICENSED_SOURCE_FILES_GLOB`   	| A glob for finding all files which should be checked that they include the license header. 	|
-
-### Slather
-Also have a look at the [slather.yml](sample/slather.yml) file and have a look at [Slather’s own documentation](https://github.com/SlatherOrg/slather).
 
 ## Contributing :mailbox_with_mail:
 Contributions are welcomed, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
