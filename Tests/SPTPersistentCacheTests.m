@@ -27,11 +27,13 @@
 #import <AppKit/NSImage.h>
 #define ImageClass NSImage
 #endif
+#import <objc/runtime.h>
 
 #import <SPTPersistentCache/SPTPersistentCache.h>
 #import <SPTPersistentCache/SPTPersistentCache.h>
 #import <SPTPersistentCache/SPTPersistentCacheResponse.h>
 #import <SPTPersistentCache/SPTPersistentCacheRecord.h>
+
 #import "SPTPersistentCache+Private.h"
 #import "SPTPersistentCacheFileManager.h"
 
@@ -1147,6 +1149,25 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, YES, &header), @"Expect valid record");
     XCTAssertEqual(header.ttl, kTTL1, @"TTL must match");
     XCTAssertEqual(header.refCount, 0u, @"refCount must match");
+}
+
+- (void)testInitNilWhenCannotCreateCacheDirectory
+{
+    SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
+                                                                                   identifier:nil
+                                                                          currentTimeCallback:nil
+                                                                                        debug:nil];
+
+    Method originalMethod = class_getClassMethod(NSFileManager.class, @selector(defaultManager));
+    IMP originalMethodImplementation = method_getImplementation(originalMethod);
+    IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
+        return nil;
+    });
+    method_setImplementation(originalMethod, fakeMethodImplementation);
+    SPTPersistentCache *cache = [[SPTPersistentCache alloc] initWithOptions:options];
+    method_setImplementation(originalMethod, originalMethodImplementation);
+
+    XCTAssertNil(cache, @"The cache should be nil if it could not create the directory");
 }
 
 #pragma mark - Internal methods
