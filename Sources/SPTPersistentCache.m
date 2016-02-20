@@ -53,8 +53,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 @property (nonatomic, strong) dispatch_queue_t workQueue;
 @property (nonatomic, strong) NSFileManager *fileManager;
 @property (nonatomic, strong) NSTimer *gcTimer;
-@property (nonatomic, copy) SPTDataCacheDebugCallback debugOutput;
-@property (nonatomic, copy) SPTDataCacheCurrentTimeSecCallback currentTime;
+@property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
+@property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback currentTime;
 @property (nonatomic, strong) SPTPersistentCacheFileManager *dataCacheFileManager;
 
 @end
@@ -93,7 +93,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 }
 
 - (BOOL)loadDataForKey:(NSString *)key
-          withCallback:(SPTDataCacheResponseCallback)callback
+          withCallback:(SPTPersistentCacheResponseCallback)callback
                onQueue:(dispatch_queue_t)queue
 {
     if (callback == nil || queue == nil) {
@@ -108,8 +108,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 }
 
 - (BOOL)loadDataForKeysWithPrefix:(NSString *)prefix
-                chooseKeyCallback:(SPTDataCacheChooseKeyCallback)chooseKeyCallback
-                     withCallback:(SPTDataCacheResponseCallback)callback
+                chooseKeyCallback:(SPTPersistentCacheChooseKeyCallback)chooseKeyCallback
+                     withCallback:(SPTPersistentCacheResponseCallback)callback
                           onQueue:(dispatch_queue_t)queue
 {
     if (callback == nil || queue == nil || chooseKeyCallback == nil) {
@@ -189,7 +189,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 - (BOOL)storeData:(NSData *)data
            forKey:(NSString *)key
            locked:(BOOL)locked
-     withCallback:(SPTDataCacheResponseCallback)callback
+     withCallback:(SPTPersistentCacheResponseCallback)callback
           onQueue:(dispatch_queue_t)queue
 
 {
@@ -200,7 +200,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
            forKey:(NSString *)key
               ttl:(NSUInteger)ttl
            locked:(BOOL)locked
-     withCallback:(SPTDataCacheResponseCallback)callback
+     withCallback:(SPTPersistentCacheResponseCallback)callback
           onQueue:(dispatch_queue_t)queue
 
 {
@@ -218,7 +218,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
 // TODO: return NOT_PERMITTED on try to touch TLL>0
 - (void)touchDataForKey:(NSString *)key
-               callback:(SPTDataCacheResponseCallback)callback
+               callback:(SPTPersistentCacheResponseCallback)callback
                 onQueue:(dispatch_queue_t)queue
 {
     if (callback != nil) {
@@ -277,7 +277,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 }
 
 - (void)lockDataForKeys:(NSArray *)keys
-               callback:(SPTDataCacheResponseCallback)callback
+               callback:(SPTPersistentCacheResponseCallback)callback
                 onQueue:(dispatch_queue_t)queue
 {
     if (callback != nil) {
@@ -323,7 +323,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 }
 
 - (void)unlockDataForKeys:(NSArray *)keys
-                 callback:(SPTDataCacheResponseCallback)callback
+                 callback:(SPTPersistentCacheResponseCallback)callback
                   onQueue:(dispatch_queue_t)queue
 {
     if (callback != nil) {
@@ -468,7 +468,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 /**
  * Load method used internally to load data. Called on work queue.
  */
-- (void)loadDataForKeySync:(NSString *)key withCallback:(SPTDataCacheResponseCallback)callback onQueue:(dispatch_queue_t)queue
+- (void)loadDataForKeySync:(NSString *)key
+              withCallback:(SPTPersistentCacheResponseCallback)callback
+                   onQueue:(dispatch_queue_t)queue
 {
     NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
@@ -572,7 +574,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                     forKey:(NSString *)key
                        ttl:(NSUInteger)ttl
                     locked:(BOOL)isLocked
-              withCallback:(SPTDataCacheResponseCallback)callback
+              withCallback:(SPTPersistentCacheResponseCallback)callback
                    onQueue:(dispatch_queue_t)queue
 {
     NSString *filePath = [self.dataCacheFileManager pathForKey:key];
@@ -840,7 +842,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 }
 
 - (void)dispatchEmptyResponseWithResult:(SPTPersistentCacheResponseCode)result
-                               callback:(SPTDataCacheResponseCallback)callback
+                               callback:(SPTPersistentCacheResponseCallback)callback
                                 onQueue:(dispatch_queue_t)queue
 {
     [self dispatchBlock:^ {
@@ -853,7 +855,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
 - (void)dispatchError:(NSError *)error
                result:(SPTPersistentCacheResponseCode)result
-             callback:(SPTDataCacheResponseCallback)callback
+             callback:(SPTPersistentCacheResponseCallback)callback
               onQueue:(dispatch_queue_t)queue
 {
     if (!callback) {
