@@ -45,6 +45,11 @@
 
 - (BOOL)isValidStyleDescription:(NSString *)description
 {
+    // Shorter than: <A: 0x0>
+    if (description.length < 8) {
+        return NO;
+    }
+
     const NSRange descriptionRange = NSMakeRange(0, description.length);
     const NSMatchingOptions options = (NSMatchingOptions)0;
     const NSUInteger matches = [self.regex numberOfMatchesInString:description options:options range:descriptionRange];
