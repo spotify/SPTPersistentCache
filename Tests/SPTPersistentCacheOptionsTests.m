@@ -21,6 +21,7 @@
 #import <XCTest/XCTest.h>
 
 #import <SPTPersistentCache/SPTPersistentCacheOptions.h>
+#import "SPTPersistentCacheObjectDescriptionStyleValidator.h"
 
 @interface SPTPersistentCacheOptionsTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentCacheOptions *dataCacheOptions;
@@ -70,5 +71,40 @@
                    SPTPersistentCacheMinimumExpirationLimit);
 }
 
+#pragma mark Test describing objects
+
+- (void)testDescriptionAdheresToStyle
+{
+    SPTPersistentCacheObjectDescriptionStyleValidator *styleValidator = [SPTPersistentCacheObjectDescriptionStyleValidator new];
+
+    NSString * const description = self.dataCacheOptions.description;
+
+    XCTAssertTrue([styleValidator isValidStyleDescription:description], @"The description string should follow our style.");
+}
+
+- (void)testDescriptionContainsClassName
+{
+    NSString * const description = self.dataCacheOptions.description;
+
+    const NSRange classNameRange = [description rangeOfString:@"SPTPersistentCacheOptions"];
+    XCTAssertNotEqual(classNameRange.location, NSNotFound, @"The class name should exist in the description");
+}
+
+- (void)testDebugDescriptionAdheresToStyle
+{
+    SPTPersistentCacheObjectDescriptionStyleValidator *styleValidator = [SPTPersistentCacheObjectDescriptionStyleValidator new];
+
+    NSString * const debugDescription = self.dataCacheOptions.debugDescription;
+
+    XCTAssertTrue([styleValidator isValidStyleDescription:debugDescription], @"The debugDescription string should follow our style.");
+}
+
+- (void)testDebugDescriptionContainsClassName
+{
+    NSString * const debugDescription = self.dataCacheOptions.debugDescription;
+
+    const NSRange classNameRange = [debugDescription rangeOfString:@"SPTPersistentCacheOptions"];
+    XCTAssertNotEqual(classNameRange.location, NSNotFound, @"The class name should exist in the debugDescription");
+}
 
 @end
