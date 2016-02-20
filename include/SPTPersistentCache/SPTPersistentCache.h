@@ -109,7 +109,7 @@ FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
  * @param queue Queue on which to run the callback. Mustn't be nil.
  */
 - (BOOL)loadDataForKey:(NSString *)key
-          withCallback:(SPTDataCacheResponseCallback)callback
+          withCallback:(SPTPersistentCacheResponseCallback)callback
                onQueue:(dispatch_queue_t)queue;
 /**
  * @discussion Load data for key which has specified prefix. chooseKeyCallback is called with array of matching keys.
@@ -123,8 +123,8 @@ FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
  * @param queue Queue on which to run the callback. Mustn't be nil.
  */
 - (BOOL)loadDataForKeysWithPrefix:(NSString *)prefix
-                chooseKeyCallback:(SPTDataCacheChooseKeyCallback)chooseKeyCallback
-                     withCallback:(SPTDataCacheResponseCallback)callback
+                chooseKeyCallback:(SPTPersistentCacheChooseKeyCallback)chooseKeyCallback
+                     withCallback:(SPTPersistentCacheResponseCallback)callback
                           onQueue:(dispatch_queue_t)queue;
 /**
  * @discussion Req.#1.0. If data already exist for that key it will be overwritten otherwise created.
@@ -139,7 +139,7 @@ FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
 - (BOOL)storeData:(NSData *)data
            forKey:(NSString *)key
            locked:(BOOL)locked
-     withCallback:(SPTDataCacheResponseCallback)callback
+     withCallback:(SPTPersistentCacheResponseCallback)callback
           onQueue:(dispatch_queue_t)queue;
 /**
  * @discussion Req.#1.0. If data already exist for that key it will be overwritten otherwise created.
@@ -157,7 +157,7 @@ FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
            forKey:(NSString *)key
               ttl:(NSUInteger)ttl
            locked:(BOOL)locked
-     withCallback:(SPTDataCacheResponseCallback)callback
+     withCallback:(SPTPersistentCacheResponseCallback)callback
           onQueue:(dispatch_queue_t)queue;
 /**
  * @discussion Update last access time in header of the record. Only applies for default expiration policy (ttl == 0).
@@ -170,7 +170,7 @@ FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
 - (void)touchDataForKey:(NSString *)key
-               callback:(SPTDataCacheResponseCallback)callback
+               callback:(SPTPersistentCacheResponseCallback)callback
                 onQueue:(dispatch_queue_t)queue;
 /**
  * @brief Removes data for keys unconditionally even if expired.
@@ -185,7 +185,7 @@ FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
 - (void)lockDataForKeys:(NSArray *)keys
-               callback:(SPTDataCacheResponseCallback)callback
+               callback:(SPTPersistentCacheResponseCallback)callback
                 onQueue:(dispatch_queue_t)queue;
 /**
  * @discussion Decrement ref count for given keys. Give callback with result for each key in input array.
@@ -195,7 +195,7 @@ FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
 - (void)unlockDataForKeys:(NSArray *)keys
-                 callback:(SPTDataCacheResponseCallback)callback
+                 callback:(SPTPersistentCacheResponseCallback)callback
                   onQueue:(dispatch_queue_t)queue;
 /**
  * Schedule garbage collection. If already scheduled then this method does nothing.

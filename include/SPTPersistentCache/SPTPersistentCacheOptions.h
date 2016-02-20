@@ -23,6 +23,23 @@
 @class SPTPersistentCacheResponse;
 
 /**
+ * Type off callback for load/store calls
+ */
+typedef void (^SPTPersistentCacheResponseCallback)(SPTPersistentCacheResponse *response);
+/**
+ * Type of callback that is used to give caller a chance to choose which key to open if any.
+ */
+typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
+/**
+ * Type of callback that is used to provide current time for that cache. Mainly for testing.
+ */
+typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
+/**
+ * Type of callback that can be used ot get debug messages from cache.
+ */
+typedef void (^SPTPersistentCacheDebugCallback)(NSString *string);
+
+/**
  * Default garbage collection interval. Some sane implementation defined value you should not care about.
  */
 FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheDefaultGCIntervalSec;
@@ -31,71 +48,25 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheDefaultGCIntervalSec;
  * Items stored without (tt=0) TTL considered as expired if following is true: current_time - update_time > ExpInterval.
  */
 FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheDefaultExpirationTimeSec;
-extern const NSUInteger SPTPersistentCacheMinimumGCIntervalLimit;
-extern const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
-
 /**
- * Type off callback for load/store calls
+ * The minimum amount of time between garbage collection intervals.
  */
-typedef void (^SPTDataCacheResponseCallback)(SPTPersistentCacheResponse *response);
-
+FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumGCIntervalLimit;
 /**
- * Type of callback that is used to give caller a chance to choose which key to open if any.
+ * The minimum TTL of cache records.
  */
-typedef NSString *(^SPTDataCacheChooseKeyCallback)(NSArray *keys);
-
-/**
- * Type of callback that is used to provide current time for that cache. Mainly for testing.
- */
-typedef NSTimeInterval (^SPTDataCacheCurrentTimeSecCallback)(void);
-
-/**
- * Type of callback that can be used ot get debug messages from cache.
- */
-typedef void (^SPTDataCacheDebugCallback)(NSString *string);
+FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
 
 /**
  * @brief SPTPersistentCacheOptions
- *
  * @discussion Class defines cache creation options
  */
 @interface SPTPersistentCacheOptions : NSObject
 
 /**
- *  Returns a new instance of the class setup with specific values.
- *
- *  @param cachePath Path in the system file for the cache. May be nil.
- *  @param cacheIdentifier An identifier for the cache. May be nil.
- *  @param currentTimeBlock A block that should return the current time. May be nil
- *  @param defaultExpirationInterval Default time which have to pass since last file access so file could be candidate for pruning on next GC.
- *  @param garbageCollectorInterval It is guaranteed that once started GC runs with this interval.
- *  @param debugCallback A callback used for debugging purposes.
- */
-- (instancetype)initWithCachePath:(NSString *)cachePath
-                       identifier:(NSString *)cacheIdentifier
-              currentTimeCallback:(SPTDataCacheCurrentTimeSecCallback)currentTimeBlock
-        defaultExpirationInterval:(NSUInteger)defaultExpirationInterval
-         garbageCollectorInterval:(NSUInteger)garbageCollectorInterval
-                            debug:(SPTDataCacheDebugCallback)debugCallback;
-
-/**
- *  Returns a new instance of the class setup with specific values.
- *
- *  @param cachePath Path in the system file for the cache. May be nil.
- *  @param cacheIdentifier An identifier for the cache. May be nil.
- *  @param currentTimeBlock A block that should return the current time. May be nil
- *  @param debugCallback A callback used for debugging purposes.
- */
-- (instancetype)initWithCachePath:(NSString *)cachePath
-                       identifier:(NSString *)cacheIdentifier
-              currentTimeCallback:(SPTDataCacheCurrentTimeSecCallback)currentTimeBlock
-                            debug:(SPTDataCacheDebugCallback)debugCallback;
-
-/**
  *  A unique identifier for a work queue based on this instance of options.
  */
 @property (nonatomic, readonly) NSString *identifierForQueue;
-
 /**
  * Path to a folder in which to store that files. If folder doesn't exist it will be created.
  * This mustn't be nil.
@@ -120,12 +91,12 @@ typedef void (^SPTDataCacheDebugCallback)(NSString *string);
 /**
  * Callback used to supply debug/internal information usually about errors.
  */
-@property (nonatomic, copy, readonly) SPTDataCacheDebugCallback debugOutput;
+@property (nonatomic, copy, readonly) SPTPersistentCacheDebugCallback debugOutput;
 /**
  * Callback to provide current time in seconds. This time shouldn't depend on time zone etc.
  * So its better to use fixed time scale i.e. UNIX. If not specified then current unix time is used.
  */
-@property (nonatomic, copy, readonly) SPTDataCacheCurrentTimeSecCallback currentTimeSec;
+@property (nonatomic, copy, readonly) SPTPersistentCacheCurrentTimeSecCallback currentTimeSec;
 /**
  * Any string that identifies the cache and used in naming of internal queue.
  * It is important to put sane string to be able identify queue during debug and in crash dumps.
@@ -136,5 +107,32 @@ typedef void (^SPTDataCacheDebugCallback)(NSString *string);
  * Use 2 first letter of key for folder names to separate recodrs into. Default: YES
  */
 @property (nonatomic, assign) BOOL folderSeparationEnabled;
+
+/**
+ * Returns a new instance of the class setup with specific values.
+ * @param cachePath Path in the system file for the cache. May be nil.
+ * @param cacheIdentifier An identifier for the cache. May be nil.
+ * @param currentTimeBlock A block that should return the current time. May be nil
+ * @param defaultExpirationInterval Default time which have to pass since last file access so file could be candidate for pruning on next GC.
+ * @param garbageCollectorInterval It is guaranteed that once started GC runs with this interval.
+ * @param debugCallback A callback used for debugging purposes.
+ */
+- (instancetype)initWithCachePath:(NSString *)cachePath
+                       identifier:(NSString *)cacheIdentifier
+              currentTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTimeBlock
+        defaultExpirationInterval:(NSUInteger)defaultExpirationInterval
+         garbageCollectorInterval:(NSUInteger)garbageCollectorInterval
+                            debug:(SPTPersistentCacheDebugCallback)debugCallback;
+/**
+ * Returns a new instance of the class setup with specific values.
+ * @param cachePath Path in the system file for the cache. May be nil.
+ * @param cacheIdentifier An identifier for the cache. May be nil.
+ * @param currentTimeBlock A block that should return the current time. May be nil
+ * @param debugCallback A callback used for debugging purposes.
+ */
+- (instancetype)initWithCachePath:(NSString *)cachePath
+                       identifier:(NSString *)cacheIdentifier
+              currentTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTimeBlock
+                            debug:(SPTPersistentCacheDebugCallback)debugCallback;
 
 @end
