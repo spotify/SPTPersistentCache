@@ -1252,7 +1252,33 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         }
         NSString *key = self.imageNames[i];
         __block BOOL called = NO;
-        [self.cache loadDataForKey:key withCallback:^(SPTPersistentCacheResponse *response) {
+        [self.cache touchDataForKey:key callback:^(SPTPersistentCacheResponse *response) {
+            called = YES;
+            XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeNotFound);
+        } onQueue:dispatch_get_main_queue()];
+        break;
+    }
+
+    method_setImplementation(originalMethod, originalMethodImplementation);
+}
+
+- (void)testLockDataWithExpiredHeader
+{
+    Method originalMethod = class_getClassMethod(NSDate.class, @selector(date));
+    IMP originalMethodImplementation = method_getImplementation(originalMethod);
+
+    IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
+        return nil;
+    });
+    method_setImplementation(originalMethod, fakeMethodImplementation);
+
+    for (NSUInteger i = 0; i < self.imageNames.count; ++i) {
+        if (kParams[i].ttl == 0) {
+            continue;
+        }
+        NSString *key = self.imageNames[i];
+        __block BOOL called = NO;
+        [self.cache lockDataForKeys:@[key] callback:^(SPTPersistentCacheResponse *response) {
             called = YES;
             XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeNotFound);
         } onQueue:dispatch_get_main_queue()];
