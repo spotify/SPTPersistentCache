@@ -311,40 +311,35 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     return YES;
 }
 
-- (void)unlockDataForKeys:(NSArray *)keys
+- (BOOL)unlockDataForKeys:(NSArray *)keys
                  callback:(SPTPersistentCacheResponseCallback)callback
                   onQueue:(dispatch_queue_t)queue
 {
-    if (callback != nil) {
-        assert(queue);
+    if ((callback != nil && queue == nil) && keys.count == 0) {
+        return NO;
     }
-    assert([keys count] > 0);
 
-    dispatch_barrier_async(self.workQueue, ^{
+    [self dispatchBlock:^{
         for (NSString *key in keys) {
             NSString *filePath = [self.dataCacheFileManager pathForKey:key];
-
-            SPTPersistentCacheResponse *response =
-            [self alterHeaderForFileAtPath:filePath
-                                 withBlock:^(SPTPersistentCacheRecordHeader *header){
-                                     assert(header != nil);
-
-                                     if (header->refCount > 0) {
-                                         --header->refCount;
-                                     } else {
-                                         [self debugOutput:@"PersistentDataCache: Error trying to decrement refCount below 0 for file at path:%@", filePath];
-                                     }
-                                 }
-                                 writeBack:YES
-                                  complain:YES];
-
+            SPTPersistentCacheResponse *response = [self alterHeaderForFileAtPath:filePath
+                                                                        withBlock:^(SPTPersistentCacheRecordHeader *header){
+                                                                            if (header->refCount > 0) {
+                                                                                --header->refCount;
+                                                                            } else {
+                                                                                [self debugOutput:@"PersistentDataCache: Error trying to decrement refCount below 0 for file at path:%@", filePath];
+                                                                            }
+                                                                        }
+                                                                        writeBack:YES
+                                                                         complain:YES];
             if (callback) {
-                dispatch_async(queue, ^{
+                [self dispatchBlock:^{
                     callback(response);
-                });
+                } on:queue];
             }
         } // for
-    });
+    } on:self.workQueue];
+    return YES;
 }
 
 - (void)scheduleGarbageCollector

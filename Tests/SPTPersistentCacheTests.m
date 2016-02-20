@@ -1288,6 +1288,24 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     method_setImplementation(originalMethod, originalMethodImplementation);
 }
 
+- (void)testUnlockDataMoreTimesThanLocked
+{
+    for (NSUInteger i = 0; i < self.imageNames.count; ++i) {
+        if (kParams[i].ttl == 0) {
+            continue;
+        }
+        NSString *key = self.imageNames[i];
+        __block BOOL called = NO;
+        for (NSInteger repeat = 0; repeat < 50; ++repeat) {
+            [self.cache unlockDataForKeys:@[key] callback:^(SPTPersistentCacheResponse *response) {
+                called = YES;
+            } onQueue:dispatch_get_main_queue()];
+        }
+        XCTAssertFalse(called);
+        break;
+    }
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
