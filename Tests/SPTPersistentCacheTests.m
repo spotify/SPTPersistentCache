@@ -109,8 +109,13 @@ static NSUInteger params_GetDefaultExpireFilesNumber(void);
 static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentCacheRecordHeader *header);
 
 @interface SPTPersistentCache (Testing)
+
+@property (nonatomic, strong) dispatch_queue_t workQueue;
+@property (nonatomic, strong) NSFileManager *fileManager;
+
 - (void)runRegularGC;
 - (void)pruneBySize;
+
 @end
 
 @interface SPTPersistentCacheTests : XCTestCase
@@ -195,8 +200,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             [self corruptFile:filePath pdcError:kParams[i].corruptReason];
         }
     }
-
-    self.cache = nil;
 }
 
 - (void)tearDown
@@ -1180,6 +1183,24 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 {
     BOOL result = [self.cache loadDataForKeysWithPrefix:@"T" chooseKeyCallback:nil withCallback:nil onQueue:nil];
     XCTAssertFalse(result);
+}
+
+- (void)testFailToRetrieveDirectoryContents
+{
+    self.cache.fileManager = nil;
+    self.cache.workQueue = dispatch_get_main_queue();
+
+    __block BOOL called = NO;
+    [self.cache loadDataForKeysWithPrefix:@"T"
+                        chooseKeyCallback:^ NSString *(NSArray *keys) {
+                            return keys.firstObject;
+                        }
+                             withCallback:^ (SPTPersistentCacheResponse *response) {
+                                 XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationError);
+                                 called = YES;
+                             }
+                                  onQueue:dispatch_get_main_queue()];
+    XCTAssertTrue(called);
 }
 
 #pragma mark - Internal methods
