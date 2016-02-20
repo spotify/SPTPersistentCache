@@ -100,8 +100,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
           withCallback:(SPTDataCacheResponseCallback)callback
                onQueue:(dispatch_queue_t)queue
 {
-    NSParameterAssert(callback);
-    NSParameterAssert(queue);
     if (callback == nil || queue == nil) {
         return NO;
     }
@@ -113,20 +111,13 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     return YES;
 }
 
-- (void)loadDataForKeysWithPrefix:(NSString *)prefix
+- (BOOL)loadDataForKeysWithPrefix:(NSString *)prefix
                 chooseKeyCallback:(SPTDataCacheChooseKeyCallback)chooseKeyCallback
                      withCallback:(SPTDataCacheResponseCallback)callback
                           onQueue:(dispatch_queue_t)queue
 {
-    assert(callback != nil);
-    assert(chooseKeyCallback != nil);
-    assert(queue != nil);
-    if (callback == nil || queue == nil) {
-        return;
-    }
-
-    if (chooseKeyCallback == nil) {
-        return;
+    if (callback == nil || queue == nil || chooseKeyCallback == nil) {
+        return NO;
     }
 
     dispatch_async(self.workQueue, ^{
@@ -194,6 +185,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
         [self loadDataForKeySync:keyToOpen withCallback:callback onQueue:queue];
     });
+    return YES;
 }
 
 - (void)storeData:(NSData *)data
