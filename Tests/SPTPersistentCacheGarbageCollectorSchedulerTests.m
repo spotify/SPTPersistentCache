@@ -55,14 +55,14 @@
 
 @end
 
-@interface SPTPersistentCacheTimerProxyTests : XCTestCase
+@interface SPTPersistentCacheGarbageCollectorSchedulerTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentCacheOptions *options;
 @property (nonatomic, strong) SPTPersistentCacheGarbageCollectorScheduler *timerProxy;
 @property (nonatomic, strong) SPTPersistentCache *dataCache;
 @property (nonatomic, strong) dispatch_queue_t dispatchQueue;
 @end
 
-@implementation SPTPersistentCacheTimerProxyTests
+@implementation SPTPersistentCacheGarbageCollectorSchedulerTests
 
 - (void)setUp
 {
