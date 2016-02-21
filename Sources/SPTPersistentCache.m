@@ -211,7 +211,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
         assert(queue);
     }
 
-
     dispatch_barrier_async(self.workQueue, ^{
         NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
@@ -248,28 +247,28 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     });
 }
 
-- (void)removeDataForKeysSync:(NSArray *)keys
+- (void)removeDataForKeysSync:(NSArray<NSString *> *)keys
 {
     for (NSString *key in keys) {
         [self.dataCacheFileManager removeDataForKey:key];
     }
 }
 
-- (void)removeDataForKeys:(NSArray *)keys
+- (void)removeDataForKeys:(NSArray<NSString *> *)keys
 {
     dispatch_barrier_async(self.workQueue, ^{
         [self removeDataForKeysSync:keys];
     });
 }
 
-- (void)lockDataForKeys:(NSArray *)keys
+- (void)lockDataForKeys:(NSArray<NSString *> *)keys
                callback:(SPTPersistentCacheResponseCallback)callback
                 onQueue:(dispatch_queue_t)queue
 {
     if (callback != nil) {
-        assert(queue);
+        NSAssert(queue, @"Queue mustn’t be nil if a callback is provided");
     }
-    assert([keys count] > 0);
+    NSAssert(keys.count > 0, @"Keys must contain at least one item");
     
     dispatch_barrier_async(self.workQueue, ^{
         for (NSString *key in keys) {
@@ -308,14 +307,14 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     });
 }
 
-- (void)unlockDataForKeys:(NSArray *)keys
+- (void)unlockDataForKeys:(NSArray<NSString *> *)keys
                  callback:(SPTPersistentCacheResponseCallback)callback
                   onQueue:(dispatch_queue_t)queue
 {
     if (callback != nil) {
-        assert(queue);
+        NSAssert(queue, @"Queue mustn’t be nil if a callback is provided");
     }
-    assert([keys count] > 0);
+    NSAssert(keys.count > 0, @"Keys must contain at least one item");
 
     dispatch_barrier_async(self.workQueue, ^{
         for (NSString *key in keys) {

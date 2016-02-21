@@ -1178,13 +1178,18 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 - (void)testFailToLoadDataWhenCallbackAbsent
 {
-    BOOL result = [self.cache loadDataForKey:@"Thing" withCallback:nil onQueue:nil];
+    SPTPersistentCacheResponseCallback callback = nil;
+    dispatch_queue_t queue = nil;
+    BOOL result = [self.cache loadDataForKey:@"Thing" withCallback:callback onQueue:queue];
     XCTAssertFalse(result);
 }
 
 - (void)testFailToLoadDataForKeysWithPrefixWhenCallbackAbsent
 {
-    BOOL result = [self.cache loadDataForKeysWithPrefix:@"T" chooseKeyCallback:nil withCallback:nil onQueue:nil];
+    SPTPersistentCacheChooseKeyCallback chooseKeyCallback = nil;
+    SPTPersistentCacheResponseCallback callback = nil;
+    dispatch_queue_t queue = nil;
+    BOOL result = [self.cache loadDataForKeysWithPrefix:@"T" chooseKeyCallback:chooseKeyCallback withCallback:callback onQueue:queue];
     XCTAssertFalse(result);
 }
 
@@ -1235,7 +1240,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 - (void)testNoDataStoredWhenDataIsNil
 {
-    BOOL result = [self.cache storeData:nil forKey:nil locked:NO withCallback:nil onQueue:nil];
+    NSData *data = nil;
+    NSString *key = nil;
+    SPTPersistentCacheResponseCallback callback = nil;
+    dispatch_queue_t queue = nil;
+    BOOL result = [self.cache storeData:data forKey:key locked:NO withCallback:callback onQueue:queue];
     XCTAssertFalse(result);
 }
 
