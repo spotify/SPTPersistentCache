@@ -1363,6 +1363,25 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertFalse(result);
 }
 
+- (void)testWriteToHeaderFailed
+{
+    self.cache.workQueue = dispatch_get_main_queue();
+    NSString *key = self.imageNames.firstObject;
+    Method originalMethod = class_getInstanceMethod(NSData.class, @selector(writeToFile:options:error:));
+    IMP originalMethodImplementation = method_getImplementation(originalMethod);
+    IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
+        return nil;
+    });
+    method_setImplementation(originalMethod, fakeMethodImplementation);
+    __block BOOL called = NO;
+    [self.cache loadDataForKey:key withCallback:^(SPTPersistentCacheResponse *response) {
+        called = YES;
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationSucceeded);
+    } onQueue:dispatch_get_main_queue()];
+    XCTAssertTrue(called);
+    method_setImplementation(originalMethod, originalMethodImplementation);
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
