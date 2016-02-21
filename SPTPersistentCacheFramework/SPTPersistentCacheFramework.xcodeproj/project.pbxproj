@@ -15,6 +15,10 @@
 		C45526B51C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = C45526B21C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h */; };
 		C45526B61C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = C45526B31C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.m */; };
 		C45526B71C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = C45526B31C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.m */; };
+		C4EA65061C7A547000A6091A /* SPTPersistentCacheDebugUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = C4EA65041C7A547000A6091A /* SPTPersistentCacheDebugUtilities.h */; };
+		C4EA65071C7A547000A6091A /* SPTPersistentCacheDebugUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = C4EA65041C7A547000A6091A /* SPTPersistentCacheDebugUtilities.h */; };
+		C4EA65081C7A547000A6091A /* SPTPersistentCacheDebugUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = C4EA65051C7A547000A6091A /* SPTPersistentCacheDebugUtilities.m */; };
+		C4EA65091C7A547000A6091A /* SPTPersistentCacheDebugUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = C4EA65051C7A547000A6091A /* SPTPersistentCacheDebugUtilities.m */; };
 		DD1D237F1C77857900D0477A /* SPTPersistentCache.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D23791C77857900D0477A /* SPTPersistentCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DD1D23801C77857900D0477A /* SPTPersistentCacheHeader.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D237A1C77857900D0477A /* SPTPersistentCacheHeader.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DD1D23811C77857900D0477A /* SPTPersistentCacheOptions.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D237B1C77857900D0477A /* SPTPersistentCacheOptions.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -67,6 +71,8 @@
 		9C9E707A1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheObjectDescription.h; sourceTree = "<group>"; };
 		C45526B21C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheTypeUtilities.h; sourceTree = "<group>"; };
 		C45526B31C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheTypeUtilities.m; sourceTree = "<group>"; };
+		C4EA65041C7A547000A6091A /* SPTPersistentCacheDebugUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheDebugUtilities.h; sourceTree = "<group>"; };
+		C4EA65051C7A547000A6091A /* SPTPersistentCacheDebugUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheDebugUtilities.m; sourceTree = "<group>"; };
 		DD1D23791C77857900D0477A /* SPTPersistentCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCache.h; sourceTree = "<group>"; };
 		DD1D237A1C77857900D0477A /* SPTPersistentCacheHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheHeader.h; sourceTree = "<group>"; };
 		DD1D237B1C77857900D0477A /* SPTPersistentCacheOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheOptions.h; sourceTree = "<group>"; };
@@ -162,6 +168,8 @@
 				DD1D239D1C7785A900D0477A /* SPTPersistentCacheGarbageCollector.m */,
 				C45526B21C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h */,
 				C45526B31C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.m */,
+				C4EA65041C7A547000A6091A /* SPTPersistentCacheDebugUtilities.h */,
+				C4EA65051C7A547000A6091A /* SPTPersistentCacheDebugUtilities.m */,
 			);
 			name = Sources;
 			path = ../Sources;
@@ -201,6 +209,7 @@
 				DD1D237F1C77857900D0477A /* SPTPersistentCache.h in Headers */,
 				DD1D23801C77857900D0477A /* SPTPersistentCacheHeader.h in Headers */,
 				DD1D23AD1C7785A900D0477A /* SPTPersistentCacheResponse+Private.h in Headers */,
+				C4EA65061C7A547000A6091A /* SPTPersistentCacheDebugUtilities.h in Headers */,
 				DD1D23821C77857900D0477A /* SPTPersistentCacheRecord.h in Headers */,
 				DD1D23A31C7785A900D0477A /* crc32iso3309.h in Headers */,
 				DD1D23AE1C7785A900D0477A /* SPTPersistentCacheGarbageCollector.h in Headers */,
@@ -221,6 +230,7 @@
 				DD1D23BB1C7785AE00D0477A /* SPTPersistentCacheRecord+Private.h in Headers */,
 				DD1D23B31C7785AE00D0477A /* crc32iso3309.h in Headers */,
 				DD1D23BD1C7785AE00D0477A /* SPTPersistentCacheResponse+Private.h in Headers */,
+				C4EA65071C7A547000A6091A /* SPTPersistentCacheDebugUtilities.h in Headers */,
 				DD1D23871C77857E00D0477A /* SPTPersistentCacheOptions.h in Headers */,
 				9C9E707E1C790F3B00E1CBE6 /* SPTPersistentCacheObjectDescription.h in Headers */,
 				DD1D23891C77857E00D0477A /* SPTPersistentCacheResponse.h in Headers */,
@@ -327,6 +337,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C4EA65081C7A547000A6091A /* SPTPersistentCacheDebugUtilities.m in Sources */,
 				DD1D23AA1C7785A900D0477A /* SPTPersistentCacheRecord.m in Sources */,
 				DD1D23A21C7785A900D0477A /* crc32iso3309.c in Sources */,
 				DD1D23AF1C7785A900D0477A /* SPTPersistentCacheGarbageCollector.m in Sources */,
@@ -350,6 +361,7 @@
 				DD1D23B81C7785AE00D0477A /* SPTPersistentCacheHeader.m in Sources */,
 				DD1D23BC1C7785AE00D0477A /* SPTPersistentCacheResponse.m in Sources */,
 				DD1D23BA1C7785AE00D0477A /* SPTPersistentCacheRecord.m in Sources */,
+				C4EA65091C7A547000A6091A /* SPTPersistentCacheDebugUtilities.m in Sources */,
 				DD1D23B71C7785AE00D0477A /* SPTPersistentCacheFileManager.m in Sources */,
 				DD1D23B91C7785AE00D0477A /* SPTPersistentCacheOptions.m in Sources */,
 				DD1D23B41C7785AE00D0477A /* SPTPersistentCache.m in Sources */,
