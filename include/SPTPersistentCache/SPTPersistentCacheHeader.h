@@ -20,6 +20,9 @@
  */
 #import <Foundation/Foundation.h>
 
+/**
+ * The type of integer the magic type is made up of in the header structure
+ */
 typedef uint32_t SPTPersistentCacheMagicType;
 
 /**
@@ -34,6 +37,9 @@ typedef NS_ENUM(NSInteger, SPTPersistentCacheRecordHeaderFlags) {
     SPTPersistentCacheRecordHeaderFlagsStreamIncomplete = 0x1,
 };
 
+/**
+ * The record header making up the front of the file index
+ */
 typedef struct SPTPersistentCacheRecordHeader {
     // Version 1:
     SPTPersistentCacheMagicType magic;
@@ -52,24 +58,39 @@ typedef struct SPTPersistentCacheRecordHeader {
     // Version 2: Add fields here if required
 } SPTPersistentCacheRecordHeader;
 
+/**
+ * The value to use for the magic number (redundancy check).
+ */
 FOUNDATION_EXPORT const SPTPersistentCacheMagicType SPTPersistentCacheMagicValue;
+/**
+ * The size of the record header in bytes.
+ */
 FOUNDATION_EXPORT const size_t SPTPersistentCacheRecordHeaderSize;
 
+// Following functions used internally and could be used for testing purposes also.
+
+/**
+ * Creates a record header from a supply of parameters.
+ */
 FOUNDATION_EXPORT SPTPersistentCacheRecordHeader SPTPersistentCacheRecordHeaderMake(uint64_t ttl,
                                                                                     uint64_t payloadSize,
                                                                                     uint64_t updateTime,
                                                                                     BOOL isLocked);
-
-// Following functions used internally and could be used for testing purposes also
-// Function return pointer to header if there are enough data otherwise NULL
-FOUNDATION_EXPORT SPTPersistentCacheRecordHeader *SPTPersistentCacheGetHeaderFromData(void *data,
-                                                                                      size_t size);
-// Function validates header accoring to predefined rules used in production code
-// @return -1 if everything is ok, otherwise one of codes from SPTPersistentCacheLoadingError
+/**
+ * Function return pointer to header if there are enough data otherwise NULL.
+ */
+FOUNDATION_EXPORT SPTPersistentCacheRecordHeader *SPTPersistentCacheGetHeaderFromData(void *data, size_t size);
+/**
+ * Function validates header accoring to predefined rules used in production code.
+ * @return -1 if everything is ok, otherwise one of codes from SPTPersistentCacheLoadingError.
+ */
 FOUNDATION_EXPORT int /*SPTPersistentCacheLoadingError*/ SPTPersistentCacheValidateHeader(const SPTPersistentCacheRecordHeader *header);
-// Function return calculated CRC for current header.
+/**
+ * Function returns calculated CRC for current header.
+ */
 FOUNDATION_EXPORT uint32_t SPTPersistentCacheCalculateHeaderCRC(const SPTPersistentCacheRecordHeader *header);
-
-/// Checks that a given header is valid.
-/// @return nil if everything is ok, otherwise will return an instance of NSError.
+/**
+ * Checks that a given header is valid.
+ * @return nil if everything is ok, otherwise will return an instance of NSError.
+ */
 FOUNDATION_EXPORT NSError * SPTPersistentCacheCheckValidHeader(SPTPersistentCacheRecordHeader *header);
