@@ -19,7 +19,7 @@
  * under the License.
  */
 #import "SPTPersistentCacheFileManager.h"
-
+#import "SPTPersistentCacheTypeUtilities.h"
 #import "SPTPersistentCacheOptions.h"
 
 static const double SPTPersistentCacheFileManagerMinFreeDiskSpace = 0.1;
@@ -66,7 +66,8 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
                                                                attributes:nil
                                                                     error:&error];
         if (didCreateDirectory == NO) {
-            [self debugOutput:@"PersistentDataCache: Unable to create dir: %@ with error:%@", self.options.cachePath, error];
+            SPTPersistentCacheSafeDebugCallback([NSString stringWithFormat:@"PersistentDataCache: Unable to create dir: %@ with error:%@", self.options.cachePath, error], self.debugOutput);
+            
             return NO;
         }
     }
@@ -130,7 +131,7 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
     NSString *filePath = [self pathForKey:key];
     
     if (![self.fileManager removeItemAtPath:filePath error:&error]) {
-        [self debugOutput:@"PersistentDataCache: Error removing data for Key:%@ , error:%@", key, error];
+        SPTPersistentCacheSafeDebugCallback([NSString stringWithFormat:@"PersistentDataCache: Error removing data for Key:%@ , error:%@", key, error], self.debugOutput);
     }
 }
 
@@ -139,7 +140,7 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
     NSError *error = nil;
     NSDictionary *attrs = [self.fileManager attributesOfItemAtPath:filePath error:&error];
     if (attrs == nil) {
-        [self debugOutput:@"PersistentDataCache: Error getting attributes for file: %@, error: %@", filePath, error];
+        SPTPersistentCacheSafeDebugCallback([NSString stringWithFormat:@"PersistentDataCache: Error getting attributes for file: %@, error: %@", filePath, error], self.debugOutput);
     }
     return (NSUInteger)[attrs fileSize];
 }
@@ -167,7 +168,7 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
                 size += [self getFileSizeAtPath:filePath];
             }
         } else {
-            [self debugOutput:@"Unable to fetch isDir#2 attribute:%@", theURL];
+            SPTPersistentCacheSafeDebugCallback([NSString stringWithFormat:@"Unable to fetch isDir#2 attribute:%@", theURL], self.debugOutput);
         }
     }
     
@@ -195,24 +196,10 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
         tempCacheSize = MAX(0, proposedCacheSize);
         
     } else {
-        [self debugOutput:@"PersistentDataCache: %@ ERROR %@", @(__PRETTY_FUNCTION__), [error localizedDescription]];
+        SPTPersistentCacheSafeDebugCallback([NSString stringWithFormat:@"PersistentDataCache: %@ ERROR %@", @(__PRETTY_FUNCTION__), [error localizedDescription]], self.debugOutput);
     }
     
     return MIN(tempCacheSize, (SPTPersistentCacheDiskSize)self.options.sizeConstraintBytes);
 }
-
-#pragma mark - Debugger
-
-- (void)debugOutput:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2)
-{
-    va_list list;
-    va_start(list, format);
-    NSString * str = [[NSString alloc ] initWithFormat:format arguments:list];
-    va_end(list);
-    if (self.debugOutput) {
-        self.debugOutput(str);
-    }
-}
-
 
 @end

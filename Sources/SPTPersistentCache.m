@@ -834,11 +834,10 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 {
     va_list list;
     va_start(list, format);
-    NSString * str = [[NSString alloc ] initWithFormat:format arguments:list];
+    NSString *debugString = [[NSString alloc ] initWithFormat:format arguments:list];
     va_end(list);
-    if (self.debugOutput) {
-        self.debugOutput(str);
-    }
+    
+    SPTPersistentCacheSafeDebugCallback(debugString, self.debugOutput);
 }
 
 - (void)pruneBySize

@@ -19,7 +19,7 @@
  * under the License.
  */
 #import "SPTPersistentCacheGarbageCollectorScheduler.h"
-
+#import "SPTPersistentCacheTypeUtilities.h"
 #import "SPTPersistentCache+Private.h"
 
 BOOL SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue(void);
@@ -95,7 +95,8 @@ static const NSTimeInterval SPTPersistentCacheTimerProxyTimerToleranceInterval =
         });
     }
                        
-    [self debugOutput:@"runGarbageCollector:%@", self.timer];
+    SPTPersistentCacheSafeDebugCallback([NSString stringWithFormat:@"runGarbageCollector:%@", self.timer],
+                                        self.debugOutput);
     
     if (self.isGarbageCollectionScheduled) {
         return;
@@ -120,7 +121,8 @@ static const NSTimeInterval SPTPersistentCacheTimerProxyTimerToleranceInterval =
         });
     }
     
-    [self debugOutput:@"stopGarbageCollector:%@", self.timer];
+    SPTPersistentCacheSafeDebugCallback([NSString stringWithFormat:@"stopGarbageCollector:%@", self.timer],
+                                        self.debugOutput);
     
     [self.timer invalidate];
     
@@ -131,21 +133,6 @@ static const NSTimeInterval SPTPersistentCacheTimerProxyTimerToleranceInterval =
 {
     return (self.timer != nil);
 }
-
-#pragma mark - Debug Logs
-
-- (void)debugOutput:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2)
-{
-    va_list list;
-    va_start(list, format);
-    NSString * debugDescription = [[NSString alloc] initWithFormat:format arguments:list];
-    va_end(list);
-    if (self.debugOutput) {
-        self.debugOutput(debugDescription);
-    }
-}
-
-
 @end
 
 BOOL SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue(void) {

@@ -20,6 +20,7 @@
  */
 
 #import <Foundation/Foundation.h>
+#import <SPTPersistentCache/SPTPersistentCacheOptions.h>
 
 
 /**
@@ -29,3 +30,13 @@
  * @return The value as an `uint64_t`.
  */
 uint64_t spt_uint64rint(double value);
+
+
+/**
+ *  Executes the debug callback safely avoiding a crash if it is set to nil.
+ *
+ *  @param debugMessage The debug message.
+ *  @param debugCallback The callback block to execute safely.
+ */
+void SPTPersistentCacheSafeDebugCallback(NSString *debugMessage,
+                                         SPTPersistentCacheDebugCallback debugCallback);
