@@ -54,7 +54,7 @@
                                                                                    currentTimeCallback:nil
                                                                              defaultExpirationInterval:1
                                                                               garbageCollectorInterval:1
-                                                                                                 debug:nil];
+                                                                                         debugCallback:nil];
     XCTAssertEqual(dataCacheOptions.gcIntervalSec,
                    SPTPersistentCacheMinimumGCIntervalLimit);
 }
@@ -66,7 +66,7 @@
                                                                                    currentTimeCallback:nil
                                                                              defaultExpirationInterval:1
                                                                               garbageCollectorInterval:1
-                                                                                                 debug:nil];
+                                                                                         debugCallback:nil];
     XCTAssertEqual(dataCacheOptions.defaultExpirationPeriodSec,
                    SPTPersistentCacheMinimumExpirationLimit);
 }

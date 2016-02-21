@@ -37,10 +37,12 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_dir
     [super setUp];
     
     self.options = [[SPTPersistentCacheOptions alloc] initWithCachePath:SPTPersistentCacheFileManagerTestsCachePath
-                                                                 identifier:nil
-                                                        currentTimeCallback:nil
-                                                                      debug:nil];
-    
+                                                             identifier:nil
+                                              defaultExpirationInterval:SPTPersistentCacheDefaultExpirationTimeSec
+                                               garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
+                                                    currentTimeCallback:nil
+                                                          debugCallback:nil];
+
     self.cacheFileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:self.options];
     
     

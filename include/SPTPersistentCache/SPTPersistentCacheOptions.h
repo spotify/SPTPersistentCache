@@ -122,6 +122,6 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
               currentTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTimeBlock
         defaultExpirationInterval:(NSUInteger)defaultExpirationInterval
          garbageCollectorInterval:(NSUInteger)garbageCollectorInterval
-                            debug:(SPTPersistentCacheDebugCallback)debugCallback;
+                    debugCallback:(SPTPersistentCacheDebugCallback)debugCallback;
 
 @end
