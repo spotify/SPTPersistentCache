@@ -20,6 +20,8 @@
  */
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * @brief SPTPersistentCacheRecord
  *
@@ -48,3 +50,5 @@
 @property (nonatomic, strong, readonly) NSData *data;
 
 @end
+
+NS_ASSUME_NONNULL_END

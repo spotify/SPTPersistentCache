@@ -534,9 +534,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
 
             SPTPersistentCacheRecord *record = [[SPTPersistentCacheRecord alloc] initWithData:payload
-                                                                              key:key
-                                                                         refCount:refCount
-                                                                              ttl:ttl];
+                                                                                          key:key
+                                                                                     refCount:refCount
+                                                                                          ttl:ttl];
 
             SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationSucceeded
                                                                                                 error:nil
