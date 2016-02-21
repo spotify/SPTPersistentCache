@@ -38,7 +38,7 @@ $ cocoapods update
 ```
 
 ### Carthage
-We support [Carthage](https://github.con/Carthage/Carthage) and provide pre-built binary frameworks for all new releases. Start by making sure you have the latest version of Carthage installed, e.g. using [Homebrew](http://brew.sh/):
+We support [Carthage](https://github.com/Carthage/Carthage) and provide pre-built binary frameworks for all new releases. Start by making sure you have the latest version of Carthage installed, e.g. using [Homebrew](http://brew.sh/):
 ```shell
 $ brew update
 $ brew install carthage
