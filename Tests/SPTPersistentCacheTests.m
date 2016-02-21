@@ -174,8 +174,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     NSLog(@"%@", self.cachePath);
 
-    self.cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return kTestEpochTime; }
-                                    expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+    self.cache = [self createCacheWithExpirationTime:SPTPersistentCacheDefaultExpirationTimeSec
+                                        timeCallback:^NSTimeInterval {
+                                            return kTestEpochTime;
+                                        }];
     SPTPersistentCacheFileManager *fileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:self.cache.options];
 
     self.thisBundle = [NSBundle bundleForClass:[self class]];
@@ -219,10 +221,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 - (void)testCorrectWriteAndRead
 {
     // No expiration
-    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
-        return [NSDate timeIntervalSinceReferenceDate];
-    }
-                                                       expirationTime:[NSDate timeIntervalSinceReferenceDate]];
+    const NSTimeInterval intervalSinceReferenceDate = [NSDate timeIntervalSinceReferenceDate];
+    SPTPersistentCache *cache = [self createCacheWithExpirationTime:intervalSinceReferenceDate timeCallback:^{
+        return intervalSinceReferenceDate;
+    }];
     SPTPersistentCacheFileManager *fileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:cache.options];
     NSUInteger __block calls = 0;
     NSUInteger __block errorCalls = 0;
@@ -295,9 +297,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 - (void)testLoadWithPrefixesSuccess
 {
     // No expiration
-    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
-        return [NSDate timeIntervalSinceReferenceDate];
-    } expirationTime:[NSDate timeIntervalSinceReferenceDate]];
+    const NSTimeInterval intervalSinceReferenceDate = [NSDate timeIntervalSinceReferenceDate];
+    SPTPersistentCache *cache = [self createCacheWithExpirationTime:intervalSinceReferenceDate timeCallback:^{
+        return intervalSinceReferenceDate;
+    }];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"testLoadWithPrefixesSuccess"];
 
@@ -348,9 +351,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 - (void)testLoadWithPrefixesFail
 {
     // No expiration
-    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
-        return [NSDate timeIntervalSinceReferenceDate];
-    } expirationTime:[NSDate timeIntervalSinceReferenceDate]];
+    const NSTimeInterval intervalSinceReferenceDate = [NSDate timeIntervalSinceReferenceDate];
+    SPTPersistentCache *cache = [self createCacheWithExpirationTime:intervalSinceReferenceDate timeCallback:^{
+        return intervalSinceReferenceDate;
+    }];
 
     XCTestExpectation *expectation = [self expectationWithDescription:@"testLoadWithPrefixesFail"];
 
@@ -394,10 +398,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testLockUnlock
 {
-    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+    SPTPersistentCache *cache = [self createCacheWithExpirationTime:SPTPersistentCacheDefaultExpirationTimeSec timeCallback:^NSTimeInterval{
         return kTestEpochTime + SPTPersistentCacheDefaultExpirationTimeSec - 1;
-    }
-                                                       expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+    }];
     
     SPTPersistentCacheFileManager *fileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:cache.options];
 
@@ -492,10 +495,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testRemoveItems
 {
-    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+    SPTPersistentCache *cache = [self createCacheWithExpirationTime:SPTPersistentCacheDefaultExpirationTimeSec timeCallback:^NSTimeInterval{
         return kTestEpochTime + SPTPersistentCacheDefaultExpirationTimeSec - 1;
-    }
-                                                       expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+    }];
 
     [cache removeDataForKeys:self.imageNames];
 
@@ -535,10 +537,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testPureCache
 {
-    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+    SPTPersistentCache *cache = [self createCacheWithExpirationTime:SPTPersistentCacheDefaultExpirationTimeSec timeCallback:^NSTimeInterval{
         return kTestEpochTime + SPTPersistentCacheDefaultExpirationTimeSec - 1;
-    }
-                                                       expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+    }];
 
     [cache prune];
 
@@ -585,10 +586,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 {
     // We consider that no expiration occure in this test
     // If pass nil in time callback then files with TTL would be expired
-    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+    SPTPersistentCache *cache = [self createCacheWithExpirationTime:SPTPersistentCacheDefaultExpirationTimeSec timeCallback:^NSTimeInterval{
         return kTestEpochTime;
-    }
-                                                       expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+    }];
 
     [cache wipeLockedFiles];
 
@@ -655,10 +655,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 */
 - (void)testWipeUnlocked
 {
-    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+    SPTPersistentCache *cache = [self createCacheWithExpirationTime:SPTPersistentCacheDefaultExpirationTimeSec timeCallback:^NSTimeInterval{
         return kTestEpochTime + SPTPersistentCacheDefaultExpirationTimeSec - 1;
-    }
-                                                       expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+    }];
 
     [cache wipeNonLockedFiles];
 
@@ -726,10 +725,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testUsedSize
 {
-    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+    SPTPersistentCache *cache = [self createCacheWithExpirationTime:SPTPersistentCacheDefaultExpirationTimeSec timeCallback:^NSTimeInterval{
         return kTestEpochTime + SPTPersistentCacheDefaultExpirationTimeSec - 1;
-    }
-                                                       expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+    }];
 
     NSUInteger expectedSize = [self calculateExpectedSize];
     NSUInteger realUsedSize = [cache totalUsedSizeInBytes];
@@ -743,10 +741,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testLockedSize
 {
-    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+    SPTPersistentCache *cache = [self createCacheWithExpirationTime:SPTPersistentCacheDefaultExpirationTimeSec timeCallback:^NSTimeInterval{
         return kTestEpochTime + SPTPersistentCacheDefaultExpirationTimeSec - 1;
-    }
-                                                       expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+    }];
 
     NSUInteger expectedSize = 0;
 
@@ -770,11 +767,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testExpirationWithDefaultTimeout
 {
-    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+    SPTPersistentCache *cache = [self createCacheWithExpirationTime:SPTPersistentCacheDefaultExpirationTimeSec timeCallback:^NSTimeInterval{
         // Exceed expiration interval by 1 sec
         return kTestEpochTime + SPTPersistentCacheDefaultExpirationTimeSec + 1;
-    }
-                                                       expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+    }];
 
     const NSUInteger count = self.imageNames.count;
     NSUInteger __block calls = 0;
@@ -834,11 +830,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 - (void)testExpirationWithTTL
 {
-    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+    SPTPersistentCache *cache = [self createCacheWithExpirationTime:SPTPersistentCacheDefaultExpirationTimeSec timeCallback:^NSTimeInterval{
         // Take largest TTL of non locked + 1 sec
         return kTestEpochTime + kTTL4 + 1;
-    }
-                                                       expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+    }];
 
     const NSUInteger count = self.imageNames.count;
     NSUInteger __block calls = 0;
@@ -900,11 +895,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
  */
 - (void)testTouchOnlyRecordsWithDefaultExpirtion
 {
-    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+    SPTPersistentCache *cache = [self createCacheWithExpirationTime:SPTPersistentCacheDefaultExpirationTimeSec timeCallback:^NSTimeInterval{
         return kTestEpochTime + SPTPersistentCacheDefaultExpirationTimeSec - 1;
-    }
-                                                       expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
-    
+    }];
+
     SPTPersistentCacheFileManager *fileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:cache.options];
 
     const NSUInteger count = self.imageNames.count;
@@ -988,11 +982,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 // WARNING: This test is dependent on hardcoded data TTL4
 - (void)testRegularGCWithTTL
 {
-    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+    SPTPersistentCache *cache = [self createCacheWithExpirationTime:SPTPersistentCacheDefaultExpirationTimeSec timeCallback:^NSTimeInterval{
         // Take largest TTL4 of non locked
         return kTestEpochTime + kTTL4;
-    }
-                                                       expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+    }];
 
     SPTPersistentCacheFileManager *fileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:cache.options];
     
@@ -1031,7 +1024,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     const NSUInteger count = self.imageNames.count;
 
     // Just dummy cache to get path to items
-    SPTPersistentCache *cache = [self createCacheWithTimeCallback:nil expirationTime:0];
+    SPTPersistentCache *cache = [self createCacheWithExpirationTime:0 timeCallback:nil];
 
     SPTPersistentCacheFileManager *fileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:cache.options];
     
@@ -1107,8 +1100,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 - (void)testSerialStoreWithLockDoesntIncrementRefCount
 {
     const NSTimeInterval refTime = kTestEpochTime + 1.0;
-    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return refTime; }
-                                                       expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+    SPTPersistentCache *cache = [self createCacheWithExpirationTime:SPTPersistentCacheDefaultExpirationTimeSec timeCallback:^{
+        return refTime;
+    }];
     
     SPTPersistentCacheFileManager *fileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:cache.options];
     // Index of file to put. It should be file without any problems.
@@ -1371,8 +1365,9 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
     close(fd);
 }
 
-- (SPTPersistentCache *)createCacheWithTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTime
-                                     expirationTime:(NSTimeInterval)expirationTimeSec
+- (SPTPersistentCache *)createCacheWithExpirationTime:(NSTimeInterval)expirationTimeSec
+                                         timeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTime
+
 {
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:self.cachePath
                                                                                            identifier:nil
