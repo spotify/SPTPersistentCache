@@ -1061,13 +1061,13 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
 
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:self.cachePath
-                                                                                           identifier:nil
-                                                                                  currentTimeCallback:nil
-                                                                            defaultExpirationInterval:SPTPersistentCacheDefaultExpirationTimeSec
-                                                                             garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
-                                                                                                debug:^(NSString *str) {
-                                                                                                    NSLog(@"%@", str);
-                                                                                                }];
+                                                                                   identifier:nil
+                                                                    defaultExpirationInterval:SPTPersistentCacheDefaultExpirationTimeSec
+                                                                     garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
+                                                                          currentTimeCallback:nil
+                                                                                debugCallback:^(NSString *str) {
+                                                                                    NSLog(@"%@", str);
+                                                                                }];
     options.sizeConstraintBytes = expectedSize;
 
     cache = [[SPTPersistentCache alloc] initWithOptions:options];
@@ -1158,10 +1158,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 - (void)testInitNilWhenCannotCreateCacheDirectory
 {
-    SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
-                                                                                   identifier:nil
-                                                                          currentTimeCallback:nil
-                                                                                        debug:nil];
+    SPTPersistentCacheOptions *options = [SPTPersistentCacheOptions new];
 
     Method originalMethod = class_getClassMethod(NSFileManager.class, @selector(defaultManager));
     IMP originalMethodImplementation = method_getImplementation(originalMethod);
@@ -1378,13 +1375,13 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
 
 {
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:self.cachePath
-                                                                                           identifier:nil
-                                                                                  currentTimeCallback:currentTime
-                                                                            defaultExpirationInterval:(NSUInteger)expirationTimeSec
-                                                                             garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
-                                                                                                debug:^(NSString *str) {
-                                                                                      NSLog(@"%@", str);
-                                                                                  }];
+                                                                                   identifier:nil
+                                                                    defaultExpirationInterval:(NSUInteger)expirationTimeSec
+                                                                     garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
+                                                                          currentTimeCallback:currentTime
+                                                                                debugCallback:^(NSString *str) {
+                                                                                    NSLog(@"%@", str);
+                                                                                }];
 
     return [[SPTPersistentCache alloc] initWithOptions:options];
 }
