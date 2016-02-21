@@ -46,7 +46,6 @@ typedef NS_ENUM(NSInteger, SPTPersistentCacheResponseCode) {
 
 /**
  * @brief SPTPersistentCacheResponse
- *
  * @discussion Class defines one response passed in callback to call loadDataForKey:
  */
 @interface SPTPersistentCacheResponse : NSObject
