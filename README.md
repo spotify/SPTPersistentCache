@@ -85,6 +85,16 @@ NSString *key = @"MyHashValue";
         } onQueue:dispatch_get_main_queue()];
 ```
 
+### Loading Data in the SPTPersistentCache
+In order to restore data you already have saved in the `SPTPersistentCache`, you simply feed it the same key that you used to store the data.
+```objc
+NSString *key = @"MyHashValue";
+[self.cache loadDataForKey:key withCallback:^(SPTPersistentCacheResponse *cacheResponse) {
+    UIImage *image = [UIImage imageWithData:cacheResponse.record.data];
+} onQueue:dispatch_get_main_queue()];
+```
+Note that if the TTL has expired, you will not receive a result.
+
 ## Background story :book:
 At Spotify we began to standardise the way we handled images in a centralised way, and in doing so we initially created a component that was handling images and their caching. But then our requirements changed, and we began to need caching for our backend calls and preview MP3 downloads as well. In doing so, we managed to separate out our caching logic into a generic component that can be used for any piece of data.
 
