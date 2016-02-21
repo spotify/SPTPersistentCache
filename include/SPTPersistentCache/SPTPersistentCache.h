@@ -201,7 +201,7 @@ FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
  * Schedule garbage collection. If already scheduled then this method does nothing.
  * @warning This method has to be called on main thread.
  */
-- (void)scheduleGarbageCollector;
+- (BOOL)scheduleGarbageCollector;
 /**
  * Stop ragbage collection. If already stopped this method does nothing.
  * @warning This method has to be called on main thread.
