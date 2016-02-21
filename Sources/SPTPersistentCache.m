@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <SPTPersistentCache/SPTPersistentCache.h>
+#import "SPTPersistentCache+Private.h"
 
 #import <SPTPersistentCache/SPTPersistentCacheHeader.h>
 
@@ -45,20 +45,6 @@ static NSString * const SPTDataCacheFileAttributesKey = @"SPTDataCacheFileAttrib
 typedef SPTPersistentCacheResponse* (^FileProcessingBlockType)(int filedes);
 typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *header);
 
-#pragma mark - SPTPersistentCache()
-
-@interface SPTPersistentCache ()
-@property (nonatomic, copy) SPTPersistentCacheOptions *options;
-// Serial queue used to run all internall stuff
-@property (nonatomic, strong) dispatch_queue_t workQueue;
-@property (nonatomic, strong) NSFileManager *fileManager;
-@property (nonatomic, strong) NSTimer *gcTimer;
-@property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
-@property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback currentTime;
-@property (nonatomic, strong) SPTPersistentCacheFileManager *dataCacheFileManager;
-
-@end
-
 #pragma mark - SPTPersistentCache
 
 @implementation SPTPersistentCache
@@ -74,14 +60,14 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
         return nil;
     }
 
-    _options = (options ? options : [SPTPersistentCacheOptions new]);
+    _options = options ?: [SPTPersistentCacheOptions new];
 
-    _workQueue = dispatch_queue_create([options.identifierForQueue UTF8String], DISPATCH_QUEUE_CONCURRENT);
-    assert(_workQueue != nil);
-    self.fileManager = [NSFileManager defaultManager];
+    _workQueue = dispatch_queue_create(options.identifierForQueue.UTF8String, DISPATCH_QUEUE_CONCURRENT);
+    NSAssert(_workQueue != nil, @"Failed to craete work queue");
+    _fileManager = [NSFileManager defaultManager];
 
-    _currentTime = [self.options.currentTimeSec copy];
-    _debugOutput = [self.options.debugOutput copy];
+    _currentTime = [_options.currentTimeSec copy];
+    _debugOutput = [_options.debugOutput copy];
     
     _dataCacheFileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:_options];
     
@@ -369,18 +355,18 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
         return;
     }
 
-    SPTPersistentCacheTimerProxy *proxy = [[SPTPersistentCacheTimerProxy alloc] initWithDataCache:self
-                                                                                                    queue:self.workQueue];
+    SPTPersistentCacheTimerProxy *proxy = [[SPTPersistentCacheTimerProxy alloc] initWithDataCache:self queue:self.workQueue];
 
     NSTimeInterval interval = self.options.gcIntervalSec;
     // clang diagnostics to workaround http://www.openradar.appspot.com/17806477 (-Wselector)
     _Pragma("clang diagnostic push");
     _Pragma("clang diagnostic ignored \"-Wselector\"");
-    self.gcTimer = [NSTimer timerWithTimeInterval:interval target:proxy selector:@selector(enqueueGC:) userInfo:nil repeats:YES];
+    NSTimer *timer = [NSTimer timerWithTimeInterval:interval target:proxy selector:@selector(enqueueGC:) userInfo:nil repeats:YES];
     _Pragma("clang diagnostic pop");
-    self.gcTimer.tolerance = 300;
+    timer.tolerance = 300;
     
-    [[NSRunLoop mainRunLoop] addTimer:self.gcTimer forMode:NSDefaultRunLoopMode];
+    [[NSRunLoop mainRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
+    self.gcTimer = timer;
 }
 
 - (void)unscheduleGarbageCollector

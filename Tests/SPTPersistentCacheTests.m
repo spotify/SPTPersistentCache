@@ -108,18 +108,22 @@ static NSUInteger params_GetDefaultExpireFilesNumber(void);
 
 static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentCacheRecordHeader *header);
 
-@interface SPTPersistentCache (Testing)
+@interface SPTPersistentCacheSettableProperties : SPTPersistentCache
 
-@property (nonatomic, strong) dispatch_queue_t workQueue;
-@property (nonatomic, strong) NSFileManager *fileManager;
+@property (nonatomic, strong, readwrite) dispatch_queue_t workQueue;
+@property (nonatomic, strong, readwrite) NSFileManager *fileManager;
 
-- (void)runRegularGC;
-- (void)pruneBySize;
+@end
+
+@implementation SPTPersistentCacheSettableProperties
+
+@synthesize workQueue = _workQueue;
+@synthesize fileManager = _fileManager;
 
 @end
 
 @interface SPTPersistentCacheTests : XCTestCase
-@property (nonatomic, strong) SPTPersistentCache *cache;
+@property (nonatomic, strong) SPTPersistentCacheSettableProperties *cache;
 @property (nonatomic, strong) NSMutableArray *imageNames;
 @property (nonatomic, strong) NSString *cachePath;
 @property (nonatomic, strong) NSBundle *thisBundle;
@@ -1370,8 +1374,8 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
     close(fd);
 }
 
-- (SPTPersistentCache *)createCacheWithExpirationTime:(NSTimeInterval)expirationTimeSec
-                                         timeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTime
+- (SPTPersistentCacheSettableProperties *)createCacheWithExpirationTime:(NSTimeInterval)expirationTimeSec
+                                                           timeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTime
 
 {
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:self.cachePath
@@ -1383,7 +1387,10 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
                                                                                     NSLog(@"%@", str);
                                                                                 }];
 
-    return [[SPTPersistentCache alloc] initWithOptions:options];
+    SPTPersistentCacheSettableProperties *cache = [[SPTPersistentCacheSettableProperties alloc] initWithOptions:options];
+    cache.fileManager = [NSFileManager defaultManager];
+    cache.workQueue = dispatch_get_main_queue();
+    return cache;
 }
 
 - (NSUInteger)getFilesNumberAtPath:(NSString *)path

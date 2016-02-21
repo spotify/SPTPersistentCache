@@ -21,11 +21,28 @@
 
 #import <SPTPersistentCache/SPTPersistentCache.h>
 
-@interface SPTPersistentCache (Private)
+@class SPTPersistentCacheFileManager;
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface SPTPersistentCache ()
 
 @property (nonatomic, copy, readonly) SPTPersistentCacheOptions *options;
+
+// Serial queue used to run all internall stuff
+@property (nonatomic, strong, readonly) dispatch_queue_t workQueue;
+
+@property (nonatomic, copy, readonly) SPTPersistentCacheDebugCallback debugOutput;
+@property (nonatomic, copy, readonly) SPTPersistentCacheCurrentTimeSecCallback currentTime;
+
+@property (nonatomic, strong, readonly) NSFileManager *fileManager;
+@property (nonatomic, strong, readonly) SPTPersistentCacheFileManager *dataCacheFileManager;
+
+@property (nonatomic, strong, nullable) NSTimer *gcTimer;
 
 - (void)runRegularGC;
 - (void)pruneBySize;
 
 @end
+
+NS_ASSUME_NONNULL_END
