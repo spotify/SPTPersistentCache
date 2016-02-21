@@ -94,9 +94,9 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
     
     _debugOutput = [debugCallback copy];
     
-    self.currentTimeSec = (currentTimeBlock ?
-                           currentTimeBlock :
-                           ^NSTimeInterval() { return [[NSDate date] timeIntervalSince1970]; });
+    self.currentTimeSec = currentTimeBlock ? currentTimeBlock : ^ NSTimeInterval() {
+        return [[NSDate date] timeIntervalSince1970];
+    };
     
     if (defaultExpirationInterval < SPTPersistentCacheMinimumExpirationLimit) {
         SPTPersistentCacheOptionsDebug([NSString stringWithFormat:@"PersistentDataCache: Forcing defaultExpirationPeriodSec to %lu sec", (unsigned long)SPTPersistentCacheMinimumExpirationLimit],

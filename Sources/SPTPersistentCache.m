@@ -230,18 +230,20 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
         NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
         BOOL __block expired = NO;
-        SPTPersistentCacheResponse *response =
-        [self alterHeaderForFileAtPath:filePath withBlock:^(SPTPersistentCacheRecordHeader *header) {
-            // Satisfy Req.#1.2 and Req.#1.3
-            if (![self isDataCanBeReturnedWithHeader:header]) {
-                expired = YES;
-                return;
-            }
-            // Touch files that have default expiration policy
-            if (header->ttl == 0) {
-                header->updateTimeSec = spt_uint64rint(self.currentTime());
-            }
-        } writeBack:YES complain:NO];
+        SPTPersistentCacheResponse *response = [self alterHeaderForFileAtPath:filePath
+                                                                    withBlock:^(SPTPersistentCacheRecordHeader *header) {
+                                                                        // Satisfy Req.#1.2 and Req.#1.3
+                                                                        if (![self isDataCanBeReturnedWithHeader:header]) {
+                                                                            expired = YES;
+                                                                            return;
+                                                                        }
+                                                                        // Touch files that have default expiration policy
+                                                                        if (header->ttl == 0) {
+                                                                            header->updateTimeSec = spt_uint64rint(self.currentTime());
+                                                                        }
+                                                                    }
+                                                                    writeBack:YES
+                                                                     complain:NO];
 
         // Satisfy Req.#1.2
         if (expired) {

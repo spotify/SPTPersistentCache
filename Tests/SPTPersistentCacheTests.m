@@ -113,6 +113,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 @property (nonatomic, strong) dispatch_queue_t workQueue;
 @property (nonatomic, strong) NSFileManager *fileManager;
 @property (nonatomic, strong) NSTimer *gcTimer;
+@property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback currentTime;
 
 - (void)runRegularGC;
 - (void)pruneBySize;
@@ -175,8 +176,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     NSLog(@"%@", self.cachePath);
 
-    self.cache = [self createCacheWithTimeCallback:^NSTimeInterval(){ return kTestEpochTime; }
-                                    expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+    self.cache = [self createCacheWithTimeCallback:^ NSTimeInterval(){
+        return kTestEpochTime;
+    } expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
     SPTPersistentCacheFileManager *fileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:self.cache.options];
 
     self.thisBundle = [NSBundle bundleForClass:[self class]];
@@ -1239,19 +1241,15 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 - (void)testTouchDataWithExpiredHeader
 {
-    Method originalMethod = class_getClassMethod(NSDate.class, @selector(date));
-    IMP originalMethodImplementation = method_getImplementation(originalMethod);
-
-    IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
-        return nil;
-    });
-    method_setImplementation(originalMethod, fakeMethodImplementation);
-
     for (NSUInteger i = 0; i < self.imageNames.count; ++i) {
         if (kParams[i].ttl == 0) {
             continue;
         }
         NSString *key = self.imageNames[i];
+        [self.cache unlockDataForKeys:@[key] callback:nil onQueue:nil];
+        self.cache.currentTime = ^ {
+            return kTestEpochTime * 100.0;
+        };
         __block BOOL called = NO;
         [self.cache touchDataForKey:key callback:^(SPTPersistentCacheResponse *response) {
             called = YES;
@@ -1259,25 +1257,19 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         } onQueue:dispatch_get_main_queue()];
         break;
     }
-
-    method_setImplementation(originalMethod, originalMethodImplementation);
 }
 
 - (void)testLockDataWithExpiredHeader
 {
-    Method originalMethod = class_getClassMethod(NSDate.class, @selector(date));
-    IMP originalMethodImplementation = method_getImplementation(originalMethod);
-
-    IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
-        return nil;
-    });
-    method_setImplementation(originalMethod, fakeMethodImplementation);
-
     for (NSUInteger i = 0; i < self.imageNames.count; ++i) {
         if (kParams[i].ttl == 0) {
             continue;
         }
         NSString *key = self.imageNames[i];
+        [self.cache unlockDataForKeys:@[key] callback:nil onQueue:nil];
+        self.cache.currentTime = ^ {
+            return kTestEpochTime * 100.0;
+        };
         __block BOOL called = NO;
         [self.cache lockDataForKeys:@[key] callback:^(SPTPersistentCacheResponse *response) {
             called = YES;
@@ -1285,8 +1277,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         } onQueue:dispatch_get_main_queue()];
         break;
     }
-
-    method_setImplementation(originalMethod, originalMethodImplementation);
 }
 
 - (void)testUnlockDataMoreTimesThanLocked
