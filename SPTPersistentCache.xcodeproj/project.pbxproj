@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		050076AA1C7A2B6D000819B5 /* NSFileManagerMock.m in Sources */ = {isa = PBXBuildFile; fileRef = 050076A91C7A2B6D000819B5 /* NSFileManagerMock.m */; };
+		050076AD1C7A2FF7000819B5 /* SPTPersistentCachePosixWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 050076AC1C7A2FF7000819B5 /* SPTPersistentCachePosixWrapper.m */; };
+		050076B01C7A3137000819B5 /* SPTPersistentCachePosixWrapperMock.m in Sources */ = {isa = PBXBuildFile; fileRef = 050076AF1C7A3137000819B5 /* SPTPersistentCachePosixWrapperMock.m */; };
 		0510FF1F1BA2FF7A00ED0766 /* libSPTPersistentCache.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0510FF131BA2FF7A00ED0766 /* libSPTPersistentCache.a */; };
 		0510FF6B1BA3073D00ED0766 /* SPTPersistentCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0510FF6A1BA3073D00ED0766 /* SPTPersistentCacheTests.m */; };
 		057AFD5B1C70F99A00350C9F /* SPTPersistentCacheHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 057AFD5A1C70F99A00350C9F /* SPTPersistentCacheHeader.m */; };
@@ -71,6 +74,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		050076A81C7A2B6D000819B5 /* NSFileManagerMock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSFileManagerMock.h; sourceTree = "<group>"; };
+		050076A91C7A2B6D000819B5 /* NSFileManagerMock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSFileManagerMock.m; sourceTree = "<group>"; };
+		050076AB1C7A2FF7000819B5 /* SPTPersistentCachePosixWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCachePosixWrapper.h; sourceTree = "<group>"; };
+		050076AC1C7A2FF7000819B5 /* SPTPersistentCachePosixWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCachePosixWrapper.m; sourceTree = "<group>"; };
+		050076AE1C7A3137000819B5 /* SPTPersistentCachePosixWrapperMock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCachePosixWrapperMock.h; sourceTree = "<group>"; };
+		050076AF1C7A3137000819B5 /* SPTPersistentCachePosixWrapperMock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCachePosixWrapperMock.m; sourceTree = "<group>"; };
 		0510FF131BA2FF7A00ED0766 /* libSPTPersistentCache.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSPTPersistentCache.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		0510FF1E1BA2FF7A00ED0766 /* SPTPersistentCacheTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SPTPersistentCacheTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0510FF241BA2FF7A00ED0766 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -154,6 +163,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		050076A71C7A2B57000819B5 /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				050076A81C7A2B6D000819B5 /* NSFileManagerMock.h */,
+				050076A91C7A2B6D000819B5 /* NSFileManagerMock.m */,
+				050076AE1C7A3137000819B5 /* SPTPersistentCachePosixWrapperMock.h */,
+				050076AF1C7A3137000819B5 /* SPTPersistentCachePosixWrapperMock.m */,
+			);
+			name = Mocks;
+			sourceTree = "<group>";
+		};
 		0510FF0A1BA2FF7A00ED0766 = {
 			isa = PBXGroup;
 			children = (
@@ -189,6 +209,7 @@
 				C4B4148E1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m */,
 				0510FF6A1BA3073D00ED0766 /* SPTPersistentCacheTests.m */,
 				C41237071C6A29FB00C1E9B8 /* SPTPersistentCacheTimerProxyTests.m */,
+				050076A71C7A2B57000819B5 /* Mocks */,
 				698B70521C7538B000BDBFEA /* Resources */,
 				0510FF231BA2FF7A00ED0766 /* Supporting Files */,
 			);
@@ -245,6 +266,8 @@
 				0595F3391C50117B0052328B /* SPTPersistentCacheTimerProxy.m */,
 				C45526AD1C77D7ED008D5570 /* SPTPersistentCacheTypeUtilities.h */,
 				C45526AE1C77D7ED008D5570 /* SPTPersistentCacheTypeUtilities.m */,
+				050076AB1C7A2FF7000819B5 /* SPTPersistentCachePosixWrapper.h */,
+				050076AC1C7A2FF7000819B5 /* SPTPersistentCachePosixWrapper.m */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -410,8 +433,11 @@
 				057AFD5B1C70F99A00350C9F /* SPTPersistentCacheHeader.m in Sources */,
 				696CD78A1C4707E20071DD18 /* crc32iso3309.c in Sources */,
 				C45526AF1C77D7ED008D5570 /* SPTPersistentCacheTypeUtilities.m in Sources */,
+				050076AA1C7A2B6D000819B5 /* NSFileManagerMock.m in Sources */,
 				696CD78B1C4707E20071DD18 /* SPTPersistentCache.m in Sources */,
 				0595F0B01C5009800052328B /* SPTPersistentCacheResponse.m in Sources */,
+				050076B01C7A3137000819B5 /* SPTPersistentCachePosixWrapperMock.m in Sources */,
+				050076AD1C7A2FF7000819B5 /* SPTPersistentCachePosixWrapper.m in Sources */,
 				696CD78C1C4707E20071DD18 /* SPTPersistentCacheOptions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
