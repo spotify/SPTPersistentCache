@@ -116,6 +116,20 @@ This will schedule garbage collection on the interval you supplied in the `SPTPe
 [self.cache unscheduleGarbageCollection];
 ```
 
+### Manually managing cache usage
+There are times when you may want to pre-empty a garbage collection that is scheduled, wipe the cache or simply remove all locked/unlocked files indiscriminantly. To support these cases we have provided methods to do just this.
+```objc
+// Lets wipe all the files we haven't explicitly locked
+[self.cache wipeUnlockedFiles];
+NSLog(@"Size = %@", @(self.cache.totalUsedSizeInBytes));
+// Now let's wipe all the files we have explicitly locked
+[self.cache wipeLockedFiles];
+NSLog(@"Size = %@", @(self.cache.totalUsedSizeInBytes));
+// Why not just wipe the entire cache?
+[self.cache prune];
+NSLog(@"Size = %@", @(self.cache.totalUsedSizeInBytes));
+```
+
 ## Background story :book:
 At Spotify we began to standardise the way we handled images in a centralised way, and in doing so we initially created a component that was handling images and their caching. But then our requirements changed, and we began to need caching for our backend calls and preview MP3 downloads as well. In doing so, we managed to separate out our caching logic into a generic component that can be used for any piece of data.
 
