@@ -317,7 +317,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                  callback:(SPTPersistentCacheResponseCallback)callback
                   onQueue:(dispatch_queue_t)queue
 {
-    if ((callback != nil && queue == nil) && keys.count == 0) {
+    if ((callback != nil && queue == nil) || keys.count == 0) {
         return NO;
     }
 

@@ -1310,6 +1310,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertNil(self.cache.gcTimer);
 }
 
+- (void)testUnlockDataWithNoKeys
+{
+    BOOL result = [self.cache unlockDataForKeys:nil callback:nil onQueue:nil];
+    XCTAssertFalse(result);
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
