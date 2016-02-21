@@ -66,7 +66,7 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
 /**
  *  A unique identifier for a work queue based on this instance of options.
  */
-@property (nonatomic, readonly) NSString *identifierForQueue;
+@property (nonatomic, copy, readonly) NSString *identifierForQueue;
 /**
  * Path to a folder in which to store that files. If folder doesn't exist it will be created.
  * This mustn't be nil.
