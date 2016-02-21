@@ -44,6 +44,7 @@
  *  Initializes the timer proxy on a specific queue using a specific data cache.
  *  
  *  @param cache Persistent Cache that will be used for garbage collection operations.
+ *  @param option Cache options to configure this garbage collector.
  *  @param queue Dispatch queue where the operations will take place.
  */
 - (instancetype)initWithDataCache:(SPTPersistentCache *)cache
