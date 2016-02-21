@@ -81,6 +81,11 @@ typedef NS_ENUM(NSInteger, SPTPersistentCacheLoadingError) {
 FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
 
 /**
+ * Type of callback that is used to give caller a chance to choose which key to open if any.
+ */
+typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
+
+/**
  * @brief SPTPersistentCache
  * @discussion Class defines persistent cache that manage files on disk. This class is threadsafe.
  * Except methods for scheduling/unscheduling GC which must be called on main thread.
