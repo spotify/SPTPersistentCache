@@ -27,11 +27,13 @@
 #import <AppKit/NSImage.h>
 #define ImageClass NSImage
 #endif
+#import <objc/runtime.h>
 
 #import <SPTPersistentCache/SPTPersistentCache.h>
 #import <SPTPersistentCache/SPTPersistentCache.h>
 #import <SPTPersistentCache/SPTPersistentCacheResponse.h>
 #import <SPTPersistentCache/SPTPersistentCacheRecord.h>
+
 #import "SPTPersistentCache+Private.h"
 #import "SPTPersistentCacheFileManager.h"
 
@@ -107,8 +109,13 @@ static NSUInteger params_GetDefaultExpireFilesNumber(void);
 static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentCacheRecordHeader *header);
 
 @interface SPTPersistentCache (Testing)
+
+@property (nonatomic, strong) dispatch_queue_t workQueue;
+@property (nonatomic, strong) NSFileManager *fileManager;
+
 - (void)runRegularGC;
 - (void)pruneBySize;
+
 @end
 
 @interface SPTPersistentCacheTests : XCTestCase
@@ -193,8 +200,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             [self corruptFile:filePath pdcError:kParams[i].corruptReason];
         }
     }
-
-    self.cache = nil;
 }
 
 - (void)tearDown
@@ -1149,6 +1154,158 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(header.refCount, 0u, @"refCount must match");
 }
 
+- (void)testInitNilWhenCannotCreateCacheDirectory
+{
+    SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
+                                                                                   identifier:nil
+                                                                          currentTimeCallback:nil
+                                                                                        debug:nil];
+
+    Method originalMethod = class_getClassMethod(NSFileManager.class, @selector(defaultManager));
+    IMP originalMethodImplementation = method_getImplementation(originalMethod);
+    IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
+        return nil;
+    });
+    method_setImplementation(originalMethod, fakeMethodImplementation);
+    SPTPersistentCache *cache = [[SPTPersistentCache alloc] initWithOptions:options];
+    method_setImplementation(originalMethod, originalMethodImplementation);
+
+    XCTAssertNil(cache, @"The cache should be nil if it could not create the directory");
+}
+
+- (void)testFailToLoadDataWhenCallbackAbsent
+{
+    BOOL result = [self.cache loadDataForKey:@"Thing" withCallback:nil onQueue:nil];
+    XCTAssertFalse(result);
+}
+
+- (void)testFailToLoadDataForKeysWithPrefixWhenCallbackAbsent
+{
+    BOOL result = [self.cache loadDataForKeysWithPrefix:@"T" chooseKeyCallback:nil withCallback:nil onQueue:nil];
+    XCTAssertFalse(result);
+}
+
+- (void)testFailToRetrieveDirectoryContents
+{
+    self.cache.fileManager = nil;
+    self.cache.workQueue = dispatch_get_main_queue();
+
+    __block BOOL called = NO;
+    [self.cache loadDataForKeysWithPrefix:@"T"
+                        chooseKeyCallback:^ NSString *(NSArray *keys) {
+                            return keys.firstObject;
+                        }
+                             withCallback:^ (SPTPersistentCacheResponse *response) {
+                                 XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationError);
+                                 called = YES;
+                             }
+                                  onQueue:dispatch_get_main_queue()];
+    XCTAssertTrue(called);
+}
+
+- (void)testNotFoundIfCacheDirectoryIsDeleted
+{
+    self.cache.workQueue = dispatch_get_main_queue();
+    [[NSFileManager defaultManager] removeItemAtPath:self.cachePath error:nil];
+    __block BOOL called = NO;
+    [self.cache loadDataForKeysWithPrefix:@"T" chooseKeyCallback:^ NSString *(NSArray *keys) {
+        return keys.firstObject;
+    } withCallback:^ (SPTPersistentCacheResponse *response) {
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeNotFound);
+        called = YES;
+    } onQueue:dispatch_get_main_queue()];
+    XCTAssertTrue(called);
+}
+
+- (void)testNoValidKeys
+{
+    self.cache.workQueue = dispatch_get_main_queue();
+    __block BOOL called = NO;
+    [self.cache loadDataForKeysWithPrefix:@"T" chooseKeyCallback:^ NSString *(NSArray *keys) {
+        return keys.firstObject;
+    } withCallback:^ (SPTPersistentCacheResponse *response) {
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeNotFound);
+        called = YES;
+    } onQueue:dispatch_get_main_queue()];
+    XCTAssertTrue(called);
+}
+
+- (void)testNoDataStoredWhenDataIsNil
+{
+    BOOL result = [self.cache storeData:nil forKey:nil locked:NO withCallback:nil onQueue:nil];
+    XCTAssertFalse(result);
+}
+
+- (void)testTouchDataWithExpiredHeader
+{
+    Method originalMethod = class_getClassMethod(NSDate.class, @selector(date));
+    IMP originalMethodImplementation = method_getImplementation(originalMethod);
+
+    IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
+        return nil;
+    });
+    method_setImplementation(originalMethod, fakeMethodImplementation);
+
+    for (NSUInteger i = 0; i < self.imageNames.count; ++i) {
+        if (kParams[i].ttl == 0) {
+            continue;
+        }
+        NSString *key = self.imageNames[i];
+        __block BOOL called = NO;
+        [self.cache touchDataForKey:key callback:^(SPTPersistentCacheResponse *response) {
+            called = YES;
+            XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeNotFound);
+        } onQueue:dispatch_get_main_queue()];
+        break;
+    }
+
+    method_setImplementation(originalMethod, originalMethodImplementation);
+}
+
+- (void)testLockDataWithExpiredHeader
+{
+    Method originalMethod = class_getClassMethod(NSDate.class, @selector(date));
+    IMP originalMethodImplementation = method_getImplementation(originalMethod);
+
+    IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
+        return nil;
+    });
+    method_setImplementation(originalMethod, fakeMethodImplementation);
+
+    for (NSUInteger i = 0; i < self.imageNames.count; ++i) {
+        if (kParams[i].ttl == 0) {
+            continue;
+        }
+        NSString *key = self.imageNames[i];
+        __block BOOL called = NO;
+        [self.cache lockDataForKeys:@[key] callback:^(SPTPersistentCacheResponse *response) {
+            called = YES;
+            XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeNotFound);
+        } onQueue:dispatch_get_main_queue()];
+        break;
+    }
+
+    method_setImplementation(originalMethod, originalMethodImplementation);
+}
+
+- (void)testUnlockDataMoreTimesThanLocked
+{
+    for (NSUInteger i = 0; i < self.imageNames.count; ++i) {
+        if (kParams[i].ttl == 0) {
+            continue;
+        }
+        NSString *key = self.imageNames[i];
+        __block BOOL called = NO;
+        for (NSInteger repeat = 0; repeat < 50; ++repeat) {
+            [self.cache unlockDataForKeys:@[key] callback:^(SPTPersistentCacheResponse *response) {
+                called = YES;
+            } onQueue:dispatch_get_main_queue()];
+        }
+        XCTAssertFalse(called);
+        break;
+    }
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
@@ -1161,8 +1318,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     NSData *data = [NSData dataWithContentsOfFile:file];
     XCTAssertNotNil(data, @"Unable to get data from file:%@", file);
     XCTAssertNotNil(key, @"Key must be specified");
-
-    [cache storeData:data forKey:key ttl:ttl locked:locked withCallback:^(SPTPersistentCacheResponse *response) {
+    SPTPersistentCacheResponseCallback callback = ^(SPTPersistentCacheResponse *response) {
         if (response.result == SPTPersistentCacheResponseCodeOperationSucceeded) {
             XCTAssertNil(response.record, @"record expected to be nil");
             XCTAssertNil(response.error, @"error xpected to be nil");
@@ -1173,7 +1329,13 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
             XCTAssert(NO, @"This is not expected result code for STORE operation");
         }
         [expectation fulfill];
-    } onQueue:dispatch_get_main_queue()];
+    };
+
+    if (ttl == 0) {
+        [cache storeData:data forKey:key locked:locked withCallback:callback onQueue:dispatch_get_main_queue()];
+    } else {
+        [cache storeData:data forKey:key ttl:ttl locked:locked withCallback:callback onQueue:dispatch_get_main_queue()];
+    }
 }
 
 /*
@@ -1279,8 +1441,8 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
     close(fd);
 }
 
-- (SPTPersistentCache *)createCacheWithTimeCallback:(SPTDataCacheCurrentTimeSecCallback)currentTime
-                                         expirationTime:(NSTimeInterval)expirationTimeSec
+- (SPTPersistentCache *)createCacheWithTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTime
+                                     expirationTime:(NSTimeInterval)expirationTimeSec
 {
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:self.cachePath
                                                                                            identifier:nil

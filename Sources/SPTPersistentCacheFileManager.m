@@ -28,9 +28,11 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
 
 
 @interface SPTPersistentCacheFileManager ()
+
 @property (nonatomic, strong) SPTPersistentCacheOptions *options;
 @property (nonatomic, strong) NSFileManager *fileManager;
-@property (nonatomic, copy) SPTDataCacheDebugCallback debugOutput;
+@property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
+
 @end
 
 @implementation SPTPersistentCacheFileManager
@@ -96,12 +98,8 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
     return [subDirectoryPathForKey stringByAppendingPathComponent:key];
 }
 
-- (void)removeAllDataButKeys:(NSSet *)busyKeys
+- (void)removeAllData
 {
-    if (!busyKeys) {
-        busyKeys = [NSSet set];
-    }
-    
     NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
     
     NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
@@ -119,9 +117,7 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
                 NSString *key = theURL.lastPathComponent;
                 
                 // That satisfies Req.#1.3
-                if (![busyKeys containsObject:key]) {
-                    [self removeDataForKey:key];
-                }
+                [self removeDataForKey:key];
             }
         }
     }

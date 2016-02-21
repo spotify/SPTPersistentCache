@@ -27,7 +27,7 @@ BOOL SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue(void);
 static const NSTimeInterval SPTPersistentCacheTimerProxyTimerToleranceInterval = 300;
 
 @interface SPTPersistentCacheGarbageCollectorScheduler ()
-@property (nonatomic, strong) SPTDataCacheDebugCallback debugOutput;
+@property (nonatomic, strong) SPTPersistentCacheDebugCallback debugOutput;
 @property (nonatomic, strong) NSTimer *timer;
 @property (nonatomic, strong) SPTPersistentCacheOptions *options;
 @end
