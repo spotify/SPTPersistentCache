@@ -75,8 +75,8 @@
     self.dispatchQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
     
     self.timerProxy = [[SPTPersistentCacheGarbageCollectorScheduler alloc] initWithDataCache:self.dataCache
-                       options:self.options
-                                                                            queue:self.dispatchQueue];
+                                                                                     options:self.options
+                                                                                       queue:self.dispatchQueue];
 }
 
 - (void)testDesignatedInitializer

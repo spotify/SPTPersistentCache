@@ -92,10 +92,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
         return nil;
     }
     
-    _garbageCollectorScheduler = [[SPTPersistentCacheGarbageCollectorScheduler alloc]
-                 initWithDataCache:self
-                                                                  options:_options
-                                                                    queue:_workQueue];
+    _garbageCollectorScheduler = [[SPTPersistentCacheGarbageCollectorScheduler alloc] initWithDataCache:self
+                                                                                                options:_options
+                                                                                                  queue:_workQueue];
 
     return self;
 }
@@ -485,6 +484,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
     return size;
 }
+
+- (void)dealloc
+{
+    [_garbageCollectorScheduler unscheduleGarbageCollection];
+}
+
 
 #pragma mark - Private methods
 /**

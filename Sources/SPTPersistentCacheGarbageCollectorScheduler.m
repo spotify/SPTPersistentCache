@@ -22,10 +22,12 @@
 
 #import "SPTPersistentCache+Private.h"
 
-const NSTimeInterval SPTPersistentCacheTimerProxyTimerToleranceInterval = 300;
+BOOL SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue(void);
+
+static const NSTimeInterval SPTPersistentCacheTimerProxyTimerToleranceInterval = 300;
 
 @interface SPTPersistentCacheGarbageCollectorScheduler ()
-@property (nonatomic, copy) SPTDataCacheDebugCallback debugOutput;
+@property (nonatomic, strong) SPTDataCacheDebugCallback debugOutput;
 @property (nonatomic, strong) NSTimer *timer;
 @property (nonatomic, strong) SPTPersistentCacheOptions *options;
 @end
@@ -46,18 +48,24 @@ const NSTimeInterval SPTPersistentCacheTimerProxyTimerToleranceInterval = 300;
     _options = options;
     _dataCache = dataCache;
     _queue = queue;
-    _debugOutput = [options.debugOutput copy];
+    _debugOutput = options.debugOutput;
     
     return self;
 }
 
 - (void)dealloc
 {
-    NSTimer *timer = self.timer;
+    NSTimer *timer = _timer;
     
-    dispatch_async(dispatch_get_main_queue(), ^{
+    void (^invalidateTimerBlock)(void) = ^{
         [timer invalidate];
-    });
+    };
+    
+    if (!SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue()) {
+        dispatch_async(dispatch_get_main_queue(), invalidateTimerBlock);
+    } else {
+        invalidateTimerBlock();
+    }
 }
 
 #pragma mark -
@@ -81,8 +89,12 @@ const NSTimeInterval SPTPersistentCacheTimerProxyTimerToleranceInterval = 300;
 
 - (void)scheduleGarbageCollection
 {
-    assert([NSThread isMainThread]);
-    
+    if (!SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue()) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self scheduleGarbageCollection];
+        });
+    }
+                       
     [self debugOutput:@"runGarbageCollector:%@", self.timer];
     
     if (self.isGarbageCollectionScheduled) {
@@ -102,7 +114,11 @@ const NSTimeInterval SPTPersistentCacheTimerProxyTimerToleranceInterval = 300;
 
 - (void)unscheduleGarbageCollection
 {
-    assert([NSThread isMainThread]);
+    if (!SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue()) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self unscheduleGarbageCollection];
+        });
+    }
     
     [self debugOutput:@"stopGarbageCollector:%@", self.timer];
     
@@ -122,12 +138,17 @@ const NSTimeInterval SPTPersistentCacheTimerProxyTimerToleranceInterval = 300;
 {
     va_list list;
     va_start(list, format);
-    NSString * str = [[NSString alloc ] initWithFormat:format arguments:list];
+    NSString * debugDescription = [[NSString alloc] initWithFormat:format arguments:list];
     va_end(list);
     if (self.debugOutput) {
-        self.debugOutput(str);
+        self.debugOutput(debugDescription);
     }
 }
 
 
 @end
+
+BOOL SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue(void) {
+    return (dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL) == dispatch_queue_get_label(dispatch_get_main_queue()));
+}
+
