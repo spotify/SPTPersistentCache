@@ -53,17 +53,12 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
 
 - (void)dealloc
 {
-    NSTimer *timer = _timer;
-    
-    void (^invalidateTimerBlock)(void) = ^{
-        [timer invalidate];
-    };
-    
-    if (!SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue()) {
-        dispatch_async(dispatch_get_main_queue(), invalidateTimerBlock);
-    } else {
-        invalidateTimerBlock();
-    }
+    /**
+     *  Intentionally Left Blank
+     *
+     *  Our timer should be invalidated by unscheduling this garbage collector
+     *  on the -dealloc method of the object owning the reference.
+     */
 }
 
 #pragma mark -

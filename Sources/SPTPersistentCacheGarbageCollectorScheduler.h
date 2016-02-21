@@ -53,11 +53,18 @@
 
 /**
  *  Schedules the garbage collection operation.
+ *
+ *  @warning The owner of the reference to this object should call 
+ *  unscheduleGarbageCollection on its dealloc method to prevent a retain cycle 
+ *  caused by an internal timer.
  */
 - (void)scheduleGarbageCollection;
 
 /**
  *  Unschedules the garbage collection operation.
+ *
+ *  @warning Ensure the garbage collector is unscheduled to break the retain
+ *  cycle that could be caused by the internal timer in this class.
  */
 - (void)unscheduleGarbageCollection;
 
