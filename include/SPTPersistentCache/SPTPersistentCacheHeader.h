@@ -20,6 +20,8 @@
  */
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 typedef uint32_t SPTPersistentCacheMagicType;
 
 /**
@@ -62,14 +64,16 @@ FOUNDATION_EXPORT SPTPersistentCacheRecordHeader SPTPersistentCacheRecordHeaderM
 
 // Following functions used internally and could be used for testing purposes also
 // Function return pointer to header if there are enough data otherwise NULL
-FOUNDATION_EXPORT SPTPersistentCacheRecordHeader *SPTPersistentCacheGetHeaderFromData(void *data,
-                                                                                      size_t size);
+FOUNDATION_EXPORT SPTPersistentCacheRecordHeader * _Nullable SPTPersistentCacheGetHeaderFromData(void * _Nullable data,
+                                                                                                 size_t size);
 // Function validates header accoring to predefined rules used in production code
 // @return -1 if everything is ok, otherwise one of codes from SPTPersistentCacheLoadingError
-FOUNDATION_EXPORT int /*SPTPersistentCacheLoadingError*/ SPTPersistentCacheValidateHeader(const SPTPersistentCacheRecordHeader *header);
+FOUNDATION_EXPORT int /*SPTPersistentCacheLoadingError*/ SPTPersistentCacheValidateHeader(const SPTPersistentCacheRecordHeader * _Nullable header);
 // Function return calculated CRC for current header.
-FOUNDATION_EXPORT uint32_t SPTPersistentCacheCalculateHeaderCRC(const SPTPersistentCacheRecordHeader *header);
+FOUNDATION_EXPORT uint32_t SPTPersistentCacheCalculateHeaderCRC(const  SPTPersistentCacheRecordHeader * _Nullable header);
 
 /// Checks that a given header is valid.
 /// @return nil if everything is ok, otherwise will return an instance of NSError.
-FOUNDATION_EXPORT NSError * SPTPersistentCacheCheckValidHeader(SPTPersistentCacheRecordHeader *header);
+FOUNDATION_EXPORT NSError * _Nullable SPTPersistentCacheCheckValidHeader(SPTPersistentCacheRecordHeader * _Nullable header);
+
+NS_ASSUME_NONNULL_END
