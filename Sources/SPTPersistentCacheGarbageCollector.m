@@ -86,6 +86,8 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
         dispatch_async(dispatch_get_main_queue(), ^{
             [self schedule];
         });
+        
+        return;
     }
                        
     SPTPersistentCacheSafeDebugCallback([NSString stringWithFormat:@"runGarbageCollector:%@", self.timer],
@@ -112,6 +114,8 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
         dispatch_async(dispatch_get_main_queue(), ^{
             [self unschedule];
         });
+        
+        return;
     }
     
     SPTPersistentCacheSafeDebugCallback([NSString stringWithFormat:@"stopGarbageCollector:%@", self.timer],
