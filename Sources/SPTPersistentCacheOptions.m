@@ -50,17 +50,17 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
 {
     return [self initWithCachePath:nil
                         identifier:nil
-               currentTimeCallback:nil
          defaultExpirationInterval:SPTPersistentCacheDefaultExpirationTimeSec
           garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
+               currentTimeCallback:nil
                      debugCallback:nil];
 }
 
 - (instancetype)initWithCachePath:(NSString *)cachePath
                        identifier:(NSString *)cacheIdentifier
-              currentTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTimeBlock
         defaultExpirationInterval:(NSUInteger)defaultExpirationInterval
          garbageCollectorInterval:(NSUInteger)garbageCollectorInterval
+              currentTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTimeBlock
                     debugCallback:(SPTPersistentCacheDebugCallback)debugCallback
 {
     if (!(self = [super init])) {
