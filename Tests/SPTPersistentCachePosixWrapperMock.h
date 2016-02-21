@@ -20,8 +20,14 @@
  */
 #import "SPTPersistentCachePosixWrapper.h"
 
+/**
+ * A custom mock of the SPTPersistentCachePosixWrapper class.
+ */
 @interface SPTPersistentCachePosixWrapperMock : SPTPersistentCachePosixWrapper
 
+/**
+ * The value to return when executing the "close:" method.
+ */
 @property (nonatomic, assign, readwrite) int closeValue;
 
 @end

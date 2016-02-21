@@ -20,9 +20,18 @@
  */
 #import <Foundation/Foundation.h>
 
+/**
+ * A custom mock of the NSFileManager object.
+ */
 @interface NSFileManagerMock : NSFileManager
 
+/**
+ * Called when the mock receives a "fileExistsAtPath:" call.
+ */
 @property (nonatomic, copy, readwrite) dispatch_block_t blockCalledOnFileExistsAtPath;
+/**
+ * Records the last "path" argument given to "fileExistsAtPath:".
+ */
 @property (nonatomic, strong, readwrite) NSString *lastPathCalledOnExists;
 
 @end
