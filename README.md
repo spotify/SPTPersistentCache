@@ -17,7 +17,7 @@ Everyone tries to implement a cache at some point in their app’s lifecycle, an
 ## Architecture :triangular_ruler:
 `SPTPersistentCache` is designed as an LRU cache which stores all the data in a single binary file, with entries containing the length, last accessed time and a CRC check designed to prevent corruption. It can be used to automatically schedule garbage collection and invoke pruning.
 
-## Installation
+## Installation :inbox_tray:
 `SPTPersistentCache` can be installed in a variety of ways including traditional static libraries and dynamic frameworks.
 
 ### Static Library
