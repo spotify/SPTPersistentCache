@@ -20,6 +20,8 @@
  */
 #import <SPTPersistentCache/SPTPersistentCacheResponse.h>
 
+NSString *NSStringFromSPTPersistentCacheResponseCode(SPTPersistentCacheResponseCode code);
+
 @interface SPTPersistentCacheResponse (Private)
 
 - (instancetype)initWithResult:(SPTPersistentCacheResponseCode)result
