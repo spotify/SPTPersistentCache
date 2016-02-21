@@ -27,10 +27,6 @@
  */
 typedef void (^SPTPersistentCacheResponseCallback)(SPTPersistentCacheResponse *response);
 /**
- * Type of callback that is used to give caller a chance to choose which key to open if any.
- */
-typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
-/**
  * Type of callback that is used to provide current time for that cache. Mainly for testing.
  */
 typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
