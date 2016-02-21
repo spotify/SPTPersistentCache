@@ -344,7 +344,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     return YES;
 }
 
-- (void)scheduleGarbageCollector
+- (BOOL)scheduleGarbageCollector
 {
     assert([NSThread isMainThread]);
 
@@ -352,7 +352,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
     // if gc process already running to nothing
     if (self.gcTimer != nil) {
-        return;
+        return NO;
     }
 
     SPTPersistentCacheTimerProxy *proxy = [[SPTPersistentCacheTimerProxy alloc] initWithDataCache:self
@@ -367,6 +367,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     self.gcTimer.tolerance = 300;
     
     [[NSRunLoop mainRunLoop] addTimer:self.gcTimer forMode:NSDefaultRunLoopMode];
+    return YES;
 }
 
 - (void)unscheduleGarbageCollector

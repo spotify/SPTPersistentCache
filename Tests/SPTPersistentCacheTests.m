@@ -1316,6 +1316,15 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertFalse(result);
 }
 
+- (void)testScheduleGarbageCollectionTwiceShouldIgnoreSecond
+{
+    BOOL result = YES;
+    for (NSInteger i = 0; i < 2; ++i) {
+        result = [self.cache scheduleGarbageCollector];
+    }
+    XCTAssertFalse(result);
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
