@@ -1336,6 +1336,16 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertNil(self.cache.gcTimer);
 }
 
+- (void)testCurrentDataTimeInterval
+{
+    SPTPersistentCache *cache = [self createCacheWithTimeCallback:nil expirationTime:0];
+    
+    NSTimeInterval firstTimeInterval = [cache currentDateTimeInterval];
+    NSTimeInterval secondTimeInterval = [cache currentDateTimeInterval];
+    
+    XCTAssertGreaterThan(secondTimeInterval, firstTimeInterval);
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
