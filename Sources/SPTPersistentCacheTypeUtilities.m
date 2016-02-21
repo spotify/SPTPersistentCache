@@ -26,11 +26,3 @@ uint64_t spt_uint64rint(double value)
 {
     return (uint64_t)llrint(value);
 }
-
-void SPTPersistentCacheSafeDebugCallback(NSString *debugMessage,
-                                         SPTPersistentCacheDebugCallback debugCallback)
-{
-    if (debugCallback) {
-        debugCallback(debugMessage);
-    }
-}

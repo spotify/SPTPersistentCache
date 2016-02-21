@@ -19,7 +19,7 @@
  * under the License.
  */
 #import "SPTPersistentCacheGarbageCollectorScheduler.h"
-#import "SPTPersistentCacheTypeUtilities.h"
+#import "SPTPersistentCacheDebugUtilities.h"
 #import "SPTPersistentCache+Private.h"
 
 static BOOL SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue(void);

@@ -31,7 +31,7 @@
 #import "SPTPersistentCacheFileManager.h"
 #include <sys/stat.h>
 #import "SPTPersistentCacheTypeUtilities.h"
-
+#import "SPTPersistentCacheDebugUtilities.h"
 
 // Enable for more precise logging
 //#define DEBUG_OUTPUT_ENABLED

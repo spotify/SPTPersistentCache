@@ -19,12 +19,12 @@
  * under the License.
  */
 
-#import <Foundation/Foundation.h>
+#import "SPTPersistentCacheDebugUtilities.h"
 
-/**
- * Converts the given `double` _value_ to an `uint64_t` value.
- *
- * @param value The value as a `double`.
- * @return The value as an `uint64_t`.
- */
-uint64_t spt_uint64rint(double value);
+void SPTPersistentCacheSafeDebugCallback(NSString *debugMessage,
+                                         SPTPersistentCacheDebugCallback debugCallback)
+{
+    if (debugCallback) {
+        debugCallback(debugMessage);
+    }
+}

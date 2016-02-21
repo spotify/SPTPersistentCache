@@ -20,7 +20,7 @@
  */
 #import "SPTPersistentCacheOptions.h"
 #import "SPTPersistentCacheObjectDescription.h"
-#import "SPTPersistentCacheTypeUtilities.h"
+#import "SPTPersistentCacheDebugUtilities.h"
 
 
 const NSUInteger SPTPersistentCacheDefaultExpirationTimeSec = 10 * 60;
