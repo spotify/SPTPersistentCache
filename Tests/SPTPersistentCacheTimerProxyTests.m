@@ -124,11 +124,9 @@
 - (void)testRepeatedScheduleGarbageCollection
 {
     [self.timerProxy scheduleGarbageCollection];
-    
     NSTimer *timerFirstCall = self.timerProxy.timer;
     
     [self.timerProxy scheduleGarbageCollection];
-    
     NSTimer *timerSecondCall = self.timerProxy.timer;
     
     XCTAssertEqualObjects(timerFirstCall, timerSecondCall);
