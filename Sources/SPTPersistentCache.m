@@ -634,12 +634,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
         int fd = open([filePath UTF8String], flags);
         if (fd == SPTPersistentCacheInvalidResult) {
-            const int errn = errno;
-            NSString *serr = @(strerror(errn));
-            [self debugOutput:@"PersistentDataCache: Error opening file:%@ , error:%@", filePath, serr];
+            const int errorNumber = errno;
+            NSString *errorDescription = @(strerror(errorNumber));
+            [self debugOutput:@"PersistentDataCache: Error opening file:%@ , error:%@", filePath, errorDescription];
             NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain
-                                                 code:errn
-                                             userInfo:@{ NSLocalizedDescriptionKey: serr }];
+                                                 code:errorNumber
+                                             userInfo:@{ NSLocalizedDescriptionKey: errorDescription }];
             return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError
                                                                 error:error
                                                                record:nil];
@@ -649,12 +649,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
         fd = [self.posixWrapper close:fd];
         if (fd == SPTPersistentCacheInvalidResult) {
-            const int errn = errno;
-            NSString *serr = @(strerror(errn));
-            [self debugOutput:@"PersistentDataCache: Error closing file:%@ , error:%@", filePath, serr];
+            const int errorNumber = errno;
+            NSString *errorDescription = @(strerror(errorNumber));
+            [self debugOutput:@"PersistentDataCache: Error closing file:%@ , error:%@", filePath, errorDescription];
             NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain
-                                                 code:errn
-                                             userInfo:@{ NSLocalizedDescriptionKey: serr }];
+                                                 code:errorNumber
+                                             userInfo:@{ NSLocalizedDescriptionKey: errorDescription }];
             return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError
                                                                 error:error
                                                                record:nil];
