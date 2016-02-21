@@ -1357,6 +1357,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     method_setImplementation(originalMethod, originalMethodImplementation);
 }
 
+- (void)testLockDataWithNoKeys
+{
+    BOOL result = [self.cache lockDataForKeys:nil callback:nil onQueue:nil];
+    XCTAssertFalse(result);
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
