@@ -22,9 +22,9 @@
 #import "SPTPersistentCacheTypeUtilities.h"
 #import "SPTPersistentCache+Private.h"
 
-BOOL SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue(void);
+static BOOL SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue(void);
 
-static const NSTimeInterval SPTPersistentCacheTimerProxyTimerToleranceInterval = 300;
+static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTolerance = 300;
 
 @interface SPTPersistentCacheGarbageCollectorScheduler ()
 @property (nonatomic, strong) SPTPersistentCacheDebugCallback debugOutput;
@@ -108,7 +108,7 @@ static const NSTimeInterval SPTPersistentCacheTimerProxyTimerToleranceInterval =
                                        userInfo:nil
                                         repeats:YES];
     
-    self.timer.tolerance = SPTPersistentCacheTimerProxyTimerToleranceInterval;
+    self.timer.tolerance = SPTPersistentCacheGarbageCollectorSchedulerTimerTolerance;
     
     [[NSRunLoop mainRunLoop] addTimer:self.timer forMode:NSDefaultRunLoopMode];
 }
@@ -135,7 +135,7 @@ static const NSTimeInterval SPTPersistentCacheTimerProxyTimerToleranceInterval =
 }
 @end
 
-BOOL SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue(void) {
+static BOOL SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue(void) {
     return (dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL) == dispatch_queue_get_label(dispatch_get_main_queue()));
 }
 
