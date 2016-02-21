@@ -57,7 +57,7 @@
 
 @interface SPTPersistentCacheGarbageCollectorSchedulerTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentCacheOptions *options;
-@property (nonatomic, strong) SPTPersistentCacheGarbageCollectorScheduler *timerProxy;
+@property (nonatomic, strong) SPTPersistentCacheGarbageCollectorScheduler *garbageCollectorScheduler;
 @property (nonatomic, strong) SPTPersistentCache *dataCache;
 @property (nonatomic, strong) dispatch_queue_t dispatchQueue;
 @end
@@ -74,28 +74,28 @@
     
     self.dispatchQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
     
-    self.timerProxy = [[SPTPersistentCacheGarbageCollectorScheduler alloc] initWithDataCache:self.dataCache
-                                                                                     options:self.options
-                                                                                       queue:self.dispatchQueue];
+    self.garbageCollectorScheduler = [[SPTPersistentCacheGarbageCollectorScheduler alloc] initWithDataCache:self.dataCache
+                                                                                                    options:self.options
+                                                                                                      queue:self.dispatchQueue];
 }
 
 - (void)testDesignatedInitializer
 {
-    __strong SPTPersistentCache *strongDataCache = self.timerProxy.dataCache;
+    __strong SPTPersistentCache *strongDataCache = self.garbageCollectorScheduler.dataCache;
     
-    XCTAssertEqual(self.timerProxy.queue, self.dispatchQueue);
+    XCTAssertEqual(self.garbageCollectorScheduler.queue, self.dispatchQueue);
     XCTAssertEqualObjects(strongDataCache, self.dataCache);
-    XCTAssertNil(self.timerProxy.timer);
+    XCTAssertNil(self.garbageCollectorScheduler.timer);
 }
 
 - (void)testGarbageCollectorEnqueue
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"testGarbageCollectorEnqueue"];
     
-    SPTPersistentCacheForUnitTests *dataCacheForUnitTests = (SPTPersistentCacheForUnitTests *)self.timerProxy.dataCache;
-    dataCacheForUnitTests.queue = self.timerProxy.queue;
+    SPTPersistentCacheForUnitTests *dataCacheForUnitTests = (SPTPersistentCacheForUnitTests *)self.garbageCollectorScheduler.dataCache;
+    dataCacheForUnitTests.queue = self.garbageCollectorScheduler.queue;
     dataCacheForUnitTests.testExpectation = expectation;
-    [self.timerProxy enqueueGarbageCollection:nil];
+    [self.garbageCollectorScheduler enqueueGarbageCollection:nil];
     
     [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error) {
         XCTAssertTrue(dataCacheForUnitTests.wasRunRegularGCCalled);
@@ -106,28 +106,28 @@
 
 - (void)testIsGarbageCollectionScheduled
 {
-    XCTAssertFalse(self.timerProxy.isGarbageCollectionScheduled);
-    [self.timerProxy scheduleGarbageCollection];
-    XCTAssertTrue(self.timerProxy.isGarbageCollectionScheduled);
-    [self.timerProxy unscheduleGarbageCollection];
-    XCTAssertFalse(self.timerProxy.isGarbageCollectionScheduled);
+    XCTAssertFalse(self.garbageCollectorScheduler.isGarbageCollectionScheduled);
+    [self.garbageCollectorScheduler scheduleGarbageCollection];
+    XCTAssertTrue(self.garbageCollectorScheduler.isGarbageCollectionScheduled);
+    [self.garbageCollectorScheduler unscheduleGarbageCollection];
+    XCTAssertFalse(self.garbageCollectorScheduler.isGarbageCollectionScheduled);
 }
 
 - (void)testScheduleGarbageCollection
 {
-    [self.timerProxy scheduleGarbageCollection];
-    XCTAssertNotNil(self.timerProxy.timer);
-    XCTAssertTrue(self.timerProxy.timer.isValid);
-    XCTAssertEqualWithAccuracy(self.timerProxy.timer.timeInterval, self.options.gcIntervalSec, 0.0);
+    [self.garbageCollectorScheduler scheduleGarbageCollection];
+    XCTAssertNotNil(self.garbageCollectorScheduler.timer);
+    XCTAssertTrue(self.garbageCollectorScheduler.timer.isValid);
+    XCTAssertEqualWithAccuracy(self.garbageCollectorScheduler.timer.timeInterval, self.options.gcIntervalSec, 0.0);
 }
 
 - (void)testRepeatedScheduleGarbageCollection
 {
-    [self.timerProxy scheduleGarbageCollection];
-    NSTimer *timerFirstCall = self.timerProxy.timer;
+    [self.garbageCollectorScheduler scheduleGarbageCollection];
+    NSTimer *timerFirstCall = self.garbageCollectorScheduler.timer;
     
-    [self.timerProxy scheduleGarbageCollection];
-    NSTimer *timerSecondCall = self.timerProxy.timer;
+    [self.garbageCollectorScheduler scheduleGarbageCollection];
+    NSTimer *timerSecondCall = self.garbageCollectorScheduler.timer;
     
     XCTAssertEqualObjects(timerFirstCall, timerSecondCall);
 }
@@ -135,9 +135,9 @@
 
 - (void)testUnscheduleGarbageCollection
 {
-    [self.timerProxy scheduleGarbageCollection];
-    [self.timerProxy unscheduleGarbageCollection];
-    XCTAssertNil(self.timerProxy.timer);
+    [self.garbageCollectorScheduler scheduleGarbageCollection];
+    [self.garbageCollectorScheduler unscheduleGarbageCollection];
+    XCTAssertNil(self.garbageCollectorScheduler.timer);
 }
 
 
