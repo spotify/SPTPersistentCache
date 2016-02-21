@@ -420,7 +420,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
         // Retrieve the file name. From cached during the enumeration.
         NSNumber *isDirectory;
-        if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
+        NSError *error = nil;
+        if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error]) {
             if ([isDirectory boolValue] == NO) {
 
                 NSString *key = theURL.lastPathComponent;
@@ -436,7 +437,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                 }
             }
         } else {
-            [self debugOutput:@"Unable to fetch isDir#3 attribute:%@", theURL];
+            [self debugOutput:@"Unable to fetch isDir#3 attribute:%@ error: %@", theURL, error];
         }
     }
 

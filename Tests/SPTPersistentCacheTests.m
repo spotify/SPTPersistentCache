@@ -1325,6 +1325,19 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertFalse(result);
 }
 
+- (void)testLockedItemSizeInBytesWithInvalidDirectoryAttributes
+{
+    Method originalMethod = class_getInstanceMethod(NSURL.class, @selector(getResourceValue:forKey:error:));
+    IMP originalMethodImplementation = method_getImplementation(originalMethod);
+    IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
+        return nil;
+    });
+    method_setImplementation(originalMethod, fakeMethodImplementation);
+    NSUInteger lockedItemsSizeInBytes = self.cache.lockedItemsSizeInBytes;
+    method_setImplementation(originalMethod, originalMethodImplementation);
+    XCTAssertEqual(lockedItemsSizeInBytes, 0u);
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
