@@ -113,11 +113,29 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 @property (nonatomic, strong) dispatch_queue_t workQueue;
 @property (nonatomic, strong) NSFileManager *fileManager;
 @property (nonatomic, strong) NSTimer *gcTimer;
-
+- (NSTimeInterval)currentDateTimeInterval;
 - (void)runRegularGC;
 - (void)pruneBySize;
 
 @end
+
+@interface SPTPersistentCacheForUnitTests : SPTPersistentCache
+@property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback timeIntervalCallback;
+@end
+
+@implementation SPTPersistentCacheForUnitTests
+
+- (NSTimeInterval)currentDateTimeInterval
+{
+    if (self.timeIntervalCallback) {
+        return self.timeIntervalCallback();
+    } else {
+        return [super currentDateTimeInterval];
+    }
+}
+
+@end
+
 
 @interface SPTPersistentCacheTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentCache *cache;
@@ -1062,7 +1080,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:self.cachePath
                                                                                            identifier:nil
-                                                                                  currentTimeCallback:nil
                                                                             defaultExpirationInterval:SPTPersistentCacheDefaultExpirationTimeSec
                                                                              garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
                                                                                                 debug:^(NSString *str) {
@@ -1159,7 +1176,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 {
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
                                                                                    identifier:nil
-                                                                          currentTimeCallback:nil
                                                                                         debug:nil];
 
     Method originalMethod = class_getClassMethod(NSFileManager.class, @selector(defaultManager));
@@ -1460,14 +1476,17 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
 {
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:self.cachePath
                                                                                            identifier:nil
-                                                                                  currentTimeCallback:currentTime
                                                                             defaultExpirationInterval:(NSUInteger)expirationTimeSec
                                                                              garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
                                                                                                 debug:^(NSString *str) {
                                                                                       NSLog(@"%@", str);
                                                                                   }];
+    
 
-    return [[SPTPersistentCache alloc] initWithOptions:options];
+    SPTPersistentCacheForUnitTests *cache = [[SPTPersistentCacheForUnitTests alloc] initWithOptions:options];
+    cache.timeIntervalCallback = currentTime;
+    
+    return cache;
 }
 
 - (NSUInteger)getFilesNumberAtPath:(NSString *)path
