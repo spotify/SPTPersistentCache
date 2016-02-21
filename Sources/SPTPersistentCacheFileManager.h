@@ -20,6 +20,8 @@
  */
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 typedef long long SPTPersistentCacheDiskSize;
 
 extern const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength;
@@ -31,16 +33,20 @@ extern const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength;
  */
 @interface SPTPersistentCacheFileManager : NSObject
 
+/// The total size of the managed data, in bytes.
 @property (nonatomic, readonly) NSUInteger totalUsedSizeInBytes;
 
-- (instancetype)init __unavailable;
+/// Unavailable, use the designated initializer.
+- (instancetype)init NS_UNAVAILABLE;
+/// Unavailable, use the designated initializer.
++ (instancetype)new NS_UNAVAILABLE;
 
 /**
  *  Initializes a new file manager set with specific options. 
  *  
  *  @param options Options of the permanent cache.
  */
-- (instancetype)initWithOptions:(SPTPersistentCacheOptions *)options;
+- (instancetype)initWithOptions:(SPTPersistentCacheOptions *)options NS_DESIGNATED_INITIALIZER;
 
 /**
  *  Creates the directory that will be used to persist the cached data. Returns YES if the operation is successful, 
@@ -89,3 +95,5 @@ extern const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength;
 - (NSUInteger)getFileSizeAtPath:(NSString *)filePath;
 
 @end
+
+NS_ASSUME_NONNULL_END
