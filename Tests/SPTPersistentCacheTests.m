@@ -33,7 +33,7 @@
 #import <SPTPersistentCache/SPTPersistentCache.h>
 #import <SPTPersistentCache/SPTPersistentCacheResponse.h>
 #import <SPTPersistentCache/SPTPersistentCacheRecord.h>
-#import "SPTPersistentCacheGarbageCollectorScheduler.h"
+#import "SPTPersistentCacheGarbageCollector.h"
 #import "SPTPersistentCache+Private.h"
 #import "SPTPersistentCacheFileManager.h"
 
@@ -109,7 +109,7 @@ static NSUInteger params_GetDefaultExpireFilesNumber(void);
 static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentCacheRecordHeader *header);
 
 @interface SPTPersistentCache (Testing)
-@property (nonatomic, strong) SPTPersistentCacheGarbageCollectorScheduler *garbageCollectorScheduler;
+@property (nonatomic, strong) SPTPersistentCacheGarbageCollector *garbageCollector;
 @property (nonatomic, strong) dispatch_queue_t workQueue;
 @property (nonatomic, strong) NSFileManager *fileManager;
 
@@ -774,11 +774,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                                                    expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
     
     
-    XCTAssertFalse(cache.garbageCollectorScheduler.isGarbageCollectionScheduled);
+    XCTAssertFalse(cache.garbageCollector.isGarbageCollectionScheduled);
     
     [cache scheduleGarbageCollector];
     
-    XCTAssertTrue(cache.garbageCollectorScheduler.isGarbageCollectionScheduled);
+    XCTAssertTrue(cache.garbageCollector.isGarbageCollectionScheduled);
 }
 
 - (void)testUnscheduleGarbageCollection
@@ -790,15 +790,15 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
                                                    expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
     
     
-    XCTAssertFalse(cache.garbageCollectorScheduler.isGarbageCollectionScheduled);
+    XCTAssertFalse(cache.garbageCollector.isGarbageCollectionScheduled);
     
     [cache scheduleGarbageCollector];
     
-    XCTAssertTrue(cache.garbageCollectorScheduler.isGarbageCollectionScheduled);
+    XCTAssertTrue(cache.garbageCollector.isGarbageCollectionScheduled);
     
     [cache unscheduleGarbageCollector];
     
-    XCTAssertFalse(cache.garbageCollectorScheduler.isGarbageCollectionScheduled);
+    XCTAssertFalse(cache.garbageCollector.isGarbageCollectionScheduled);
 }
 
 /**

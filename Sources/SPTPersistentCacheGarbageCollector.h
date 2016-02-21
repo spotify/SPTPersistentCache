@@ -23,7 +23,7 @@
 @class SPTPersistentCache;
 @class SPTPersistentCacheOptions;
 
-@interface SPTPersistentCacheGarbageCollectorScheduler : NSObject
+@interface SPTPersistentCacheGarbageCollector : NSObject
 
 /**
  *  Persistent Cache that will be used for garbage collection operations.

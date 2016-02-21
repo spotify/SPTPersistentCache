@@ -26,7 +26,7 @@
 #import "SPTPersistentCacheRecord+Private.h"
 #import "SPTPersistentCacheResponse+Private.h"
 #import "SPTPersistentCache+Private.h"
-#import "SPTPersistentCacheGarbageCollectorScheduler.h"
+#import "SPTPersistentCacheGarbageCollector.h"
 #import "NSError+SPTPersistentCacheDomainErrors.h"
 #import "SPTPersistentCacheFileManager.h"
 #include <sys/stat.h>
@@ -52,7 +52,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 // Serial queue used to run all internall stuff
 @property (nonatomic, strong) dispatch_queue_t workQueue;
 @property (nonatomic, strong) NSFileManager *fileManager;
-@property (nonatomic, strong) SPTPersistentCacheGarbageCollectorScheduler *garbageCollectorScheduler;
+@property (nonatomic, strong) SPTPersistentCacheGarbageCollector *garbageCollector;
 @property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
 @property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback currentTime;
 @property (nonatomic, strong) SPTPersistentCacheFileManager *dataCacheFileManager;
@@ -88,9 +88,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
         return nil;
     }
     
-    _garbageCollectorScheduler = [[SPTPersistentCacheGarbageCollectorScheduler alloc] initWithDataCache:self
-                                                                                                options:_options
-                                                                                                  queue:_workQueue];
+    _garbageCollector = [[SPTPersistentCacheGarbageCollector alloc] initWithDataCache:self
+                                                                              options:_options
+                                                                                queue:_workQueue];
 
     return self;
 }
@@ -347,12 +347,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
 - (void)scheduleGarbageCollector
 {
-    [self.garbageCollectorScheduler scheduleGarbageCollection];
+    [self.garbageCollector scheduleGarbageCollection];
 }
 
 - (void)unscheduleGarbageCollector
 {
-    [self.garbageCollectorScheduler unscheduleGarbageCollection];
+    [self.garbageCollector unscheduleGarbageCollection];
 }
 
 - (void)prune
@@ -420,7 +420,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
 - (void)dealloc
 {
-    [_garbageCollectorScheduler unscheduleGarbageCollection];
+    [_garbageCollector unscheduleGarbageCollection];
 }
 
 

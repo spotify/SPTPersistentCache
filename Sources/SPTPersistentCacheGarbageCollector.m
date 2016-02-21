@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import "SPTPersistentCacheGarbageCollectorScheduler.h"
+#import "SPTPersistentCacheGarbageCollector.h"
 #import "SPTPersistentCacheDebugUtilities.h"
 #import "SPTPersistentCache+Private.h"
 
@@ -26,13 +26,13 @@ static BOOL SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue(void);
 
 static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTolerance = 300;
 
-@interface SPTPersistentCacheGarbageCollectorScheduler ()
+@interface SPTPersistentCacheGarbageCollector ()
 @property (nonatomic, strong) NSTimer *timer;
 @property (nonatomic, strong) SPTPersistentCacheOptions *options;
 @end
 
 
-@implementation SPTPersistentCacheGarbageCollectorScheduler
+@implementation SPTPersistentCacheGarbageCollector
 
 #pragma mark - Initializer
 
