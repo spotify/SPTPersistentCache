@@ -123,16 +123,5 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
         defaultExpirationInterval:(NSUInteger)defaultExpirationInterval
          garbageCollectorInterval:(NSUInteger)garbageCollectorInterval
                             debug:(SPTPersistentCacheDebugCallback)debugCallback;
-/**
- * Returns a new instance of the class setup with specific values.
- * @param cachePath Path in the system file for the cache. May be nil.
- * @param cacheIdentifier An identifier for the cache. May be nil.
- * @param currentTimeBlock A block that should return the current time. May be nil
- * @param debugCallback A callback used for debugging purposes.
- */
-- (instancetype)initWithCachePath:(NSString *)cachePath
-                       identifier:(NSString *)cacheIdentifier
-              currentTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTimeBlock
-                            debug:(SPTPersistentCacheDebugCallback)debugCallback;
 
 @end
