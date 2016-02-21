@@ -93,10 +93,13 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
     _folderSeparationEnabled = YES;
     
     _debugOutput = [debugCallback copy];
-    
-    self.currentTimeSec = currentTimeBlock ? currentTimeBlock : ^ NSTimeInterval() {
-        return [[NSDate date] timeIntervalSince1970];
+    _currentTimeSec = currentTimeBlock ?: ^NSTimeInterval() {
+        return 0;
     };
+    
+    _currentTimeSec = (id)currentTimeBlock ?: [^() {
+        return [[NSDate date] timeIntervalSince1970];
+    } copy];
     
     if (defaultExpirationInterval < SPTPersistentCacheMinimumExpirationLimit) {
         SPTPersistentCacheOptionsDebug([NSString stringWithFormat:@"PersistentDataCache: Forcing defaultExpirationPeriodSec to %lu sec", (unsigned long)SPTPersistentCacheMinimumExpirationLimit],
