@@ -27,4 +27,9 @@
     return self.closeValue;
 }
 
+- (ssize_t)read:(int)descriptor buffer:(void *)buffer bufferSize:(size_t)bufferSize
+{
+    return self.readValue;
+}
+
 @end

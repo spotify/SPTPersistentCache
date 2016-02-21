@@ -648,21 +648,20 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                                                writeBack:(BOOL)needWriteBack
                                                 complain:(BOOL)needComplains
 {
-    assert(modifyBlock != nil);
-    if (modifyBlock == nil) {
-        return nil;
-    }
-
     return [self guardOpenFileWithPath:filePath jobBlock:^SPTPersistentCacheResponse*(int filedes) {
 
         SPTPersistentCacheRecordHeader header;
-        ssize_t readBytes = read(filedes, &header, SPTPersistentCacheRecordHeaderSize);
+        ssize_t readBytes = [self.posixWrapper read:filedes
+                                             buffer:&header
+                                         bufferSize:SPTPersistentCacheRecordHeaderSize];
         if (readBytes != (ssize_t)SPTPersistentCacheRecordHeaderSize) {
             NSError *error = [NSError spt_persistentDataCacheErrorWithCode:SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader];
             if (readBytes == -1) {
-                const int errn = errno;
-                const char* serr = strerror(errn);
-                error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: @(serr)}];
+                const int errorNumber = errno;
+                const char *errorString = strerror(errorNumber);
+                error = [NSError errorWithDomain:NSPOSIXErrorDomain
+                                            code:errorNumber
+                                        userInfo:@{ NSLocalizedDescriptionKey: @(errorString) }];
             }
 
             [self debugOutput:@"PersistentDataCache: Error not enough data to read the header of file path:%@ , error:%@",

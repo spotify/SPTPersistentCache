@@ -29,5 +29,9 @@
  * The value to return when executing the "close:" method.
  */
 @property (nonatomic, assign, readwrite) int closeValue;
+/**
+ * The value to return when executing the "read:" method.
+ */
+@property (nonatomic, assign, readwrite) int readValue;
 
 @end

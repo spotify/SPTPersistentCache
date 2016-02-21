@@ -30,5 +30,12 @@
  * @param descriptor The file descriptor to close.
  */
 - (int)close:(int)descriptor;
+/**
+ * See POSIX "read"
+ * @param descriptor The file descriptor to read.
+ * @param buffer The memory to read into.
+ * @param bufferSize The amount of the file to read into memory.
+ */
+- (ssize_t)read:(int)descriptor buffer:(void *)buffer bufferSize:(size_t)bufferSize;
 
 @end

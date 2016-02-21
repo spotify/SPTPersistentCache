@@ -27,4 +27,9 @@
     return close(descriptor);
 }
 
+- (ssize_t)read:(int)descriptor buffer:(void *)buffer bufferSize:(size_t)bufferSize
+{
+    return read(descriptor, buffer, bufferSize);
+}
+
 @end
