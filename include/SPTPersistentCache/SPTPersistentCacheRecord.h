@@ -22,7 +22,6 @@
 
 /**
  * @brief SPTPersistentCacheRecord
- *
  * @discussion Class defines one record in cache that is returned in response.
  *             Each record is represented by single file on disk.
  *             If file deleted from disk then cache assumes its never existed and return SPTPersistentCacheResponseCodeNotFound for load call.
