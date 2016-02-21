@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		050076B31C7A4354000819B5 /* SPTPersistentCachePosixWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 050076B11C7A4354000819B5 /* SPTPersistentCachePosixWrapper.h */; };
+		050076B41C7A4354000819B5 /* SPTPersistentCachePosixWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 050076B21C7A4354000819B5 /* SPTPersistentCachePosixWrapper.m */; };
+		050076B51C7A4DC7000819B5 /* SPTPersistentCachePosixWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 050076B21C7A4354000819B5 /* SPTPersistentCachePosixWrapper.m */; };
 		9C9E707B1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C9E70791C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m */; };
 		9C9E707C1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C9E707A1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h */; };
 		9C9E707D1C790F3700E1CBE6 /* SPTPersistentCacheObjectDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C9E70791C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m */; };
@@ -58,6 +61,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		050076B11C7A4354000819B5 /* SPTPersistentCachePosixWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCachePosixWrapper.h; sourceTree = "<group>"; };
+		050076B21C7A4354000819B5 /* SPTPersistentCachePosixWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCachePosixWrapper.m; sourceTree = "<group>"; };
 		0520219C1C737DBE003A4FB4 /* SPTPersistentCache.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SPTPersistentCache.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		052021F21C738048003A4FB4 /* SPTPersistentCache.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SPTPersistentCache.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		052021FB1C7382C6003A4FB4 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -162,6 +167,8 @@
 				DD1D239D1C7785A900D0477A /* SPTPersistentCacheTimerProxy.m */,
 				C45526B21C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h */,
 				C45526B31C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.m */,
+				050076B11C7A4354000819B5 /* SPTPersistentCachePosixWrapper.h */,
+				050076B21C7A4354000819B5 /* SPTPersistentCachePosixWrapper.m */,
 			);
 			name = Sources;
 			path = ../Sources;
@@ -206,6 +213,7 @@
 				DD1D23AE1C7785A900D0477A /* SPTPersistentCacheTimerProxy.h in Headers */,
 				DD1D23A51C7785A900D0477A /* SPTPersistentCache+Private.h in Headers */,
 				9C9E707C1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h in Headers */,
+				050076B31C7A4354000819B5 /* SPTPersistentCachePosixWrapper.h in Headers */,
 				DD1D23811C77857900D0477A /* SPTPersistentCacheOptions.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -329,6 +337,7 @@
 			files = (
 				DD1D23AA1C7785A900D0477A /* SPTPersistentCacheRecord.m in Sources */,
 				DD1D23A21C7785A900D0477A /* crc32iso3309.c in Sources */,
+				050076B41C7A4354000819B5 /* SPTPersistentCachePosixWrapper.m in Sources */,
 				9C9E707B1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m in Sources */,
 				DD1D23AF1C7785A900D0477A /* SPTPersistentCacheTimerProxy.m in Sources */,
 				DD1D23A71C7785A900D0477A /* SPTPersistentCacheFileManager.m in Sources */,
@@ -355,6 +364,7 @@
 				DD1D23B41C7785AE00D0477A /* SPTPersistentCache.m in Sources */,
 				C45526B71C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.m in Sources */,
 				9C9E707D1C790F3700E1CBE6 /* SPTPersistentCacheObjectDescription.m in Sources */,
+				050076B51C7A4DC7000819B5 /* SPTPersistentCachePosixWrapper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

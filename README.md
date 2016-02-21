@@ -38,7 +38,7 @@ $ cocoapods update
 ```
 
 ### Carthage
-We support [Carthage](https://github.con/Carthage/Carthage) and provide pre-built binary frameworks for all new releases. Start by making sure you have the latest version of Carthage installed, e.g. using [Homebrew](http://brew.sh/):
+We support [Carthage](https://github.com/Carthage/Carthage) and provide pre-built binary frameworks for all new releases. Start by making sure you have the latest version of Carthage installed, e.g. using [Homebrew](http://brew.sh/):
 ```shell
 $ brew update
 $ brew install carthage
@@ -105,6 +105,16 @@ NSString *key = @"MyHashValue";
 // Now my data will be subject to its original TTL
 ```
 Note: That if you exceed the constrained size in your cache, even locked files can be subject to pruning.
+
+### Using the garbage collector
+The garbage collection functionality in `SPTPersistentCache` is not automatically run, you have to call it manually using `scheduleGarbageCollector`.
+```objc
+[self.cache scheduleGarbageCollection];
+```
+This will schedule garbage collection on the interval you supplied in the `SPTPersistentCacheOptions` class, by default this is the `SPTPersistentCacheDefaultExpirationTimeSec` external variable. To unschedule the garbage collector simply call the opposite function `unscheduleGarbageCollector`.
+```objc
+[self.cache unscheduleGarbageCollection];
+```
 
 ## Background story :book:
 At Spotify we began to standardise the way we handled images in a centralised way, and in doing so we initially created a component that was handling images and their caching. But then our requirements changed, and we began to need caching for our backend calls and preview MP3 downloads as well. In doing so, we managed to separate out our caching logic into a generic component that can be used for any piece of data.
