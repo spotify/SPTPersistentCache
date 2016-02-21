@@ -20,10 +20,14 @@
  */
 #import <SPTPersistentCache/SPTPersistentCacheResponse.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface SPTPersistentCacheResponse (Private)
 
 - (instancetype)initWithResult:(SPTPersistentCacheResponseCode)result
-                         error:(NSError *)error
-                        record:(SPTPersistentCacheRecord *)record;
+                         error:(nullable NSError *)error
+                        record:(nullable SPTPersistentCacheRecord *)record;
 
 @end
+
+NS_ASSUME_NONNULL_END
