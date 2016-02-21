@@ -36,6 +36,7 @@
 
 #import "SPTPersistentCache+Private.h"
 #import "SPTPersistentCacheFileManager.h"
+#import "NSFileManagerMock.h"
 
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -1399,6 +1400,22 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     } onQueue:dispatch_get_main_queue()];
     XCTAssertTrue(called);
     method_setImplementation(originalMethod, originalMethodImplementation);
+}
+
+- (void)testOpenFailure
+{
+    NSFileManagerMock *fileManagerMock = [NSFileManagerMock new];
+    self.cache.fileManager = fileManagerMock;
+    __weak __typeof(fileManagerMock) weakFileManagerMock = fileManagerMock;
+    fileManagerMock.blockCalledOnFileExistsAtPath = ^ {
+        __strong __typeof(weakFileManagerMock) strongFileManagerMock = weakFileManagerMock;
+        [[NSFileManager defaultManager] removeItemAtPath:strongFileManagerMock.lastPathCalledOnExists error:nil];
+    };
+    __block BOOL called = NO;
+    [self.cache touchDataForKey:self.imageNames[0] callback:^(SPTPersistentCacheResponse *response) {
+        called = YES;
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationError);
+    } onQueue:dispatch_get_main_queue()];
 }
 
 #pragma mark - Internal methods

@@ -618,11 +618,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                                              complain:(BOOL)needComplains
                                             writeBack:(BOOL)writeBack
 {
-    assert(jobBlock != nil);
-    if (jobBlock == nil) {
-        return nil;
-    }
-
     if (![self.fileManager fileExistsAtPath:filePath]) {
         if (needComplains) {
             [self debugOutput:@"PersistentDataCache: Record not exist at path:%@", filePath];
@@ -630,21 +625,26 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
         return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeNotFound error:nil record:nil];
 
     } else {
+        const int SPTPersistentCacheInvalidResult = -1;
         const int flags = (writeBack ? O_RDWR : O_RDONLY);
 
         int fd = open([filePath UTF8String], flags);
-        if (fd == -1) {
+        if (fd == SPTPersistentCacheInvalidResult) {
             const int errn = errno;
             NSString *serr = @(strerror(errn));
             [self debugOutput:@"PersistentDataCache: Error opening file:%@ , error:%@", filePath, serr];
-            NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: serr}];
-            return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError error:error record:nil];
+            NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain
+                                                 code:errn
+                                             userInfo:@{ NSLocalizedDescriptionKey: serr }];
+            return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError
+                                                                error:error
+                                                               record:nil];
         }
 
         SPTPersistentCacheResponse *response = jobBlock(fd);
 
         fd = close(fd);
-        if (fd == -1) {
+        if (fd == SPTPersistentCacheInvalidResult) {
             const int errn = errno;
             NSString *serr = @(strerror(errn));
             [self debugOutput:@"PersistentDataCache: Error closing file:%@ , error:%@", filePath, serr];
