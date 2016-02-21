@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
     s.license      = "Apache 2.0"
     s.author       = { "Dmitry Ponomarev" => "dmitry@spotify.com" }
     s.source       = { :git => "https://github.com/spotify/SPTPersistentCache.git", :tag => s.version }
-    s.source_files = "include/SPTPersistentCache/*.h", "Sources/*.{h,m}"
+    s.source_files = "include/SPTPersistentCache/*.h", "Sources/**/*.{h,m,c}"
     s.public_header_files = "include/SPTPersistentCache/*.h"
     s.xcconfig = { 'OTHER_LDFLAGS' => '-lObjC' }
 
