@@ -1382,6 +1382,25 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     method_setImplementation(originalMethod, originalMethodImplementation);
 }
 
+- (void)testWriteFailedOnStoreData
+{
+    self.cache.workQueue = dispatch_get_main_queue();
+    Method originalMethod = class_getInstanceMethod(NSData.class, @selector(writeToFile:options:error:));
+    IMP originalMethodImplementation = method_getImplementation(originalMethod);
+    IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
+        return nil;
+    });
+    method_setImplementation(originalMethod, fakeMethodImplementation);
+    __block BOOL called = NO;
+    NSData *tmpData = [@"TEST" dataUsingEncoding:NSUTF8StringEncoding];
+    [self.cache storeData:tmpData forKey:@"TEST" locked:NO withCallback:^(SPTPersistentCacheResponse *response) {
+        called = YES;
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationError);
+    } onQueue:dispatch_get_main_queue()];
+    XCTAssertTrue(called);
+    method_setImplementation(originalMethod, originalMethodImplementation);
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
