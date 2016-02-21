@@ -36,9 +36,9 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
 
 #pragma mark - Initializer
 
-- (instancetype)initWithDataCache:(SPTPersistentCache *)dataCache
-                          options:(SPTPersistentCacheOptions *)options
-                            queue:(dispatch_queue_t)queue
+- (instancetype)initWithCache:(SPTPersistentCache *)dataCache
+                      options:(SPTPersistentCacheOptions *)options
+                        queue:(dispatch_queue_t)queue
 {
     if (!(self = [super init])) {
         return nil;

@@ -58,7 +58,7 @@
 @interface SPTPersistentCacheGarbageCollectorTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentCacheOptions *options;
 @property (nonatomic, strong) SPTPersistentCacheGarbageCollector *garbageCollector;
-@property (nonatomic, strong) SPTPersistentCache *dataCache;
+@property (nonatomic, strong) SPTPersistentCache *cache;
 @property (nonatomic, strong) dispatch_queue_t dispatchQueue;
 @end
 
@@ -68,15 +68,15 @@
 {
     [super setUp];
     
-    self.dataCache = [[SPTPersistentCacheForUnitTests alloc] init];
+    self.cache = [[SPTPersistentCacheForUnitTests alloc] init];
     
     self.options = [SPTPersistentCacheOptions new];
     
     self.dispatchQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
     
-    self.garbageCollector = [[SPTPersistentCacheGarbageCollector alloc] initWithDataCache:self.dataCache
-                                                                                  options:self.options
-                                                                                    queue:self.dispatchQueue];
+    self.garbageCollector = [[SPTPersistentCacheGarbageCollector alloc] initWithCache:self.cache
+                                                                              options:self.options
+                                                                                queue:self.dispatchQueue];
 }
 
 - (void)testDesignatedInitializer
@@ -84,7 +84,7 @@
     __strong SPTPersistentCache *strongDataCache = self.garbageCollector.dataCache;
     
     XCTAssertEqual(self.garbageCollector.queue, self.dispatchQueue);
-    XCTAssertEqualObjects(strongDataCache, self.dataCache);
+    XCTAssertEqualObjects(strongDataCache, self.cache);
     XCTAssertNil(self.garbageCollector.timer);
 }
 

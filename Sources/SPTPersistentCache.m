@@ -88,9 +88,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
         return nil;
     }
     
-    _garbageCollector = [[SPTPersistentCacheGarbageCollector alloc] initWithDataCache:self
-                                                                              options:_options
-                                                                                queue:_workQueue];
+    _garbageCollector = [[SPTPersistentCacheGarbageCollector alloc] initWithCache:self
+                                                                          options:_options
+                                                                            queue:_workQueue];
 
     return self;
 }

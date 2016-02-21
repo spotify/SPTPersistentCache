@@ -47,9 +47,9 @@
  *  @param options Cache options to configure this garbage collector.
  *  @param queue Dispatch queue where the operations will take place.
  */
-- (instancetype)initWithDataCache:(SPTPersistentCache *)cache
-                          options:(SPTPersistentCacheOptions *)options
-                            queue:(dispatch_queue_t)queue;
+- (instancetype)initWithCache:(SPTPersistentCache *)cache
+                      options:(SPTPersistentCacheOptions *)options
+                        queue:(dispatch_queue_t)queue;
 
 /**
  *  Schedules the garbage collection operation.
