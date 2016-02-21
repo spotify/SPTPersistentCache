@@ -107,15 +107,15 @@
 - (void)testIsGarbageCollectionScheduled
 {
     XCTAssertFalse(self.garbageCollector.isGarbageCollectionScheduled);
-    [self.garbageCollector scheduleGarbageCollection];
+    [self.garbageCollector schedule];
     XCTAssertTrue(self.garbageCollector.isGarbageCollectionScheduled);
-    [self.garbageCollector unscheduleGarbageCollection];
+    [self.garbageCollector unschedule];
     XCTAssertFalse(self.garbageCollector.isGarbageCollectionScheduled);
 }
 
 - (void)testScheduleGarbageCollection
 {
-    [self.garbageCollector scheduleGarbageCollection];
+    [self.garbageCollector schedule];
     XCTAssertNotNil(self.garbageCollector.timer);
     XCTAssertTrue(self.garbageCollector.timer.isValid);
     XCTAssertEqualWithAccuracy(self.garbageCollector.timer.timeInterval, self.options.gcIntervalSec, 0.0);
@@ -123,10 +123,10 @@
 
 - (void)testRepeatedScheduleGarbageCollection
 {
-    [self.garbageCollector scheduleGarbageCollection];
+    [self.garbageCollector schedule];
     NSTimer *timerFirstCall = self.garbageCollector.timer;
     
-    [self.garbageCollector scheduleGarbageCollection];
+    [self.garbageCollector schedule];
     NSTimer *timerSecondCall = self.garbageCollector.timer;
     
     XCTAssertEqualObjects(timerFirstCall, timerSecondCall);
@@ -135,8 +135,8 @@
 
 - (void)testUnscheduleGarbageCollection
 {
-    [self.garbageCollector scheduleGarbageCollection];
-    [self.garbageCollector unscheduleGarbageCollection];
+    [self.garbageCollector schedule];
+    [self.garbageCollector unschedule];
     XCTAssertNil(self.garbageCollector.timer);
 }
 

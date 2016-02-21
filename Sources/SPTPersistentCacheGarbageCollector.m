@@ -80,11 +80,11 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
     });
 }
 
-- (void)scheduleGarbageCollection
+- (void)schedule
 {
     if (!SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue()) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self scheduleGarbageCollection];
+            [self schedule];
         });
     }
                        
@@ -106,11 +106,11 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
     [[NSRunLoop mainRunLoop] addTimer:self.timer forMode:NSDefaultRunLoopMode];
 }
 
-- (void)unscheduleGarbageCollection
+- (void)unschedule
 {
     if (!SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue()) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self unscheduleGarbageCollection];
+            [self unschedule];
         });
     }
     

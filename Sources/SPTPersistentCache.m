@@ -347,12 +347,12 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
 - (void)scheduleGarbageCollector
 {
-    [self.garbageCollector scheduleGarbageCollection];
+    [self.garbageCollector schedule];
 }
 
 - (void)unscheduleGarbageCollector
 {
-    [self.garbageCollector unscheduleGarbageCollection];
+    [self.garbageCollector unschedule];
 }
 
 - (void)prune
@@ -420,7 +420,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
 - (void)dealloc
 {
-    [_garbageCollector unscheduleGarbageCollection];
+    [_garbageCollector unschedule];
 }
 
 
