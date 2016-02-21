@@ -95,6 +95,17 @@ NSString *key = @"MyHashValue";
 ```
 Note that if the TTL has expired, you will not receive a result.
 
+### Locking/Unlocking files
+Sometimes you may want to lock a file in `SPTPersistentCache` long after it has been expired by its TTL. An example of where we do this at Spotify is images relating to the cover art of the songs you have offlined (we wouldn't want to invalidate these images when you are away on vacation). When you have locked a file, you must make sure you unlock it eventually, otherwise it will stay around forever. A lock is basically a contract between the cache and it's consumer that the data will remain in the cache until it is explicitly unlocked.
+```objc
+NSString *key = @"MyHashValue";
+[self.cache lockDataForKeys:@[key] callback:nil queue:nil];
+// Now my data is safe within the arms of the cache
+[self.cache unlockDataForKeys:@[key] callback:nil queue:nil];
+// Now my data will be subject to its original TTL
+```
+Note: That if you exceed the constrained size in your cache, even locked files can be subject to pruning.
+
 ## Background story :book:
 At Spotify we began to standardise the way we handled images in a centralised way, and in doing so we initially created a component that was handling images and their caching. But then our requirements changed, and we began to need caching for our backend calls and preview MP3 downloads as well. In doing so, we managed to separate out our caching logic into a generic component that can be used for any piece of data.
 
