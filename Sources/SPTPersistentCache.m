@@ -101,9 +101,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     }
 
     callback = [callback copy];
-    dispatch_async(self.workQueue, ^{
+    [self dispatchBlock:^ {
         [self loadDataForKeySync:key withCallback:callback onQueue:queue];
-    });
+    } on:self.workQueue];
     return YES;
 }
 
@@ -474,7 +474,10 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                                                                  error:&error];
         if (rawData == nil) {
             // File read with error -> inform user
-            [self dispatchError:error result:SPTPersistentCacheResponseCodeOperationError callback:callback onQueue:queue];
+            [self dispatchError:error
+                         result:SPTPersistentCacheResponseCodeOperationError
+                       callback:callback
+                        onQueue:queue];
         } else {
             SPTPersistentCacheRecordHeader *header = SPTPersistentCacheGetHeaderFromData(rawData.mutableBytes, rawData.length);
 
@@ -547,9 +550,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
             }
 
             // Callback only after we finished everyhing to avoid situation when user gets notified and we are still writting
-            dispatch_async(queue, ^{
+            [self dispatchBlock:^{
                 callback(response);
-            });
+            } on:queue];
 
         } // if rawData
     } // file exist
