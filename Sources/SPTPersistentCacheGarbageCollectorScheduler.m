@@ -27,7 +27,6 @@ static BOOL SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue(void);
 static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTolerance = 300;
 
 @interface SPTPersistentCacheGarbageCollectorScheduler ()
-@property (nonatomic, strong) SPTPersistentCacheDebugCallback debugOutput;
 @property (nonatomic, strong) NSTimer *timer;
 @property (nonatomic, strong) SPTPersistentCacheOptions *options;
 @end
@@ -48,7 +47,6 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
     _options = options;
     _dataCache = dataCache;
     _queue = queue;
-    _debugOutput = options.debugOutput;
     
     return self;
 }
@@ -96,7 +94,7 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
     }
                        
     SPTPersistentCacheSafeDebugCallback([NSString stringWithFormat:@"runGarbageCollector:%@", self.timer],
-                                        self.debugOutput);
+                                        self.options.debugOutput);
     
     if (self.isGarbageCollectionScheduled) {
         return;
@@ -122,7 +120,7 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
     }
     
     SPTPersistentCacheSafeDebugCallback([NSString stringWithFormat:@"stopGarbageCollector:%@", self.timer],
-                                        self.debugOutput);
+                                        self.options.debugOutput);
     
     [self.timer invalidate];
     
