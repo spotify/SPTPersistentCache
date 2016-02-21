@@ -184,7 +184,7 @@ FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
  * @param callback May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
-- (void)lockDataForKeys:(NSArray *)keys
+- (BOOL)lockDataForKeys:(NSArray *)keys
                callback:(SPTPersistentCacheResponseCallback)callback
                 onQueue:(dispatch_queue_t)queue;
 /**
@@ -194,7 +194,7 @@ FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
  * @param callback May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
-- (void)unlockDataForKeys:(NSArray *)keys
+- (BOOL)unlockDataForKeys:(NSArray *)keys
                  callback:(SPTPersistentCacheResponseCallback)callback
                   onQueue:(dispatch_queue_t)queue;
 /**
