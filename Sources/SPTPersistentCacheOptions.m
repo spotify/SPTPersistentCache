@@ -21,7 +21,12 @@
 #import "SPTPersistentCacheOptions.h"
 #import "SPTPersistentCacheObjectDescription.h"
 
-void SPTPersistentCacheOptionsDebug(NSString *debugMessage, SPTPersistentCacheDebugCallback debugCallback);
+NS_INLINE void SPTPersistentCacheOptionsDebug(NSString *debugMessage, SPTPersistentCacheDebugCallback debugCallback)
+{
+    if (debugCallback) {
+        debugCallback(debugMessage);
+    }
+}
 
 const NSUInteger SPTPersistentCacheDefaultExpirationTimeSec = 10 * 60;
 const NSUInteger SPTPersistentCacheDefaultGCIntervalSec = 6 * 60 + 3;
@@ -31,20 +36,11 @@ const NSUInteger SPTPersistentCacheMinimumGCIntervalLimit = 60;
 const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
 
 
-
-#pragma mark SPTPersistentCacheOptions
-
-@interface SPTPersistentCacheOptions ()
-
-@property (nonatomic) NSString *identifierForQueue;
-@property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback currentTimeSec;
-
-@end
-
+#pragma mark - SPTPersistentCacheOptions Implementation
 
 @implementation SPTPersistentCacheOptions
 
-#pragma mark - Initializers
+#pragma mark Object Life Cycle
 
 - (instancetype)init
 {
@@ -63,48 +59,41 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
               currentTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTimeBlock
                     debugCallback:(SPTPersistentCacheDebugCallback)debugCallback
 {
-    if (!(self = [super init])) {
-        return nil;
-    }
-    
-    _sizeConstraintBytes = SPTPersistentCacheDefaultCacheSizeInBytes;
-    
-    _cachePath = (cachePath ?
-                  [cachePath copy] :
-                  [NSTemporaryDirectory() stringByAppendingPathComponent:@"/com.spotify.temppersistent.image.cache"]);
-    
-    _cacheIdentifier = (cacheIdentifier ?
-                        [cacheIdentifier copy] :
-                        @"persistent.cache");
-    
-    _defaultExpirationPeriodSec = defaultExpirationInterval;
-    _gcIntervalSec = garbageCollectorInterval;
-    _folderSeparationEnabled = YES;
-    
-    _debugOutput = [debugCallback copy];
-    
-    self.currentTimeSec = (currentTimeBlock ?
-                           currentTimeBlock :
-                           ^NSTimeInterval() { return [[NSDate date] timeIntervalSince1970]; });
-    
-    if (defaultExpirationInterval < SPTPersistentCacheMinimumExpirationLimit) {
-        SPTPersistentCacheOptionsDebug([NSString stringWithFormat:@"PersistentDataCache: Forcing defaultExpirationPeriodSec to %lu sec", (unsigned long)SPTPersistentCacheMinimumExpirationLimit],
-                                            debugCallback);
-        _defaultExpirationPeriodSec = SPTPersistentCacheMinimumExpirationLimit;
-    } else {
+    self = [super init];
+    if (self) {
+        _sizeConstraintBytes = SPTPersistentCacheDefaultCacheSizeInBytes;
+        _folderSeparationEnabled = YES;
+        _identifierForQueue = [NSString stringWithFormat:@"%@.queue.%lu.%lu.%p",
+                               _cacheIdentifier,
+                               (unsigned long)_gcIntervalSec,
+                               (unsigned long)_defaultExpirationPeriodSec,
+                               (void *)self];
+
         _defaultExpirationPeriodSec = defaultExpirationInterval;
-    }
-    
-    if (garbageCollectorInterval < SPTPersistentCacheMinimumGCIntervalLimit) {
-        SPTPersistentCacheOptionsDebug([NSString stringWithFormat:@"PersistentDataCache: Forcing gcIntervalSec to %lu sec", (unsigned long)SPTPersistentCacheMinimumGCIntervalLimit], debugCallback);
-        _gcIntervalSec = SPTPersistentCacheMinimumGCIntervalLimit;
-    } else {
         _gcIntervalSec = garbageCollectorInterval;
+
+        _cachePath = [(cachePath ?: [NSTemporaryDirectory() stringByAppendingPathComponent:@"/com.spotify.temppersistent.image.cache"]) copy];
+        _cacheIdentifier = [(cacheIdentifier ?: @"persistent.cache") copy];
+
+        _currentTimeSec = [(currentTimeBlock ?: ^{ return [[NSDate date] timeIntervalSince1970]; }) copy];
+        _debugOutput = [debugCallback copy];
+
+        if (defaultExpirationInterval < SPTPersistentCacheMinimumExpirationLimit) {
+            SPTPersistentCacheOptionsDebug([NSString stringWithFormat:@"PersistentDataCache: Forcing defaultExpirationPeriodSec to %lu sec", (unsigned long)SPTPersistentCacheMinimumExpirationLimit],
+                                           debugCallback);
+            _defaultExpirationPeriodSec = SPTPersistentCacheMinimumExpirationLimit;
+        } else {
+            _defaultExpirationPeriodSec = defaultExpirationInterval;
+        }
+
+        if (garbageCollectorInterval < SPTPersistentCacheMinimumGCIntervalLimit) {
+            SPTPersistentCacheOptionsDebug([NSString stringWithFormat:@"PersistentDataCache: Forcing gcIntervalSec to %lu sec", (unsigned long)SPTPersistentCacheMinimumGCIntervalLimit], debugCallback);
+            _gcIntervalSec = SPTPersistentCacheMinimumGCIntervalLimit;
+        } else {
+            _gcIntervalSec = garbageCollectorInterval;
+        }
     }
-    
-    _identifierForQueue = [NSString stringWithFormat:@"%@.queue.%lu.%lu.%p", _cacheIdentifier,
-                           (unsigned long)_gcIntervalSec, (unsigned long)_defaultExpirationPeriodSec, (void *)self];
-    
+
     return self;
 }
 
@@ -128,12 +117,3 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
 }
 
 @end
-
-#pragma mark - Logging
-
-void SPTPersistentCacheOptionsDebug(NSString *debugMessage, SPTPersistentCacheDebugCallback debugCallback)
-{
-    if (debugCallback) {
-        debugCallback(debugMessage);
-    }
-}

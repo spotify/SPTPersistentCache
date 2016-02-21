@@ -22,6 +22,8 @@
 
 @class SPTPersistentCacheResponse;
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * Type off callback for load/store calls
  */
@@ -54,8 +56,7 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumGCIntervalLimit;
 FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
 
 /**
- * @brief SPTPersistentCacheOptions
- * @discussion Class defines cache creation options
+ * Class which defines cache creation options.
  */
 @interface SPTPersistentCacheOptions : NSObject
 
@@ -104,20 +105,25 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
  */
 @property (nonatomic, assign) BOOL folderSeparationEnabled;
 
+#pragma mark Creating Persistent Cache Otions
+
 /**
  * Returns a new instance of the class setup with specific values.
  * @param cachePath Path in the system file for the cache. May be nil.
  * @param cacheIdentifier An identifier for the cache. May be nil.
- * @param currentTimeBlock A block that should return the current time. May be nil
- * @param defaultExpirationInterval Default time which have to pass since last file access so file could be candidate for pruning on next GC.
+ * @param defaultExpirationInterval Default time which have to pass since last file access so file could be candidate
+ * for pruning on next GC.
  * @param garbageCollectorInterval It is guaranteed that once started GC runs with this interval.
- * @param debugCallback A callback used for debugging purposes.
+ * @param currentTimeBlock A block that should return the current time. May be nil.
+ * @param debugCallback A callback used for debugging purposes. May be nil.
  */
-- (instancetype)initWithCachePath:(NSString *)cachePath
-                       identifier:(NSString *)cacheIdentifier
+- (instancetype)initWithCachePath:(nullable NSString *)cachePath
+                       identifier:(nullable NSString *)cacheIdentifier
         defaultExpirationInterval:(NSUInteger)defaultExpirationInterval
          garbageCollectorInterval:(NSUInteger)garbageCollectorInterval
-              currentTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTimeBlock
-                    debugCallback:(SPTPersistentCacheDebugCallback)debugCallback;
+              currentTimeCallback:(nullable SPTPersistentCacheCurrentTimeSecCallback)currentTimeBlock
+                    debugCallback:(nullable SPTPersistentCacheDebugCallback)debugCallback NS_DESIGNATED_INITIALIZER;
 
 @end
+
+NS_ASSUME_NONNULL_END
