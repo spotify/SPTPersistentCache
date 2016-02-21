@@ -37,6 +37,7 @@
 #import "SPTPersistentCache+Private.h"
 #import "SPTPersistentCacheFileManager.h"
 #import "NSFileManagerMock.h"
+#import "SPTPersistentCachePosixWrapperMock.h"
 
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -115,6 +116,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 @property (nonatomic, strong) NSFileManager *fileManager;
 @property (nonatomic, strong) NSTimer *gcTimer;
 @property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback currentTime;
+@property (nonatomic, strong) SPTPersistentCachePosixWrapper *posixWrapper;
 
 - (void)runRegularGC;
 - (void)pruneBySize;
@@ -1411,6 +1413,18 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         __strong __typeof(weakFileManagerMock) strongFileManagerMock = weakFileManagerMock;
         [[NSFileManager defaultManager] removeItemAtPath:strongFileManagerMock.lastPathCalledOnExists error:nil];
     };
+    __block BOOL called = NO;
+    [self.cache touchDataForKey:self.imageNames[0] callback:^(SPTPersistentCacheResponse *response) {
+        called = YES;
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationError);
+    } onQueue:dispatch_get_main_queue()];
+}
+
+- (void)testCloseFailure
+{
+    SPTPersistentCachePosixWrapperMock *posixWrapperMock = [SPTPersistentCachePosixWrapperMock new];
+    self.cache.posixWrapper = posixWrapperMock;
+    posixWrapperMock.closeValue = -1;
     __block BOOL called = NO;
     [self.cache touchDataForKey:self.imageNames[0] callback:^(SPTPersistentCacheResponse *response) {
         called = YES;

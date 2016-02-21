@@ -31,7 +31,7 @@
 #import "SPTPersistentCacheFileManager.h"
 #include <sys/stat.h>
 #import "SPTPersistentCacheTypeUtilities.h"
-
+#import "SPTPersistentCachePosixWrapper.h"
 
 // Enable for more precise logging
 //#define DEBUG_OUTPUT_ENABLED
@@ -48,6 +48,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 #pragma mark - SPTPersistentCache()
 
 @interface SPTPersistentCache ()
+
 @property (nonatomic, copy) SPTPersistentCacheOptions *options;
 // Serial queue used to run all internall stuff
 @property (nonatomic, strong) dispatch_queue_t workQueue;
@@ -56,6 +57,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 @property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
 @property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback currentTime;
 @property (nonatomic, strong) SPTPersistentCacheFileManager *dataCacheFileManager;
+@property (nonatomic, strong) SPTPersistentCachePosixWrapper *posixWrapper;
 
 @end
 
@@ -88,6 +90,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     if (![_dataCacheFileManager createCacheDirectory]) {
         return nil;
     }
+
+    _posixWrapper = [SPTPersistentCachePosixWrapper new];
 
     return self;
 }
@@ -643,13 +647,17 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
         SPTPersistentCacheResponse *response = jobBlock(fd);
 
-        fd = close(fd);
+        fd = [self.posixWrapper close:fd];
         if (fd == SPTPersistentCacheInvalidResult) {
             const int errn = errno;
             NSString *serr = @(strerror(errn));
             [self debugOutput:@"PersistentDataCache: Error closing file:%@ , error:%@", filePath, serr];
-            NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: serr}];
-            return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError error:error record:nil];
+            NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain
+                                                 code:errn
+                                             userInfo:@{ NSLocalizedDescriptionKey: serr }];
+            return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError
+                                                                error:error
+                                                               record:nil];
         }
 
         return response;
