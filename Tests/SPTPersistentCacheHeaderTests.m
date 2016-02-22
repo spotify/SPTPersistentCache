@@ -51,11 +51,18 @@
     free(data);
 }
 
--(void)testValidateNULLHeader
+- (void)testValidateNULLHeader
 {
     int headerValidationResult = SPTPersistentCacheValidateHeader(NULL);
     
     XCTAssertEqual(headerValidationResult, SPTPersistentCacheLoadingErrorInternalInconsistency);
+}
+
+- (void)testCalculateNULLHeaderCRC
+{
+    uint32_t headerCRC = SPTPersistentCacheCalculateHeaderCRC(NULL);
+    
+    XCTAssertEqual(headerCRC, (uint32_t)0);
 }
 
 - (void)testSPTPersistentCacheRecordHeaderMake
