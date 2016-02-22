@@ -88,11 +88,7 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
  * Callback used to supply debug/internal information usually about errors.
  */
 @property (nonatomic, copy, readonly) SPTPersistentCacheDebugCallback debugOutput;
-/**
- * Callback to provide current time in seconds. This time shouldn't depend on time zone etc.
- * So its better to use fixed time scale i.e. UNIX. If not specified then current unix time is used.
- */
-@property (nonatomic, copy, readonly) SPTPersistentCacheCurrentTimeSecCallback currentTimeSec;
+
 /**
  * Any string that identifies the cache and used in naming of internal queue.
  * It is important to put sane string to be able identify queue during debug and in crash dumps.
@@ -108,14 +104,12 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
  * Returns a new instance of the class setup with specific values.
  * @param cachePath Path in the system file for the cache. May be nil.
  * @param cacheIdentifier An identifier for the cache. May be nil.
- * @param currentTimeBlock A block that should return the current time. May be nil
  * @param defaultExpirationInterval Default time which have to pass since last file access so file could be candidate for pruning on next GC.
  * @param garbageCollectorInterval It is guaranteed that once started GC runs with this interval.
  * @param debugCallback A callback used for debugging purposes.
  */
 - (instancetype)initWithCachePath:(NSString *)cachePath
                        identifier:(NSString *)cacheIdentifier
-              currentTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTimeBlock
         defaultExpirationInterval:(NSUInteger)defaultExpirationInterval
          garbageCollectorInterval:(NSUInteger)garbageCollectorInterval
                             debug:(SPTPersistentCacheDebugCallback)debugCallback;
@@ -123,12 +117,10 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
  * Returns a new instance of the class setup with specific values.
  * @param cachePath Path in the system file for the cache. May be nil.
  * @param cacheIdentifier An identifier for the cache. May be nil.
- * @param currentTimeBlock A block that should return the current time. May be nil
  * @param debugCallback A callback used for debugging purposes.
  */
 - (instancetype)initWithCachePath:(NSString *)cachePath
                        identifier:(NSString *)cacheIdentifier
-              currentTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTimeBlock
                             debug:(SPTPersistentCacheDebugCallback)debugCallback;
 
 @end

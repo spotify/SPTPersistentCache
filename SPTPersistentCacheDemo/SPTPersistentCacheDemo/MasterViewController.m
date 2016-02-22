@@ -45,7 +45,6 @@
     
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:cachePath
                                                                                    identifier:@"com.spotify.demo.image.cache"
-                                                                          currentTimeCallback:nil
                                                                     defaultExpirationInterval:(60 * 60 * 24 * 30)
                                                                      garbageCollectorInterval:(NSUInteger)(1.5 * SPTPersistentCacheDefaultGCIntervalSec)
                                                                                         debug:^(NSString *string) { NSLog(@"%@", string); }];
