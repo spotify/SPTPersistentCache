@@ -51,6 +51,13 @@
     free(data);
 }
 
+-(void)testValidateNULLHeader
+{
+    int headerValidationResult = SPTPersistentCacheValidateHeader(NULL);
+    
+    XCTAssertEqual(headerValidationResult, SPTPersistentCacheLoadingErrorInternalInconsistency);
+}
+
 - (void)testSPTPersistentCacheRecordHeaderMake
 {
     uint64_t ttl = 64;
