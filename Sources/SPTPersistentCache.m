@@ -689,13 +689,17 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
             }
 
             // Set file pointer to the beginning of the file
-            off_t ret = lseek(filedes, SEEK_SET, 0);
-            if (ret != 0) {
-                const int errn = errno;
-                NSString *serr = @(strerror(errn));
-                [self debugOutput:@"PersistentDataCache: Error seeking to begin of file path:%@ , error:%@", filePath, serr];
-                NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: serr}];
-                return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError error:error record:nil];
+            off_t seekOffset = [self.posixWrapper lseek:filedes seekType:SEEK_SET seekAmount:0];
+            if (seekOffset != 0) {
+                const int errorNumber = errno;
+                NSString *errorDescription = @(strerror(errorNumber));
+                [self debugOutput:@"PersistentDataCache: Error seeking to begin of file path:%@ , error:%@", filePath, errorDescription];
+                NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain
+                                                     code:errorNumber
+                                                 userInfo:@{ NSLocalizedDescriptionKey: errorDescription }];
+                return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError
+                                                                    error:error
+                                                                   record:nil];
 
             } else {
                 ssize_t writtenBytes = write(filedes, &header, SPTPersistentCacheRecordHeaderSize);

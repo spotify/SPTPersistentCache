@@ -32,4 +32,9 @@
     return read(descriptor, buffer, bufferSize);
 }
 
+- (off_t)lseek:(int)descriptor seekType:(off_t)seekType seekAmount:(int)seekAmount
+{
+    return lseek(descriptor, seekType, seekAmount);
+}
+
 @end

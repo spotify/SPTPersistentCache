@@ -37,5 +37,12 @@
  * @param bufferSize The amount of the file to read into memory.
  */
 - (ssize_t)read:(int)descriptor buffer:(void *)buffer bufferSize:(size_t)bufferSize;
+/**
+ * See POSIX "lseek"
+ * @param descriptor The file descriptor to seek in.
+ * @param seekType Where in the file to begin seeking.
+ * @param seekAmount The amount of bytes to seek in the file.
+ */
+- (off_t)lseek:(int)descriptor seekType:(off_t)seekType seekAmount:(int)seekAmount;
 
 @end

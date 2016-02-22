@@ -1477,6 +1477,22 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     SPTPersistentCachePosixWrapperMock *posixWrapperMock = [SPTPersistentCachePosixWrapperMock new];
     self.cache.posixWrapper = posixWrapperMock;
     posixWrapperMock.readValue = -1;
+    posixWrapperMock.readOverridden = YES;
+    __block BOOL called = NO;
+    [self.cache touchDataForKey:self.imageNames[0] callback:^(SPTPersistentCacheResponse *response) {
+        called = YES;
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationError);
+    } onQueue:dispatch_get_main_queue()];
+}
+
+- (void)testlseekFailure
+{
+    self.cache.currentTime = ^ {
+        return kTestEpochTime * 10.0;
+    };
+    SPTPersistentCachePosixWrapperMock *posixWrapperMock = [SPTPersistentCachePosixWrapperMock new];
+    self.cache.posixWrapper = posixWrapperMock;
+    posixWrapperMock.lseekValue = -1;
     __block BOOL called = NO;
     [self.cache touchDataForKey:self.imageNames[0] callback:^(SPTPersistentCacheResponse *response) {
         called = YES;
