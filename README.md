@@ -61,7 +61,6 @@ It is best to use different caches for different types of data you want to store
 ```objc
 SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:cachePath
                                                                                identifier:@"com.spotify.demo.image.cache"
-                                                                      currentTimeCallback:nil
                                                                 defaultExpirationInterval:(60 * 60 * 24 * 30)
                                                                  garbageCollectorInterval:(NSUInteger)(1.5 * SPTPersistentCacheDefaultGCIntervalSec)
                                                                                     debug:^(NSString *string) {
@@ -70,7 +69,6 @@ SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWith
 options.sizeConstraintBytes = 1024 * 1024 * 10; // 10 MiB
 SPTPersistentCache *cache = [[SPTPersistentCache alloc] initWithOptions:options];
 ```
-Note that in  the above example, the `currentTimeCallback` is `nil`. When this is nil it will default to using `NSDate` for its current time.
 
 ### Storing Data in the SPTPersistentCache
 When storing data in the `SPTPersistentCache`, you must be aware of the file system semantics. The key will be used as the file name within the cache directory to save. The reason we did not implement a hash function under the hood is because we wanted to give the option of what hash function to use to the user, so it is recommended that when you insert data into the cache for a key, that you create the key using your own hashing function (at Spotify we use SHA1, although better hashing functions exist these days). If you want the cache record, i.e. file, to exist without any TTL make sure you store it as a locked file.
@@ -114,6 +112,20 @@ The garbage collection functionality in `SPTPersistentCache` is not automaticall
 This will schedule garbage collection on the interval you supplied in the `SPTPersistentCacheOptions` class, by default this is the `SPTPersistentCacheDefaultExpirationTimeSec` external variable. To unschedule the garbage collector simply call the opposite function `unscheduleGarbageCollector`.
 ```objc
 [self.cache unscheduleGarbageCollection];
+```
+
+### Manually managing cache usage
+There are times when you may want to pre-empty a garbage collection that is scheduled, wipe the cache or simply remove all locked/unlocked files indiscriminantly. To support these cases we have provided methods to do just this.
+```objc
+// Lets wipe all the files we haven't explicitly locked
+[self.cache wipeUnlockedFiles];
+NSLog(@"Size = %@", @(self.cache.totalUsedSizeInBytes));
+// Now let's wipe all the files we have explicitly locked
+[self.cache wipeLockedFiles];
+NSLog(@"Size = %@", @(self.cache.totalUsedSizeInBytes));
+// Why not just wipe the entire cache?
+[self.cache prune];
+NSLog(@"Size = %@", @(self.cache.totalUsedSizeInBytes));
 ```
 
 ## Background story :book:

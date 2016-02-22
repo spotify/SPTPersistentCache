@@ -20,17 +20,15 @@
  */
 #import <Foundation/Foundation.h>
 
-#import <SPTPersistentCache/SPTPersistentCache.h>
+/**
+ * An Obj-C wrapper for POSIX functions mainly made for mocking functions during unit tests.
+ */
+@interface SPTPersistentCachePosixWrapper : NSObject
 
 /**
- * Category to instantiate NSError objects with a specific domain for SPTPersistentCache.
+ * See POSIX "close"
+ * @param descriptor The file descriptor to close.
  */
-@interface NSError (SPTPersistentCacheDomainErrors)
-
-/**
- * Returns a new instance of NSError with a SPTPersistentCache domain and an error code.
- * @param persistentDataCacheLoadingError The error code for the NSError object.
- */
-+ (instancetype)spt_persistentDataCacheErrorWithCode:(SPTPersistentCacheLoadingError)persistentDataCacheLoadingError;
+- (int)close:(int)descriptor;
 
 @end

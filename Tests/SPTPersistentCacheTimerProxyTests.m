@@ -23,7 +23,7 @@
 #import "SPTPersistentCacheTimerProxy.h"
 #import <SPTPersistentCache/SPTPersistentCache.h>
 
-@interface SPTPersistentCacheForUnitTests : SPTPersistentCache
+@interface SPTPersistentCacheForTimerProxyUnitTests : SPTPersistentCache
 @property (nonatomic) dispatch_queue_t queue;
 @property (nonatomic) XCTestExpectation *testExpectation;
 @property (nonatomic) BOOL wasCalledFromIncorrectQueue;
@@ -31,7 +31,7 @@
 @property (nonatomic) BOOL wasPruneBySizeCalled;
 @end
 
-@implementation SPTPersistentCacheForUnitTests
+@implementation SPTPersistentCacheForTimerProxyUnitTests
 
 - (void)runRegularGC
 {
@@ -60,7 +60,7 @@
 {
     [super setUp];
     
-    self.dataCache = [[SPTPersistentCacheForUnitTests alloc] init];
+    self.dataCache = [[SPTPersistentCacheForTimerProxyUnitTests alloc] init];
     
     self.dispatchQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
     
@@ -80,7 +80,7 @@
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"testGarbageCollectorEnqueue"];
     
-    SPTPersistentCacheForUnitTests *dataCacheForUnitTests = (SPTPersistentCacheForUnitTests *)self.timerProxy.dataCache;
+    SPTPersistentCacheForTimerProxyUnitTests *dataCacheForUnitTests = (SPTPersistentCacheForTimerProxyUnitTests *)self.timerProxy.dataCache;
     dataCacheForUnitTests.queue = self.timerProxy.queue;
     dataCacheForUnitTests.testExpectation = expectation;
     [self.timerProxy enqueueGC:nil];

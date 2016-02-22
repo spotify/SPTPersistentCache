@@ -35,10 +35,7 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
 #pragma mark SPTPersistentCacheOptions
 
 @interface SPTPersistentCacheOptions ()
-
 @property (nonatomic) NSString *identifierForQueue;
-@property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback currentTimeSec;
-
 @end
 
 
@@ -50,18 +47,15 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
 {
     return [self initWithCachePath:nil
                         identifier:nil
-               currentTimeCallback:nil
                              debug:nil];
 }
 
 - (instancetype)initWithCachePath:(NSString *)cachePath
                        identifier:(NSString *)cacheIdentifier
-              currentTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTimeBlock
                             debug:(SPTPersistentCacheDebugCallback)debugCallback
 {
     return [self initWithCachePath:cachePath
                         identifier:cacheIdentifier
-               currentTimeCallback:nil
          defaultExpirationInterval:SPTPersistentCacheDefaultExpirationTimeSec
           garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
                              debug:nil];
@@ -69,7 +63,6 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
 
 - (instancetype)initWithCachePath:(NSString *)cachePath
                        identifier:(NSString *)cacheIdentifier
-              currentTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTimeBlock
         defaultExpirationInterval:(NSUInteger)defaultExpirationInterval
          garbageCollectorInterval:(NSUInteger)garbageCollectorInterval
                             debug:(SPTPersistentCacheDebugCallback)debugCallback
@@ -93,13 +86,6 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
     _folderSeparationEnabled = YES;
     
     _debugOutput = [debugCallback copy];
-    _currentTimeSec = currentTimeBlock ?: ^NSTimeInterval() {
-        return 0;
-    };
-    
-    _currentTimeSec = (id)currentTimeBlock ?: [^() {
-        return [[NSDate date] timeIntervalSince1970];
-    } copy];
     
     if (defaultExpirationInterval < SPTPersistentCacheMinimumExpirationLimit) {
         SPTPersistentCacheOptionsDebug([NSString stringWithFormat:@"PersistentDataCache: Forcing defaultExpirationPeriodSec to %lu sec", (unsigned long)SPTPersistentCacheMinimumExpirationLimit],
