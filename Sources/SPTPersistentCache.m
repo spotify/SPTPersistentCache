@@ -648,21 +648,20 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                                                writeBack:(BOOL)needWriteBack
                                                 complain:(BOOL)needComplains
 {
-    assert(modifyBlock != nil);
-    if (modifyBlock == nil) {
-        return nil;
-    }
-
     return [self guardOpenFileWithPath:filePath jobBlock:^SPTPersistentCacheResponse*(int filedes) {
 
         SPTPersistentCacheRecordHeader header;
-        ssize_t readBytes = read(filedes, &header, SPTPersistentCacheRecordHeaderSize);
+        ssize_t readBytes = [self.posixWrapper read:filedes
+                                             buffer:&header
+                                         bufferSize:SPTPersistentCacheRecordHeaderSize];
         if (readBytes != (ssize_t)SPTPersistentCacheRecordHeaderSize) {
             NSError *error = [NSError spt_persistentDataCacheErrorWithCode:SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader];
             if (readBytes == -1) {
-                const int errn = errno;
-                const char* serr = strerror(errn);
-                error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: @(serr)}];
+                const int errorNumber = errno;
+                const char *errorString = strerror(errorNumber);
+                error = [NSError errorWithDomain:NSPOSIXErrorDomain
+                                            code:errorNumber
+                                        userInfo:@{ NSLocalizedDescriptionKey: @(errorString) }];
             }
 
             [self debugOutput:@"PersistentDataCache: Error not enough data to read the header of file path:%@ , error:%@",
@@ -690,31 +689,45 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
             }
 
             // Set file pointer to the beginning of the file
-            off_t ret = lseek(filedes, SEEK_SET, 0);
-            if (ret != 0) {
-                const int errn = errno;
-                NSString *serr = @(strerror(errn));
-                [self debugOutput:@"PersistentDataCache: Error seeking to begin of file path:%@ , error:%@", filePath, serr];
-                NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: serr}];
-                return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError error:error record:nil];
+            off_t seekOffset = [self.posixWrapper lseek:filedes seekType:SEEK_SET seekAmount:0];
+            if (seekOffset != 0) {
+                const int errorNumber = errno;
+                NSString *errorDescription = @(strerror(errorNumber));
+                [self debugOutput:@"PersistentDataCache: Error seeking to begin of file path:%@ , error:%@", filePath, errorDescription];
+                NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain
+                                                     code:errorNumber
+                                                 userInfo:@{ NSLocalizedDescriptionKey: errorDescription }];
+                return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError
+                                                                    error:error
+                                                                   record:nil];
 
             } else {
-                ssize_t writtenBytes = write(filedes, &header, SPTPersistentCacheRecordHeaderSize);
+                ssize_t writtenBytes = [self.posixWrapper write:filedes
+                                                         buffer:&header
+                                                     bufferSize:SPTPersistentCacheRecordHeaderSize];
                 if (writtenBytes != (ssize_t)SPTPersistentCacheRecordHeaderSize) {
-                    const int errn = errno;
-                    NSString *serr = @(strerror(errn));
-                    [self debugOutput:@"PersistentDataCache: Error writting header at file path:%@ , error:%@", filePath, serr];
-                    NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: serr}];
-                    return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError error:error record:nil];
+                    const int errorNumber = errno;
+                    NSString *errorDescription = @(strerror(errorNumber));
+                    [self debugOutput:@"PersistentDataCache: Error writting header at file path:%@ , error:%@", filePath, errorDescription];
+                    NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain
+                                                         code:errorNumber
+                                                     userInfo:@{ NSLocalizedDescriptionKey: errorDescription }];
+                    return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError
+                                                                        error:error
+                                                                       record:nil];
 
                 } else {
-                    int result = fsync(filedes);
+                    int result = [self.posixWrapper fsync:filedes];
                     if (result == -1) {
-                        const int errn = errno;
-                        NSString *serr = @(strerror(errn));
-                        [self debugOutput:@"PersistentDataCache: Error flushing file:%@ , error:%@", filePath, serr];
-                        NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: serr}];
-                        return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError error:error record:nil];
+                        const int errorNumber = errno;
+                        NSString *errorDescription = @(strerror(errorNumber));
+                        [self debugOutput:@"PersistentDataCache: Error flushing file:%@ , error:%@", filePath, errorDescription];
+                        NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain
+                                                             code:errorNumber
+                                                         userInfo:@{ NSLocalizedDescriptionKey: errorDescription }];
+                        return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError
+                                                                            error:error
+                                                                           record:nil];
                     }
                 }
             }
