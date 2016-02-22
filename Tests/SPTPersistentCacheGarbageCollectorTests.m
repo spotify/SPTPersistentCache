@@ -92,7 +92,7 @@
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"testGarbageCollectorEnqueue"];
     
-    SPTPersistentCacheForTimerProxyUnitTests *dataCacheForUnitTests = (SPTPersistentCacheForUnitTests *)self.garbageCollector.dataCache;
+    SPTPersistentCacheForTimerProxyUnitTests *dataCacheForUnitTests = (SPTPersistentCacheForTimerProxyUnitTests *)self.garbageCollector.dataCache;
     dataCacheForUnitTests.queue = self.garbageCollector.queue;
 
     dataCacheForUnitTests.testExpectation = expectation;
