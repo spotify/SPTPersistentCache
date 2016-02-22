@@ -21,6 +21,7 @@
 #import <SPTPersistentCache/SPTPersistentCacheResponse.h>
 #import <SPTPersistentCache/SPTPersistentCacheRecord.h>
 #import "SPTPersistentCacheObjectDescription.h"
+#import "SPTPersistentCacheResponse+Private.h"
 
 @interface SPTPersistentCacheResponse ()
 
@@ -49,7 +50,7 @@
 
 #pragma mark Describing Object
 
-NS_INLINE NSString *NSStringFromSPTPersistentCacheResponseCode(SPTPersistentCacheResponseCode code)
+NSString *NSStringFromSPTPersistentCacheResponseCode(SPTPersistentCacheResponseCode code)
 {
     switch (code) {
         case SPTPersistentCacheResponseCodeNotFound:            return @"not-found";
