@@ -37,4 +37,9 @@
     return lseek(descriptor, seekType, seekAmount);
 }
 
+- (ssize_t)write:(int)descriptor buffer:(const void *)buffer bufferSize:(size_t)bufferSize
+{
+    return write(descriptor, buffer, bufferSize);
+}
+
 @end

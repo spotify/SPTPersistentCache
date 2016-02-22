@@ -44,5 +44,12 @@
  * @param seekAmount The amount of bytes to seek in the file.
  */
 - (off_t)lseek:(int)descriptor seekType:(off_t)seekType seekAmount:(int)seekAmount;
+/**
+ * See POSIX "write"
+ * @param descriptor The file descriptor to write to.
+ * @param buffer The memory to write into the file.
+ * @param bufferSize The size of the memory to write into the file.
+ */
+- (ssize_t)write:(int)descriptor buffer:(const void *)buffer bufferSize:(size_t)bufferSize;
 
 @end

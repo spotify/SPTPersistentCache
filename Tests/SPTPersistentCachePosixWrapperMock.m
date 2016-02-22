@@ -40,4 +40,9 @@
     return self.lseekValue;
 }
 
+- (ssize_t)write:(int)descriptor buffer:(const void *)buffer bufferSize:(size_t)bufferSize
+{
+    return self.writeValue;
+}
+
 @end

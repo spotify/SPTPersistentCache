@@ -702,13 +702,19 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                                                                    record:nil];
 
             } else {
-                ssize_t writtenBytes = write(filedes, &header, SPTPersistentCacheRecordHeaderSize);
+                ssize_t writtenBytes = [self.posixWrapper write:filedes
+                                                         buffer:&header
+                                                     bufferSize:SPTPersistentCacheRecordHeaderSize];
                 if (writtenBytes != (ssize_t)SPTPersistentCacheRecordHeaderSize) {
-                    const int errn = errno;
-                    NSString *serr = @(strerror(errn));
-                    [self debugOutput:@"PersistentDataCache: Error writting header at file path:%@ , error:%@", filePath, serr];
-                    NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: serr}];
-                    return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError error:error record:nil];
+                    const int errorNumber = errno;
+                    NSString *errorDescription = @(strerror(errorNumber));
+                    [self debugOutput:@"PersistentDataCache: Error writting header at file path:%@ , error:%@", filePath, errorDescription];
+                    NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain
+                                                         code:errorNumber
+                                                     userInfo:@{ NSLocalizedDescriptionKey: errorDescription }];
+                    return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError
+                                                                        error:error
+                                                                       record:nil];
 
                 } else {
                     int result = fsync(filedes);

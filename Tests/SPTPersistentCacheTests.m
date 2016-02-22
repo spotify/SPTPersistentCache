@@ -1500,6 +1500,21 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     } onQueue:dispatch_get_main_queue()];
 }
 
+- (void)testWriteFailure
+{
+    self.cache.currentTime = ^ {
+        return kTestEpochTime * 10.0;
+    };
+    SPTPersistentCachePosixWrapperMock *posixWrapperMock = [SPTPersistentCachePosixWrapperMock new];
+    self.cache.posixWrapper = posixWrapperMock;
+    posixWrapperMock.writeValue = 0;
+    __block BOOL called = NO;
+    [self.cache touchDataForKey:self.imageNames[0] callback:^(SPTPersistentCacheResponse *response) {
+        called = YES;
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationError);
+    } onQueue:dispatch_get_main_queue()];
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file

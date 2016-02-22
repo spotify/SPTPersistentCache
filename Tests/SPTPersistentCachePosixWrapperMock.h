@@ -42,5 +42,9 @@
  * The value to return when executing the "lseek:" method.
  */
 @property (nonatomic, assign, readwrite) off_t lseekValue;
+/**
+ * The value to return when executing the "write:" method.
+ */
+@property (nonatomic, assign, readwrite) ssize_t writeValue;
 
 @end
