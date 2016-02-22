@@ -111,12 +111,14 @@ static NSUInteger params_GetDefaultExpireFilesNumber(void);
 static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentCacheRecordHeader *header);
 
 @interface SPTPersistentCache (Testing)
+
 @property (nonatomic, strong) SPTPersistentCacheGarbageCollector *garbageCollector;
 @property (nonatomic, strong) dispatch_queue_t workQueue;
 @property (nonatomic, strong) NSFileManager *fileManager;
-
 @property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback currentTime;
 @property (nonatomic, strong) SPTPersistentCachePosixWrapper *posixWrapper;
+@property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
+
 - (NSTimeInterval)currentDateTimeInterval;
 - (void)runRegularGC;
 - (void)pruneBySize;
@@ -1529,6 +1531,25 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         called = YES;
         XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationError);
     } onQueue:dispatch_get_main_queue()];
+}
+
+- (void)testStoreLargeTTL
+{
+    self.cache.workQueue = dispatch_get_main_queue();
+    __block BOOL called = NO;
+    self.cache.debugOutput = ^(NSString *output) {
+        called = YES;
+    };
+    NSString *key = @"TEST";
+    NSData *testData = [@"TEST" dataUsingEncoding:NSUTF8StringEncoding];
+    [self.cache storeData:testData
+                   forKey:key
+                      ttl:86400 * 31 * 2 * 2
+                   locked:NO
+             withCallback:nil
+                  onQueue:nil];
+    [self.cache touchDataForKey:key callback:nil onQueue:nil];
+    XCTAssertTrue(called);
 }
 
 #pragma mark - Internal methods
