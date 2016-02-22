@@ -20,8 +20,8 @@
  */
 #import "SPTPersistentCacheOptions.h"
 #import "SPTPersistentCacheObjectDescription.h"
+#import "SPTPersistentCacheDebugUtilities.h"
 
-void SPTPersistentCacheOptionsDebug(NSString *debugMessage, SPTPersistentCacheDebugCallback debugCallback);
 
 const NSUInteger SPTPersistentCacheDefaultExpirationTimeSec = 10 * 60;
 const NSUInteger SPTPersistentCacheDefaultGCIntervalSec = 6 * 60 + 3;
@@ -88,7 +88,7 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
     _debugOutput = [debugCallback copy];
     
     if (defaultExpirationInterval < SPTPersistentCacheMinimumExpirationLimit) {
-        SPTPersistentCacheOptionsDebug([NSString stringWithFormat:@"PersistentDataCache: Forcing defaultExpirationPeriodSec to %lu sec", (unsigned long)SPTPersistentCacheMinimumExpirationLimit],
+        SPTPersistentCacheSafeDebugCallback([NSString stringWithFormat:@"PersistentDataCache: Forcing defaultExpirationPeriodSec to %lu sec", (unsigned long)SPTPersistentCacheMinimumExpirationLimit],
                                             debugCallback);
         _defaultExpirationPeriodSec = SPTPersistentCacheMinimumExpirationLimit;
     } else {
@@ -96,7 +96,7 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
     }
     
     if (garbageCollectorInterval < SPTPersistentCacheMinimumGCIntervalLimit) {
-        SPTPersistentCacheOptionsDebug([NSString stringWithFormat:@"PersistentDataCache: Forcing gcIntervalSec to %lu sec", (unsigned long)SPTPersistentCacheMinimumGCIntervalLimit], debugCallback);
+        SPTPersistentCacheSafeDebugCallback([NSString stringWithFormat:@"PersistentDataCache: Forcing gcIntervalSec to %lu sec", (unsigned long)SPTPersistentCacheMinimumGCIntervalLimit], debugCallback);
         _gcIntervalSec = SPTPersistentCacheMinimumGCIntervalLimit;
     } else {
         _gcIntervalSec = garbageCollectorInterval;
@@ -128,12 +128,3 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
 }
 
 @end
-
-#pragma mark - Logging
-
-void SPTPersistentCacheOptionsDebug(NSString *debugMessage, SPTPersistentCacheDebugCallback debugCallback)
-{
-    if (debugCallback) {
-        debugCallback(debugMessage);
-    }
-}

@@ -33,7 +33,7 @@
 #import <SPTPersistentCache/SPTPersistentCache.h>
 #import <SPTPersistentCache/SPTPersistentCacheResponse.h>
 #import <SPTPersistentCache/SPTPersistentCacheRecord.h>
-
+#import "SPTPersistentCacheGarbageCollector.h"
 #import "SPTPersistentCache+Private.h"
 #import "SPTPersistentCacheFileManager.h"
 #import "NSFileManagerMock.h"
@@ -111,7 +111,7 @@ static NSUInteger params_GetDefaultExpireFilesNumber(void);
 static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentCacheRecordHeader *header);
 
 @interface SPTPersistentCache (Testing)
-
+@property (nonatomic, strong) SPTPersistentCacheGarbageCollector *garbageCollector;
 @property (nonatomic, strong) dispatch_queue_t workQueue;
 @property (nonatomic, strong) NSFileManager *fileManager;
 
@@ -789,6 +789,42 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(realUsedSize, expectedSize);
 }
 
+- (void)testScheduleGarbageCollection
+{
+    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+        // Exceed expiration interval by 1 sec
+        return kTestEpochTime + SPTPersistentCacheDefaultExpirationTimeSec + 1;
+    }
+                                                   expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+    
+    
+    XCTAssertFalse(cache.garbageCollector.isGarbageCollectionScheduled);
+    
+    [cache scheduleGarbageCollector];
+    
+    XCTAssertTrue(cache.garbageCollector.isGarbageCollectionScheduled);
+}
+
+- (void)testUnscheduleGarbageCollection
+{
+    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+        // Exceed expiration interval by 1 sec
+        return kTestEpochTime + SPTPersistentCacheDefaultExpirationTimeSec + 1;
+    }
+                                                   expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+    
+    
+    XCTAssertFalse(cache.garbageCollector.isGarbageCollectionScheduled);
+    
+    [cache scheduleGarbageCollector];
+    
+    XCTAssertTrue(cache.garbageCollector.isGarbageCollectionScheduled);
+    
+    [cache unscheduleGarbageCollector];
+    
+    XCTAssertFalse(cache.garbageCollector.isGarbageCollectionScheduled);
+}
+
 /**
  * This test also checks Req.#1.2 of cache API.
  */
@@ -1325,18 +1361,10 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     
     XCTAssertGreaterThan(secondTimeInterval, firstTimeInterval);
 }
+
 - (void)testUnlockDataWithNoKeys
 {
     BOOL result = [self.cache unlockDataForKeys:nil callback:nil onQueue:nil];
-    XCTAssertFalse(result);
-}
-
-- (void)testScheduleGarbageCollectionTwiceShouldIgnoreSecond
-{
-    BOOL result = YES;
-    for (NSInteger i = 0; i < 2; ++i) {
-        result = [self.cache scheduleGarbageCollector];
-    }
     XCTAssertFalse(result);
 }
 
