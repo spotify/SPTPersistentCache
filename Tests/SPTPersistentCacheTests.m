@@ -115,7 +115,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 @property (nonatomic, strong) SPTPersistentCacheGarbageCollector *garbageCollector;
 @property (nonatomic, strong) dispatch_queue_t workQueue;
 @property (nonatomic, strong) NSFileManager *fileManager;
-@property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback currentTime;
 @property (nonatomic, strong) SPTPersistentCachePosixWrapper *posixWrapper;
 @property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
 
@@ -1489,7 +1488,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 - (void)testlseekFailure
 {
-    self.cache.currentTime = ^ {
+    self.cache.timeIntervalCallback = ^ {
         return kTestEpochTime * 10.0;
     };
     SPTPersistentCachePosixWrapperMock *posixWrapperMock = [SPTPersistentCachePosixWrapperMock new];
@@ -1504,7 +1503,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 - (void)testWriteFailure
 {
-    self.cache.currentTime = ^ {
+    self.cache.timeIntervalCallback = ^ {
         return kTestEpochTime * 10.0;
     };
     SPTPersistentCachePosixWrapperMock *posixWrapperMock = [SPTPersistentCachePosixWrapperMock new];
@@ -1519,7 +1518,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 - (void)testFsyncFailure
 {
-    self.cache.currentTime = ^ {
+    self.cache.timeIntervalCallback = ^ {
         return kTestEpochTime * 10.0;
     };
     SPTPersistentCachePosixWrapperMock *posixWrapperMock = [SPTPersistentCachePosixWrapperMock new];
