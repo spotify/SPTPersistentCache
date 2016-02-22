@@ -132,7 +132,10 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
 }
 @end
 
-static BOOL SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue(void) {
-    return (dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL) == dispatch_queue_get_label(dispatch_get_main_queue()));
+static BOOL SPTPersistentCacheGarbageCollectorSchedulerIsInMainQueue(void)
+{
+    NSString *currentQueueLabelString = [NSString stringWithUTF8String:dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL)];
+    NSString *mainQueueLabelString = [NSString stringWithUTF8String:dispatch_queue_get_label(dispatch_get_main_queue())];
+    return [currentQueueLabelString isEqualToString:mainQueueLabelString];
 }
 
