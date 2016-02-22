@@ -30,7 +30,7 @@
     
 
 
-@interface SPTPersistentCacheForUnitTests : SPTPersistentCache
+@interface SPTPersistentCacheForTimerProxyUnitTests : SPTPersistentCache
 @property (nonatomic) dispatch_queue_t queue;
 @property (nonatomic) XCTestExpectation *testExpectation;
 @property (nonatomic) BOOL wasCalledFromIncorrectQueue;
@@ -38,7 +38,7 @@
 @property (nonatomic) BOOL wasPruneBySizeCalled;
 @end
 
-@implementation SPTPersistentCacheForUnitTests
+@implementation SPTPersistentCacheForTimerProxyUnitTests
 
 - (void)runRegularGC
 {
@@ -68,7 +68,7 @@
 {
     [super setUp];
     
-    self.cache = [[SPTPersistentCacheForUnitTests alloc] init];
+    self.cache = [[SPTPersistentCacheForTimerProxyUnitTests alloc] init];
     
     self.options = [SPTPersistentCacheOptions new];
     
@@ -92,8 +92,9 @@
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"testGarbageCollectorEnqueue"];
     
-    SPTPersistentCacheForUnitTests *dataCacheForUnitTests = (SPTPersistentCacheForUnitTests *)self.garbageCollector.dataCache;
+    SPTPersistentCacheForTimerProxyUnitTests *dataCacheForUnitTests = (SPTPersistentCacheForUnitTests *)self.garbageCollector.dataCache;
     dataCacheForUnitTests.queue = self.garbageCollector.queue;
+
     dataCacheForUnitTests.testExpectation = expectation;
     [self.garbageCollector enqueueGarbageCollection:nil];
     

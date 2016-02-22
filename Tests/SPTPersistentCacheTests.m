@@ -36,6 +36,8 @@
 #import "SPTPersistentCacheGarbageCollector.h"
 #import "SPTPersistentCache+Private.h"
 #import "SPTPersistentCacheFileManager.h"
+#import "NSFileManagerMock.h"
+#import "SPTPersistentCachePosixWrapperMock.h"
 
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -112,16 +114,35 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 @property (nonatomic, strong) SPTPersistentCacheGarbageCollector *garbageCollector;
 @property (nonatomic, strong) dispatch_queue_t workQueue;
 @property (nonatomic, strong) NSFileManager *fileManager;
-@property (nonatomic, strong) NSTimer *gcTimer;
-@property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback currentTime;
 
+@property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback currentTime;
+@property (nonatomic, strong) SPTPersistentCachePosixWrapper *posixWrapper;
+- (NSTimeInterval)currentDateTimeInterval;
 - (void)runRegularGC;
 - (void)pruneBySize;
 
 @end
 
+@interface SPTPersistentCacheForUnitTests : SPTPersistentCache
+@property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback timeIntervalCallback;
+@end
+
+@implementation SPTPersistentCacheForUnitTests
+
+- (NSTimeInterval)currentDateTimeInterval
+{
+    if (self.timeIntervalCallback) {
+        return self.timeIntervalCallback();
+    } else {
+        return [super currentDateTimeInterval];
+    }
+}
+
+@end
+
+
 @interface SPTPersistentCacheTests : XCTestCase
-@property (nonatomic, strong) SPTPersistentCache *cache;
+@property (nonatomic, strong) SPTPersistentCacheForUnitTests *cache;
 @property (nonatomic, strong) NSMutableArray *imageNames;
 @property (nonatomic, strong) NSString *cachePath;
 @property (nonatomic, strong) NSBundle *thisBundle;
@@ -1100,7 +1121,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:self.cachePath
                                                                                            identifier:nil
-                                                                                  currentTimeCallback:nil
                                                                             defaultExpirationInterval:SPTPersistentCacheDefaultExpirationTimeSec
                                                                              garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
                                                                                                 debug:^(NSString *str) {
@@ -1197,7 +1217,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 {
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
                                                                                    identifier:nil
-                                                                          currentTimeCallback:nil
                                                                                         debug:nil];
 
     Method originalMethod = class_getClassMethod(NSFileManager.class, @selector(defaultManager));
@@ -1283,7 +1302,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         }
         NSString *key = self.imageNames[i];
         [self.cache unlockDataForKeys:@[key] callback:nil onQueue:nil];
-        self.cache.currentTime = ^ {
+        self.cache.timeIntervalCallback = ^ {
             return kTestEpochTime * 100.0;
         };
         __block BOOL called = NO;
@@ -1303,7 +1322,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         }
         NSString *key = self.imageNames[i];
         [self.cache unlockDataForKeys:@[key] callback:nil onQueue:nil];
-        self.cache.currentTime = ^ {
+        self.cache.timeIntervalCallback = ^ {
             return kTestEpochTime * 100.0;
         };
         __block BOOL called = NO;
@@ -1331,6 +1350,16 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         XCTAssertFalse(called);
         break;
     }
+}
+
+- (void)testCurrentDataTimeInterval
+{
+    SPTPersistentCache *cache = [self createCacheWithTimeCallback:nil expirationTime:0];
+    
+    NSTimeInterval firstTimeInterval = [cache currentDateTimeInterval];
+    NSTimeInterval secondTimeInterval = [cache currentDateTimeInterval];
+    
+    XCTAssertGreaterThan(secondTimeInterval, firstTimeInterval);
 }
 
 - (void)testUnlockDataWithNoKeys
@@ -1369,6 +1398,78 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     } onQueue:dispatch_get_main_queue()];
     XCTAssertTrue(called);
     method_setImplementation(originalMethod, originalMethodImplementation);
+}
+
+- (void)testLockDataWithNoKeys
+{
+    BOOL result = [self.cache lockDataForKeys:nil callback:nil onQueue:nil];
+    XCTAssertFalse(result);
+}
+
+- (void)testWriteToHeaderFailed
+{
+    self.cache.workQueue = dispatch_get_main_queue();
+    NSString *key = self.imageNames.firstObject;
+    Method originalMethod = class_getInstanceMethod(NSData.class, @selector(writeToFile:options:error:));
+    IMP originalMethodImplementation = method_getImplementation(originalMethod);
+    IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
+        return nil;
+    });
+    method_setImplementation(originalMethod, fakeMethodImplementation);
+    __block BOOL called = NO;
+    [self.cache loadDataForKey:key withCallback:^(SPTPersistentCacheResponse *response) {
+        called = YES;
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationSucceeded);
+    } onQueue:dispatch_get_main_queue()];
+    XCTAssertTrue(called);
+    method_setImplementation(originalMethod, originalMethodImplementation);
+}
+
+- (void)testWriteFailedOnStoreData
+{
+    self.cache.workQueue = dispatch_get_main_queue();
+    Method originalMethod = class_getInstanceMethod(NSData.class, @selector(writeToFile:options:error:));
+    IMP originalMethodImplementation = method_getImplementation(originalMethod);
+    IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
+        return nil;
+    });
+    method_setImplementation(originalMethod, fakeMethodImplementation);
+    __block BOOL called = NO;
+    NSData *tmpData = [@"TEST" dataUsingEncoding:NSUTF8StringEncoding];
+    [self.cache storeData:tmpData forKey:@"TEST" locked:NO withCallback:^(SPTPersistentCacheResponse *response) {
+        called = YES;
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationError);
+    } onQueue:dispatch_get_main_queue()];
+    XCTAssertTrue(called);
+    method_setImplementation(originalMethod, originalMethodImplementation);
+}
+
+- (void)testOpenFailure
+{
+    NSFileManagerMock *fileManagerMock = [NSFileManagerMock new];
+    self.cache.fileManager = fileManagerMock;
+    __weak __typeof(fileManagerMock) weakFileManagerMock = fileManagerMock;
+    fileManagerMock.blockCalledOnFileExistsAtPath = ^ {
+        __strong __typeof(weakFileManagerMock) strongFileManagerMock = weakFileManagerMock;
+        [[NSFileManager defaultManager] removeItemAtPath:strongFileManagerMock.lastPathCalledOnExists error:nil];
+    };
+    __block BOOL called = NO;
+    [self.cache touchDataForKey:self.imageNames[0] callback:^(SPTPersistentCacheResponse *response) {
+        called = YES;
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationError);
+    } onQueue:dispatch_get_main_queue()];
+}
+
+- (void)testCloseFailure
+{
+    SPTPersistentCachePosixWrapperMock *posixWrapperMock = [SPTPersistentCachePosixWrapperMock new];
+    self.cache.posixWrapper = posixWrapperMock;
+    posixWrapperMock.closeValue = -1;
+    __block BOOL called = NO;
+    [self.cache touchDataForKey:self.imageNames[0] callback:^(SPTPersistentCacheResponse *response) {
+        called = YES;
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationError);
+    } onQueue:dispatch_get_main_queue()];
 }
 
 #pragma mark - Internal methods
@@ -1506,19 +1607,22 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
     close(fd);
 }
 
-- (SPTPersistentCache *)createCacheWithTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTime
-                                     expirationTime:(NSTimeInterval)expirationTimeSec
+- (SPTPersistentCacheForUnitTests *)createCacheWithTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTime
+                                                 expirationTime:(NSTimeInterval)expirationTimeSec
 {
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:self.cachePath
                                                                                            identifier:nil
-                                                                                  currentTimeCallback:currentTime
                                                                             defaultExpirationInterval:(NSUInteger)expirationTimeSec
                                                                              garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
                                                                                                 debug:^(NSString *str) {
                                                                                       NSLog(@"%@", str);
                                                                                   }];
+    
 
-    return [[SPTPersistentCache alloc] initWithOptions:options];
+    SPTPersistentCacheForUnitTests *cache = [[SPTPersistentCacheForUnitTests alloc] initWithOptions:options];
+    cache.timeIntervalCallback = currentTime;
+    
+    return cache;
 }
 
 - (NSUInteger)getFilesNumberAtPath:(NSString *)path

@@ -20,6 +20,17 @@
  */
 #import <Foundation/Foundation.h>
 
+#ifndef SPT_BUILDING_FRAMEWORK
+#define SPT_BUILDING_FRAMEWORK 0
+#endif
+#if SPT_BUILDING_FRAMEWORK
+//! Project version number for SPTDataLoader.
+FOUNDATION_EXPORT double SPTDataLoaderVersionNumber;
+
+//! Project version string for SPTDataLoader.
+FOUNDATION_EXPORT const unsigned char SPTDataLoaderVersionString[];
+#endif // SPT_BUILDING_FRAMEWORK
+
 #import <SPTPersistentCache/SPTPersistentCacheOptions.h>
 #import <SPTPersistentCache/SPTPersistentCacheHeader.h>
 #import <SPTPersistentCache/SPTPersistentCacheRecord.h>
@@ -64,20 +75,15 @@ typedef NS_ENUM(NSInteger, SPTPersistentCacheLoadingError) {
     SPTPersistentCacheLoadingErrorInternalInconsistency
 };
 
-#ifndef SPT_BUILDING_FRAMEWORK
-#define SPT_BUILDING_FRAMEWORK 0
-#endif
-#if SPT_BUILDING_FRAMEWORK
-//! Project version number for SPTDataLoader.
-FOUNDATION_EXPORT double SPTDataLoaderVersionNumber;
-
-//! Project version string for SPTDataLoader.
-FOUNDATION_EXPORT const unsigned char SPTDataLoaderVersionString[];
-#endif // SPT_BUILDING_FRAMEWORK
 /**
  * The error domain for errors produced by the persistent cache.
  */
 FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
+
+/**
+ * Type of callback that is used to give caller a chance to choose which key to open if any.
+ */
+typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
 
 /**
  * @brief SPTPersistentCache

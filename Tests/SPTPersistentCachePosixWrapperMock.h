@@ -18,19 +18,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <Foundation/Foundation.h>
-
-#import <SPTPersistentCache/SPTPersistentCache.h>
+#import "SPTPersistentCachePosixWrapper.h"
 
 /**
- * Category to instantiate NSError objects with a specific domain for SPTPersistentCache.
+ * A custom mock of the SPTPersistentCachePosixWrapper class.
  */
-@interface NSError (SPTPersistentCacheDomainErrors)
+@interface SPTPersistentCachePosixWrapperMock : SPTPersistentCachePosixWrapper
 
 /**
- * Returns a new instance of NSError with a SPTPersistentCache domain and an error code.
- * @param persistentDataCacheLoadingError The error code for the NSError object.
+ * The value to return when executing the "close:" method.
  */
-+ (instancetype)spt_persistentDataCacheErrorWithCode:(SPTPersistentCacheLoadingError)persistentDataCacheLoadingError;
+@property (nonatomic, assign, readwrite) int closeValue;
 
 @end
