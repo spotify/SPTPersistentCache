@@ -51,7 +51,6 @@
 {
     SPTPersistentCacheOptions *dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
                                                                                             identifier:nil
-                                                                                   currentTimeCallback:nil
                                                                              defaultExpirationInterval:1
                                                                               garbageCollectorInterval:1
                                                                                                  debug:nil];
@@ -63,7 +62,6 @@
 {
     SPTPersistentCacheOptions *dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
                                                                                             identifier:nil
-                                                                                   currentTimeCallback:nil
                                                                              defaultExpirationInterval:1
                                                                               garbageCollectorInterval:1
                                                                                                  debug:nil];

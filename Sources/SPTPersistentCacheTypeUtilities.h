@@ -21,7 +21,6 @@
 
 #import <Foundation/Foundation.h>
 
-
 /**
  * Converts the given `double` _value_ to an `uint64_t` value.
  *

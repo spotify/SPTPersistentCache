@@ -205,12 +205,10 @@ typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
                   onQueue:(dispatch_queue_t)queue;
 /**
  * Schedule garbage collection. If already scheduled then this method does nothing.
- * @warning This method has to be called on main thread.
  */
-- (BOOL)scheduleGarbageCollector;
+- (void)scheduleGarbageCollector;
 /**
- * Stop ragbage collection. If already stopped this method does nothing.
- * @warning This method has to be called on main thread.
+ * Stop garbage collection. If already stopped this method does nothing.
  */
 - (void)unscheduleGarbageCollector;
 /**

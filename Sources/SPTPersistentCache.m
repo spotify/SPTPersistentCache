@@ -26,11 +26,12 @@
 #import "SPTPersistentCacheRecord+Private.h"
 #import "SPTPersistentCacheResponse+Private.h"
 #import "SPTPersistentCache+Private.h"
-#import "SPTPersistentCacheTimerProxy.h"
+#import "SPTPersistentCacheGarbageCollector.h"
 #import "NSError+SPTPersistentCacheDomainErrors.h"
 #import "SPTPersistentCacheFileManager.h"
 #include <sys/stat.h>
 #import "SPTPersistentCacheTypeUtilities.h"
+#import "SPTPersistentCacheDebugUtilities.h"
 #import "SPTPersistentCachePosixWrapper.h"
 
 // Enable for more precise logging
@@ -53,12 +54,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 // Serial queue used to run all internall stuff
 @property (nonatomic, strong) dispatch_queue_t workQueue;
 @property (nonatomic, strong) NSFileManager *fileManager;
-@property (nonatomic, strong) NSTimer *gcTimer;
+@property (nonatomic, strong) SPTPersistentCacheGarbageCollector *garbageCollector;
 @property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
-@property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback currentTime;
 @property (nonatomic, strong) SPTPersistentCacheFileManager *dataCacheFileManager;
+@property (nonatomic, readonly) NSTimeInterval currentDateTimeInterval;
 @property (nonatomic, strong) SPTPersistentCachePosixWrapper *posixWrapper;
-
 @end
 
 #pragma mark - SPTPersistentCache
@@ -82,7 +82,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     assert(_workQueue != nil);
     self.fileManager = [NSFileManager defaultManager];
 
-    _currentTime = [self.options.currentTimeSec copy];
     _debugOutput = [self.options.debugOutput copy];
     
     _dataCacheFileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:_options];
@@ -90,6 +89,10 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     if (![_dataCacheFileManager createCacheDirectory]) {
         return nil;
     }
+    
+    _garbageCollector = [[SPTPersistentCacheGarbageCollector alloc] initWithCache:self
+                                                                          options:_options
+                                                                            queue:_workQueue];
 
     _posixWrapper = [SPTPersistentCachePosixWrapper new];
 
@@ -234,6 +237,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
         NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
         BOOL __block expired = NO;
+
         SPTPersistentCacheResponse *response = [self alterHeaderForFileAtPath:filePath
                                                                     withBlock:^(SPTPersistentCacheRecordHeader *header) {
                                                                         // Satisfy Req.#1.2 and Req.#1.3
@@ -243,7 +247,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                                                                         }
                                                                         // Touch files that have default expiration policy
                                                                         if (header->ttl == 0) {
-                                                                            header->updateTimeSec = spt_uint64rint(self.currentTime());
+                                                                            header->updateTimeSec = spt_uint64rint(self.currentDateTimeInterval);
                                                                         }
                                                                     }
                                                                     writeBack:YES
@@ -348,40 +352,14 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     return YES;
 }
 
-- (BOOL)scheduleGarbageCollector
+- (void)scheduleGarbageCollector
 {
-    assert([NSThread isMainThread]);
-
-    [self debugOutput:@"runGarbageCollector:%@", self.gcTimer];
-
-    // if gc process already running to nothing
-    if (self.gcTimer != nil) {
-        return NO;
-    }
-
-    SPTPersistentCacheTimerProxy *proxy = [[SPTPersistentCacheTimerProxy alloc] initWithDataCache:self
-                                                                                                    queue:self.workQueue];
-
-    NSTimeInterval interval = self.options.gcIntervalSec;
-    // clang diagnostics to workaround http://www.openradar.appspot.com/17806477 (-Wselector)
-    _Pragma("clang diagnostic push");
-    _Pragma("clang diagnostic ignored \"-Wselector\"");
-    self.gcTimer = [NSTimer timerWithTimeInterval:interval target:proxy selector:@selector(enqueueGC:) userInfo:nil repeats:YES];
-    _Pragma("clang diagnostic pop");
-    self.gcTimer.tolerance = 300;
-    
-    [[NSRunLoop mainRunLoop] addTimer:self.gcTimer forMode:NSDefaultRunLoopMode];
-    return YES;
+    [self.garbageCollector schedule];
 }
 
 - (void)unscheduleGarbageCollector
 {
-    assert([NSThread isMainThread]);
-
-    [self debugOutput:@"stopGarbageCollector:%@", self.gcTimer];
-
-    [self.gcTimer invalidate];
-    self.gcTimer = nil;
+    [self.garbageCollector unschedule];
 }
 
 - (void)prune
@@ -450,11 +428,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
 - (void)dealloc
 {
-    NSTimer *timer = self.gcTimer;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [timer invalidate];
-    });
+    [_garbageCollector unschedule];
 }
+
 
 #pragma mark - Private methods
 /**
@@ -538,7 +514,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                                                                                                record:record];
             // If data ttl == 0 we update access time
             if (ttl == 0) {
-                localHeader.updateTimeSec = spt_uint64rint(self.currentTime());
+                localHeader.updateTimeSec = spt_uint64rint(self.currentDateTimeInterval);
                 localHeader.crc = SPTPersistentCacheCalculateHeaderCRC(&localHeader);
                 memcpy(header, &localHeader, sizeof(localHeader));
 
@@ -584,7 +560,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
     SPTPersistentCacheRecordHeader header = SPTPersistentCacheRecordHeaderMake(ttl,
                                                                                payloadLength,
-                                                                               spt_uint64rint(self.currentTime()),
+                                                                               spt_uint64rint(self.currentDateTimeInterval),
                                                                                isLocked);
 
     [rawData appendBytes:&header length:SPTPersistentCacheRecordHeaderSize];
@@ -757,7 +733,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 {
     assert(header != nil);
     uint64_t ttl = header->ttl;
-    uint64_t current = spt_uint64rint(self.currentTime());
+    uint64_t current = spt_uint64rint(self.currentDateTimeInterval);
     int64_t threshold = (int64_t)((ttl > 0) ? ttl : self.options.defaultExpirationPeriodSec);
 
     if (ttl > kTTLUpperBoundInSec) {
@@ -872,11 +848,10 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 {
     va_list list;
     va_start(list, format);
-    NSString * str = [[NSString alloc ] initWithFormat:format arguments:list];
+    NSString *debugString = [[NSString alloc ] initWithFormat:format arguments:list];
     va_end(list);
-    if (self.debugOutput) {
-        self.debugOutput(str);
-    }
+    
+    SPTPersistentCacheSafeDebugCallback(debugString, self.debugOutput);
 }
 
 - (void)pruneBySize
@@ -987,6 +962,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     NSArray *sortedImages = [images sortedArrayUsingComparator:SPTSortFilesByModificationDate];
 
     return [sortedImages mutableCopy];
+}
+
+- (NSTimeInterval)currentDateTimeInterval
+{
+    return [[NSDate date] timeIntervalSince1970];
 }
 
 #pragma mark SPTPersistentCache

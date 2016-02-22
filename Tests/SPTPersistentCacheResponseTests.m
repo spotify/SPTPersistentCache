@@ -86,5 +86,29 @@ static const SPTPersistentCacheResponseCode SPTPersistentCacheResponseTestsTestC
     XCTAssertNotEqual(classNameRange.location, NSNotFound, @"The class name should exist in the debugDescription");
 }
 
+- (void)testStringFromResponseCodeUniqueness
+{
+    SPTPersistentCacheResponseCode code = SPTPersistentCacheResponseCodeOperationSucceeded;
+    
+    NSArray *allResponses;
+    
+    switch (code) { // Ensure this method includes all states of enum.
+        case SPTPersistentCacheResponseCodeOperationSucceeded:
+        case SPTPersistentCacheResponseCodeNotFound:
+        case SPTPersistentCacheResponseCodeOperationError: {
+            allResponses = @[NSStringFromSPTPersistentCacheResponseCode(SPTPersistentCacheResponseCodeOperationSucceeded),
+                             NSStringFromSPTPersistentCacheResponseCode(SPTPersistentCacheResponseCodeNotFound),
+                             NSStringFromSPTPersistentCacheResponseCode(SPTPersistentCacheResponseCodeOperationError)];
+        }
+    }
+    
+    NSSet *uniqueResponses = [NSSet setWithArray:allResponses];
+    
+    XCTAssertEqual(allResponses.count,
+                   uniqueResponses.count,
+                   @"Each string for the response codes should be unique.");
+
+}
+
 
 @end

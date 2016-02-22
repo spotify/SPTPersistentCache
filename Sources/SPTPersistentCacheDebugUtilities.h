@@ -18,14 +18,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <SPTPersistentCache/SPTPersistentCacheResponse.h>
 
-extern NSString *NSStringFromSPTPersistentCacheResponseCode(SPTPersistentCacheResponseCode code);
+#import <Foundation/Foundation.h>
+#import <SPTPersistentCache/SPTPersistentCacheOptions.h>
 
-@interface SPTPersistentCacheResponse (Private)
-
-- (instancetype)initWithResult:(SPTPersistentCacheResponseCode)result
-                         error:(NSError *)error
-                        record:(SPTPersistentCacheRecord *)record;
-
-@end
+/**
+ *  Executes the debug callback safely avoiding a crash if it is set to nil.
+ *
+ *  @param debugMessage The debug message.
+ *  @param debugCallback The callback block to execute safely.
+ */
+void SPTPersistentCacheSafeDebugCallback(NSString *debugMessage,
+                                         SPTPersistentCacheDebugCallback debugCallback);
