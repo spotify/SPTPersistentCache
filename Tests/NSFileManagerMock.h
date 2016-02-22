@@ -20,17 +20,18 @@
  */
 #import <Foundation/Foundation.h>
 
-#import <SPTPersistentCache/SPTPersistentCache.h>
+/**
+ * A custom mock of the NSFileManager object.
+ */
+@interface NSFileManagerMock : NSFileManager
 
 /**
- * Category to instantiate NSError objects with a specific domain for SPTPersistentCache.
+ * Called when the mock receives a "fileExistsAtPath:" call.
  */
-@interface NSError (SPTPersistentCacheDomainErrors)
-
+@property (nonatomic, copy, readwrite) dispatch_block_t blockCalledOnFileExistsAtPath;
 /**
- * Returns a new instance of NSError with a SPTPersistentCache domain and an error code.
- * @param persistentDataCacheLoadingError The error code for the NSError object.
+ * Records the last "path" argument given to "fileExistsAtPath:".
  */
-+ (instancetype)spt_persistentDataCacheErrorWithCode:(SPTPersistentCacheLoadingError)persistentDataCacheLoadingError;
+@property (nonatomic, strong, readwrite) NSString *lastPathCalledOnExists;
 
 @end

@@ -31,7 +31,7 @@
 #import "SPTPersistentCacheFileManager.h"
 #include <sys/stat.h>
 #import "SPTPersistentCacheTypeUtilities.h"
-
+#import "SPTPersistentCachePosixWrapper.h"
 
 // Enable for more precise logging
 //#define DEBUG_OUTPUT_ENABLED
@@ -48,6 +48,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 #pragma mark - SPTPersistentCache()
 
 @interface SPTPersistentCache ()
+
 @property (nonatomic, copy) SPTPersistentCacheOptions *options;
 // Serial queue used to run all internall stuff
 @property (nonatomic, strong) dispatch_queue_t workQueue;
@@ -56,6 +57,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 @property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
 @property (nonatomic, strong) SPTPersistentCacheFileManager *dataCacheFileManager;
 @property (nonatomic, readonly) NSTimeInterval currentDateTimeInterval;
+@property (nonatomic, strong) SPTPersistentCachePosixWrapper *posixWrapper;
+
 @end
 
 #pragma mark - SPTPersistentCache
@@ -87,6 +90,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
         return nil;
     }
 
+    _posixWrapper = [SPTPersistentCachePosixWrapper new];
+
     return self;
 }
 
@@ -99,9 +104,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     }
 
     callback = [callback copy];
-    dispatch_async(self.workQueue, ^{
+    [self dispatchBlock:^ {
         [self loadDataForKeySync:key withCallback:callback onQueue:queue];
-    });
+    } on:self.workQueue];
     return YES;
 }
 
@@ -228,18 +233,21 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
         NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
         BOOL __block expired = NO;
-        SPTPersistentCacheResponse *response =
-        [self alterHeaderForFileAtPath:filePath withBlock:^(SPTPersistentCacheRecordHeader *header) {
-            // Satisfy Req.#1.2 and Req.#1.3
-            if (![self isDataCanBeReturnedWithHeader:header]) {
-                expired = YES;
-                return;
-            }
-            // Touch files that have default expiration policy
-            if (header->ttl == 0) {
-                header->updateTimeSec = spt_uint64rint(self.currentDateTimeInterval);
-            }
-        } writeBack:YES complain:NO];
+
+        SPTPersistentCacheResponse *response = [self alterHeaderForFileAtPath:filePath
+                                                                    withBlock:^(SPTPersistentCacheRecordHeader *header) {
+                                                                        // Satisfy Req.#1.2 and Req.#1.3
+                                                                        if (![self isDataCanBeReturnedWithHeader:header]) {
+                                                                            expired = YES;
+                                                                            return;
+                                                                        }
+                                                                        // Touch files that have default expiration policy
+                                                                        if (header->ttl == 0) {
+                                                                            header->updateTimeSec = spt_uint64rint(self.currentDateTimeInterval);
+                                                                        }
+                                                                    }
+                                                                    writeBack:YES
+                                                                     complain:NO];
 
         // Satisfy Req.#1.2
         if (expired) {
@@ -313,7 +321,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                  callback:(SPTPersistentCacheResponseCallback)callback
                   onQueue:(dispatch_queue_t)queue
 {
-    if ((callback != nil && queue == nil) && keys.count == 0) {
+    if ((callback != nil && queue == nil) || keys.count == 0) {
         return NO;
     }
 
@@ -340,7 +348,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     return YES;
 }
 
-- (void)scheduleGarbageCollector
+- (BOOL)scheduleGarbageCollector
 {
     assert([NSThread isMainThread]);
 
@@ -348,7 +356,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
     // if gc process already running to nothing
     if (self.gcTimer != nil) {
-        return;
+        return NO;
     }
 
     SPTPersistentCacheTimerProxy *proxy = [[SPTPersistentCacheTimerProxy alloc] initWithDataCache:self
@@ -363,6 +371,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     self.gcTimer.tolerance = 300;
     
     [[NSRunLoop mainRunLoop] addTimer:self.gcTimer forMode:NSDefaultRunLoopMode];
+    return YES;
 }
 
 - (void)unscheduleGarbageCollector
@@ -415,7 +424,8 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
         // Retrieve the file name. From cached during the enumeration.
         NSNumber *isDirectory;
-        if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
+        NSError *error = nil;
+        if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error]) {
             if ([isDirectory boolValue] == NO) {
 
                 NSString *key = theURL.lastPathComponent;
@@ -431,7 +441,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                 }
             }
         } else {
-            [self debugOutput:@"Unable to fetch isDir#3 attribute:%@", theURL];
+            [self debugOutput:@"Unable to fetch isDir#3 attribute:%@ error: %@", theURL, error];
         }
     }
 
@@ -468,7 +478,10 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                                                                  error:&error];
         if (rawData == nil) {
             // File read with error -> inform user
-            [self dispatchError:error result:SPTPersistentCacheResponseCodeOperationError callback:callback onQueue:queue];
+            [self dispatchError:error
+                         result:SPTPersistentCacheResponseCodeOperationError
+                       callback:callback
+                        onQueue:queue];
         } else {
             SPTPersistentCacheRecordHeader *header = SPTPersistentCacheGetHeaderFromData(rawData.mutableBytes, rawData.length);
 
@@ -541,9 +554,9 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
             }
 
             // Callback only after we finished everyhing to avoid situation when user gets notified and we are still writting
-            dispatch_async(queue, ^{
+            [self dispatchBlock:^{
                 callback(response);
-            });
+            } on:queue];
 
         } // if rawData
     } // file exist
@@ -583,7 +596,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
         [self debugOutput:@"PersistentDataCache: Error writting to file:%@ , for key:%@. Removing it...", filePath, key];
         [self removeDataForKeysSync:@[key]];
         [self dispatchError:error result:SPTPersistentCacheResponseCodeOperationError callback:callback onQueue:queue];
-
     } else {
 
         if (callback != nil) {
@@ -610,11 +622,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                                              complain:(BOOL)needComplains
                                             writeBack:(BOOL)writeBack
 {
-    assert(jobBlock != nil);
-    if (jobBlock == nil) {
-        return nil;
-    }
-
     if (![self.fileManager fileExistsAtPath:filePath]) {
         if (needComplains) {
             [self debugOutput:@"PersistentDataCache: Record not exist at path:%@", filePath];
@@ -622,26 +629,35 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
         return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeNotFound error:nil record:nil];
 
     } else {
+        const int SPTPersistentCacheInvalidResult = -1;
         const int flags = (writeBack ? O_RDWR : O_RDONLY);
 
         int fd = open([filePath UTF8String], flags);
-        if (fd == -1) {
-            const int errn = errno;
-            NSString *serr = @(strerror(errn));
-            [self debugOutput:@"PersistentDataCache: Error opening file:%@ , error:%@", filePath, serr];
-            NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: serr}];
-            return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError error:error record:nil];
+        if (fd == SPTPersistentCacheInvalidResult) {
+            const int errorNumber = errno;
+            NSString *errorDescription = @(strerror(errorNumber));
+            [self debugOutput:@"PersistentDataCache: Error opening file:%@ , error:%@", filePath, errorDescription];
+            NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain
+                                                 code:errorNumber
+                                             userInfo:@{ NSLocalizedDescriptionKey: errorDescription }];
+            return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError
+                                                                error:error
+                                                               record:nil];
         }
 
         SPTPersistentCacheResponse *response = jobBlock(fd);
 
-        fd = close(fd);
-        if (fd == -1) {
-            const int errn = errno;
-            NSString *serr = @(strerror(errn));
-            [self debugOutput:@"PersistentDataCache: Error closing file:%@ , error:%@", filePath, serr];
-            NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: serr}];
-            return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError error:error record:nil];
+        fd = [self.posixWrapper close:fd];
+        if (fd == SPTPersistentCacheInvalidResult) {
+            const int errorNumber = errno;
+            NSString *errorDescription = @(strerror(errorNumber));
+            [self debugOutput:@"PersistentDataCache: Error closing file:%@ , error:%@", filePath, errorDescription];
+            NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain
+                                                 code:errorNumber
+                                             userInfo:@{ NSLocalizedDescriptionKey: errorDescription }];
+            return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError
+                                                                error:error
+                                                               record:nil];
         }
 
         return response;

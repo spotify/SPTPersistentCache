@@ -18,19 +18,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <Foundation/Foundation.h>
+#import "NSFileManagerMock.h"
 
-#import <SPTPersistentCache/SPTPersistentCache.h>
+@implementation NSFileManagerMock
 
-/**
- * Category to instantiate NSError objects with a specific domain for SPTPersistentCache.
- */
-@interface NSError (SPTPersistentCacheDomainErrors)
-
-/**
- * Returns a new instance of NSError with a SPTPersistentCache domain and an error code.
- * @param persistentDataCacheLoadingError The error code for the NSError object.
- */
-+ (instancetype)spt_persistentDataCacheErrorWithCode:(SPTPersistentCacheLoadingError)persistentDataCacheLoadingError;
+- (BOOL)fileExistsAtPath:(NSString *)path
+{
+    self.lastPathCalledOnExists = path;
+    BOOL exists = [super fileExistsAtPath:path];
+    if (self.blockCalledOnFileExistsAtPath) {
+        self.blockCalledOnFileExistsAtPath();
+    }
+    return exists;
+}
 
 @end
