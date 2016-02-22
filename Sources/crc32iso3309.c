@@ -120,34 +120,3 @@ uint32_t spt_crc32(const uint8_t *buf, size_t len)
 {
     return update_crc(0L, buf, len);
 }
-
-#if 0
-#include <stdio.h>
-/* Make the table for a fast CRC. */
-void make_crc_table(void)
-{
-    uint32_t c = 0;
-
-    printf("static const uint32_t crc_table[] = { \n");
-
-    for (uint32_t n = 0; n < 256; n++) {
-        c = n;
-        for (int k = 0; k < 8; k++) {
-            if (c & 1) {
-                c = 0xedb88320U ^ (c >> 1);
-            } else {
-                c = c >> 1;
-            }
-        }
-
-        if (n == 255) {
-            printf("0x%0xU };", c);
-        } else {
-            printf("0x%0xU, ", c);
-        }
-        if (n > 0 && (n +1)% 4 == 0) {
-            printf("\n");
-        }
-    }
-}
-#endif
