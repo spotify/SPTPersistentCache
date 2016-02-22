@@ -36,7 +36,7 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
 
 #pragma mark - Initializer
 
-- (instancetype)initWithCache:(SPTPersistentCache *)dataCache
+- (instancetype)initWithCache:(SPTPersistentCache *)cache
                       options:(SPTPersistentCacheOptions *)options
                         queue:(dispatch_queue_t)queue
 {
@@ -45,7 +45,7 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
     }
     
     _options = options;
-    _dataCache = dataCache;
+    _cache = cache;
     _queue = queue;
     
     return self;
@@ -73,10 +73,10 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
         __typeof(weakSelf) const self = weakSelf;
         _Pragma("clang diagnostic pop");
 
-        SPTPersistentCache * const dataCache = self.dataCache;
+        SPTPersistentCache * const cache = self.cache;
 
-        [dataCache runRegularGC];
-        [dataCache pruneBySize];
+        [cache runRegularGC];
+        [cache pruneBySize];
     });
 }
 

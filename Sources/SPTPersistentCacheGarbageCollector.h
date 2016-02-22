@@ -28,7 +28,7 @@
 /**
  *  Persistent Cache that will be used for garbage collection operations.
  */
-@property (nonatomic, weak, readonly) SPTPersistentCache *dataCache;
+@property (nonatomic, weak, readonly) SPTPersistentCache *cache;
 
 /**
  *  Dispatch queue where the operations will take place.

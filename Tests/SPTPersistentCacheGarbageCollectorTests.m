@@ -81,10 +81,10 @@
 
 - (void)testDesignatedInitializer
 {
-    __strong SPTPersistentCache *strongDataCache = self.garbageCollector.dataCache;
+    __strong SPTPersistentCache *strongCache = self.garbageCollector.cache;
     
     XCTAssertEqual(self.garbageCollector.queue, self.dispatchQueue);
-    XCTAssertEqualObjects(strongDataCache, self.cache);
+    XCTAssertEqualObjects(strongCache, self.cache);
     XCTAssertNil(self.garbageCollector.timer);
 }
 
@@ -92,7 +92,7 @@
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"testGarbageCollectorEnqueue"];
     
-    SPTPersistentCacheForTimerProxyUnitTests *dataCacheForUnitTests = (SPTPersistentCacheForTimerProxyUnitTests *)self.garbageCollector.dataCache;
+    SPTPersistentCacheForTimerProxyUnitTests *dataCacheForUnitTests = (SPTPersistentCacheForTimerProxyUnitTests *)self.garbageCollector.cache;
     dataCacheForUnitTests.queue = self.garbageCollector.queue;
 
     dataCacheForUnitTests.testExpectation = expectation;
