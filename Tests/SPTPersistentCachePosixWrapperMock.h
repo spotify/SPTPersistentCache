@@ -46,5 +46,9 @@
  * The value to return when executing the "write:" method.
  */
 @property (nonatomic, assign, readwrite) ssize_t writeValue;
+/**
+ * The value to return when executing the "fsync:" method.
+ */
+@property (nonatomic, assign, readwrite) int fsyncValue;
 
 @end

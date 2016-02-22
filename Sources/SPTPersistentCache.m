@@ -717,13 +717,17 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                                                                        record:nil];
 
                 } else {
-                    int result = fsync(filedes);
+                    int result = [self.posixWrapper fsync:filedes];
                     if (result == -1) {
-                        const int errn = errno;
-                        NSString *serr = @(strerror(errn));
-                        [self debugOutput:@"PersistentDataCache: Error flushing file:%@ , error:%@", filePath, serr];
-                        NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errn userInfo:@{NSLocalizedDescriptionKey: serr}];
-                        return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError error:error record:nil];
+                        const int errorNumber = errno;
+                        NSString *errorDescription = @(strerror(errorNumber));
+                        [self debugOutput:@"PersistentDataCache: Error flushing file:%@ , error:%@", filePath, errorDescription];
+                        NSError *error = [NSError errorWithDomain:NSPOSIXErrorDomain
+                                                             code:errorNumber
+                                                         userInfo:@{ NSLocalizedDescriptionKey: errorDescription }];
+                        return [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationError
+                                                                            error:error
+                                                                           record:nil];
                     }
                 }
             }

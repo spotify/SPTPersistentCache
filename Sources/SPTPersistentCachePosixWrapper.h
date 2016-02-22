@@ -51,5 +51,10 @@
  * @param bufferSize The size of the memory to write into the file.
  */
 - (ssize_t)write:(int)descriptor buffer:(const void *)buffer bufferSize:(size_t)bufferSize;
+/**
+ * See POSIX "fsync"
+ * @param descriptor The file descriptor to synchronise.
+ */
+- (int)fsync:(int)descriptor;
 
 @end

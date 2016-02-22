@@ -42,4 +42,9 @@
     return write(descriptor, buffer, bufferSize);
 }
 
+- (int)fsync:(int)descriptor
+{
+    return fsync(descriptor);
+}
+
 @end

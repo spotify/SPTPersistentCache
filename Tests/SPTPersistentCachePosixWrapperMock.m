@@ -45,4 +45,9 @@
     return self.writeValue;
 }
 
+- (int)fsync:(int)descriptor
+{
+    return self.fsyncValue;
+}
+
 @end
