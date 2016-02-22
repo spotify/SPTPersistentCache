@@ -51,6 +51,15 @@
     free(data);
 }
 
+- (void)testValidateMisalignedHeader
+{
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wcast-align"
+    int headerValidationResult = SPTPersistentCacheValidateHeader((SPTPersistentCacheRecordHeader *)"a");
+    #pragma mark diagnostic pop
+    XCTAssertEqual(headerValidationResult, SPTPersistentCacheLoadingErrorHeaderAlignmentMismatch);
+}
+
 - (void)testValidateNULLHeader
 {
     int headerValidationResult = SPTPersistentCacheValidateHeader(NULL);
