@@ -945,9 +945,11 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                  which is described in apple doc and its our case here */
 
                 struct stat fileStat;
-                int ret = stat([theURL fileSystemRepresentation], &fileStat);
-                if (ret == -1)
+                int ret = [self.posixWrapper stat:[theURL fileSystemRepresentation] statStruct:&fileStat];
+                if (ret == -1) {
+                    [self debugOutput:@"Cannot find the stats of file: %@", theURL.absoluteString];
                     continue;
+                }
 
                 /*
                  Use modification time even for files with TTL

@@ -50,5 +50,9 @@
  * The value to return when executing the "fsync:" method.
  */
 @property (nonatomic, assign, readwrite) int fsyncValue;
+/**
+ * The value to return when executing the "stat:" method.
+ */
+@property (nonatomic, assign, readwrite) int statValue;
 
 @end

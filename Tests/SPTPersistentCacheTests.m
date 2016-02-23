@@ -1605,6 +1605,26 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertTrue(called);
 }
 
+- (void)testStatFailure
+{
+    self.cache.workQueue = dispatch_get_main_queue();
+    [self.cache storeData:[@"TEST" dataUsingEncoding:NSUTF8StringEncoding]
+                   forKey:@"TEST"
+                   locked:YES
+             withCallback:nil
+                  onQueue:nil];
+    self.cache.options.sizeConstraintBytes = 1;
+    SPTPersistentCachePosixWrapperMock *posixWrapperMock = [SPTPersistentCachePosixWrapperMock new];
+    posixWrapperMock.statValue = -1;
+    self.cache.posixWrapper = posixWrapperMock;
+    __block BOOL called = NO;
+    self.cache.debugOutput = ^(NSString *output) {
+        called = YES;
+    };
+    [self.cache pruneBySize];
+    XCTAssertTrue(called);
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file

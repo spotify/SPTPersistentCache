@@ -56,5 +56,11 @@
  * @param descriptor The file descriptor to synchronise.
  */
 - (int)fsync:(int)descriptor;
+/**
+ * See POSIX "stat"
+ * @param path The path to file to get the stats for.
+ * @param statStruct The structure to store the file stats in.
+ */
+- (int)stat:(const char *)path statStruct:(struct stat *)statStruct;
 
 @end
