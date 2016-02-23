@@ -50,4 +50,9 @@
     return self.fsyncValue;
 }
 
+- (int)stat:(const char *)path statStruct:(struct stat *)statStruct
+{
+    return self.statValue;
+}
+
 @end

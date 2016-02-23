@@ -20,6 +20,8 @@
  */
 #import "SPTPersistentCachePosixWrapper.h"
 
+#include <sys/stat.h>
+
 @implementation SPTPersistentCachePosixWrapper
 
 - (int)close:(int)descriptor
@@ -45,6 +47,11 @@
 - (int)fsync:(int)descriptor
 {
     return fsync(descriptor);
+}
+
+- (int)stat:(const char *)path statStruct:(struct stat *)statStruct
+{
+    return stat(path, statStruct);
 }
 
 @end

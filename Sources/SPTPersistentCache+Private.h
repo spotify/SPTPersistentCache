@@ -26,6 +26,6 @@
 @property (nonatomic, copy, readonly) SPTPersistentCacheOptions *options;
 
 - (void)runRegularGC;
-- (void)pruneBySize;
+- (BOOL)pruneBySize;
 
 @end

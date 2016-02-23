@@ -33,11 +33,13 @@
 #import <SPTPersistentCache/SPTPersistentCache.h>
 #import <SPTPersistentCache/SPTPersistentCacheResponse.h>
 #import <SPTPersistentCache/SPTPersistentCacheRecord.h>
+
 #import "SPTPersistentCacheGarbageCollector.h"
 #import "SPTPersistentCache+Private.h"
 #import "SPTPersistentCacheFileManager.h"
 #import "NSFileManagerMock.h"
 #import "SPTPersistentCachePosixWrapperMock.h"
+#import "SPTPersistentCache+Private.h"
 
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -119,8 +121,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 @property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
 
 - (NSTimeInterval)currentDateTimeInterval;
-- (void)runRegularGC;
-- (void)pruneBySize;
+- (void)collectGarbageForceExpire:(BOOL)forceExpire forceLocked:(BOOL)forceLocked;
 
 @end
 
@@ -1548,6 +1549,79 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
              withCallback:nil
                   onQueue:nil];
     [self.cache touchDataForKey:key callback:nil onQueue:nil];
+    XCTAssertTrue(called);
+}
+
+- (void)testWipeAllFiles
+{
+    __block BOOL called = NO;
+    self.cache.debugOutput = ^(NSString *output) {
+        called = YES;
+    };
+    [self.cache collectGarbageForceExpire:YES forceLocked:YES];
+    XCTAssertTrue(called);
+}
+
+- (void)testURLAttributeFailure
+{
+    __block BOOL called = NO;
+    self.cache.debugOutput = ^(NSString *output) {
+        called = YES;
+    };
+    Method originalMethod = class_getInstanceMethod(NSURL.class, @selector(getResourceValue:forKey:error:));
+    IMP originalMethodImplementation = method_getImplementation(originalMethod);
+    IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
+        return nil;
+    });
+    method_setImplementation(originalMethod, fakeMethodImplementation);
+    [self.cache collectGarbageForceExpire:YES forceLocked:YES];
+    method_setImplementation(originalMethod, originalMethodImplementation);
+    XCTAssertTrue(called);
+}
+
+- (void)testPruneBySizeOnUnconstrainedCache
+{
+    BOOL result = [self.cache pruneBySize];
+    XCTAssertFalse(result);
+}
+
+- (void)testPruneBySizeRemoveFileFailure
+{
+    __block BOOL called = NO;
+    self.cache.debugOutput = ^(NSString *output) {
+        called = YES;
+    };
+    self.cache.workQueue = dispatch_get_main_queue();
+    [self.cache storeData:[@"TEST" dataUsingEncoding:NSUTF8StringEncoding]
+                   forKey:@"TEST"
+                   locked:YES
+             withCallback:nil
+                  onQueue:nil];
+    self.cache.options.sizeConstraintBytes = 1;
+    NSFileManagerMock *fileManagerMock = [NSFileManagerMock new];
+    fileManagerMock.disableRemoveFile = YES;
+    self.cache.fileManager = fileManagerMock;
+    [self.cache pruneBySize];
+    XCTAssertTrue(called);
+}
+
+- (void)testStatFailure
+{
+    self.cache.workQueue = dispatch_get_main_queue();
+    [self.cache storeData:[@"TEST" dataUsingEncoding:NSUTF8StringEncoding]
+                   forKey:@"TEST"
+                   locked:YES
+             withCallback:nil
+                  onQueue:nil];
+    self.cache.options.sizeConstraintBytes = 1;
+    SPTPersistentCachePosixWrapperMock *posixWrapperMock = [SPTPersistentCachePosixWrapperMock new];
+    posixWrapperMock.statValue = -1;
+    self.cache.posixWrapper = posixWrapperMock;
+    __block BOOL called = NO;
+    self.cache.debugOutput = ^(NSString *output) {
+        called = YES;
+    };
+    [self.cache pruneBySize];
     XCTAssertTrue(called);
 }
 
