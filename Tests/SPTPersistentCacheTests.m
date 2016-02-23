@@ -121,6 +121,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 - (NSTimeInterval)currentDateTimeInterval;
 - (void)runRegularGC;
 - (void)pruneBySize;
+- (void)collectGarbageForceExpire:(BOOL)forceExpire forceLocked:(BOOL)forceLocked;
 
 @end
 
@@ -1548,6 +1549,16 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
              withCallback:nil
                   onQueue:nil];
     [self.cache touchDataForKey:key callback:nil onQueue:nil];
+    XCTAssertTrue(called);
+}
+
+- (void)testWipeAllFiles
+{
+    __block BOOL called = NO;
+    self.cache.debugOutput = ^(NSString *output) {
+        called = YES;
+    };
+    [self.cache collectGarbageForceExpire:YES forceLocked:YES];
     XCTAssertTrue(called);
 }
 
