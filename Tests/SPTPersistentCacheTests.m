@@ -33,11 +33,13 @@
 #import <SPTPersistentCache/SPTPersistentCache.h>
 #import <SPTPersistentCache/SPTPersistentCacheResponse.h>
 #import <SPTPersistentCache/SPTPersistentCacheRecord.h>
+
 #import "SPTPersistentCacheGarbageCollector.h"
 #import "SPTPersistentCache+Private.h"
 #import "SPTPersistentCacheFileManager.h"
 #import "NSFileManagerMock.h"
 #import "SPTPersistentCachePosixWrapperMock.h"
+#import "SPTPersistentCache+Private.h"
 
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -119,8 +121,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 @property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
 
 - (NSTimeInterval)currentDateTimeInterval;
-- (void)runRegularGC;
-- (void)pruneBySize;
 - (void)collectGarbageForceExpire:(BOOL)forceExpire forceLocked:(BOOL)forceLocked;
 
 @end
@@ -1577,6 +1577,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     [self.cache collectGarbageForceExpire:YES forceLocked:YES];
     method_setImplementation(originalMethod, originalMethodImplementation);
     XCTAssertTrue(called);
+}
+
+- (void)testPruneBySizeOnUnconstrainedCache
+{
+    BOOL result = [self.cache pruneBySize];
+    XCTAssertFalse(result);
 }
 
 #pragma mark - Internal methods

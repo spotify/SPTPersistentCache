@@ -139,7 +139,10 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
                                               onQueue:queue];
             } else {
                 [self debugOutput:@"PersistentDataCache: Unable to get dir contents: %@, error: %@", path, [error localizedDescription]];
-                [self dispatchError:error result:SPTPersistentCacheResponseCodeOperationError callback:callback onQueue:queue];
+                [self dispatchError:error
+                             result:SPTPersistentCacheResponseCodeOperationError
+                           callback:callback
+                            onQueue:queue];
             }
             return;
         }
@@ -845,10 +848,6 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
              callback:(SPTPersistentCacheResponseCallback)callback
               onQueue:(dispatch_queue_t)queue
 {
-    if (!callback) {
-        return;
-    }
-    
     [self dispatchBlock:^{
         SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:result
                                                                                             error:error
@@ -867,10 +866,10 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
     SPTPersistentCacheSafeDebugCallback(debugString, self.debugOutput);
 }
 
-- (void)pruneBySize
+- (BOOL)pruneBySize
 {
     if (self.options.sizeConstraintBytes == 0) {
-        return;
+        return NO;
     }
 
     // Find all the image names and attributes and sort oldest last
@@ -900,6 +899,7 @@ typedef void (^RecordHeaderGetCallbackType)(SPTPersistentCacheRecordHeader *head
 
         currentCacheSize -= [image[SPTDataCacheFileAttributesKey][NSFileSize] integerValue];
     }
+    return YES;
 }
 
 - (NSMutableArray *)storedImageNamesAndAttributes
