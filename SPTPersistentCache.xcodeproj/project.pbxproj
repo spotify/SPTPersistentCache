@@ -49,6 +49,7 @@
 		C48AE7411C75BB8300814D7D /* SPTPersistentCacheFileManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C48AE7401C75BB8300814D7D /* SPTPersistentCacheFileManagerTests.m */; };
 		C4B4148F1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C4B4148E1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m */; };
 		C4B414911C6A24A10099FECD /* SPTPersistentCacheOptionsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C4B414901C6A24A10099FECD /* SPTPersistentCacheOptionsTests.m */; };
+		C4B98D1B1C7B5CB900E1B9A3 /* SPTPersistentCacheDebugUtilitiesTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C4B98D1A1C7B5CB900E1B9A3 /* SPTPersistentCacheDebugUtilitiesTests.m */; };
 		C4EA65031C7A478100A6091A /* SPTPersistentCacheDebugUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = C4EA65021C7A478100A6091A /* SPTPersistentCacheDebugUtilities.m */; };
 /* End PBXBuildFile section */
 
@@ -143,6 +144,7 @@
 		C4B4148B1C6A01970099FECD /* SPTPersistentCacheRecordTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheRecordTests.m; sourceTree = "<group>"; };
 		C4B4148E1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheResponseTests.m; sourceTree = "<group>"; };
 		C4B414901C6A24A10099FECD /* SPTPersistentCacheOptionsTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheOptionsTests.m; sourceTree = "<group>"; };
+		C4B98D1A1C7B5CB900E1B9A3 /* SPTPersistentCacheDebugUtilitiesTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheDebugUtilitiesTests.m; sourceTree = "<group>"; };
 		C4EA65011C7A478100A6091A /* SPTPersistentCacheDebugUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheDebugUtilities.h; sourceTree = "<group>"; };
 		C4EA65021C7A478100A6091A /* SPTPersistentCacheDebugUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheDebugUtilities.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -212,6 +214,7 @@
 				C4B4148E1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m */,
 				0510FF6A1BA3073D00ED0766 /* SPTPersistentCacheTests.m */,
 				C41237071C6A29FB00C1E9B8 /* SPTPersistentCacheGarbageCollectorTests.m */,
+				C4B98D1A1C7B5CB900E1B9A3 /* SPTPersistentCacheDebugUtilitiesTests.m */,
 				050076A71C7A2B57000819B5 /* Mocks */,
 				698B70521C7538B000BDBFEA /* Resources */,
 				0510FF231BA2FF7A00ED0766 /* Supporting Files */,
@@ -453,6 +456,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9C9E70781C790ED900E1CBE6 /* SPTPersistentCacheRecordTests.m in Sources */,
+				C4B98D1B1C7B5CB900E1B9A3 /* SPTPersistentCacheDebugUtilitiesTests.m in Sources */,
 				C4B414911C6A24A10099FECD /* SPTPersistentCacheOptionsTests.m in Sources */,
 				0510FF6B1BA3073D00ED0766 /* SPTPersistentCacheTests.m in Sources */,
 				C413BA011C71CBBA002D41FB /* SPTPersistentCacheHeaderTests.m in Sources */,

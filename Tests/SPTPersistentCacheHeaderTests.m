@@ -51,6 +51,29 @@
     free(data);
 }
 
+- (void)testValidateMisalignedHeader
+{
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wcast-align"
+    int headerValidationResult = SPTPersistentCacheValidateHeader((SPTPersistentCacheRecordHeader *)"a");
+    #pragma mark diagnostic pop
+    XCTAssertEqual(headerValidationResult, SPTPersistentCacheLoadingErrorHeaderAlignmentMismatch);
+}
+
+- (void)testValidateNULLHeader
+{
+    int headerValidationResult = SPTPersistentCacheValidateHeader(NULL);
+    
+    XCTAssertEqual(headerValidationResult, SPTPersistentCacheLoadingErrorInternalInconsistency);
+}
+
+- (void)testCalculateNULLHeaderCRC
+{
+    uint32_t headerCRC = SPTPersistentCacheCalculateHeaderCRC(NULL);
+    
+    XCTAssertEqual(headerCRC, (uint32_t)0);
+}
+
 - (void)testSPTPersistentCacheRecordHeaderMake
 {
     uint64_t ttl = 64;
