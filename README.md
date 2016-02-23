@@ -133,6 +133,11 @@ At Spotify we began to standardise the way we handled images in a centralised wa
 
 Thus we boiled down what we needed in a cache, the key features being TTL on specific pieces of data, disk management to make sure we don't use too much, and protections against data corruption. It also became very useful to separate different caches into separate files (such as images and mp3s), in order to easily measure how much space each item is taking up.
 
+## Tools :hammer:
+Having a nice GUI tool to inspect the contents of an `SPTPersistentCache` directory would be nice, so we made one. In this repository we have a project called `SPTPersistentCacheViewer.xcodeproj` which is part of the `SPTPersistentCache.xcworkspace`. When you open it and build it for OS X, you will see a GUI that allows you to inspect the contents of a cache, including individual items TTL and payload size.
+
+<img alt="SPTPersistentCacheViewer" src="SPTPersistentCacheViewer.png">
+
 ## Contributing :mailbox_with_mail:
 Contributions are welcomed, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.
 
