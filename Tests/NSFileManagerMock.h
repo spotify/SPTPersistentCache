@@ -33,5 +33,9 @@
  * Records the last "path" argument given to "fileExistsAtPath:".
  */
 @property (nonatomic, strong, readwrite) NSString *lastPathCalledOnExists;
+/**
+ * Disables the "removeFile:" method.
+ */
+@property (nonatomic, assign, readwrite) BOOL disableRemoveFile;
 
 @end

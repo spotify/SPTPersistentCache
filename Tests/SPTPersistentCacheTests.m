@@ -1585,6 +1585,26 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertFalse(result);
 }
 
+- (void)testPruneBySizeRemoveFileFailure
+{
+    __block BOOL called = NO;
+    self.cache.debugOutput = ^(NSString *output) {
+        called = YES;
+    };
+    self.cache.workQueue = dispatch_get_main_queue();
+    [self.cache storeData:[@"TEST" dataUsingEncoding:NSUTF8StringEncoding]
+                   forKey:@"TEST"
+                   locked:YES
+             withCallback:nil
+                  onQueue:nil];
+    self.cache.options.sizeConstraintBytes = 1;
+    NSFileManagerMock *fileManagerMock = [NSFileManagerMock new];
+    fileManagerMock.disableRemoveFile = YES;
+    self.cache.fileManager = fileManagerMock;
+    [self.cache pruneBySize];
+    XCTAssertTrue(called);
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file

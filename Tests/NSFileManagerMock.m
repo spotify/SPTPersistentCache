@@ -32,4 +32,12 @@
     return exists;
 }
 
+- (BOOL)removeItemAtPath:(NSString *)path error:(NSError * _Nullable __autoreleasing *)error
+{
+    if (self.disableRemoveFile) {
+        return NO;
+    }
+    return [super removeItemAtPath:path error:error];
+}
+
 @end
