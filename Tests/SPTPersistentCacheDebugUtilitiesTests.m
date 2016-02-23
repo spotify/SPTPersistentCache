@@ -14,4 +14,18 @@
                      @"A nil callback shouldn't cause an exception.");
 }
 
+- (void)testDebugCallback
+{
+    __block NSString *stringSetInsideBlock = nil;
+    
+    NSString *testString = @"Test";
+    SPTPersistentCacheSafeDebugCallback(testString, ^(NSString *message){
+        stringSetInsideBlock = message;
+    });
+    
+    XCTAssertEqualObjects(stringSetInsideBlock,
+                          testString,
+                          @"The debug callback was not executed. :{");
+}
+
 @end
