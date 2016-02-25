@@ -25,6 +25,13 @@
 
 static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_directory";
 
+@interface SPTPersistentCacheFileManager ()
+
+@property (nonatomic, strong) NSFileManager *fileManager;
+@property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
+
+@end
+
 @interface SPTPersistentCacheFileManagerTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentCacheOptions *options;
 @property (nonatomic, strong) SPTPersistentCacheFileManager *cacheFileManager;
@@ -157,6 +164,17 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_dir
     
     XCTAssertTrue(!isFileOneAtPath && !isFileTwoAtPath,
                   @"Removing all keys with nil or empty argument should have removed all data");
+}
+
+- (void)testFileManagerFailsToGetAttributesOfFile
+{
+    __block BOOL called = NO;
+    self.cacheFileManager.debugOutput = ^(NSString *string) {
+        called = YES;
+    };
+    self.cacheFileManager.fileManager = nil;
+    [self.cacheFileManager getFileSizeAtPath:@"TEST"];
+    XCTAssertTrue(called);
 }
 
 #pragma mark - Helper Functions
