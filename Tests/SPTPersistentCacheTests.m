@@ -211,7 +211,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     for (NSUInteger i = 0; i < count; ++i) {
         XCTAssert(kParams[i].last != YES, @"Last param element reached");
         NSString *fileName = [self.thisBundle pathForResource:self.imageNames[i] ofType:nil];
-        XCTestExpectation *expectation = [self expectationWithDescription:fileName];
+        __weak XCTestExpectation *expectation = [self expectationWithDescription:fileName];
         [self putFile:fileName inCache:self.cache withKey:self.imageNames[i] ttl:kParams[i].ttl locked:kParams[i].locked expectation:expectation];
         NSData *data = [NSData dataWithContentsOfFile:fileName];
         ImageClass *image = [[ImageClass alloc] initWithData:data];
@@ -258,7 +258,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     for (NSUInteger i = 0; i < count; ++i) {
 
         NSString *cacheKey = self.imageNames[i];
-        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
+        __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
         [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
 
@@ -325,7 +325,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         return [NSDate timeIntervalSinceReferenceDate];
     } expirationTime:[NSDate timeIntervalSinceReferenceDate]];
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"testLoadWithPrefixesSuccess"];
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"testLoadWithPrefixesSuccess"];
 
     // Thas hardcode logic: 10th element should be safe to get
     const NSUInteger index = 10;
@@ -378,7 +378,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         return [NSDate timeIntervalSinceReferenceDate];
     } expirationTime:[NSDate timeIntervalSinceReferenceDate]];
 
-    XCTestExpectation *expectation = [self expectationWithDescription:@"testLoadWithPrefixesFail"];
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"testLoadWithPrefixesFail"];
 
     // Thas hardcode logic: 10th element should be safe to get
     const NSUInteger index = 9;
@@ -440,7 +440,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
 
     // Wait untill all lock/unlock is done
-    XCTestExpectation *lockExp = [self expectationWithDescription:@"lock"];
+    __weak XCTestExpectation *lockExp = [self expectationWithDescription:@"lock"];
     NSInteger __block toLockCount = (NSInteger)[toLock count];
     [cache lockDataForKeys:toLock callback:^(SPTPersistentCacheResponse *response) {
         if (--toLockCount == 0) {
@@ -448,7 +448,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         }
     } onQueue:dispatch_get_main_queue()];
 
-    XCTestExpectation *unlockExp = [self expectationWithDescription:@"unlock"];
+    __weak XCTestExpectation *unlockExp = [self expectationWithDescription:@"unlock"];
     NSInteger __block toUnlockCount = (NSInteger)[toUnlock count];
     [cache unlockDataForKeys:toUnlock callback:^(SPTPersistentCacheResponse *response) {
         if (--toUnlockCount == 0){
@@ -472,7 +472,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     for (NSUInteger i = 0; i < count; ++i) {
 
         NSString *cacheKey = self.imageNames[i];
-        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
+        __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
         [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
@@ -532,7 +532,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     for (NSUInteger i = 0; i < count; ++i) {
 
         NSString *cacheKey = self.imageNames[i];
-        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
+        __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
         // This just give us guarantee that files should be deleted
         [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
@@ -575,7 +575,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     for (NSUInteger i = 0; i < count; ++i) {
 
         NSString *cacheKey = self.imageNames[i];
-        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
+        __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
         // This just give us guarantee that files should be deleted
         [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
@@ -629,7 +629,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     for (unsigned i = 0; i < count; ++i) {
         NSString *cacheKey = self.imageNames[i];
-        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
+        __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
         [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
@@ -700,7 +700,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     for (unsigned i = 0; i < count; ++i) {
         
         NSString *cacheKey = self.imageNames[i];
-        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
+        __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
         [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
@@ -847,7 +847,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     for (unsigned i = 0; i < count; ++i) {
         NSString *cacheKey = self.imageNames[i];
-        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
+        __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
         [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
@@ -911,7 +911,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     for (unsigned i = 0; i < count; ++i) {
         NSString *cacheKey = self.imageNames[i];
-        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
+        __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
         [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
@@ -973,7 +973,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     for (unsigned i = 0; i < count; ++i) {
         NSString *cacheKey = self.imageNames[i];
-        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
+        __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
         [cache touchDataForKey:cacheKey callback:^(SPTPersistentCacheResponse *response) {
             [exp fulfill];
@@ -1003,7 +1003,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
     for (unsigned i = 0; i < count; ++i) {
         NSString *cacheKey = self.imageNames[i];
-        XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
+        __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
 
         [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
             calls += 1;
@@ -1184,7 +1184,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertNotNil(image, @"Image is invalid");
 
     // Put file for existing name and expect new ttl and lock status
-    XCTestExpectation *exp1 = [self expectationWithDescription:@"exp1"];
+    __weak XCTestExpectation *exp1 = [self expectationWithDescription:@"exp1"];
     [self putFile:fileName inCache:cache withKey:key ttl:kTTL1 locked:YES expectation:exp1];
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
@@ -1195,7 +1195,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(header.refCount, 1u, @"refCount must match");
 
     // Now same call with new ttl and same lock status. Expect no change in refCount according to API Req.#1.0
-    XCTestExpectation *exp2 = [self expectationWithDescription:@"exp2"];
+    __weak XCTestExpectation *exp2 = [self expectationWithDescription:@"exp2"];
     [self putFile:fileName inCache:cache withKey:key ttl:kTTL2 locked:YES expectation:exp2];
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
@@ -1205,7 +1205,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertEqual(header.refCount, 1u, @"refCount must match");
 
     // Now same call with new ttl and new lock status. Expect no change in refCount according to API Req.#1.0
-    XCTestExpectation *exp3 = [self expectationWithDescription:@"exp3"];
+    __weak XCTestExpectation *exp3 = [self expectationWithDescription:@"exp3"];
     [self putFile:fileName inCache:cache withKey:key ttl:kTTL1 locked:NO expectation:exp3];
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
@@ -1632,7 +1632,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         withKey:(NSString *)key
             ttl:(NSUInteger)ttl
          locked:(BOOL)locked
-    expectation:(XCTestExpectation *)expectation
+    expectation:(__weak XCTestExpectation *)expectation
 {
     NSData *data = [NSData dataWithContentsOfFile:file];
     XCTAssertNotNil(data, @"Unable to get data from file:%@", file);

@@ -31,11 +31,11 @@
 
 
 @interface SPTPersistentCacheForTimerProxyUnitTests : SPTPersistentCache
-@property (nonatomic) dispatch_queue_t queue;
-@property (nonatomic) XCTestExpectation *testExpectation;
-@property (nonatomic) BOOL wasCalledFromIncorrectQueue;
-@property (nonatomic) BOOL wasRunRegularGCCalled;
-@property (nonatomic) BOOL wasPruneBySizeCalled;
+@property (nonatomic, strong) dispatch_queue_t queue;
+@property (nonatomic, weak) XCTestExpectation *testExpectation;
+@property (nonatomic, assign) BOOL wasCalledFromIncorrectQueue;
+@property (nonatomic, assign) BOOL wasRunRegularGCCalled;
+@property (nonatomic, assign) BOOL wasPruneBySizeCalled;
 @end
 
 @implementation SPTPersistentCacheForTimerProxyUnitTests
@@ -90,7 +90,7 @@
 
 - (void)testGarbageCollectorEnqueue
 {
-    XCTestExpectation *expectation = [self expectationWithDescription:@"testGarbageCollectorEnqueue"];
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"testGarbageCollectorEnqueue"];
     
     SPTPersistentCacheForTimerProxyUnitTests *dataCacheForUnitTests = (SPTPersistentCacheForTimerProxyUnitTests *)self.garbageCollector.cache;
     dataCacheForUnitTests.queue = self.garbageCollector.queue;
