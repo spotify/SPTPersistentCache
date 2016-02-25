@@ -197,6 +197,17 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_dir
     XCTAssertTrue(called);
 }
 
+- (void)testOptimizedDiskSizeForCacheSizeFileManagerFail
+{
+    __block BOOL called = NO;
+    self.cacheFileManager.debugOutput = ^(NSString *string) {
+        called = YES;
+    };
+    self.cacheFileManager.fileManager = nil;
+    [self.cacheFileManager optimizedDiskSizeForCacheSize:100];
+    XCTAssertTrue(called);
+}
+
 #pragma mark - Helper Functions
 
 - (NSString *)createFileForKey:(NSString *)key
