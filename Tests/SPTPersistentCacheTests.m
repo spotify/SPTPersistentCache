@@ -1625,6 +1625,24 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     XCTAssertTrue(called);
 }
 
+- (void)testResourceInfoURLFailure
+{
+    self.cache.options.sizeConstraintBytes = 1;
+    __block BOOL called = NO;
+    self.cache.debugOutput = ^(NSString *output) {
+        called = YES;
+    };
+    Method originalMethod = class_getInstanceMethod(NSURL.class, @selector(getResourceValue:forKey:error:));
+    IMP originalMethodImplementation = method_getImplementation(originalMethod);
+    IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
+        return nil;
+    });
+    method_setImplementation(originalMethod, fakeMethodImplementation);
+    [self.cache pruneBySize];
+    method_setImplementation(originalMethod, originalMethodImplementation);
+    XCTAssertTrue(called);
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
