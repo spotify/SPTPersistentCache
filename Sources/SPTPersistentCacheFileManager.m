@@ -41,14 +41,12 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
 
 - (instancetype)initWithOptions:(SPTPersistentCacheOptions *)options
 {
-    if (!(self = [super init ])) {
-        return nil;
+    self = [super init];
+    if (self) {
+        _options = options;
+        _fileManager = [NSFileManager defaultManager];
+        _debugOutput = options.debugOutput;
     }
-    
-    _options = options;
-    _fileManager = [NSFileManager defaultManager];
-    _debugOutput = options.debugOutput;
-    
     return self;
 }
 

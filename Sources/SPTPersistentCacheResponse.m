@@ -37,14 +37,12 @@
                          error:(NSError *)error
                         record:(SPTPersistentCacheRecord *)record
 {
-    if (!(self = [super init])) {
-        return nil;
+    self = [super init];
+    if (self) {
+        _result = result;
+        _error = error;
+        _record = record;
     }
-
-    _result = result;
-    _error = error;
-    _record = record;
-
     return self;
 }
 

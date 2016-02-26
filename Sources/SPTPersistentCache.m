@@ -73,26 +73,24 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 
 - (instancetype)initWithOptions:(SPTPersistentCacheOptions *)options
 {
-    if (!(self = [super init])) {
-        return nil;
+    self = [super init];
+    if (self) {
+        _options = options ?: [SPTPersistentCacheOptions new];
+        _workQueue = dispatch_queue_create([options.identifierForQueue UTF8String], DISPATCH_QUEUE_CONCURRENT);
+        _fileManager = [NSFileManager defaultManager];
+        _debugOutput = [self.options.debugOutput copy];
+        _dataCacheFileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:_options];
+        _garbageCollector = [[SPTPersistentCacheGarbageCollector alloc] initWithCache:self
+                                                                              options:_options
+                                                                                queue:_workQueue];
+
+        _posixWrapper = [SPTPersistentCachePosixWrapper new];
+
+        NSAssert(_workQueue, @"The work queue can never be nil, otherwise the cache won't run");
+        if (![_dataCacheFileManager createCacheDirectory]) {
+            return nil;
+        }
     }
-
-    _options = options ?: [SPTPersistentCacheOptions new];
-    _workQueue = dispatch_queue_create([options.identifierForQueue UTF8String], DISPATCH_QUEUE_CONCURRENT);
-    _fileManager = [NSFileManager defaultManager];
-    _debugOutput = [self.options.debugOutput copy];
-    _dataCacheFileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:_options];
-    _garbageCollector = [[SPTPersistentCacheGarbageCollector alloc] initWithCache:self
-                                                                          options:_options
-                                                                            queue:_workQueue];
-
-    _posixWrapper = [SPTPersistentCachePosixWrapper new];
-
-    NSAssert(_workQueue, @"The work queue can never be nil, otherwise the cache won't run");
-    if (![_dataCacheFileManager createCacheDirectory]) {
-        return nil;
-    }
-
     return self;
 }
 

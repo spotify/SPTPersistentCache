@@ -50,7 +50,7 @@
 - (void)testMinimumGarbageColectorInterval
 {
     SPTPersistentCacheOptions *dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
-                                                                                            identifier:nil
+                                                                                            identifier:@"test"
                                                                              defaultExpirationInterval:1
                                                                               garbageCollectorInterval:1
                                                                                                  debug:nil];
