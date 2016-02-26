@@ -40,14 +40,12 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
                       options:(SPTPersistentCacheOptions *)options
                         queue:(dispatch_queue_t)queue
 {
-    if (!(self = [super init])) {
-        return nil;
+    self = [super init];
+    if (self) {
+        _options = options;
+        _cache = cache;
+        _queue = queue;
     }
-    
-    _options = options;
-    _cache = cache;
-    _queue = queue;
-    
     return self;
 }
 

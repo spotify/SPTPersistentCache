@@ -30,15 +30,13 @@
                     refCount:(NSUInteger)refCount
                          ttl:(NSUInteger)ttl
 {
-    if (!(self = [super init])) {
-        return nil;
+    self = [super init];
+    if (self) {
+        _refCount = refCount;
+        _ttl = ttl;
+        _key = [key copy];
+        _data = data;
     }
-
-    _refCount = refCount;
-    _ttl = ttl;
-    _key = [key copy];
-    _data = data;
-
     return self;
 }
 
