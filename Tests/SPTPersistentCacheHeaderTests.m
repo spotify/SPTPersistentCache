@@ -55,7 +55,7 @@
 {
     #pragma clang diagnostic push
     #pragma clang diagnostic ignored "-Wcast-align"
-    int headerValidationResult = SPTPersistentCacheValidateHeader((SPTPersistentCacheRecordHeader *)"a");
+    int headerValidationResult = SPTPersistentCacheValidateHeader((SPTPersistentCacheRecordHeader *)3);
     #pragma mark diagnostic pop
     XCTAssertEqual(headerValidationResult, SPTPersistentCacheLoadingErrorHeaderAlignmentMismatch);
 }
