@@ -21,9 +21,19 @@
 #import <XCTest/XCTest.h>
 
 #import "SPTPersistentCacheFileManager.h"
+
+#import <objc/runtime.h>
+
 #import <SPTPersistentCache/SPTPersistentCacheOptions.h>
 
 static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_directory";
+
+@interface SPTPersistentCacheFileManager ()
+
+@property (nonatomic, strong) NSFileManager *fileManager;
+@property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
+
+@end
 
 @interface SPTPersistentCacheFileManagerTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentCacheOptions *options;
@@ -157,6 +167,45 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_dir
     
     XCTAssertTrue(!isFileOneAtPath && !isFileTwoAtPath,
                   @"Removing all keys with nil or empty argument should have removed all data");
+}
+
+- (void)testFileManagerFailsToGetAttributesOfFile
+{
+    __block BOOL called = NO;
+    self.cacheFileManager.debugOutput = ^(NSString *string) {
+        called = YES;
+    };
+    self.cacheFileManager.fileManager = nil;
+    [self.cacheFileManager getFileSizeAtPath:@"TEST"];
+    XCTAssertTrue(called);
+}
+
+- (void)testTotalUsedSizeInBytesFailWithNSURLGetResourceValue
+{
+    __block BOOL called = NO;
+    self.cacheFileManager.debugOutput = ^(NSString *string) {
+        called = YES;
+    };
+    Method originalMethod = class_getInstanceMethod(NSURL.class, @selector(getResourceValue:forKey:error:));
+    IMP originalMethodImplementation = method_getImplementation(originalMethod);
+    IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
+        return nil;
+    });
+    method_setImplementation(originalMethod, fakeMethodImplementation);
+    [self.cacheFileManager totalUsedSizeInBytes];
+    method_setImplementation(originalMethod, originalMethodImplementation);
+    XCTAssertTrue(called);
+}
+
+- (void)testOptimizedDiskSizeForCacheSizeFileManagerFail
+{
+    __block BOOL called = NO;
+    self.cacheFileManager.debugOutput = ^(NSString *string) {
+        called = YES;
+    };
+    self.cacheFileManager.fileManager = nil;
+    [self.cacheFileManager optimizedDiskSizeForCacheSize:100];
+    XCTAssertTrue(called);
 }
 
 #pragma mark - Helper Functions

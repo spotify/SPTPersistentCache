@@ -133,7 +133,6 @@
     XCTAssertEqualObjects(timerFirstCall, timerSecondCall);
 }
 
-
 - (void)testUnscheduleGarbageCollection
 {
     [self.garbageCollector schedule];
@@ -141,5 +140,17 @@
     XCTAssertNil(self.garbageCollector.timer);
 }
 
+- (void)testSchedulingGarbageCollectionOnAnotherThread
+{
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"Scheduled Expectation"];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^ {
+        [self.garbageCollector schedule];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [expectation fulfill];
+        });
+    });
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
+    XCTAssertTrue(self.garbageCollector.isGarbageCollectionScheduled);
+}
 
 @end
