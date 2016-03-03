@@ -22,6 +22,8 @@
 
 @class SPTPersistentCacheResponse;
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * Type off callback for load/store calls
  */
@@ -112,15 +114,8 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
                        identifier:(NSString *)cacheIdentifier
         defaultExpirationInterval:(NSUInteger)defaultExpirationInterval
          garbageCollectorInterval:(NSUInteger)garbageCollectorInterval
-                            debug:(SPTPersistentCacheDebugCallback)debugCallback;
-/**
- * Returns a new instance of the class setup with specific values.
- * @param cachePath Path in the system file for the cache. May be nil.
- * @param cacheIdentifier An identifier for the cache. May be nil.
- * @param debugCallback A callback used for debugging purposes.
- */
-- (instancetype)initWithCachePath:(NSString *)cachePath
-                       identifier:(NSString *)cacheIdentifier
-                            debug:(SPTPersistentCacheDebugCallback)debugCallback;
+                            debug:(SPTPersistentCacheDebugCallback)debugCallback NS_DESIGNATED_INITIALIZER;
 
 @end
+
+NS_ASSUME_NONNULL_END
