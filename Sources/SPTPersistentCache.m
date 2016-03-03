@@ -264,21 +264,21 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
     } on:self.workQueue];
 }
 
-- (void)removeDataForKeysSync:(NSArray *)keys
+- (void)removeDataForKeysSync:(NSArray<NSString *> *)keys
 {
     for (NSString *key in keys) {
         [self.dataCacheFileManager removeDataForKey:key];
     }
 }
 
-- (void)removeDataForKeys:(NSArray *)keys
+- (void)removeDataForKeys:(NSArray<NSString *> *)keys
 {
     dispatch_barrier_async(self.workQueue, ^{
         [self removeDataForKeysSync:keys];
     });
 }
 
-- (BOOL)lockDataForKeys:(NSArray *)keys
+- (BOOL)lockDataForKeys:(NSArray<NSString *> *)keys
                callback:(SPTPersistentCacheResponseCallback)callback
                 onQueue:(dispatch_queue_t)queue
 {
@@ -319,7 +319,7 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
     return YES;
 }
 
-- (BOOL)unlockDataForKeys:(NSArray *)keys
+- (BOOL)unlockDataForKeys:(NSArray<NSString *> *)keys
                  callback:(SPTPersistentCacheResponseCallback)callback
                   onQueue:(dispatch_queue_t)queue
 {

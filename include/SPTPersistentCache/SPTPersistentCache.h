@@ -85,7 +85,7 @@ FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
 /**
  * Type of callback that is used to give caller a chance to choose which key to open if any.
  */
-typedef NSString * _Nonnull(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
+typedef NSString * _Nonnull(^SPTPersistentCacheChooseKeyCallback)(NSArray<NSString *> *keys);
 
 /**
  * @brief SPTPersistentCache
@@ -184,7 +184,7 @@ typedef NSString * _Nonnull(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys)
  * @brief Removes data for keys unconditionally even if expired.
  * @param keys The keys corresponding to the data to remove.
  */
-- (void)removeDataForKeys:(NSArray *)keys;
+- (void)removeDataForKeys:(NSArray<NSString *> *)keys;
 /**
  * @discussion Increment ref count for given keys. Give callback with result for each key in input array.
  *             Req.#1.2. Expired records treated as not found on lock.
@@ -192,7 +192,7 @@ typedef NSString * _Nonnull(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys)
  * @param callback May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
-- (BOOL)lockDataForKeys:(NSArray *)keys
+- (BOOL)lockDataForKeys:(NSArray<NSString *> *)keys
                callback:(SPTPersistentCacheResponseCallback)callback
                 onQueue:(dispatch_queue_t)queue;
 /**
@@ -202,7 +202,7 @@ typedef NSString * _Nonnull(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys)
  * @param callback May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
-- (BOOL)unlockDataForKeys:(NSArray *)keys
+- (BOOL)unlockDataForKeys:(NSArray<NSString *> *)keys
                  callback:(SPTPersistentCacheResponseCallback)callback
                   onQueue:(dispatch_queue_t)queue;
 /**
