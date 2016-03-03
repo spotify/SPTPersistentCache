@@ -22,6 +22,8 @@
 
 @class SPTPersistentCacheRecord;
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * The SPTPersistentCacheResponseCode enum defines constants that is used to identify what kind of response would be
  * given in callback to loadDataForKey:withCallback: method.
@@ -64,3 +66,5 @@ typedef NS_ENUM(NSInteger, SPTPersistentCacheResponseCode) {
 @property (nonatomic, strong, readonly) SPTPersistentCacheRecord *record;
 
 @end
+
+NS_ASSUME_NONNULL_END
