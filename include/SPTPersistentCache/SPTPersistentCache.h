@@ -36,6 +36,8 @@ FOUNDATION_EXPORT const unsigned char SPTDataLoaderVersionString[];
 #import <SPTPersistentCache/SPTPersistentCacheRecord.h>
 #import <SPTPersistentCache/SPTPersistentCacheResponse.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * The SPTPersistentCacheLoadingError enum defines constants that identify NSError's in SPTPersistentCacheErrorDomain.
  */
@@ -83,7 +85,7 @@ FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
 /**
  * Type of callback that is used to give caller a chance to choose which key to open if any.
  */
-typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
+typedef NSString * _Nonnull(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
 
 /**
  * @brief SPTPersistentCache
@@ -104,7 +106,7 @@ typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
  * Designated initialiser.
  * @param options The options to use for the cache parameters.
  */
-- (instancetype)initWithOptions:(SPTPersistentCacheOptions *)options;
+- (instancetype)initWithOptions:(SPTPersistentCacheOptions *)options NS_DESIGNATED_INITIALIZER;
 
 /**
  * @discussion Load data from cache for specified key. 
@@ -235,3 +237,5 @@ typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
 - (NSUInteger)lockedItemsSizeInBytes;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -68,7 +68,7 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 
 - (instancetype)init
 {
-    return [self initWithOptions:nil];
+    return [self initWithOptions:[SPTPersistentCacheOptions new]];
 }
 
 - (instancetype)initWithOptions:(SPTPersistentCacheOptions *)options
