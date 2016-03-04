@@ -20,6 +20,8 @@
  */
 #import <Foundation/Foundation.h>
 
+#include <sys/stat.h>
+
 /**
  * An Obj-C wrapper for POSIX functions mainly made for mocking functions during unit tests.
  */

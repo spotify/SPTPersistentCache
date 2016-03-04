@@ -20,8 +20,6 @@
  */
 #import "SPTPersistentCachePosixWrapper.h"
 
-#include <sys/stat.h>
-
 @implementation SPTPersistentCachePosixWrapper
 
 - (int)close:(int)descriptor
