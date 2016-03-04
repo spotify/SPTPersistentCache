@@ -45,20 +45,13 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
 
 - (instancetype)init
 {
-    return [self initWithCachePath:nil
-                        identifier:nil
-                             debug:nil];
-}
-
-- (instancetype)initWithCachePath:(NSString *)cachePath
-                       identifier:(NSString *)cacheIdentifier
-                            debug:(SPTPersistentCacheDebugCallback)debugCallback
-{
-    return [self initWithCachePath:cachePath
-                        identifier:cacheIdentifier
+    return [self initWithCachePath:[NSTemporaryDirectory() stringByAppendingPathComponent:@"/com.spotify.temppersistent.image.cache"]
+                        identifier:@"persistent.cache"
          defaultExpirationInterval:SPTPersistentCacheDefaultExpirationTimeSec
           garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
-                             debug:nil];
+                             debug:^(NSString *debugString) {
+                                 NSLog(@"%@", debugString);
+                             }];
 }
 
 - (instancetype)initWithCachePath:(NSString *)cachePath

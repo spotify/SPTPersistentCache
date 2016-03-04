@@ -1122,12 +1122,12 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
     }
 
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:self.cachePath
-                                                                                           identifier:nil
-                                                                            defaultExpirationInterval:SPTPersistentCacheDefaultExpirationTimeSec
-                                                                             garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
-                                                                                                debug:^(NSString *str) {
-                                                                                                    NSLog(@"%@", str);
-                                                                                                }];
+                                                                                   identifier:@"test"
+                                                                    defaultExpirationInterval:SPTPersistentCacheDefaultExpirationTimeSec
+                                                                     garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
+                                                                                        debug:^(NSString *str) {
+                                                                                            NSLog(@"%@", str);
+                                                                                        }];
     options.sizeConstraintBytes = expectedSize;
 
     cache = [[SPTPersistentCache alloc] initWithOptions:options];
@@ -1217,9 +1217,11 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 - (void)testInitNilWhenCannotCreateCacheDirectory
 {
-    SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
-                                                                                   identifier:nil
-                                                                                        debug:nil];
+    SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:[NSTemporaryDirectory() stringByAppendingPathComponent:@"/com.spotify.temppersistent.image.cache"]
+                                                                                   identifier:@"test"
+                                                                    defaultExpirationInterval:0
+                                                                     garbageCollectorInterval:0
+                                                                                        debug:^(NSString *debug){}];
 
     Method originalMethod = class_getClassMethod(NSFileManager.class, @selector(defaultManager));
     IMP originalMethodImplementation = method_getImplementation(originalMethod);
@@ -1288,12 +1290,6 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         called = YES;
     } onQueue:dispatch_get_main_queue()];
     XCTAssertTrue(called);
-}
-
-- (void)testNoDataStoredWhenDataIsNil
-{
-    BOOL result = [self.cache storeData:nil forKey:nil locked:NO withCallback:nil onQueue:nil];
-    XCTAssertFalse(result);
 }
 
 - (void)testTouchDataWithExpiredHeader
@@ -1366,7 +1362,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 - (void)testUnlockDataWithNoKeys
 {
-    BOOL result = [self.cache unlockDataForKeys:nil callback:nil onQueue:nil];
+    BOOL result = [self.cache unlockDataForKeys:@[] callback:nil onQueue:nil];
     XCTAssertFalse(result);
 }
 
@@ -1404,7 +1400,7 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 - (void)testLockDataWithNoKeys
 {
-    BOOL result = [self.cache lockDataForKeys:nil callback:nil onQueue:nil];
+    BOOL result = [self.cache lockDataForKeys:@[] callback:nil onQueue:nil];
     XCTAssertFalse(result);
 }
 
@@ -1592,7 +1588,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         called = YES;
     };
     self.cache.workQueue = dispatch_get_main_queue();
-    [self.cache storeData:[@"TEST" dataUsingEncoding:NSUTF8StringEncoding]
+    NSData *data = [@"TEST" dataUsingEncoding:NSUTF8StringEncoding];
+    [self.cache storeData:data
                    forKey:@"TEST"
                    locked:YES
              withCallback:nil
@@ -1608,7 +1605,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 - (void)testStatFailure
 {
     self.cache.workQueue = dispatch_get_main_queue();
-    [self.cache storeData:[@"TEST" dataUsingEncoding:NSUTF8StringEncoding]
+    NSData *data = [@"TEST" dataUsingEncoding:NSUTF8StringEncoding];
+    [self.cache storeData:data
                    forKey:@"TEST"
                    locked:YES
              withCallback:nil
@@ -1782,7 +1780,7 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
                                                  expirationTime:(NSTimeInterval)expirationTimeSec
 {
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:self.cachePath
-                                                                                           identifier:nil
+                                                                                           identifier:@"Test"
                                                                             defaultExpirationInterval:(NSUInteger)expirationTimeSec
                                                                              garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
                                                                                                 debug:^(NSString *str) {

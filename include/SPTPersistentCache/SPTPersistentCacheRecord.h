@@ -20,6 +20,8 @@
  */
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * @brief SPTPersistentCacheRecord
  * @discussion Class defines one record in cache that is returned in response.
@@ -47,3 +49,5 @@
 @property (nonatomic, strong, readonly) NSData *data;
 
 @end
+
+NS_ASSUME_NONNULL_END

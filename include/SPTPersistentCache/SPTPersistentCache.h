@@ -36,6 +36,8 @@ FOUNDATION_EXPORT const unsigned char SPTDataLoaderVersionString[];
 #import <SPTPersistentCache/SPTPersistentCacheRecord.h>
 #import <SPTPersistentCache/SPTPersistentCacheResponse.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * The SPTPersistentCacheLoadingError enum defines constants that identify NSError's in SPTPersistentCacheErrorDomain.
  */
@@ -83,7 +85,7 @@ FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
 /**
  * Type of callback that is used to give caller a chance to choose which key to open if any.
  */
-typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
+typedef NSString * _Nonnull(^SPTPersistentCacheChooseKeyCallback)(NSArray<NSString *> *keys);
 
 /**
  * @brief SPTPersistentCache
@@ -104,7 +106,7 @@ typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
  * Designated initialiser.
  * @param options The options to use for the cache parameters.
  */
-- (instancetype)initWithOptions:(SPTPersistentCacheOptions *)options;
+- (instancetype)initWithOptions:(SPTPersistentCacheOptions *)options NS_DESIGNATED_INITIALIZER;
 
 /**
  * @discussion Load data from cache for specified key. 
@@ -115,8 +117,8 @@ typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
  * @param queue Queue on which to run the callback. Mustn't be nil.
  */
 - (BOOL)loadDataForKey:(NSString *)key
-          withCallback:(SPTPersistentCacheResponseCallback)callback
-               onQueue:(dispatch_queue_t)queue;
+          withCallback:(SPTPersistentCacheResponseCallback _Nullable)callback
+               onQueue:(dispatch_queue_t _Nullable)queue;
 /**
  * @discussion Load data for key which has specified prefix. chooseKeyCallback is called with array of matching keys.
  *             Req.#1.1a. To load the data user needs to pick one key and return it.
@@ -129,9 +131,9 @@ typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
  * @param queue Queue on which to run the callback. Mustn't be nil.
  */
 - (BOOL)loadDataForKeysWithPrefix:(NSString *)prefix
-                chooseKeyCallback:(SPTPersistentCacheChooseKeyCallback)chooseKeyCallback
-                     withCallback:(SPTPersistentCacheResponseCallback)callback
-                          onQueue:(dispatch_queue_t)queue;
+                chooseKeyCallback:(SPTPersistentCacheChooseKeyCallback _Nullable)chooseKeyCallback
+                     withCallback:(SPTPersistentCacheResponseCallback _Nullable)callback
+                          onQueue:(dispatch_queue_t _Nullable)queue;
 /**
  * @discussion Req.#1.0. If data already exist for that key it will be overwritten otherwise created.
  * Its access time will be updated. RefCount depends on locked parameter.
@@ -145,8 +147,8 @@ typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
 - (BOOL)storeData:(NSData *)data
            forKey:(NSString *)key
            locked:(BOOL)locked
-     withCallback:(SPTPersistentCacheResponseCallback)callback
-          onQueue:(dispatch_queue_t)queue;
+     withCallback:(SPTPersistentCacheResponseCallback _Nullable)callback
+          onQueue:(dispatch_queue_t _Nullable)queue;
 /**
  * @discussion Req.#1.0. If data already exist for that key it will be overwritten otherwise created.
  * Its access time will be apdated. Its TTL will be updated if applicable.
@@ -163,8 +165,8 @@ typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
            forKey:(NSString *)key
               ttl:(NSUInteger)ttl
            locked:(BOOL)locked
-     withCallback:(SPTPersistentCacheResponseCallback)callback
-          onQueue:(dispatch_queue_t)queue;
+     withCallback:(SPTPersistentCacheResponseCallback _Nullable)callback
+          onQueue:(dispatch_queue_t _Nullable)queue;
 /**
  * @discussion Update last access time in header of the record. Only applies for default expiration policy (ttl == 0).
  *             Locked files could be touched even if they are expired.
@@ -176,13 +178,13 @@ typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
 - (void)touchDataForKey:(NSString *)key
-               callback:(SPTPersistentCacheResponseCallback)callback
-                onQueue:(dispatch_queue_t)queue;
+               callback:(SPTPersistentCacheResponseCallback _Nullable)callback
+                onQueue:(dispatch_queue_t _Nullable)queue;
 /**
  * @brief Removes data for keys unconditionally even if expired.
  * @param keys The keys corresponding to the data to remove.
  */
-- (void)removeDataForKeys:(NSArray *)keys;
+- (void)removeDataForKeys:(NSArray<NSString *> *)keys;
 /**
  * @discussion Increment ref count for given keys. Give callback with result for each key in input array.
  *             Req.#1.2. Expired records treated as not found on lock.
@@ -190,9 +192,9 @@ typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
  * @param callback May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
-- (BOOL)lockDataForKeys:(NSArray *)keys
-               callback:(SPTPersistentCacheResponseCallback)callback
-                onQueue:(dispatch_queue_t)queue;
+- (BOOL)lockDataForKeys:(NSArray<NSString *> *)keys
+               callback:(SPTPersistentCacheResponseCallback _Nullable)callback
+                onQueue:(dispatch_queue_t _Nullable)queue;
 /**
  * @discussion Decrement ref count for given keys. Give callback with result for each key in input array.
  *             If decrements exceeds increments assertion is given.
@@ -200,9 +202,9 @@ typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
  * @param callback May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
-- (BOOL)unlockDataForKeys:(NSArray *)keys
-                 callback:(SPTPersistentCacheResponseCallback)callback
-                  onQueue:(dispatch_queue_t)queue;
+- (BOOL)unlockDataForKeys:(NSArray<NSString *> *)keys
+                 callback:(SPTPersistentCacheResponseCallback _Nullable)callback
+                  onQueue:(dispatch_queue_t _Nullable)queue;
 /**
  * Schedule garbage collection. If already scheduled then this method does nothing.
  */
@@ -235,3 +237,5 @@ typedef NSString *(^SPTPersistentCacheChooseKeyCallback)(NSArray *keys);
 - (NSUInteger)lockedItemsSizeInBytes;
 
 @end
+
+NS_ASSUME_NONNULL_END
