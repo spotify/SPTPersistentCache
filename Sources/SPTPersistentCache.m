@@ -95,8 +95,8 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 }
 
 - (BOOL)loadDataForKey:(NSString *)key
-          withCallback:(SPTPersistentCacheResponseCallback)callback
-               onQueue:(dispatch_queue_t)queue
+          withCallback:(SPTPersistentCacheResponseCallback _Nullable)callback
+               onQueue:(dispatch_queue_t _Nullable)queue
 {
     if (callback == nil || queue == nil) {
         return NO;
@@ -110,9 +110,9 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 }
 
 - (BOOL)loadDataForKeysWithPrefix:(NSString *)prefix
-                chooseKeyCallback:(SPTPersistentCacheChooseKeyCallback)chooseKeyCallback
-                     withCallback:(SPTPersistentCacheResponseCallback)callback
-                          onQueue:(dispatch_queue_t)queue
+                chooseKeyCallback:(SPTPersistentCacheChooseKeyCallback _Nullable)chooseKeyCallback
+                     withCallback:(SPTPersistentCacheResponseCallback _Nullable)callback
+                          onQueue:(dispatch_queue_t _Nullable)queue
 {
     if (callback == nil || queue == nil || chooseKeyCallback == nil) {
         return NO;
@@ -192,8 +192,8 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 - (BOOL)storeData:(NSData *)data
            forKey:(NSString *)key
            locked:(BOOL)locked
-     withCallback:(SPTPersistentCacheResponseCallback)callback
-          onQueue:(dispatch_queue_t)queue
+     withCallback:(SPTPersistentCacheResponseCallback _Nullable)callback
+          onQueue:(dispatch_queue_t _Nullable)queue
 
 {
     return [self storeData:data forKey:key ttl:0 locked:locked withCallback:callback onQueue:queue];
@@ -203,8 +203,8 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
            forKey:(NSString *)key
               ttl:(NSUInteger)ttl
            locked:(BOOL)locked
-     withCallback:(SPTPersistentCacheResponseCallback)callback
-          onQueue:(dispatch_queue_t)queue
+     withCallback:(SPTPersistentCacheResponseCallback _Nullable)callback
+          onQueue:(dispatch_queue_t _Nullable)queue
 
 {
     if (data == nil || key == nil || (callback != nil && queue == nil)) {
@@ -221,8 +221,8 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 
 // TODO: return NOT_PERMITTED on try to touch TLL>0
 - (void)touchDataForKey:(NSString *)key
-               callback:(SPTPersistentCacheResponseCallback)callback
-                onQueue:(dispatch_queue_t)queue
+               callback:(SPTPersistentCacheResponseCallback _Nullable)callback
+                onQueue:(dispatch_queue_t _Nullable)queue
 {
     if (callback != nil) {
         NSAssert(queue, @"You must specify the queue");
@@ -279,8 +279,8 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 }
 
 - (BOOL)lockDataForKeys:(NSArray<NSString *> *)keys
-               callback:(SPTPersistentCacheResponseCallback)callback
-                onQueue:(dispatch_queue_t)queue
+               callback:(SPTPersistentCacheResponseCallback _Nullable)callback
+                onQueue:(dispatch_queue_t _Nullable)queue
 {
     if ((callback != nil && queue == nil) || keys.count == 0) {
         return NO;
@@ -320,8 +320,8 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 }
 
 - (BOOL)unlockDataForKeys:(NSArray<NSString *> *)keys
-                 callback:(SPTPersistentCacheResponseCallback)callback
-                  onQueue:(dispatch_queue_t)queue
+                 callback:(SPTPersistentCacheResponseCallback _Nullable)callback
+                  onQueue:(dispatch_queue_t _Nullable)queue
 {
     if ((callback != nil && queue == nil) || keys.count == 0) {
         return NO;

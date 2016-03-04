@@ -23,6 +23,8 @@
 #import <SPTPersistentCache/SPTPersistentCacheOptions.h>
 #import "SPTPersistentCacheObjectDescriptionStyleValidator.h"
 
+static NSString * const SPTPersistentCacheOptionsPathComponent = @"com.spotify.tmp.cache";
+
 @interface SPTPersistentCacheOptionsTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentCacheOptions *dataCacheOptions;
 @end
@@ -49,22 +51,24 @@
 
 - (void)testMinimumGarbageColectorInterval
 {
-    SPTPersistentCacheOptions *dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
+    SPTPersistentCacheOptions *dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:[NSTemporaryDirectory() stringByAppendingPathComponent:SPTPersistentCacheOptionsPathComponent]
                                                                                             identifier:@"test"
                                                                              defaultExpirationInterval:1
                                                                               garbageCollectorInterval:1
-                                                                                                 debug:nil];
+                                                                                                 debug:^(NSString *debug){
+                                                                                                 }];
     XCTAssertEqual(dataCacheOptions.gcIntervalSec,
                    SPTPersistentCacheMinimumGCIntervalLimit);
 }
 
 - (void)testMinimumDefaultExpirationInterval
 {
-    SPTPersistentCacheOptions *dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:nil
-                                                                                            identifier:nil
+    SPTPersistentCacheOptions *dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:[NSTemporaryDirectory() stringByAppendingPathComponent:SPTPersistentCacheOptionsPathComponent]
+                                                                                            identifier:@"test"
                                                                              defaultExpirationInterval:1
                                                                               garbageCollectorInterval:1
-                                                                                                 debug:nil];
+                                                                                                 debug:^(NSString *debug){
+                                                                                                 }];
     XCTAssertEqual(dataCacheOptions.defaultExpirationPeriodSec,
                    SPTPersistentCacheMinimumExpirationLimit);
 }

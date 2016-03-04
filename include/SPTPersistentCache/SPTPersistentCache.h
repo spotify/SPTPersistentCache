@@ -117,8 +117,8 @@ typedef NSString * _Nonnull(^SPTPersistentCacheChooseKeyCallback)(NSArray<NSStri
  * @param queue Queue on which to run the callback. Mustn't be nil.
  */
 - (BOOL)loadDataForKey:(NSString *)key
-          withCallback:(SPTPersistentCacheResponseCallback)callback
-               onQueue:(dispatch_queue_t)queue;
+          withCallback:(SPTPersistentCacheResponseCallback _Nullable)callback
+               onQueue:(dispatch_queue_t _Nullable)queue;
 /**
  * @discussion Load data for key which has specified prefix. chooseKeyCallback is called with array of matching keys.
  *             Req.#1.1a. To load the data user needs to pick one key and return it.
@@ -131,9 +131,9 @@ typedef NSString * _Nonnull(^SPTPersistentCacheChooseKeyCallback)(NSArray<NSStri
  * @param queue Queue on which to run the callback. Mustn't be nil.
  */
 - (BOOL)loadDataForKeysWithPrefix:(NSString *)prefix
-                chooseKeyCallback:(SPTPersistentCacheChooseKeyCallback)chooseKeyCallback
-                     withCallback:(SPTPersistentCacheResponseCallback)callback
-                          onQueue:(dispatch_queue_t)queue;
+                chooseKeyCallback:(SPTPersistentCacheChooseKeyCallback _Nullable)chooseKeyCallback
+                     withCallback:(SPTPersistentCacheResponseCallback _Nullable)callback
+                          onQueue:(dispatch_queue_t _Nullable)queue;
 /**
  * @discussion Req.#1.0. If data already exist for that key it will be overwritten otherwise created.
  * Its access time will be updated. RefCount depends on locked parameter.
@@ -147,8 +147,8 @@ typedef NSString * _Nonnull(^SPTPersistentCacheChooseKeyCallback)(NSArray<NSStri
 - (BOOL)storeData:(NSData *)data
            forKey:(NSString *)key
            locked:(BOOL)locked
-     withCallback:(SPTPersistentCacheResponseCallback)callback
-          onQueue:(dispatch_queue_t)queue;
+     withCallback:(SPTPersistentCacheResponseCallback _Nullable)callback
+          onQueue:(dispatch_queue_t _Nullable)queue;
 /**
  * @discussion Req.#1.0. If data already exist for that key it will be overwritten otherwise created.
  * Its access time will be apdated. Its TTL will be updated if applicable.
@@ -165,8 +165,8 @@ typedef NSString * _Nonnull(^SPTPersistentCacheChooseKeyCallback)(NSArray<NSStri
            forKey:(NSString *)key
               ttl:(NSUInteger)ttl
            locked:(BOOL)locked
-     withCallback:(SPTPersistentCacheResponseCallback)callback
-          onQueue:(dispatch_queue_t)queue;
+     withCallback:(SPTPersistentCacheResponseCallback _Nullable)callback
+          onQueue:(dispatch_queue_t _Nullable)queue;
 /**
  * @discussion Update last access time in header of the record. Only applies for default expiration policy (ttl == 0).
  *             Locked files could be touched even if they are expired.
@@ -178,8 +178,8 @@ typedef NSString * _Nonnull(^SPTPersistentCacheChooseKeyCallback)(NSArray<NSStri
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
 - (void)touchDataForKey:(NSString *)key
-               callback:(SPTPersistentCacheResponseCallback)callback
-                onQueue:(dispatch_queue_t)queue;
+               callback:(SPTPersistentCacheResponseCallback _Nullable)callback
+                onQueue:(dispatch_queue_t _Nullable)queue;
 /**
  * @brief Removes data for keys unconditionally even if expired.
  * @param keys The keys corresponding to the data to remove.
@@ -193,8 +193,8 @@ typedef NSString * _Nonnull(^SPTPersistentCacheChooseKeyCallback)(NSArray<NSStri
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
 - (BOOL)lockDataForKeys:(NSArray<NSString *> *)keys
-               callback:(SPTPersistentCacheResponseCallback)callback
-                onQueue:(dispatch_queue_t)queue;
+               callback:(SPTPersistentCacheResponseCallback _Nullable)callback
+                onQueue:(dispatch_queue_t _Nullable)queue;
 /**
  * @discussion Decrement ref count for given keys. Give callback with result for each key in input array.
  *             If decrements exceeds increments assertion is given.
@@ -203,8 +203,8 @@ typedef NSString * _Nonnull(^SPTPersistentCacheChooseKeyCallback)(NSArray<NSStri
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
  */
 - (BOOL)unlockDataForKeys:(NSArray<NSString *> *)keys
-                 callback:(SPTPersistentCacheResponseCallback)callback
-                  onQueue:(dispatch_queue_t)queue;
+                 callback:(SPTPersistentCacheResponseCallback _Nullable)callback
+                  onQueue:(dispatch_queue_t _Nullable)queue;
 /**
  * Schedule garbage collection. If already scheduled then this method does nothing.
  */
