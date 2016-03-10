@@ -2,7 +2,7 @@ Pod::Spec.new do |s|
 
     s.name         = "SPTPersistentCache"
     s.version      = "1.0.0"
-    s.summary      = "SPTPersistentCache is a fast, binary, LRU cache used by the Spotify app"
+    s.summary      = "SPTPersistentCache is a fast, binary, LRU cache used in the Spotify iOS app"
 
     s.description  = <<-DESC
                         Everyone tries to implement a cache at some point in their apps lifecycle,
