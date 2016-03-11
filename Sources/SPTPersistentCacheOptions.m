@@ -63,15 +63,8 @@ const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
     self = [super init];
     if (self) {
         _sizeConstraintBytes = SPTPersistentCacheDefaultCacheSizeInBytes;
-
-        _cachePath = (cachePath ?
-                      [cachePath copy] :
-                      [NSTemporaryDirectory() stringByAppendingPathComponent:@"/com.spotify.temppersistent.image.cache"]);
-
-        _cacheIdentifier = (cacheIdentifier ?
-                            [cacheIdentifier copy] :
-                            @"persistent.cache");
-
+        _cachePath = cachePath.copy;
+        _cacheIdentifier = cacheIdentifier.copy;
         _defaultExpirationPeriodSec = defaultExpirationInterval;
         _gcIntervalSec = garbageCollectorInterval;
         _folderSeparationEnabled = YES;

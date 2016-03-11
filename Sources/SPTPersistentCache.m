@@ -75,7 +75,7 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 {
     self = [super init];
     if (self) {
-        _options = options ?: [SPTPersistentCacheOptions new];
+        _options = options;
         _workQueue = dispatch_queue_create([options.identifierForQueue UTF8String], DISPATCH_QUEUE_CONCURRENT);
         _fileManager = [NSFileManager defaultManager];
         _debugOutput = [self.options.debugOutput copy];
