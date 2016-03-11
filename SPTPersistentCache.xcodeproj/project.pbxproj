@@ -13,6 +13,7 @@
 		0510FF1F1BA2FF7A00ED0766 /* libSPTPersistentCache.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0510FF131BA2FF7A00ED0766 /* libSPTPersistentCache.a */; };
 		0510FF6B1BA3073D00ED0766 /* SPTPersistentCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0510FF6A1BA3073D00ED0766 /* SPTPersistentCacheTests.m */; };
 		057AFD5B1C70F99A00350C9F /* SPTPersistentCacheHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 057AFD5A1C70F99A00350C9F /* SPTPersistentCacheHeader.m */; };
+		057F47B81C931A090099A65F /* CHANGELOG.md in Sources */ = {isa = PBXBuildFile; fileRef = 057F47B71C931A090099A65F /* CHANGELOG.md */; };
 		0595F0A91C5008060052328B /* SPTPersistentCacheRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 0595F0A81C5008060052328B /* SPTPersistentCacheRecord.m */; };
 		0595F0B01C5009800052328B /* SPTPersistentCacheResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 0595F0AF1C5009800052328B /* SPTPersistentCacheResponse.m */; };
 		0595F33A1C50117B0052328B /* SPTPersistentCacheGarbageCollector.m in Sources */ = {isa = PBXBuildFile; fileRef = 0595F3391C50117B0052328B /* SPTPersistentCacheGarbageCollector.m */; };
@@ -91,6 +92,7 @@
 		055725EE1C651EF200EF6787 /* CONTRIBUTING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CONTRIBUTING.md; sourceTree = "<group>"; };
 		057AF8531C6E18AC00350C9F /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		057AFD5A1C70F99A00350C9F /* SPTPersistentCacheHeader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheHeader.m; sourceTree = "<group>"; };
+		057F47B71C931A090099A65F /* CHANGELOG.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		0595F0A81C5008060052328B /* SPTPersistentCacheRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheRecord.m; sourceTree = "<group>"; };
 		0595F0AA1C50081C0052328B /* SPTPersistentCacheRecord.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheRecord.h; sourceTree = "<group>"; };
 		0595F0AB1C5008AB0052328B /* SPTPersistentCacheRecord+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SPTPersistentCacheRecord+Private.h"; sourceTree = "<group>"; };
@@ -246,6 +248,7 @@
 				055725EE1C651EF200EF6787 /* CONTRIBUTING.md */,
 				055725ED1C651ED600EF6787 /* LICENSE */,
 				055725EB1C6519B700EF6787 /* README.md */,
+				057F47B71C931A090099A65F /* CHANGELOG.md */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -436,6 +439,7 @@
 				C4EA65031C7A478100A6091A /* SPTPersistentCacheDebugUtilities.m in Sources */,
 				C413BA051C71E1A0002D41FB /* NSError+SPTPersistentCacheDomainErrors.m in Sources */,
 				C48AE4641C74A7F800814D7D /* SPTPersistentCacheFileManager.m in Sources */,
+				057F47B81C931A090099A65F /* CHANGELOG.md in Sources */,
 				0595F33A1C50117B0052328B /* SPTPersistentCacheGarbageCollector.m in Sources */,
 				9C9E70711C78D39900E1CBE6 /* SPTPersistentCacheObjectDescription.m in Sources */,
 				0595F0A91C5008060052328B /* SPTPersistentCacheRecord.m in Sources */,
