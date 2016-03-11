@@ -15,7 +15,11 @@ Everyone tries to implement a cache at some point in their app’s lifecycle, an
 - [x] 💻 OS X 10.9+
 
 ## Architecture :triangular_ruler:
-`SPTPersistentCache` is designed as an LRU cache which stores all the data in a single binary file, with entries containing the length, last accessed time and a CRC check designed to prevent corruption. It can be used to automatically schedule garbage collection and invoke pruning.
+`SPTPersistentCache` is designed as an LRU cache which makes use of the file system to store files as well as inserting a cache header into each file. This cache header allows us to track the TTL, last updated time, the redundancy check and more. This allows the cache to know how often a file is accessed, when it was made, whether it has become corrupt and allows decisions to be made on whether the cache is stale.
+
+The use of different files rather than a single binary file allows multiple reads/writes on different files within the cache without complicated blocking logic. The cache header in each file can be removed quite easily, this can be seen in the `SPTPersistentCacheViewer` tool that is made to run on OS X.
+
+Included here is also the ability to schedule garbage collection over the cache, which allows the user to ensure they are never using too much space for commonly cache data (such as images).
 
 ## Installation :inbox_tray:
 `SPTPersistentCache` can be installed in a variety of ways including traditional static libraries and dynamic frameworks.
