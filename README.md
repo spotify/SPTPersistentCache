@@ -38,7 +38,7 @@ pod 'SPTPersistentCache', '~> 1.0'
 ```
 Lastly let CocoaPods do it's thing by running:
 ```shell
-$ cocoapods update
+$ pod install
 ```
 
 ### Carthage
