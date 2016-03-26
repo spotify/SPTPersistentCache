@@ -28,7 +28,7 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
 
 @interface SPTPersistentCacheGarbageCollector ()
 @property (nonatomic, strong) NSTimer *timer;
-@property (nonatomic, strong) SPTPersistentCacheOptions *options;
+@property (nonatomic, copy) SPTPersistentCacheOptions *options;
 @end
 
 
@@ -42,7 +42,7 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
 {
     self = [super init];
     if (self) {
-        _options = options;
+        _options = [options copy];
         _cache = cache;
         _queue = queue;
     }
@@ -95,7 +95,7 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
         return;
     }
 
-    self.timer = [NSTimer timerWithTimeInterval:self.options.gcIntervalSec
+    self.timer = [NSTimer timerWithTimeInterval:self.options.garbageCollectionInterval
                                          target:self
                                        selector:@selector(enqueueGarbageCollection:)
                                        userInfo:nil

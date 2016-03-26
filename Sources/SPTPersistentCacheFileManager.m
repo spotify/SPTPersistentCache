@@ -81,8 +81,7 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
     // make folder tree: xx/  zx/  xy/  yz/ etc.
     NSString *subDir = self.options.cachePath;
     
-    if (self.options.folderSeparationEnabled &&
-        [key length] >= SPTPersistentCacheFileManagerSubDirNameLength) {
+    if (self.options.useDirectorySeparation && key.length >= SPTPersistentCacheFileManagerSubDirNameLength) {
         NSString *subDirectoryName = [key substringToIndex:SPTPersistentCacheFileManagerSubDirNameLength];
         subDir = [self.options.cachePath stringByAppendingPathComponent:subDirectoryName];
     }

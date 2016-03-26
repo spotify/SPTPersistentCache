@@ -38,6 +38,8 @@ FOUNDATION_EXPORT const unsigned char SPTDataLoaderVersionString[];
 
 NS_ASSUME_NONNULL_BEGIN
 
+#pragma mark - Persistent Cache Errors
+
 /**
  * The SPTPersistentCacheLoadingError enum defines constants that identify NSError's in SPTPersistentCacheErrorDomain.
  */
@@ -82,10 +84,20 @@ typedef NS_ENUM(NSInteger, SPTPersistentCacheLoadingError) {
  */
 FOUNDATION_EXPORT NSString *const SPTPersistentCacheErrorDomain;
 
+
+#pragma mark - Callback Types
+
 /**
- * Type of callback that is used to give caller a chance to choose which key to open if any.
+ *  Type off callback for load/store calls
+ */
+typedef void (^SPTPersistentCacheResponseCallback)(SPTPersistentCacheResponse *response);
+/**
+ *  Type of callback that is used to give caller a chance to choose which key to open if any.
  */
 typedef NSString * _Nonnull(^SPTPersistentCacheChooseKeyCallback)(NSArray<NSString *> *keys);
+
+
+#pragma mark - SPTPersistentCache Interface
 
 /**
  * @brief SPTPersistentCache
