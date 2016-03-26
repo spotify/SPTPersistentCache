@@ -19,6 +19,6 @@ Pod::Spec.new do |s|
     s.source       = { :git => "https://github.com/spotify/SPTPersistentCache.git", :tag => s.version }
     s.source_files = "include/SPTPersistentCache/*.h", "Sources/**/*.{h,m,c}"
     s.public_header_files = "include/SPTPersistentCache/*.h"
-    s.xcconfig = { 'OTHER_LDFLAGS' => '-lObjC' }
+    s.xcconfig = { "OTHER_LDFLAGS" => "-lObjC" }
 
 end
