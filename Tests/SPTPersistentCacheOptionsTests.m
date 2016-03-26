@@ -174,11 +174,8 @@ static NSString * const SPTPersistentCacheOptionsPathComponent = @"com.spotify.t
     _Pragma("clang diagnostic ignored \"-Wdeprecated\"");
 
     SPTPersistentCacheOptions * const options = [SPTPersistentCacheOptions new];
+    options.garbageCollectionInterval = SPTPersistentCacheDefaultGCIntervalSec + 37;
 
-    XCTAssertEqual(options.gcIntervalSec, options.garbageCollectionInterval);
-
-    options.gcIntervalSec = SPTPersistentCacheDefaultGCIntervalSec + 37;
-    XCTAssertEqual(options.garbageCollectionInterval, SPTPersistentCacheDefaultGCIntervalSec + 37, @"Setting the compatibility property should update the real property");
     XCTAssertEqual(options.gcIntervalSec, options.garbageCollectionInterval);
 
     _Pragma("clang diagnostic pop");
@@ -190,11 +187,8 @@ static NSString * const SPTPersistentCacheOptionsPathComponent = @"com.spotify.t
     _Pragma("clang diagnostic ignored \"-Wdeprecated\"");
 
     SPTPersistentCacheOptions * const options = [SPTPersistentCacheOptions new];
+    options.defaultExpirationPeriod = SPTPersistentCacheDefaultExpirationTimeSec + 37;
 
-    XCTAssertEqual(options.defaultExpirationPeriodSec, options.defaultExpirationPeriod);
-
-    options.defaultExpirationPeriodSec = SPTPersistentCacheDefaultExpirationTimeSec + 37;
-    XCTAssertEqual(options.defaultExpirationPeriod, SPTPersistentCacheDefaultExpirationTimeSec + 37, @"Setting the compatibility property should update the real property");
     XCTAssertEqual(options.defaultExpirationPeriodSec, options.defaultExpirationPeriod);
 
     _Pragma("clang diagnostic pop");

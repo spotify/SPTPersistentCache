@@ -160,14 +160,16 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
 @property (nonatomic, assign) BOOL folderSeparationEnabled DEPRECATED_MSG_ATTRIBUTE("Use the useDirectorySeparation property instead");
 /**
  *  Compatibility alias for `garbageCollectionInterval`.
+ *  @deprecated
  *  @see garbageCollectionInterval
  */
-@property (nonatomic, assign) NSUInteger gcIntervalSec DEPRECATED_MSG_ATTRIBUTE("Use the garbageCollectionInterval property instead");
+@property (nonatomic, assign, readonly) NSUInteger gcIntervalSec DEPRECATED_MSG_ATTRIBUTE("Use the garbageCollectionInterval property instead");
 /**
  *  Compatibility alias for `defaultExpirationPeriod`.
+ *  @deprecated
  *  @see defaultExpirationPeriod
  */
-@property (nonatomic, assign) NSUInteger defaultExpirationPeriodSec DEPRECATED_MSG_ATTRIBUTE("Use the defaultExpirationPeriod property instead");
+@property (nonatomic, assign, readonly) NSUInteger defaultExpirationPeriodSec DEPRECATED_MSG_ATTRIBUTE("Use the defaultExpirationPeriod property instead");
 
 @end
 

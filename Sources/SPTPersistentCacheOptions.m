@@ -174,19 +174,9 @@ static NSUInteger SPTGuardedPropertyValue(NSUInteger proposedValue, NSUInteger m
     return self.garbageCollectionInterval;
 }
 
-- (void)setGcIntervalSec:(NSUInteger)gcIntervalSec
-{
-    self.garbageCollectionInterval = gcIntervalSec;
-}
-
 - (NSUInteger)defaultExpirationPeriodSec
 {
     return self.defaultExpirationPeriod;
-}
-
-- (void)setDefaultExpirationPeriodSec:(NSUInteger)defaultExpirationPeriodSec
-{
-    self.defaultExpirationPeriod = defaultExpirationPeriodSec;
 }
 
 @end
