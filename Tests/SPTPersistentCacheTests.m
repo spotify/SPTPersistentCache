@@ -125,6 +125,8 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 @end
 
+typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
+
 @interface SPTPersistentCacheForUnitTests : SPTPersistentCache
 @property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback timeIntervalCallback;
 @end
@@ -1121,14 +1123,13 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
         [savedItems addObject:self.imageNames[i]];
     }
 
-    SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:self.cachePath
-                                                                                   identifier:@"test"
-                                                                    defaultExpirationInterval:SPTPersistentCacheDefaultExpirationTimeSec
-                                                                     garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
-                                                                                        debug:^(NSString *str) {
-                                                                                            NSLog(@"%@", str);
-                                                                                        }];
+    SPTPersistentCacheOptions *options = [SPTPersistentCacheOptions new];
+    options.cachePath = self.cachePath;
+    options.cacheIdentifier = @"test";
     options.sizeConstraintBytes = expectedSize;
+    options.debugOutput = ^(NSString *str) {
+        NSLog(@"%@", str);
+    };
 
     cache = [[SPTPersistentCache alloc] initWithOptions:options];
 
@@ -1217,11 +1218,9 @@ static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersi
 
 - (void)testInitNilWhenCannotCreateCacheDirectory
 {
-    SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:[NSTemporaryDirectory() stringByAppendingPathComponent:@"/com.spotify.temppersistent.image.cache"]
-                                                                                   identifier:@"test"
-                                                                    defaultExpirationInterval:0
-                                                                     garbageCollectorInterval:0
-                                                                                        debug:^(NSString *debug){}];
+    SPTPersistentCacheOptions *options = [SPTPersistentCacheOptions new];
+    options.cachePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"/com.spotify.temppersistent.image.cache"];
+    options.cacheIdentifier = @"test";
 
     Method originalMethod = class_getClassMethod(NSFileManager.class, @selector(defaultManager));
     IMP originalMethodImplementation = method_getImplementation(originalMethod);
@@ -1789,14 +1788,13 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
 - (SPTPersistentCacheForUnitTests *)createCacheWithTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTime
                                                  expirationTime:(NSTimeInterval)expirationTimeSec
 {
-    SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:self.cachePath
-                                                                                           identifier:@"Test"
-                                                                            defaultExpirationInterval:(NSUInteger)expirationTimeSec
-                                                                             garbageCollectorInterval:SPTPersistentCacheDefaultGCIntervalSec
-                                                                                                debug:^(NSString *str) {
-                                                                                      NSLog(@"%@", str);
-                                                                                  }];
-    
+    SPTPersistentCacheOptions *options = [SPTPersistentCacheOptions new];
+    options.cachePath = self.cachePath;
+    options.cacheIdentifier = @"Test";
+    options.defaultExpirationPeriod = (NSUInteger)expirationTimeSec;
+    options.debugOutput = ^(NSString *message) {
+        NSLog(@"%@", message);
+    };
 
     SPTPersistentCacheForUnitTests *cache = [[SPTPersistentCacheForUnitTests alloc] initWithOptions:options];
     cache.timeIntervalCallback = currentTime;

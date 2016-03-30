@@ -119,7 +119,7 @@
     [self.garbageCollector schedule];
     XCTAssertNotNil(self.garbageCollector.timer);
     XCTAssertTrue(self.garbageCollector.timer.isValid);
-    XCTAssertEqualWithAccuracy(self.garbageCollector.timer.timeInterval, self.options.gcIntervalSec, 0.0);
+    XCTAssertEqualWithAccuracy(self.garbageCollector.timer.timeInterval, self.options.garbageCollectionInterval, 0.0);
 }
 
 - (void)testRepeatedScheduleGarbageCollection

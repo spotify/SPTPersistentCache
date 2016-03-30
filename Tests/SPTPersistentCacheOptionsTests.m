@@ -40,40 +40,161 @@ static NSString * const SPTPersistentCacheOptionsPathComponent = @"com.spotify.t
 
 - (void)testDefaultInitializer
 {
-    XCTAssertEqual(self.dataCacheOptions.folderSeparationEnabled, YES);
-    XCTAssertEqual(self.dataCacheOptions.gcIntervalSec, SPTPersistentCacheDefaultGCIntervalSec);
-    XCTAssertEqual(self.dataCacheOptions.defaultExpirationPeriodSec,
-                   SPTPersistentCacheDefaultExpirationTimeSec);
+    XCTAssertTrue(self.dataCacheOptions.useDirectorySeparation, @"Directory separation should be enabled");
+    XCTAssertEqual(self.dataCacheOptions.garbageCollectionInterval, SPTPersistentCacheDefaultGCIntervalSec);
+    XCTAssertEqual(self.dataCacheOptions.defaultExpirationPeriod, SPTPersistentCacheDefaultExpirationTimeSec);
     XCTAssertNotNil(self.dataCacheOptions.cachePath, @"The cache path cannot be nil");
     XCTAssertNotNil(self.dataCacheOptions.cacheIdentifier, @"The cache identifier cannot be nil");
     XCTAssertNotNil(self.dataCacheOptions.identifierForQueue, @"The identifier for queue shouldn't be nil");
 }
 
-- (void)testMinimumGarbageColectorInterval
+- (void)testMinimumGarbageCollectorIntervalForDeprecatedInit
 {
+    _Pragma("clang diagnostic push");
+    _Pragma("clang diagnostic ignored \"-Wdeprecated\"");
     SPTPersistentCacheOptions *dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:[NSTemporaryDirectory() stringByAppendingPathComponent:SPTPersistentCacheOptionsPathComponent]
                                                                                             identifier:@"test"
                                                                              defaultExpirationInterval:1
                                                                               garbageCollectorInterval:1
-                                                                                                 debug:^(NSString *debug){
-                                                                                                 }];
-    XCTAssertEqual(dataCacheOptions.gcIntervalSec,
+                                                                                                 debug:nil];
+    _Pragma("clang diagnostic pop");
+
+    XCTAssertEqual(dataCacheOptions.garbageCollectionInterval,
                    SPTPersistentCacheMinimumGCIntervalLimit);
 }
 
-- (void)testMinimumDefaultExpirationInterval
+- (void)testMinimumGarbageCollectorInterval
 {
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"debugOuput is executed"];
+
+    SPTPersistentCacheOptions *options = [SPTPersistentCacheOptions new];
+    options.cachePath = [NSTemporaryDirectory() stringByAppendingPathComponent:SPTPersistentCacheOptionsPathComponent];
+    options.cacheIdentifier = @"test";
+    options.debugOutput = ^(NSString *message) {
+        XCTAssertNotEqual([message rangeOfString:@"garbageCollectionInterval"].location, NSNotFound, @"The \"garbageCollectionInterval\" property name should be in the message (\"%@\")", message);
+        [expectation fulfill];
+    };
+
+    options.garbageCollectionInterval = 1;
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+
+    XCTAssertEqual(options.garbageCollectionInterval,
+                   SPTPersistentCacheMinimumGCIntervalLimit);
+}
+
+- (void)testMinimumDefaultExpirationIntervalForDeprecatedInit
+{
+    _Pragma("clang diagnostic push");
+    _Pragma("clang diagnostic ignored \"-Wdeprecated\"");
     SPTPersistentCacheOptions *dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:[NSTemporaryDirectory() stringByAppendingPathComponent:SPTPersistentCacheOptionsPathComponent]
                                                                                             identifier:@"test"
                                                                              defaultExpirationInterval:1
                                                                               garbageCollectorInterval:1
-                                                                                                 debug:^(NSString *debug){
-                                                                                                 }];
-    XCTAssertEqual(dataCacheOptions.defaultExpirationPeriodSec,
+                                                                                                 debug:nil];
+    _Pragma("clang diagnostic pop");
+
+    XCTAssertEqual(dataCacheOptions.defaultExpirationPeriod,
                    SPTPersistentCacheMinimumExpirationLimit);
 }
 
-#pragma mark Test describing objects
+- (void)testMinimumDefaultExpiration
+{
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"debugOuput is executed"];
+
+    SPTPersistentCacheOptions *options = [SPTPersistentCacheOptions new];
+    options.cachePath = [NSTemporaryDirectory() stringByAppendingPathComponent:SPTPersistentCacheOptionsPathComponent];
+    options.cacheIdentifier = @"test";
+    options.debugOutput = ^(NSString *message) {
+        XCTAssertNotEqual([message rangeOfString:@"defaultExpirationPeriod"].location, NSNotFound, @"The \"defaultExpirationPeriod\" property name should be in the message (\"%@\")", message);
+        [expectation fulfill];
+    };
+
+    options.defaultExpirationPeriod = 1;
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+
+    XCTAssertEqual(options.defaultExpirationPeriod,
+                   SPTPersistentCacheMinimumExpirationLimit);
+}
+
+#pragma mark Copying
+
+- (void)testCopying
+{
+    SPTPersistentCacheOptions * const original = [SPTPersistentCacheOptions new];
+    original.cachePath = [NSTemporaryDirectory() stringByAppendingPathComponent:SPTPersistentCacheOptionsPathComponent];
+    original.cacheIdentifier = @"test";
+    original.useDirectorySeparation = NO;
+    original.garbageCollectionInterval = SPTPersistentCacheDefaultGCIntervalSec + 10;
+    original.defaultExpirationPeriod = SPTPersistentCacheDefaultExpirationTimeSec + 10;
+    original.sizeConstraintBytes = 1024 * 1024;
+    original.debugOutput = ^(NSString *message) {
+        NSLog(@"Foo: %@", message);
+    };
+
+    const NSRange lastDotRange = [original.identifierForQueue rangeOfString:@"." options:NSBackwardsSearch];
+    NSString * const queueIdentifierPrefix = [original.identifierForQueue substringToIndex:lastDotRange.location];
+
+    SPTPersistentCacheOptions * const copy = [original copy];
+
+    XCTAssertNotEqual(original, copy, @"The original and copy shouldn’t be the same object");
+
+    XCTAssertNotNil(copy.debugOutput, @"The debug output callback block should exist after copy");
+
+    XCTAssertTrue([copy.identifierForQueue hasPrefix:queueIdentifierPrefix] , @"The values of the property \"identifierForQueue\" should have the same prefix");
+    XCTAssertEqualObjects(original.cachePath, copy.cachePath, @"The values of the property \"cachePath\" should be equal");
+    XCTAssertEqualObjects(original.cacheIdentifier, copy.cacheIdentifier, @"The values of the property \"cacheIdentifier\" should be equal");
+
+    XCTAssertEqual(original.useDirectorySeparation, copy.useDirectorySeparation, @"The values of the property \"useDirectorySeparation\" should be equal");
+    XCTAssertEqual(original.garbageCollectionInterval, copy.garbageCollectionInterval, @"The values of the property \"garbageCollectionInterval\" should be equal");
+    XCTAssertEqual(original.defaultExpirationPeriod, copy.defaultExpirationPeriod, @"The values of the property \"defaultExpirationPeriod\" should be equal");
+    XCTAssertEqual(original.sizeConstraintBytes, copy.sizeConstraintBytes, @"The values of the property \"sizeConstraintBytes\" should be equal");
+}
+
+#pragma mark Compatibility Properties for Deprecated Properties
+
+- (void)testFolderSeparationEnabled
+{
+    _Pragma("clang diagnostic push");
+    _Pragma("clang diagnostic ignored \"-Wdeprecated\"");
+
+    SPTPersistentCacheOptions * const options = [SPTPersistentCacheOptions new];
+
+    XCTAssertEqual(options.folderSeparationEnabled, options.useDirectorySeparation);
+
+    options.folderSeparationEnabled = NO;
+    XCTAssertFalse(options.useDirectorySeparation, @"Setting the compatibility property should update the real property");
+    XCTAssertEqual(options.folderSeparationEnabled, options.useDirectorySeparation);
+
+    _Pragma("clang diagnostic pop");
+}
+
+- (void)testGcIntervalSec
+{
+    _Pragma("clang diagnostic push");
+    _Pragma("clang diagnostic ignored \"-Wdeprecated\"");
+
+    SPTPersistentCacheOptions * const options = [SPTPersistentCacheOptions new];
+    options.garbageCollectionInterval = SPTPersistentCacheDefaultGCIntervalSec + 37;
+
+    XCTAssertEqual(options.gcIntervalSec, options.garbageCollectionInterval);
+
+    _Pragma("clang diagnostic pop");
+}
+
+- (void)testDefaultExpirationPeriodSec
+{
+    _Pragma("clang diagnostic push");
+    _Pragma("clang diagnostic ignored \"-Wdeprecated\"");
+
+    SPTPersistentCacheOptions * const options = [SPTPersistentCacheOptions new];
+    options.defaultExpirationPeriod = SPTPersistentCacheDefaultExpirationTimeSec + 37;
+
+    XCTAssertEqual(options.defaultExpirationPeriodSec, options.defaultExpirationPeriod);
+
+    _Pragma("clang diagnostic pop");
+}
+
+#pragma mark Describing objects
 
 - (void)testDescriptionAdheresToStyle
 {

@@ -757,7 +757,7 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
     assert(header != nil);
     uint64_t ttl = header->ttl;
     uint64_t current = spt_uint64rint(self.currentDateTimeInterval);
-    int64_t threshold = (int64_t)((ttl > 0) ? ttl : self.options.defaultExpirationPeriodSec);
+    int64_t threshold = (int64_t)((ttl > 0) ? ttl : self.options.defaultExpirationPeriod);
 
     if (ttl > SPTPersistentCacheTTLUpperBoundInSec) {
         [self debugOutput:@"PersistentDataCache: WARNING: TTL seems too big: %llu > %llu sec", ttl, SPTPersistentCacheTTLUpperBoundInSec];

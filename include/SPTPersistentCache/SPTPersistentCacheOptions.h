@@ -24,97 +24,152 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/**
- * Type off callback for load/store calls
- */
-typedef void (^SPTPersistentCacheResponseCallback)(SPTPersistentCacheResponse *response);
-/**
- * Type of callback that is used to provide current time for that cache. Mainly for testing.
- */
-typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
-/**
- * Type of callback that can be used ot get debug messages from cache.
- */
-typedef void (^SPTPersistentCacheDebugCallback)(NSString *string);
+#pragma mark - Callback Types
 
 /**
- * Default garbage collection interval. Some sane implementation defined value you should not care about.
+ *  Type of callback that can be used ot get debug messages from cache.
+ *  @param message The debug message.
+ */
+typedef void (^SPTPersistentCacheDebugCallback)(NSString *message);
+
+
+#pragma mark - Garbage Collection Constants
+
+/**
+ *  Default garbage collection interval. Some sane implementation defined value you should not care about.
  */
 FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheDefaultGCIntervalSec;
 /**
- * Default exparation interval for all cache items. Particular record's TTL takes precedence over this value.
- * Items stored without (tt=0) TTL considered as expired if following is true: current_time - update_time > ExpInterval.
+ *  The minimum amount of time between garbage collection intervals.
+ */
+FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumGCIntervalLimit;
+
+/**
+ *  Default exparation interval for all cache items. Particular record's TTL takes precedence over this value.
+ *
+ *  @discussion Items stored without a TTL value (i.e. ttl = 0) will be considered to have expired if the following
+ *  expressing is true: `current_time - update_time > ExpInterval`.
  */
 FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheDefaultExpirationTimeSec;
 /**
- * The minimum amount of time between garbage collection intervals.
- */
-FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumGCIntervalLimit;
-/**
- * The minimum TTL of cache records.
+ *  The minimum TTL of cache records.
  */
 FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
 
+
+#pragma mark - SPTPersistentCacheOptions Interface
+
 /**
- * @brief SPTPersistentCacheOptions
- * @discussion Class defines cache creation options
+ *  Class which defines options used by a cache instance.
  */
-@interface SPTPersistentCacheOptions : NSObject
+@interface SPTPersistentCacheOptions : NSObject <NSCopying>
+
+#pragma mark Queue Management Options
 
 /**
  *  A unique identifier for a work queue based on this instance of options.
+ *  @note The value is derived from the `cacheIdentifier`.
  */
-@property (nonatomic, readonly) NSString *identifierForQueue;
+@property (nonatomic, copy, readonly) NSString *identifierForQueue;
+
+#pragma mark Cache Options
+
 /**
- * Path to a folder in which to store that files. If folder doesn't exist it will be created.
- * This mustn't be nil.
+ *  Any string that identifies the cache and used in naming of internal queue.
+ *  @discussion It is important to use a stable cache identifier to be able identify the queue during debug and in
+ *  crash dumps.
+ *  @note Defaults to `persistent.cache`.
  */
-@property (nonatomic, copy, readonly) NSString *cachePath;
+@property (nonatomic, copy) NSString *cacheIdentifier;
 /**
- * Garbage collection interval. It is guaranteed that once started GC runs with this interval.
- * Its recommended to use SPTPersistentCacheDefaultGCIntervalSec constant if not sure.
- * Internal guarding is applied to this value.
+ *  Path to a folder in which to store that files. If folder doesn't exist it will be created.
+ *  @note Defaults to a sub-directory in the current user’s temporary directory.
  */
-@property (nonatomic, assign, readonly) NSUInteger gcIntervalSec;
+@property (nonatomic, copy) NSString *cachePath;
+
 /**
- * Default time which have to pass since last file access so file could be candidate for pruning on next GC.
- * Its recommended to use SPTPersistentCacheDefaultExpirationTimeSec if not sure.
- * Internal guarding is applied.
+ *  Whether directory separation of cache records should be used.
+ *  @discussion When enabled cached records are separate into direcectories based on the first two (2) characters in
+ *  the key.
+ *  @note Defaults to `YES`.
  */
-@property (nonatomic, assign, readonly) NSUInteger defaultExpirationPeriodSec;
+@property (nonatomic, assign) BOOL useDirectorySeparation;
+
+#pragma mark Garbage Collection Options
+
 /**
- * Size in bytes to which cache should adjust itself when performing GC. 0 - no size constraint (default)
+ *  Garbage collection (GC) interval in seconds. It is guaranteed that once started the GC runs with this interval.
+ *  @discussion Its recommended to use `SPTPersistentCacheDefaultGCIntervalSec` constant if unsure. The
+ *  implementation will make sure the value isn’t below the minimum (`SPTPersistentCacheMinimumGCIntervalLimit`).
+ *  @note Defaults to `SPTPersistentCacheDefaultGCIntervalSec`.
+ */
+@property (nonatomic, assign) NSUInteger garbageCollectionInterval;
+/**
+ *  Default time perioid, in seconds, which needs to pass since last access for a file to be conisdered for pruning
+ *  during the next garbage collection run.
+ *  @discussion It’s recommended to use `SPTPersistentCacheDefaultExpirationTimeSec` if unsure. The
+ *  implementation will make sure the value isn’t below the minimum (`SPTPersistentCacheMinimumExpirationLimit`).
+ *  @note Defaults to `SPTPersistentCacheDefaultExpirationTimeSec`.
+ */
+@property (nonatomic, assign) NSUInteger defaultExpirationPeriod;
+/**
+ *  Size in bytes to which cache should adjust itself when performing GC. `0` - no size constraint.
+ *  @note Defaults to `0` (unbounded).
  */
 @property (nonatomic, assign) NSUInteger sizeConstraintBytes;
-/**
- * Callback used to supply debug/internal information usually about errors.
- */
-@property (nonatomic, copy, readonly) SPTPersistentCacheDebugCallback debugOutput;
+
+#pragma mark Debugging
 
 /**
- * Any string that identifies the cache and used in naming of internal queue.
- * It is important to put sane string to be able identify queue during debug and in crash dumps.
- * Default is "persistent.cache".
+ *  Callback used to supply debug/internal information usually about errors.
+ *  @warning The block might be executed on any thread or queue. Make sure your code is thread-safe or dispatches out
+ *  to a thread safe for you.
  */
-@property (nonatomic, copy, readonly) NSString *cacheIdentifier;
-/**
- * Use 2 first letter of key for folder names to separate recodrs into. Default: YES
- */
-@property (nonatomic, assign) BOOL folderSeparationEnabled;
+@property (nonatomic, copy, nullable) SPTPersistentCacheDebugCallback debugOutput;
+
+@end
+
+
+#pragma mark - Deprecation Category
 
 /**
- * Returns a new instance of the class setup with specific values.
- * @param cachePath Path in the system file for the cache. May be nil.
- * @param cacheIdentifier An identifier for the cache. May be nil.
- * @param defaultExpirationInterval Default time which have to pass since last file access so file could be candidate for pruning on next GC.
- * @param garbageCollectorInterval It is guaranteed that once started GC runs with this interval.
- * @param debugCallback A callback used for debugging purposes.
+ * Methods on `SPTPersistentCacheOptions` that are deprecated and will be removed in a later release.
+ */
+@interface SPTPersistentCacheOptions (Deprectated)
+
+/**
+ *  Returns a new instance of the class setup with specific values.
+ *  @deprecated
+ *  @param cachePath Path in the system file for the cache.
+ *  @param cacheIdentifier An identifier for the cache.
+ *  @param defaultExpirationInterval Default time which have to pass since last file access so file could be candidate
+ *  for pruning on next GC.
+ *  @param garbageCollectorInterval It is guaranteed that once started GC runs with this interval.
+ *  @param debugCallback A callback used for debugging purposes. May be nil.
  */
 - (instancetype)initWithCachePath:(NSString *)cachePath
                        identifier:(NSString *)cacheIdentifier
         defaultExpirationInterval:(NSUInteger)defaultExpirationInterval
          garbageCollectorInterval:(NSUInteger)garbageCollectorInterval
-                            debug:(SPTPersistentCacheDebugCallback)debugCallback NS_DESIGNATED_INITIALIZER;
+                            debug:(nullable SPTPersistentCacheDebugCallback)debugCallback DEPRECATED_MSG_ATTRIBUTE("Configure the option instance’s properties instead.");
+
+/**
+ *  Compatibility alias for `useDirectorySeparation`.
+ *  @see useDirectorySeparation
+ */
+@property (nonatomic, assign) BOOL folderSeparationEnabled DEPRECATED_MSG_ATTRIBUTE("Use the useDirectorySeparation property instead");
+/**
+ *  Compatibility alias for `garbageCollectionInterval`.
+ *  @deprecated
+ *  @see garbageCollectionInterval
+ */
+@property (nonatomic, assign, readonly) NSUInteger gcIntervalSec DEPRECATED_MSG_ATTRIBUTE("Use the garbageCollectionInterval property instead");
+/**
+ *  Compatibility alias for `defaultExpirationPeriod`.
+ *  @deprecated
+ *  @see defaultExpirationPeriod
+ */
+@property (nonatomic, assign, readonly) NSUInteger defaultExpirationPeriodSec DEPRECATED_MSG_ATTRIBUTE("Use the defaultExpirationPeriod property instead");
 
 @end
 

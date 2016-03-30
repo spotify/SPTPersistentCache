@@ -63,14 +63,18 @@ For an example of this framework's usage, see the demo application `SPTPersisten
 ### Creating the SPTPersistentCache
 It is best to use different caches for different types of data you want to store, and not just one big cache for your entire application. However, only create one `SPTPersistentCache` instance for each cache, otherwise you might encounter anomalies when the two different caches end up writing to the same file.
 ```objc
-SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:cachePath
-                                                                               identifier:@"com.spotify.demo.image.cache"
-                                                                defaultExpirationInterval:(60 * 60 * 24 * 30)
-                                                                 garbageCollectorInterval:(NSUInteger)(1.5 * SPTPersistentCacheDefaultGCIntervalSec)
-                                                                                    debug:^(NSString *string) {
-                                                                                              NSLog(@"%@", string);
-                                                                                          }];
+NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject stringByAppendingString:@"com.spotify.demo.image.cache"];
+
+SPTPersistentCacheOptions *options = [SPTPersistentCacheOptions new];
+options.cachePath = cachePath;
+options.cacheIdentifier = @"com.spotify.demo.image.cache";
+options.defaultExpirationPeriod = 60 * 60 * 24 * 30; // 30 days
+options.garbageCollectionInterval = (NSUInteger)(1.5 * SPTPersistentCacheDefaultGCIntervalSec);
 options.sizeConstraintBytes = 1024 * 1024 * 10; // 10 MiB
+options.debugOutput = ^(NSString *string) {
+    NSLog(@"%@", string);
+};
+
 SPTPersistentCache *cache = [[SPTPersistentCache alloc] initWithOptions:options];
 ```
 
