@@ -36,7 +36,7 @@ Then simply add `SPTPersistentCache` to your `Podfile`.
 ```
 pod 'SPTPersistentCache', '~> 1.0'
 ```
-Lastly let CocoaPods do it's thing by running:
+Lastly let CocoaPods do its thing by running:
 ```shell
 $ pod install
 ```
