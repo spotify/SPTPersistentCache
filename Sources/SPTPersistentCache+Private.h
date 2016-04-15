@@ -64,6 +64,8 @@ NS_ASSUME_NONNULL_BEGIN
               onQueue:(dispatch_queue_t _Nullable)queue;
 
 - (void)dispatchBlock:(dispatch_block_t)block on:(dispatch_queue_t _Nullable)queue;
+/// Returns an appropriate queue given the proposed queue. If `nil` is given the main queue will be returned.
+- (dispatch_queue_t)queueForProposedDispatchQueue:(dispatch_queue_t _Nullable)queue;
 
 @end
 

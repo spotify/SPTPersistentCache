@@ -1753,6 +1753,46 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     XCTAssertTrue(cache.test_didDispatchBlock);
 }
 
+#pragma mark Test Dispatching Blocks
+
+- (void)testQueueForNilProposedDispatchQueue
+{
+    XCTAssertEqual([self.cache queueForProposedDispatchQueue:nil], dispatch_get_main_queue());
+}
+
+- (void)testQueueForProposedDispatchQueueReturnsPropsosal
+{
+    dispatch_queue_t proposed = dispatch_queue_create("com.spotify.persistentcache.proposed-queue", DISPATCH_QUEUE_SERIAL);
+    XCTAssertEqual([self.cache queueForProposedDispatchQueue:proposed], proposed);
+}
+
+- (void)testDispatchBlockSync
+{
+    XCTAssertTrue([NSThread isMainThread]);
+
+    __block BOOL didExecuteBlock = NO;
+    dispatch_block_t block = ^{
+        didExecuteBlock = YES;
+    };
+
+    [self.cache dispatchBlock:block on:nil];
+
+    XCTAssertTrue(didExecuteBlock);
+}
+
+- (void)testDispatchBlockAsync
+{
+    XCTAssertTrue([NSThread isMainThread]);
+
+    __weak XCTestExpectation * const expecation = [self expectationWithDescription:@"block was executed"];
+    dispatch_block_t block = ^{
+        [expecation fulfill];
+    };
+
+    [self.cache dispatchBlock:block on:dispatch_queue_create("com.spotify.persistentcache.proposed-queue", DISPATCH_QUEUE_SERIAL)];
+
+    [self waitForExpectationsWithTimeout:2.0 handler:nil];
+}
 
 #pragma mark - Internal methods
 

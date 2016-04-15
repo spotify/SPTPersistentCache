@@ -992,13 +992,18 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 
 - (void)dispatchBlock:(dispatch_block_t)block on:(dispatch_queue_t)queue
 {
-    const dispatch_queue_t dispatchQueue = queue ?: dispatch_get_main_queue();
+    const dispatch_queue_t dispatchQueue = [self queueForProposedDispatchQueue:queue];
 
     if (dispatchQueue == dispatch_get_main_queue() && [NSThread isMainThread]) {
         block();
     } else {
         dispatch_async(dispatchQueue, block);
     }
+}
+
+- (dispatch_queue_t)queueForProposedDispatchQueue:(dispatch_queue_t)queue
+{
+    return queue ?: dispatch_get_main_queue();
 }
 
 @end
