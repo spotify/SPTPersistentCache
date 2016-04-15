@@ -21,11 +21,39 @@
 
 #import <SPTPersistentCache/SPTPersistentCache.h>
 
-@interface SPTPersistentCache (Private)
+@class SPTPersistentCacheFileManager;
+@class SPTPersistentCacheGarbageCollector;
+@class SPTPersistentCachePosixWrapper;
+
+NS_ASSUME_NONNULL_BEGIN
+
+/// Private interface exposed for testability.
+@interface SPTPersistentCache ()
 
 @property (nonatomic, copy, readonly) SPTPersistentCacheOptions *options;
+
+@property (nonatomic, copy, readonly, nullable) SPTPersistentCacheDebugCallback debugOutput;
+
+/// Serial queue used to run all internal stuff
+@property (nonatomic, strong, readonly) dispatch_queue_t workQueue;
+
+@property (nonatomic, strong, readonly) NSFileManager *fileManager;
+@property (nonatomic, strong, readonly) SPTPersistentCacheFileManager *dataCacheFileManager;
+
+@property (nonatomic, strong, readonly) SPTPersistentCacheGarbageCollector *garbageCollector;
+
+@property (nonatomic, assign, readonly) NSTimeInterval currentDateTimeInterval;
+@property (nonatomic, strong, readonly) SPTPersistentCachePosixWrapper *posixWrapper;
 
 - (void)runRegularGC;
 - (BOOL)pruneBySize;
 
+/**
+ * forceExpire = YES treat all unlocked files like they expired
+ * forceLocked = YES ignore lock status
+ */
+- (void)collectGarbageForceExpire:(BOOL)forceExpire forceLocked:(BOOL)forceLocked;;
+
 @end
+
+NS_ASSUME_NONNULL_END

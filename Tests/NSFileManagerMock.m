@@ -56,4 +56,12 @@
     return [super attributesOfFileSystemForPath:path error:error];
 }
 
+- (NSArray<NSString *> *)contentsOfDirectoryAtPath:(NSString *)path error:(NSError * _Nullable __autoreleasing *)error
+{
+    if (self.mock_contentsOfDirectoryAtPaths) {
+        return self.mock_contentsOfDirectoryAtPaths[path];
+    }
+    return [super contentsOfDirectoryAtPath:path error:error];
+}
+
 @end

@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import <SPTPersistentCache/SPTPersistentCache.h>
+#import "SPTPersistentCache+Private.h"
 
 #import <SPTPersistentCache/SPTPersistentCacheHeader.h>
 
@@ -48,19 +48,7 @@ static NSString * const SPTDataCacheFileAttributesKey = @"SPTDataCacheFileAttrib
 
 static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 
-@interface SPTPersistentCache ()
-
-@property (nonatomic, copy) SPTPersistentCacheOptions *options;
-/// Serial queue used to run all internal stuff
-@property (nonatomic, strong) dispatch_queue_t workQueue;
-@property (nonatomic, strong) NSFileManager *fileManager;
-@property (nonatomic, strong) SPTPersistentCacheGarbageCollector *garbageCollector;
-@property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
-@property (nonatomic, strong) SPTPersistentCacheFileManager *dataCacheFileManager;
-@property (nonatomic, readonly) NSTimeInterval currentDateTimeInterval;
-@property (nonatomic, strong) SPTPersistentCachePosixWrapper *posixWrapper;
-
-@end
+// Class extension exists in SPTPersistentCache+Private.h
 
 #pragma mark - SPTPersistentCache
 
@@ -75,18 +63,19 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 {
     self = [super init];
     if (self) {
-        _options = options;
-        _workQueue = dispatch_queue_create([options.identifierForQueue UTF8String], DISPATCH_QUEUE_CONCURRENT);
+        _workQueue = dispatch_queue_create(options.identifierForQueue.UTF8String, DISPATCH_QUEUE_CONCURRENT);
+        NSAssert(_workQueue, @"The work queue couldn’t be created using the given options: %@", options);
+
+        _options = [options copy];
         _fileManager = [NSFileManager defaultManager];
         _debugOutput = [self.options.debugOutput copy];
         _dataCacheFileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:_options];
+        _posixWrapper = [SPTPersistentCachePosixWrapper new];
         _garbageCollector = [[SPTPersistentCacheGarbageCollector alloc] initWithCache:self
                                                                               options:_options
                                                                                 queue:_workQueue];
 
-        _posixWrapper = [SPTPersistentCachePosixWrapper new];
 
-        NSAssert(_workQueue, @"The work queue can never be nil, otherwise the cache won't run");
         if (![_dataCacheFileManager createCacheDirectory]) {
             return nil;
         }
@@ -509,9 +498,9 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 
 
             SPTPersistentCacheRecord *record = [[SPTPersistentCacheRecord alloc] initWithData:payload
-                                                                              key:key
-                                                                         refCount:refCount
-                                                                              ttl:ttl];
+                                                                                          key:key
+                                                                                     refCount:refCount
+                                                                                          ttl:ttl];
 
             SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationSucceeded
                                                                                                 error:nil
@@ -779,10 +768,6 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
     [self collectGarbageForceExpire:NO forceLocked:NO];
 }
 
-/**
- * forceExpire = YES treat all unlocked files like they expired
- * forceLocked = YES ignore lock status
- */
 - (void)collectGarbageForceExpire:(BOOL)forceExpire forceLocked:(BOOL)forceLocked
 {
     [self debugOutput:@"PersistentDataCache: Run GC with forceExpire:%d forceLock:%d", forceExpire, forceLocked];
