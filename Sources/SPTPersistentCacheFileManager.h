@@ -33,6 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface SPTPersistentCacheFileManager : NSObject
 
+/// The total amount of bytes used by the cache given the reciever’s options.
 @property (nonatomic, readonly) NSUInteger totalUsedSizeInBytes;
 
 - (instancetype)init NS_UNAVAILABLE;
