@@ -58,6 +58,11 @@ NS_ASSUME_NONNULL_BEGIN
                                callback:(SPTPersistentCacheResponseCallback _Nullable)callback
                                 onQueue:(dispatch_queue_t _Nullable)queue;
 
+- (void)dispatchError:(NSError *)error
+               result:(SPTPersistentCacheResponseCode)result
+             callback:(SPTPersistentCacheResponseCallback _Nullable)callback
+              onQueue:(dispatch_queue_t _Nullable)queue;
+
 - (void)dispatchBlock:(dispatch_block_t)block on:(dispatch_queue_t _Nullable)queue;
 
 @end

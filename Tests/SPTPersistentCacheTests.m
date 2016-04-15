@@ -1672,6 +1672,8 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     XCTAssertFalse(result);
 }
 
+#pragma mark Test Dispatching Empty and Error Responses
+
 - (void)testDispatchEmptyResponseWithNilCallbackDoesNothing
 {
     SPTPersistentCacheForUnitTests * const cache = [self createCacheWithTimeCallback:^ NSTimeInterval(){
@@ -1707,6 +1709,50 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     [self waitForExpectationsWithTimeout:0.5 handler:nil];
     XCTAssertTrue(cache.test_didDispatchBlock);
 }
+
+- (void)testDispatchErrorWithNilCallbackDoesNothing
+{
+    SPTPersistentCacheForUnitTests * const cache = [self createCacheWithTimeCallback:^ NSTimeInterval(){
+        return kTestEpochTime;
+    } expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+
+    [cache dispatchError:[NSError errorWithDomain:SPTPersistentCacheErrorDomain code:0 userInfo:nil]
+                  result:SPTPersistentCacheResponseCodeOperationError
+                callback:nil
+                 onQueue:dispatch_get_main_queue()];
+
+    XCTAssertTrue(cache.test_didDispatchBlock == NO);
+}
+
+- (void)testDispatchError
+{
+    SPTPersistentCacheForUnitTests * const cache = [self createCacheWithTimeCallback:^ NSTimeInterval(){
+        return kTestEpochTime;
+    } expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+
+    NSError * const error = [NSError errorWithDomain:SPTPersistentCacheErrorDomain
+                                                code:SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader
+                                            userInfo:nil];
+
+    __weak XCTestExpectation * const expectation = [self expectationWithDescription:@"callback expectation"];
+    SPTPersistentCacheResponseCallback callback = ^(SPTPersistentCacheResponse *response){
+        XCTAssertNotNil(response);
+        XCTAssertEqualObjects(response.error, error);
+        XCTAssertNil(response.record);
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationError);
+
+        [expectation fulfill];
+    };
+
+    [cache dispatchError:error
+                  result:SPTPersistentCacheResponseCodeOperationError
+                callback:callback
+                 onQueue:dispatch_get_main_queue()];
+
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    XCTAssertTrue(cache.test_didDispatchBlock);
+}
+
 
 #pragma mark - Internal methods
 
