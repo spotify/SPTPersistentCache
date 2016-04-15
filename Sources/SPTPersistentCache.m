@@ -839,9 +839,13 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 }
 
 - (void)dispatchEmptyResponseWithResult:(SPTPersistentCacheResponseCode)result
-                               callback:(SPTPersistentCacheResponseCallback)callback
-                                onQueue:(dispatch_queue_t)queue
+                               callback:(SPTPersistentCacheResponseCallback _Nullable)callback
+                                onQueue:(dispatch_queue_t _Nullable)queue
 {
+    if (callback == nil) {
+        return;
+    }
+
     [self dispatchBlock:^ {
         SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:result
                                                                                             error:nil
@@ -852,9 +856,13 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 
 - (void)dispatchError:(NSError *)error
                result:(SPTPersistentCacheResponseCode)result
-             callback:(SPTPersistentCacheResponseCallback)callback
-              onQueue:(dispatch_queue_t)queue
+             callback:(SPTPersistentCacheResponseCallback _Nullable)callback
+              onQueue:(dispatch_queue_t _Nullable)queue
 {
+    if (callback == nil) {
+        return;
+    }
+
     [self dispatchBlock:^{
         SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:result
                                                                                             error:error
@@ -865,12 +873,17 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 
 - (void)debugOutput:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2)
 {
+    SPTPersistentCacheDebugCallback const debugOutput = self.debugOutput;
+    if (debugOutput == nil) {
+        return;
+    }
+
     va_list list;
     va_start(list, format);
-    NSString *debugString = [[NSString alloc ] initWithFormat:format arguments:list];
+    NSString * const message = [[NSString alloc] initWithFormat:format arguments:list];
     va_end(list);
     
-    SPTPersistentCacheSafeDebugCallback(debugString, self.debugOutput);
+    debugOutput(message);
 }
 
 - (BOOL)pruneBySize
