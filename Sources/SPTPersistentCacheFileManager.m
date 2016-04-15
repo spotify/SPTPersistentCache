@@ -18,22 +18,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#import "SPTPersistentCacheFileManager.h"
+#import "SPTPersistentCacheFileManager+Private.h"
 #import "SPTPersistentCacheDebugUtilities.h"
 #import "SPTPersistentCacheOptions.h"
 
 static const double SPTPersistentCacheFileManagerMinFreeDiskSpace = 0.1;
 
 const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
-
-
-@interface SPTPersistentCacheFileManager ()
-
-@property (nonatomic, strong) SPTPersistentCacheOptions *options;
-@property (nonatomic, strong) NSFileManager *fileManager;
-@property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
-
-@end
 
 @implementation SPTPersistentCacheFileManager
 
@@ -43,7 +34,7 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
 {
     self = [super init];
     if (self) {
-        _options = options;
+        _options = [options copy];
         _fileManager = [NSFileManager defaultManager];
         _debugOutput = options.debugOutput;
     }

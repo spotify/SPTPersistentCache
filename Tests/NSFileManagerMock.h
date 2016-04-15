@@ -38,4 +38,10 @@
  */
 @property (nonatomic, assign, readwrite) BOOL disableRemoveFile;
 
+/// Path -> Dictionary of attributes
+@property (nonatomic, copy) NSDictionary<NSString *, NSDictionary<NSString *, id> *> *mock_attributesOfItemsAtPaths;
+
+/// Path -> Dictionary of attributes
+@property (nonatomic, copy) NSDictionary<NSString *, NSDictionary<NSString *, id> *> * mock_attributesOfFileSystemForPaths;
+
 @end

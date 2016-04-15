@@ -26,6 +26,8 @@ extern const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength;
 
 @class SPTPersistentCacheOptions;
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  *  An object that encapsulates file-related operations of SPTPersistentCache.
  */
@@ -33,14 +35,14 @@ extern const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength;
 
 @property (nonatomic, readonly) NSUInteger totalUsedSizeInBytes;
 
-- (instancetype)init __unavailable;
+- (instancetype)init NS_UNAVAILABLE;
 
 /**
  *  Initializes a new file manager set with specific options. 
  *  
  *  @param options Options of the permanent cache.
  */
-- (instancetype)initWithOptions:(SPTPersistentCacheOptions *)options;
+- (instancetype)initWithOptions:(SPTPersistentCacheOptions *)options NS_DESIGNATED_INITIALIZER;
 
 /**
  *  Creates the directory that will be used to persist the cached data. Returns YES if the operation is successful, 
@@ -89,3 +91,5 @@ extern const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength;
 - (NSUInteger)getFileSizeAtPath:(NSString *)filePath;
 
 @end
+
+NS_ASSUME_NONNULL_END
