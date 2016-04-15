@@ -859,16 +859,15 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 - (void)debugOutput:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2)
 {
     SPTPersistentCacheDebugCallback const debugOutput = self.debugOutput;
-    if (debugOutput == nil) {
-        return;
-    }
 
-    va_list list;
-    va_start(list, format);
-    NSString * const message = [[NSString alloc] initWithFormat:format arguments:list];
-    va_end(list);
-    
-    debugOutput(message);
+    if (debugOutput && format.length > 0) {
+        va_list list;
+        va_start(list, format);
+        NSString * const message = [[NSString alloc] initWithFormat:format arguments:list];
+        va_end(list);
+
+        debugOutput(message);
+    }
 }
 
 - (BOOL)pruneBySize
