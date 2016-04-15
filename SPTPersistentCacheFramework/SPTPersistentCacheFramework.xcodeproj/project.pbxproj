@@ -78,7 +78,7 @@
 		C45526B31C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheTypeUtilities.m; sourceTree = "<group>"; };
 		C4EA65041C7A547000A6091A /* SPTPersistentCacheDebugUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheDebugUtilities.h; sourceTree = "<group>"; };
 		C4EA65051C7A547000A6091A /* SPTPersistentCacheDebugUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheDebugUtilities.m; sourceTree = "<group>"; };
-		DD1D23791C77857900D0477A /* SPTPersistentCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = SPTPersistentCache.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		DD1D23791C77857900D0477A /* SPTPersistentCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = SPTPersistentCache.h; sourceTree = "<group>"; };
 		DD1D237A1C77857900D0477A /* SPTPersistentCacheHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheHeader.h; sourceTree = "<group>"; };
 		DD1D237B1C77857900D0477A /* SPTPersistentCacheOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = SPTPersistentCacheOptions.h; sourceTree = "<group>"; };
 		DD1D237C1C77857900D0477A /* SPTPersistentCacheRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheRecord.h; sourceTree = "<group>"; };

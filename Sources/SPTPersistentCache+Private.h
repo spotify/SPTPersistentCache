@@ -52,7 +52,13 @@ NS_ASSUME_NONNULL_BEGIN
  * forceExpire = YES treat all unlocked files like they expired
  * forceLocked = YES ignore lock status
  */
-- (void)collectGarbageForceExpire:(BOOL)forceExpire forceLocked:(BOOL)forceLocked;;
+- (void)collectGarbageForceExpire:(BOOL)forceExpire forceLocked:(BOOL)forceLocked;
+
+- (void)dispatchEmptyResponseWithResult:(SPTPersistentCacheResponseCode)result
+                               callback:(SPTPersistentCacheResponseCallback _Nullable)callback
+                                onQueue:(dispatch_queue_t _Nullable)queue;
+
+- (void)dispatchBlock:(dispatch_block_t)block on:(dispatch_queue_t _Nullable)queue;
 
 @end
 

@@ -121,6 +121,8 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 @property (nonatomic, strong, readwrite) NSFileManager *test_fileManager;
 @property (nonatomic, strong, readwrite) SPTPersistentCachePosixWrapper *test_posixWrapper;
 @property (nonatomic, copy, readwrite) SPTPersistentCacheDebugCallback test_debugOutput;
+
+@property (nonatomic, assign) BOOL test_didDispatchBlock;
 @end
 
 @implementation SPTPersistentCacheForUnitTests
@@ -152,6 +154,12 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     } else {
         return [super currentDateTimeInterval];
     }
+}
+
+- (void)dispatchBlock:(dispatch_block_t)block on:(dispatch_queue_t)queue
+{
+    [super dispatchBlock:block on:queue];
+    self.test_didDispatchBlock = YES;
 }
 
 @end
@@ -1664,6 +1672,42 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     XCTAssertFalse(result);
 }
 
+- (void)testDispatchEmptyResponseWithNilCallbackDoesNothing
+{
+    SPTPersistentCacheForUnitTests * const cache = [self createCacheWithTimeCallback:^ NSTimeInterval(){
+        return kTestEpochTime;
+    } expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+
+    [cache dispatchEmptyResponseWithResult:SPTPersistentCacheResponseCodeNotFound
+                                  callback:nil
+                                   onQueue:nil];
+
+    XCTAssertFalse(cache.test_didDispatchBlock);
+}
+
+- (void)testDispatchEmptyResponse
+{
+    SPTPersistentCacheForUnitTests * const cache = [self createCacheWithTimeCallback:^ NSTimeInterval(){
+        return kTestEpochTime;
+    } expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+
+    __weak XCTestExpectation * const expectation = [self expectationWithDescription:@"callback expectation"];
+    SPTPersistentCacheResponseCallback callback = ^(SPTPersistentCacheResponse *response){
+        XCTAssertNotNil(response);
+        XCTAssertNil(response.error);
+        XCTAssertNil(response.record);
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeNotFound);
+
+        [expectation fulfill];
+    };
+    [cache dispatchEmptyResponseWithResult:SPTPersistentCacheResponseCodeNotFound
+                                  callback:callback
+                                   onQueue:dispatch_get_main_queue()];
+
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    XCTAssertTrue(cache.test_didDispatchBlock);
+}
+
 #pragma mark - Internal methods
 
 - (void)putFile:(NSString *)file
@@ -1872,7 +1916,6 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
 
     return expectedSize;
 }
-
 
 @end
 
