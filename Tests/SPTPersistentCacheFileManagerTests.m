@@ -20,24 +20,44 @@
  */
 #import <XCTest/XCTest.h>
 
-#import "SPTPersistentCacheFileManager.h"
+#import "SPTPersistentCacheFileManager+Private.h"
+#import "NSFileManagerMock.h"
 
 #import <objc/runtime.h>
 
-#import <SPTPersistentCache/SPTPersistentCacheOptions.h>
 
 static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_directory";
 
-@interface SPTPersistentCacheFileManager ()
 
-@property (nonatomic, strong) NSFileManager *fileManager;
-@property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
+#pragma mark -
+
+@interface SPTPersistentCacheFileManagerForTests : SPTPersistentCacheFileManager
+
+@property (nonatomic, strong, readwrite) NSFileManagerMock *test_fileManager;
+@property (nonatomic, copy, readwrite) SPTPersistentCacheDebugCallback test_debugOutput;
 
 @end
 
+@implementation SPTPersistentCacheFileManagerForTests
+
+- (NSFileManager *)fileManager
+{
+    return self.test_fileManager ?: super.fileManager;
+}
+
+- (SPTPersistentCacheDebugCallback)debugOutput
+{
+    return self.test_debugOutput ?: super.debugOutput;
+}
+
+@end
+
+
+#pragma mark -
+
 @interface SPTPersistentCacheFileManagerTests : XCTestCase
 @property (nonatomic, strong) SPTPersistentCacheOptions *options;
-@property (nonatomic, strong) SPTPersistentCacheFileManager *cacheFileManager;
+@property (nonatomic, strong) SPTPersistentCacheFileManagerForTests *cacheFileManager;
 @end
 
 @implementation SPTPersistentCacheFileManagerTests
@@ -51,7 +71,7 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_dir
     options.cacheIdentifier = @"test";
     self.options = options;
     
-    self.cacheFileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:self.options];
+    self.cacheFileManager = [[SPTPersistentCacheFileManagerForTests alloc] initWithOptions:self.options];
 }
 
 - (void)testCreateCacheDirectory
@@ -62,9 +82,9 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_dir
     BOOL wasFileCreated = [[NSFileManager defaultManager] fileExistsAtPath:self.options.cachePath
                                                                isDirectory:&isDirectory];
 
-    XCTAssertTrue(didCreateCacheDirectory &&
-                  wasFileCreated &&
-                  isDirectory);
+    XCTAssertTrue(didCreateCacheDirectory);
+    XCTAssertTrue(wasFileCreated);
+    XCTAssertTrue(isDirectory);
 }
 
 - (void)testExistingCacheDirectory
@@ -75,8 +95,8 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_dir
                                                                                                error:nil];
     BOOL directoryDidExist = [self.cacheFileManager createCacheDirectory];
     
-    XCTAssertTrue(didCreateDirectoryUsingNSFileManager &&
-                  directoryDidExist);
+    XCTAssertTrue(didCreateDirectoryUsingNSFileManager);
+    XCTAssertTrue(directoryDidExist);
 }
 
 - (void)testSubdirectoryPathForKeyWithShortKey
@@ -171,10 +191,14 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_dir
 - (void)testFileManagerFailsToGetAttributesOfFile
 {
     __block BOOL called = NO;
-    self.cacheFileManager.debugOutput = ^(NSString *string) {
+    self.cacheFileManager.test_debugOutput = ^(NSString *string) {
         called = YES;
     };
-    self.cacheFileManager.fileManager = nil;
+
+    NSFileManagerMock *fileManager = [NSFileManagerMock new];
+    fileManager.mock_attributesOfItemsAtPaths = @{};
+    self.cacheFileManager.test_fileManager = fileManager;
+
     [self.cacheFileManager getFileSizeAtPath:@"TEST"];
     XCTAssertTrue(called);
 }
@@ -182,7 +206,7 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_dir
 - (void)testTotalUsedSizeInBytesFailWithNSURLGetResourceValue
 {
     __block BOOL called = NO;
-    self.cacheFileManager.debugOutput = ^(NSString *string) {
+    self.cacheFileManager.test_debugOutput = ^(NSString *string) {
         called = YES;
     };
     Method originalMethod = class_getInstanceMethod(NSURL.class, @selector(getResourceValue:forKey:error:));
@@ -199,10 +223,14 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_dir
 - (void)testOptimizedDiskSizeForCacheSizeFileManagerFail
 {
     __block BOOL called = NO;
-    self.cacheFileManager.debugOutput = ^(NSString *string) {
+    self.cacheFileManager.test_debugOutput = ^(NSString *string) {
         called = YES;
     };
-    self.cacheFileManager.fileManager = nil;
+
+    NSFileManagerMock *fileManager = [NSFileManagerMock new];
+    fileManager.mock_attributesOfFileSystemForPaths = @{};
+    self.cacheFileManager.test_fileManager = fileManager;
+
     [self.cacheFileManager optimizedDiskSizeForCacheSize:100];
     XCTAssertTrue(called);
 }

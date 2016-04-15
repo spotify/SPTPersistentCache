@@ -112,26 +112,40 @@ static NSUInteger params_GetDefaultExpireFilesNumber(void);
 
 static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentCacheRecordHeader *header);
 
-@interface SPTPersistentCache (Testing)
-
-@property (nonatomic, strong) SPTPersistentCacheGarbageCollector *garbageCollector;
-@property (nonatomic, strong) dispatch_queue_t workQueue;
-@property (nonatomic, strong) NSFileManager *fileManager;
-@property (nonatomic, strong) SPTPersistentCachePosixWrapper *posixWrapper;
-@property (nonatomic, copy) SPTPersistentCacheDebugCallback debugOutput;
-
-- (NSTimeInterval)currentDateTimeInterval;
-- (void)collectGarbageForceExpire:(BOOL)forceExpire forceLocked:(BOOL)forceLocked;
-
-@end
-
 typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
 @interface SPTPersistentCacheForUnitTests : SPTPersistentCache
 @property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback timeIntervalCallback;
+
+@property (nonatomic, strong, readwrite) dispatch_queue_t test_workQueue;
+@property (nonatomic, strong, readwrite) NSFileManager *test_fileManager;
+@property (nonatomic, strong, readwrite) SPTPersistentCachePosixWrapper *test_posixWrapper;
+@property (nonatomic, copy, readwrite) SPTPersistentCacheDebugCallback test_debugOutput;
+
+@property (nonatomic, assign) BOOL test_didDispatchBlock;
 @end
 
 @implementation SPTPersistentCacheForUnitTests
+
+- (dispatch_queue_t)workQueue
+{
+    return self.test_workQueue ?: super.workQueue;
+}
+
+- (NSFileManager *)fileManager
+{
+    return self.test_fileManager ?: super.fileManager;
+}
+
+- (SPTPersistentCachePosixWrapper *)posixWrapper
+{
+    return self.test_posixWrapper ?: super.posixWrapper;
+}
+
+- (SPTPersistentCacheDebugCallback)debugOutput
+{
+    return self.test_debugOutput ?: super.debugOutput;
+}
 
 - (NSTimeInterval)currentDateTimeInterval
 {
@@ -140,6 +154,12 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     } else {
         return [super currentDateTimeInterval];
     }
+}
+
+- (void)dispatchBlock:(dispatch_block_t)block on:(dispatch_queue_t)queue
+{
+    [super dispatchBlock:block on:queue];
+    self.test_didDispatchBlock = YES;
 }
 
 @end
@@ -1248,15 +1268,17 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
 - (void)testFailToRetrieveDirectoryContents
 {
-    self.cache.fileManager = nil;
-    self.cache.workQueue = dispatch_get_main_queue();
+    NSFileManagerMock *fileManager = [NSFileManagerMock new];
+    fileManager.mock_contentsOfDirectoryAtPaths = @{};
+    self.cache.test_fileManager = fileManager;
+    self.cache.test_workQueue = dispatch_get_main_queue();
 
     __block BOOL called = NO;
     [self.cache loadDataForKeysWithPrefix:@"T"
                         chooseKeyCallback:^ NSString *(NSArray *keys) {
                             return keys.firstObject;
                         }
-                             withCallback:^ (SPTPersistentCacheResponse *response) {
+                             withCallback:^(SPTPersistentCacheResponse *response) {
                                  XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationError);
                                  called = YES;
                              }
@@ -1266,7 +1288,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
 - (void)testNotFoundIfCacheDirectoryIsDeleted
 {
-    self.cache.workQueue = dispatch_get_main_queue();
+    self.cache.test_workQueue = dispatch_get_main_queue();
     [[NSFileManager defaultManager] removeItemAtPath:self.cachePath error:nil];
     __block BOOL called = NO;
     [self.cache loadDataForKeysWithPrefix:@"T" chooseKeyCallback:^ NSString *(NSArray *keys) {
@@ -1280,7 +1302,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
 - (void)testNoValidKeys
 {
-    self.cache.workQueue = dispatch_get_main_queue();
+    self.cache.test_workQueue = dispatch_get_main_queue();
     __block BOOL called = NO;
     [self.cache loadDataForKeysWithPrefix:@"T" chooseKeyCallback:^ NSString *(NSArray *keys) {
         return keys.firstObject;
@@ -1380,7 +1402,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
 - (void)testErrorWhenCannotReadFile
 {
-    self.cache.workQueue = dispatch_get_main_queue();
+    self.cache.test_workQueue = dispatch_get_main_queue();
     NSString *key = self.imageNames.firstObject;
     Method originalMethod = class_getClassMethod(NSMutableData.class, @selector(dataWithContentsOfFile:options:error:));
     IMP originalMethodImplementation = method_getImplementation(originalMethod);
@@ -1405,7 +1427,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
 - (void)testWriteToHeaderFailed
 {
-    self.cache.workQueue = dispatch_get_main_queue();
+    self.cache.test_workQueue = dispatch_get_main_queue();
     NSString *key = self.imageNames.firstObject;
     Method originalMethod = class_getInstanceMethod(NSData.class, @selector(writeToFile:options:error:));
     IMP originalMethodImplementation = method_getImplementation(originalMethod);
@@ -1424,7 +1446,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
 - (void)testWriteFailedOnStoreData
 {
-    self.cache.workQueue = dispatch_get_main_queue();
+    self.cache.test_workQueue = dispatch_get_main_queue();
     Method originalMethod = class_getInstanceMethod(NSData.class, @selector(writeToFile:options:error:));
     IMP originalMethodImplementation = method_getImplementation(originalMethod);
     IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
@@ -1444,7 +1466,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 - (void)testOpenFailure
 {
     NSFileManagerMock *fileManagerMock = [NSFileManagerMock new];
-    self.cache.fileManager = fileManagerMock;
+    self.cache.test_fileManager = fileManagerMock;
     __weak __typeof(fileManagerMock) weakFileManagerMock = fileManagerMock;
     fileManagerMock.blockCalledOnFileExistsAtPath = ^ {
         __strong __typeof(weakFileManagerMock) strongFileManagerMock = weakFileManagerMock;
@@ -1460,7 +1482,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 - (void)testCloseFailure
 {
     SPTPersistentCachePosixWrapperMock *posixWrapperMock = [SPTPersistentCachePosixWrapperMock new];
-    self.cache.posixWrapper = posixWrapperMock;
+    self.cache.test_posixWrapper = posixWrapperMock;
     posixWrapperMock.closeValue = -1;
     __block BOOL called = NO;
     [self.cache touchDataForKey:self.imageNames[0] callback:^(SPTPersistentCacheResponse *response) {
@@ -1472,7 +1494,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 - (void)testReadFailure
 {
     SPTPersistentCachePosixWrapperMock *posixWrapperMock = [SPTPersistentCachePosixWrapperMock new];
-    self.cache.posixWrapper = posixWrapperMock;
+    self.cache.test_posixWrapper = posixWrapperMock;
     posixWrapperMock.readValue = -1;
     posixWrapperMock.readOverridden = YES;
     __block BOOL called = NO;
@@ -1488,7 +1510,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
         return kTestEpochTime * 10.0;
     };
     SPTPersistentCachePosixWrapperMock *posixWrapperMock = [SPTPersistentCachePosixWrapperMock new];
-    self.cache.posixWrapper = posixWrapperMock;
+    self.cache.test_posixWrapper = posixWrapperMock;
     posixWrapperMock.lseekValue = -1;
     __block BOOL called = NO;
     [self.cache touchDataForKey:self.imageNames[0] callback:^(SPTPersistentCacheResponse *response) {
@@ -1503,7 +1525,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
         return kTestEpochTime * 10.0;
     };
     SPTPersistentCachePosixWrapperMock *posixWrapperMock = [SPTPersistentCachePosixWrapperMock new];
-    self.cache.posixWrapper = posixWrapperMock;
+    self.cache.test_posixWrapper = posixWrapperMock;
     posixWrapperMock.writeValue = 0;
     __block BOOL called = NO;
     [self.cache touchDataForKey:self.imageNames[0] callback:^(SPTPersistentCacheResponse *response) {
@@ -1518,7 +1540,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
         return kTestEpochTime * 10.0;
     };
     SPTPersistentCachePosixWrapperMock *posixWrapperMock = [SPTPersistentCachePosixWrapperMock new];
-    self.cache.posixWrapper = posixWrapperMock;
+    self.cache.test_posixWrapper = posixWrapperMock;
     posixWrapperMock.writeValue = (ssize_t)SPTPersistentCacheRecordHeaderSize;
     posixWrapperMock.fsyncValue = -1;
     __block BOOL called = NO;
@@ -1530,9 +1552,9 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
 - (void)testStoreLargeTTL
 {
-    self.cache.workQueue = dispatch_get_main_queue();
+    self.cache.test_workQueue = dispatch_get_main_queue();
     __block BOOL called = NO;
-    self.cache.debugOutput = ^(NSString *output) {
+    self.cache.test_debugOutput = ^(NSString *output) {
         called = YES;
     };
     NSString *key = @"TEST";
@@ -1550,7 +1572,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 - (void)testWipeAllFiles
 {
     __block BOOL called = NO;
-    self.cache.debugOutput = ^(NSString *output) {
+    self.cache.test_debugOutput = ^(NSString *output) {
         called = YES;
     };
     [self.cache collectGarbageForceExpire:YES forceLocked:YES];
@@ -1560,7 +1582,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 - (void)testURLAttributeFailure
 {
     __block BOOL called = NO;
-    self.cache.debugOutput = ^(NSString *output) {
+    self.cache.test_debugOutput = ^(NSString *output) {
         called = YES;
     };
     Method originalMethod = class_getInstanceMethod(NSURL.class, @selector(getResourceValue:forKey:error:));
@@ -1583,10 +1605,10 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 - (void)testPruneBySizeRemoveFileFailure
 {
     __block BOOL called = NO;
-    self.cache.debugOutput = ^(NSString *output) {
+    self.cache.test_debugOutput = ^(NSString *output) {
         called = YES;
     };
-    self.cache.workQueue = dispatch_get_main_queue();
+    self.cache.test_workQueue = dispatch_get_main_queue();
     NSData *data = [@"TEST" dataUsingEncoding:NSUTF8StringEncoding];
     [self.cache storeData:data
                    forKey:@"TEST"
@@ -1596,14 +1618,14 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     self.cache.options.sizeConstraintBytes = 1;
     NSFileManagerMock *fileManagerMock = [NSFileManagerMock new];
     fileManagerMock.disableRemoveFile = YES;
-    self.cache.fileManager = fileManagerMock;
+    self.cache.test_fileManager = fileManagerMock;
     [self.cache pruneBySize];
     XCTAssertTrue(called);
 }
 
 - (void)testStatFailure
 {
-    self.cache.workQueue = dispatch_get_main_queue();
+    self.cache.test_workQueue = dispatch_get_main_queue();
     NSData *data = [@"TEST" dataUsingEncoding:NSUTF8StringEncoding];
     [self.cache storeData:data
                    forKey:@"TEST"
@@ -1613,9 +1635,9 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     self.cache.options.sizeConstraintBytes = 1;
     SPTPersistentCachePosixWrapperMock *posixWrapperMock = [SPTPersistentCachePosixWrapperMock new];
     posixWrapperMock.statValue = -1;
-    self.cache.posixWrapper = posixWrapperMock;
+    self.cache.test_posixWrapper = posixWrapperMock;
     __block BOOL called = NO;
-    self.cache.debugOutput = ^(NSString *output) {
+    self.cache.test_debugOutput = ^(NSString *output) {
         called = YES;
     };
     [self.cache pruneBySize];
@@ -1626,7 +1648,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 {
     self.cache.options.sizeConstraintBytes = 1;
     __block BOOL called = NO;
-    self.cache.debugOutput = ^(NSString *output) {
+    self.cache.test_debugOutput = ^(NSString *output) {
         called = YES;
     };
     Method originalMethod = class_getInstanceMethod(NSURL.class, @selector(getResourceValue:forKey:error:));
@@ -1648,6 +1670,128 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
                            withCallback:^(SPTPersistentCacheResponse *response) {}
                                 onQueue:nil];
     XCTAssertFalse(result);
+}
+
+#pragma mark Test Dispatching Empty and Error Responses
+
+- (void)testDispatchEmptyResponseWithNilCallbackDoesNothing
+{
+    SPTPersistentCacheForUnitTests * const cache = [self createCacheWithTimeCallback:^ NSTimeInterval(){
+        return kTestEpochTime;
+    } expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+
+    [cache dispatchEmptyResponseWithResult:SPTPersistentCacheResponseCodeNotFound
+                                  callback:nil
+                                   onQueue:nil];
+
+    XCTAssertFalse(cache.test_didDispatchBlock);
+}
+
+- (void)testDispatchEmptyResponse
+{
+    SPTPersistentCacheForUnitTests * const cache = [self createCacheWithTimeCallback:^ NSTimeInterval(){
+        return kTestEpochTime;
+    } expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+
+    __weak XCTestExpectation * const expectation = [self expectationWithDescription:@"callback expectation"];
+    SPTPersistentCacheResponseCallback callback = ^(SPTPersistentCacheResponse *response){
+        XCTAssertNotNil(response);
+        XCTAssertNil(response.error);
+        XCTAssertNil(response.record);
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeNotFound);
+
+        [expectation fulfill];
+    };
+    [cache dispatchEmptyResponseWithResult:SPTPersistentCacheResponseCodeNotFound
+                                  callback:callback
+                                   onQueue:dispatch_get_main_queue()];
+
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    XCTAssertTrue(cache.test_didDispatchBlock);
+}
+
+- (void)testDispatchErrorWithNilCallbackDoesNothing
+{
+    SPTPersistentCacheForUnitTests * const cache = [self createCacheWithTimeCallback:^ NSTimeInterval(){
+        return kTestEpochTime;
+    } expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+
+    [cache dispatchError:[NSError errorWithDomain:SPTPersistentCacheErrorDomain code:0 userInfo:nil]
+                  result:SPTPersistentCacheResponseCodeOperationError
+                callback:nil
+                 onQueue:dispatch_get_main_queue()];
+
+    XCTAssertTrue(cache.test_didDispatchBlock == NO);
+}
+
+- (void)testDispatchError
+{
+    SPTPersistentCacheForUnitTests * const cache = [self createCacheWithTimeCallback:^ NSTimeInterval(){
+        return kTestEpochTime;
+    } expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+
+    NSError * const error = [NSError errorWithDomain:SPTPersistentCacheErrorDomain
+                                                code:SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader
+                                            userInfo:nil];
+
+    __weak XCTestExpectation * const expectation = [self expectationWithDescription:@"callback expectation"];
+    SPTPersistentCacheResponseCallback callback = ^(SPTPersistentCacheResponse *response){
+        XCTAssertNotNil(response);
+        XCTAssertEqualObjects(response.error, error);
+        XCTAssertNil(response.record);
+        XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationError);
+
+        [expectation fulfill];
+    };
+
+    [cache dispatchError:error
+                  result:SPTPersistentCacheResponseCodeOperationError
+                callback:callback
+                 onQueue:dispatch_get_main_queue()];
+
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    XCTAssertTrue(cache.test_didDispatchBlock);
+}
+
+#pragma mark Test Dispatching Blocks
+
+- (void)testQueueForNilProposedDispatchQueue
+{
+    XCTAssertEqual([self.cache queueForProposedDispatchQueue:nil], dispatch_get_main_queue());
+}
+
+- (void)testQueueForProposedDispatchQueueReturnsPropsosal
+{
+    dispatch_queue_t proposed = dispatch_queue_create("com.spotify.persistentcache.proposed-queue", DISPATCH_QUEUE_SERIAL);
+    XCTAssertEqual([self.cache queueForProposedDispatchQueue:proposed], proposed);
+}
+
+- (void)testDispatchBlockSync
+{
+    XCTAssertTrue([NSThread isMainThread]);
+
+    __block BOOL didExecuteBlock = NO;
+    dispatch_block_t block = ^{
+        didExecuteBlock = YES;
+    };
+
+    [self.cache dispatchBlock:block on:nil];
+
+    XCTAssertTrue(didExecuteBlock);
+}
+
+- (void)testDispatchBlockAsync
+{
+    XCTAssertTrue([NSThread isMainThread]);
+
+    __weak XCTestExpectation * const expecation = [self expectationWithDescription:@"block was executed"];
+    dispatch_block_t block = ^{
+        [expecation fulfill];
+    };
+
+    [self.cache dispatchBlock:block on:dispatch_queue_create("com.spotify.persistentcache.proposed-queue", DISPATCH_QUEUE_SERIAL)];
+
+    [self waitForExpectationsWithTimeout:2.0 handler:nil];
 }
 
 #pragma mark - Internal methods
@@ -1858,7 +2002,6 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
 
     return expectedSize;
 }
-
 
 @end
 
