@@ -81,6 +81,17 @@ FOUNDATION_EXPORT SPTPersistentCacheRecordHeader SPTPersistentCacheRecordHeaderM
  */
 FOUNDATION_EXPORT SPTPersistentCacheRecordHeader *SPTPersistentCacheGetHeaderFromData(void *data, size_t size);
 /**
+ * Function loads a header from a given file.
+ * @return nil if everything is ok, NSError object otherwise.
+ */
+FOUNDATION_EXPORT NSError* SPTPersistentCacheGetHeaderFromFileWithPath(NSString *filepath, SPTPersistentCacheRecordHeader *header);
+/**
+ * Function saves a header to a given file.
+ * @return nil if everything is ok, NSError object otherwise.
+ */
+FOUNDATION_EXPORT NSError* SPTPersistentCacheSetHeaderForFileWithPath(NSString *filepath, const SPTPersistentCacheRecordHeader *header);
+
+/**
  * Function validates header accoring to predefined rules used in production code.
  * @return -1 if everything is ok, otherwise one of codes from SPTPersistentCacheLoadingError.
  */

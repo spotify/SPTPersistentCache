@@ -74,6 +74,10 @@ typedef NS_ENUM(NSInteger, SPTPersistentCacheLoadingError) {
      */
     SPTPersistentCacheLoadingErrorRecordIsStreamAndBusy,
     /**
+     * The file attribute operation(read or write) failed.
+     */
+    SPTPersistentCacheLoadingErrorFileAttributeOperationFail,
+    /**
      * Something bad has happened that shouldn't.
      */
     SPTPersistentCacheLoadingErrorInternalInconsistency

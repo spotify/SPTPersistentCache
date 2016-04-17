@@ -110,7 +110,7 @@ static NSUInteger params_GetFilesNumber(BOOL locked);
 static NSUInteger params_GetCorruptedFilesNumber(void);
 static NSUInteger params_GetDefaultExpireFilesNumber(void);
 
-static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentCacheRecordHeader *header);
+static BOOL spt_test_ReadHeaderForFile(NSString* path, BOOL validate, SPTPersistentCacheRecordHeader *header);
 
 typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
@@ -805,7 +805,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
             NSString *fileName = [self.thisBundle pathForResource:self.imageNames[i] ofType:nil];
             NSData *data = [NSData dataWithContentsOfFile:fileName];
             XCTAssertNotNil(data, @"Data must be valid");
-            expectedSize += ([data length] + (NSUInteger)SPTPersistentCacheRecordHeaderSize);
+            expectedSize += [data length];
         }
     }
 
@@ -1092,7 +1092,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
         NSString *path = [fileManager pathForKey:self.imageNames[i]];
 
         SPTPersistentCacheRecordHeader header;
-        BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
+        BOOL opened = spt_test_ReadHeaderForFile(path, YES, &header);
         if (kParams[i].locked) {
             ++lockedCount;
             XCTAssertTrue(opened, @"Locked files expected to be at place");
@@ -1139,7 +1139,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
     for (unsigned i = 0; i < count && i < dropCount; ++i) {
         NSUInteger size = [self dataSizeForItem:self.imageNames[i]];
-        expectedSize -= (size + (NSUInteger)SPTPersistentCacheRecordHeaderSize);
+        expectedSize -= size;
         [savedItems addObject:self.imageNames[i]];
     }
 
@@ -1170,7 +1170,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
         NSString *path = [fileManager pathForKey:savedItems[i]];
         SPTPersistentCacheRecordHeader header;
-        BOOL opened = spt_test_ReadHeaderForFile(path.UTF8String, YES, &header);
+        BOOL opened = spt_test_ReadHeaderForFile(path, YES, &header);
         XCTAssertTrue(opened, @"Saved files expected to in place");
     }
 
@@ -1211,7 +1211,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
     // Check data
     SPTPersistentCacheRecordHeader header;
-    XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, YES, &header), @"Expect valid record");
+    XCTAssertTrue(spt_test_ReadHeaderForFile(path, YES, &header), @"Expect valid record");
     XCTAssertEqual(header.ttl, kTTL1, @"TTL must match");
     XCTAssertEqual(header.refCount, 1u, @"refCount must match");
 
@@ -1221,7 +1221,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     // Check data
-    XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, YES, &header), @"Expect valid record");
+    XCTAssertTrue(spt_test_ReadHeaderForFile(path, YES, &header), @"Expect valid record");
     XCTAssertEqual(header.ttl, kTTL2, @"TTL must match");
     XCTAssertEqual(header.refCount, 1u, @"refCount must match");
 
@@ -1231,7 +1231,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     // Check data
-    XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, YES, &header), @"Expect valid record");
+    XCTAssertTrue(spt_test_ReadHeaderForFile(path, YES, &header), @"Expect valid record");
     XCTAssertEqual(header.ttl, kTTL1, @"TTL must match");
     XCTAssertEqual(header.refCount, 0u, @"refCount must match");
 }
@@ -1834,29 +1834,10 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
 - (void)corruptFile:(NSString *)filePath
            pdcError:(int)pdcError
 {
-    int flags = O_RDWR;
-    if (pdcError == SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader) {
-        flags |= O_TRUNC;
-    }
-
-    int fd = open([filePath UTF8String], flags);
-    if (fd == -1) {
-        XCTAssert(fd != -1, @"Could not open file while trying to simulate corruption");
-        return;
-    }
-
     SPTPersistentCacheRecordHeader header;
     memset(&header, 0, (size_t)SPTPersistentCacheRecordHeaderSize);
-
-    if (pdcError != SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader) {
-
-        ssize_t readSize = read(fd, &header, (size_t)SPTPersistentCacheRecordHeaderSize);
-        if (readSize != (ssize_t)SPTPersistentCacheRecordHeaderSize) {
-            XCTAssert(readSize == (ssize_t)SPTPersistentCacheRecordHeaderSize, @"Header not read");
-            close(fd);
-            return;
-        }
-    }
+    NSError* headerGetError = SPTPersistentCacheGetHeaderFromFileWithPath(filePath, &header);
+    XCTAssertNil(headerGetError);
 
     NSUInteger headerSize = (NSUInteger)SPTPersistentCacheRecordHeaderSize;
 
@@ -1887,43 +1868,31 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
             NSAssert(NO, @"Gotcha!");
             break;
     }
-
-    off_t ret = lseek(fd, SEEK_SET, 0);
-    XCTAssert(ret != -1);
-
-    ssize_t written = write(fd, &header, headerSize);
-    XCTAssert(written == (ssize_t)headerSize, @"header was not written");
-    fsync(fd);
-    close(fd);
+    if (pdcError == SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader) {
+        // this error makes sense for legacy header only.
+        // here we remove the cached file if any and create a new one with truncated header.
+        NSMutableData* data = [NSMutableData dataWithBytes:&header length:headerSize];
+        NSError* error = nil;
+        [[NSFileManager defaultManager] removeItemAtPath:filePath error:&error];
+        XCTAssertNil(error);
+        XCTAssertTrue([[NSFileManager defaultManager] createFileAtPath:filePath contents:data attributes:nil]);
+    } else {
+        NSError* headerSetError = SPTPersistentCacheSetHeaderForFileWithPath(filePath, &header);
+        XCTAssertNil(headerSetError);
+    }
 }
 
 - (void)alterUpdateTime:(uint64_t)updateTime forFileAtPath:(NSString *)filePath
 {
-    int fd = open([filePath UTF8String], O_RDWR);
-    if (fd == -1) {
-        XCTAssert(fd != -1, @"Could open file for altering");
-        return;
-    }
-
     SPTPersistentCacheRecordHeader header;
-    memset(&header, 0, (size_t)SPTPersistentCacheRecordHeaderSize);
-
-    ssize_t readSize = read(fd, &header, (size_t)SPTPersistentCacheRecordHeaderSize);
-    if (readSize != (ssize_t)SPTPersistentCacheRecordHeaderSize) {
-        close(fd);
-        return;
-    }
+    NSError* headerGetError = SPTPersistentCacheGetHeaderFromFileWithPath(filePath, &header);
+    XCTAssertNil(headerGetError);
 
     header.updateTimeSec = updateTime;
     header.crc = SPTPersistentCacheCalculateHeaderCRC(&header);
 
-    off_t ret = lseek(fd, SEEK_SET, 0);
-    XCTAssert(ret != -1);
-
-    ssize_t written = write(fd, &header, (size_t)SPTPersistentCacheRecordHeaderSize);
-    XCTAssert(written == (ssize_t)SPTPersistentCacheRecordHeaderSize, @"header was not written");
-    fsync(fd);
-    close(fd);
+    NSError* headerSetError = SPTPersistentCacheSetHeaderForFileWithPath(filePath, &header);
+    XCTAssertNil(headerSetError);
 }
 
 - (SPTPersistentCacheForUnitTests *)createCacheWithTimeCallback:(SPTPersistentCacheCurrentTimeSecCallback)currentTime
@@ -1972,7 +1941,7 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
     XCTAssertNotNil(path, @"Path is nil");
     SPTPersistentCacheRecordHeader header;
     if (validate) {
-        XCTAssertTrue(spt_test_ReadHeaderForFile(path.UTF8String, validate, &header), @"Unable to read and validate header");
+        XCTAssertTrue(spt_test_ReadHeaderForFile(path, validate, &header), @"Unable to read and validate header");
         timeCheck(header.updateTimeSec);
     }
 }
@@ -1993,7 +1962,7 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
         if (kParams[i].corruptReason == SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader) {
             expectedSize += kCorruptedFileSize;
         } else {
-            expectedSize += ([self dataSizeForItem:self.imageNames[i]] + (NSUInteger)SPTPersistentCacheRecordHeaderSize);
+            expectedSize += ([self dataSizeForItem:self.imageNames[i]]);
         }
     }
 
@@ -2002,22 +1971,14 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
 
 @end
 
-static BOOL spt_test_ReadHeaderForFile(const char* path, BOOL validate, SPTPersistentCacheRecordHeader *header)
+static BOOL spt_test_ReadHeaderForFile(NSString* path, BOOL validate, SPTPersistentCacheRecordHeader *header)
 {
-    int fd = open(path, O_RDONLY);
-    if (fd == -1) {
+    NSError* headerGetError = SPTPersistentCacheGetHeaderFromFileWithPath(path, header);
+    if (headerGetError != nil) {
         return NO;
     }
 
     assert(header != NULL);
-    memset(header, 0, (size_t)SPTPersistentCacheRecordHeaderSize);
-
-    ssize_t readSize = read(fd, header, (size_t)SPTPersistentCacheRecordHeaderSize);
-    close(fd);
-
-    if (readSize != (ssize_t)SPTPersistentCacheRecordHeaderSize) {
-        return NO;
-    }
 
     if (validate && SPTPersistentCacheValidateHeader(header) != -1) {
         return NO;
