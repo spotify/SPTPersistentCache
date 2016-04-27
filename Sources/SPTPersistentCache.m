@@ -48,6 +48,19 @@ static NSString * const SPTDataCacheFileAttributesKey = @"SPTDataCacheFileAttrib
 
 static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 
+void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nullable dispatch_block_t block)
+{
+    if (!block) {
+        return;
+    }
+    const dispatch_queue_t dispatchQueue = queue ?: dispatch_get_main_queue();
+    if (dispatchQueue == dispatch_get_main_queue() && [NSThread isMainThread]) {
+        block();
+    } else {
+        dispatch_async(dispatchQueue, block);
+    }
+}
+
 // Class extension exists in SPTPersistentCache+Private.h
 
 #pragma mark - SPTPersistentCache
@@ -92,9 +105,9 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
     }
 
     callback = [callback copy];
-    [self dispatchBlock:^ {
+    [self doWork:^{
         [self loadDataForKeySync:key withCallback:callback onQueue:queue];
-    } on:self.workQueue];
+    }];
     return YES;
 }
 
@@ -107,7 +120,7 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
         return NO;
     }
 
-    [self dispatchBlock:^{
+    [self doWork:^{
         NSString *path = [self.dataCacheFileManager subDirectoryPathForKey:prefix];
         NSMutableArray * __block keys = [NSMutableArray array];
 
@@ -173,7 +186,7 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
         }
         
         [self loadDataForKeySync:keyToOpen withCallback:callback onQueue:queue];
-    } on:self.workQueue];
+    }];
 
     return YES;
 }
@@ -201,9 +214,9 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
     }
 
     callback = [callback copy];
-    [self dispatchBlock:^{
+    [self doWork:^{
         [self storeDataSync:data forKey:key ttl:ttl locked:locked withCallback:callback onQueue:queue];
-    } on:self.workQueue];
+    }];
     return YES;
 }
 
@@ -218,7 +231,7 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
     }
 
 
-    [self dispatchBlock:^{
+    [self doWork:^{
         NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
         BOOL __block expired = NO;
@@ -246,11 +259,11 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
         }
 
         if (callback) {
-            [self dispatchBlock:^ {
+            SPTPersistentCacheSafeDispatch(queue, ^{
                 callback(response);
-            } on:queue];
+            });
         }
-    } on:self.workQueue];
+    }];
 }
 
 - (void)removeDataForKeysSync:(NSArray<NSString *> *)keys
@@ -275,7 +288,7 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
         return NO;
     }
 
-    [self dispatchBlock:^{
+    [self doWork:^{
         for (NSString *key in keys) {
             NSString *filePath = [self.dataCacheFileManager pathForKey:key];
             BOOL __block expired = NO;
@@ -298,13 +311,13 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
                                                                        record:nil];
             }
             if (callback) {
-                [self dispatchBlock:^{
+                SPTPersistentCacheSafeDispatch(queue, ^{
                     callback(response);
-                } on:queue];
+                });
             }
             
         } // for
-    } on:self.workQueue];
+    }];
     return YES;
 }
 
@@ -316,7 +329,7 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
         return NO;
     }
 
-    [self dispatchBlock:^{
+    [self doWork:^{
         for (NSString *key in keys) {
             NSString *filePath = [self.dataCacheFileManager pathForKey:key];
             SPTPersistentCacheResponse *response = [self alterHeaderForFileAtPath:filePath
@@ -330,12 +343,12 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
                                                                         writeBack:YES
                                                                          complain:YES];
             if (callback) {
-                [self dispatchBlock:^{
+                SPTPersistentCacheSafeDispatch(queue, ^{
                     callback(response);
-                } on:queue];
+                });
             }
         } // for
-    } on:self.workQueue];
+    }];
     return YES;
 }
 
@@ -523,9 +536,9 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
             }
 
             // Callback only after we finished everyhing to avoid situation when user gets notified and we are still writting
-            [self dispatchBlock:^{
+            SPTPersistentCacheSafeDispatch(queue, ^{
                 callback(response);
-            } on:queue];
+            });
 
         } // if rawData
     } // file exist
@@ -572,7 +585,7 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
                                                                                                 error:nil
                                                                                                record:nil];
 
-            dispatch_async(queue, ^{
+            SPTPersistentCacheSafeDispatch(queue, ^{
                 callback(response);
             });
         }
@@ -831,12 +844,12 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
         return;
     }
 
-    [self dispatchBlock:^ {
+    SPTPersistentCacheSafeDispatch(queue, ^{
         SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:result
                                                                                             error:nil
                                                                                            record:nil];
         callback(response);
-    } on:queue];
+    });
 }
 
 - (void)dispatchError:(NSError *)error
@@ -848,12 +861,12 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
         return;
     }
 
-    [self dispatchBlock:^{
+    SPTPersistentCacheSafeDispatch(queue, ^{
         SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:result
                                                                                             error:error
                                                                                            record:nil];
         callback(response);
-    } on:queue];
+    });
 }
 
 - (void)debugOutput:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2)
@@ -988,22 +1001,9 @@ static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
     return [[NSDate date] timeIntervalSince1970];
 }
 
-#pragma mark SPTPersistentCache
-
-- (void)dispatchBlock:(dispatch_block_t)block on:(dispatch_queue_t)queue
+- (void)doWork:(dispatch_block_t)block
 {
-    const dispatch_queue_t dispatchQueue = [self queueForProposedDispatchQueue:queue];
-
-    if (dispatchQueue == dispatch_get_main_queue() && [NSThread isMainThread]) {
-        block();
-    } else {
-        dispatch_async(dispatchQueue, block);
-    }
-}
-
-- (dispatch_queue_t)queueForProposedDispatchQueue:(dispatch_queue_t)queue
-{
-    return queue ?: dispatch_get_main_queue();
+    SPTPersistentCacheSafeDispatch(self.workQueue, block);
 }
 
 @end

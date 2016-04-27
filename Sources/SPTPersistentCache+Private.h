@@ -25,6 +25,8 @@
 @class SPTPersistentCacheGarbageCollector;
 @class SPTPersistentCachePosixWrapper;
 
+void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nullable dispatch_block_t block);
+
 NS_ASSUME_NONNULL_BEGIN
 
 /// Private interface exposed for testability.
@@ -63,9 +65,7 @@ NS_ASSUME_NONNULL_BEGIN
              callback:(SPTPersistentCacheResponseCallback _Nullable)callback
               onQueue:(dispatch_queue_t _Nullable)queue;
 
-- (void)dispatchBlock:(dispatch_block_t)block on:(dispatch_queue_t _Nullable)queue;
-/// Returns an appropriate queue given the proposed queue. If `nil` is given the main queue will be returned.
-- (dispatch_queue_t)queueForProposedDispatchQueue:(dispatch_queue_t _Nullable)queue;
+- (void)doWork:(dispatch_block_t)block;
 
 @end
 

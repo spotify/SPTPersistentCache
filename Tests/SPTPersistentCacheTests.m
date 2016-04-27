@@ -122,7 +122,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 @property (nonatomic, strong, readwrite) SPTPersistentCachePosixWrapper *test_posixWrapper;
 @property (nonatomic, copy, readwrite) SPTPersistentCacheDebugCallback test_debugOutput;
 
-@property (nonatomic, assign) BOOL test_didDispatchBlock;
+@property (nonatomic, assign) BOOL test_didWork;
 @end
 
 @implementation SPTPersistentCacheForUnitTests
@@ -156,10 +156,10 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     }
 }
 
-- (void)dispatchBlock:(dispatch_block_t)block on:(dispatch_queue_t)queue
+- (void)doWork:(dispatch_block_t)block
 {
-    [super dispatchBlock:block on:queue];
-    self.test_didDispatchBlock = YES;
+    [super doWork:block];
+    self.test_didWork = YES;
 }
 
 @end
@@ -1684,7 +1684,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
                                   callback:nil
                                    onQueue:nil];
 
-    XCTAssertFalse(cache.test_didDispatchBlock);
+    XCTAssertFalse(cache.test_didWork);
 }
 
 - (void)testDispatchEmptyResponse
@@ -1707,7 +1707,6 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
                                    onQueue:dispatch_get_main_queue()];
 
     [self waitForExpectationsWithTimeout:0.5 handler:nil];
-    XCTAssertTrue(cache.test_didDispatchBlock);
 }
 
 - (void)testDispatchErrorWithNilCallbackDoesNothing
@@ -1721,7 +1720,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
                 callback:nil
                  onQueue:dispatch_get_main_queue()];
 
-    XCTAssertTrue(cache.test_didDispatchBlock == NO);
+    XCTAssertFalse(cache.test_didWork);
 }
 
 - (void)testDispatchError
@@ -1750,21 +1749,9 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
                  onQueue:dispatch_get_main_queue()];
 
     [self waitForExpectationsWithTimeout:0.5 handler:nil];
-    XCTAssertTrue(cache.test_didDispatchBlock);
 }
 
 #pragma mark Test Dispatching Blocks
-
-- (void)testQueueForNilProposedDispatchQueue
-{
-    XCTAssertEqual([self.cache queueForProposedDispatchQueue:nil], dispatch_get_main_queue());
-}
-
-- (void)testQueueForProposedDispatchQueueReturnsPropsosal
-{
-    dispatch_queue_t proposed = dispatch_queue_create("com.spotify.persistentcache.proposed-queue", DISPATCH_QUEUE_SERIAL);
-    XCTAssertEqual([self.cache queueForProposedDispatchQueue:proposed], proposed);
-}
 
 - (void)testDispatchBlockSync
 {
@@ -1773,9 +1760,10 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     __block BOOL didExecuteBlock = NO;
     dispatch_block_t block = ^{
         didExecuteBlock = YES;
+        XCTAssertTrue([NSThread isMainThread]);
     };
 
-    [self.cache dispatchBlock:block on:nil];
+    SPTPersistentCacheSafeDispatch(nil, block);
 
     XCTAssertTrue(didExecuteBlock);
 }
@@ -1783,13 +1771,22 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 - (void)testDispatchBlockAsync
 {
     XCTAssertTrue([NSThread isMainThread]);
+    
+    dispatch_queue_t queue = dispatch_queue_create("com.spotify.persistentcache.proposed-queue", DISPATCH_QUEUE_SERIAL);
+    
+    static const char qKey;
+    int qValue = 123;
+    dispatch_queue_set_specific(queue, &qKey, &qValue, NULL);
 
     __weak XCTestExpectation * const expecation = [self expectationWithDescription:@"block was executed"];
     dispatch_block_t block = ^{
+        int *ptr = dispatch_queue_get_specific(queue, &qKey);
+        XCTAssertTrue(ptr != NULL);
+        XCTAssertTrue(*ptr == 123);
         [expecation fulfill];
     };
 
-    [self.cache dispatchBlock:block on:dispatch_queue_create("com.spotify.persistentcache.proposed-queue", DISPATCH_QUEUE_SERIAL)];
+    SPTPersistentCacheSafeDispatch(queue, block);
 
     [self waitForExpectationsWithTimeout:2.0 handler:nil];
 }
