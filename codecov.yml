@@ -1,0 +1,16 @@
+coverage:
+  ignore:
+  - Pods/.*
+  - Applications/Xcode.app/.*
+  - ci/.*
+  - Carthage/.*
+  - build/.*
+  - Tests/.*
+  - .*Tests.m
+  status:
+    patch:
+      default:
+        target: '80'
+    project:
+      default:
+        target: auto
