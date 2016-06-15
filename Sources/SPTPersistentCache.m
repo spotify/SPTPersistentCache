@@ -48,11 +48,8 @@ static NSString * const SPTDataCacheFileAttributesKey = @"SPTDataCacheFileAttrib
 
 static const uint64_t SPTPersistentCacheTTLUpperBoundInSec = 86400 * 31 * 2;
 
-void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nullable dispatch_block_t block)
+void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull dispatch_block_t block)
 {
-    if (!block) {
-        return;
-    }
     const dispatch_queue_t dispatchQueue = queue ?: dispatch_get_main_queue();
     if (dispatchQueue == dispatch_get_main_queue() && [NSThread isMainThread]) {
         block();

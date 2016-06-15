@@ -25,7 +25,7 @@
 @class SPTPersistentCacheGarbageCollector;
 @class SPTPersistentCachePosixWrapper;
 
-void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nullable dispatch_block_t block);
+void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull dispatch_block_t block);
 
 NS_ASSUME_NONNULL_BEGIN
 
