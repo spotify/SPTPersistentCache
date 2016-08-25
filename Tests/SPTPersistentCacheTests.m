@@ -30,7 +30,6 @@
 #import <objc/runtime.h>
 
 #import <SPTPersistentCache/SPTPersistentCache.h>
-#import <SPTPersistentCache/SPTPersistentCache.h>
 #import <SPTPersistentCache/SPTPersistentCacheResponse.h>
 #import <SPTPersistentCache/SPTPersistentCacheRecord.h>
 
