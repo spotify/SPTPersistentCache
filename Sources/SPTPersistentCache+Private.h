@@ -67,6 +67,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)doWork:(dispatch_block_t)block;
 
+- (void)logTimingForKey:(NSString *)key method:(SPTPersistentCacheDebugMethodType)method type:(SPTPersistentCacheDebugTimingType)type;
+
 @end
 
 NS_ASSUME_NONNULL_END

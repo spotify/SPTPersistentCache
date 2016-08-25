@@ -110,6 +110,7 @@ static NSUInteger SPTGuardedPropertyValue(NSUInteger proposedValue, NSUInteger m
     copy.sizeConstraintBytes = self.sizeConstraintBytes;
 
     copy.debugOutput = self.debugOutput;
+    copy.timingCallback = self.timingCallback;
 
     return copy;
 }

@@ -33,6 +33,7 @@
 #import "SPTPersistentCachePosixWrapper.h"
 
 #include <sys/stat.h>
+#import <mach/mach_time.h>
 
 #include "crc32iso3309.h"
 
@@ -102,8 +103,11 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
     }
 
     callback = [callback copy];
+    [self logTimingForKey:key method:SPTPersistentCacheDebugMethodTypeRead type:SPTPersistentCacheDebugTimingTypeQueued];
     [self doWork:^{
+        [self logTimingForKey:key method:SPTPersistentCacheDebugMethodTypeRead type:SPTPersistentCacheDebugTimingTypeStarting];
         [self loadDataForKeySync:key withCallback:callback onQueue:queue];
+        [self logTimingForKey:key method:SPTPersistentCacheDebugMethodTypeRead type:SPTPersistentCacheDebugTimingTypeFinished];
     }];
     return YES;
 }
@@ -116,8 +120,9 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
     if (callback == nil || queue == nil || chooseKeyCallback == nil) {
         return NO;
     }
-
+    [self logTimingForKey:prefix method:SPTPersistentCacheDebugMethodTypeRead type:SPTPersistentCacheDebugTimingTypeQueued];
     [self doWork:^{
+        [self logTimingForKey:prefix method:SPTPersistentCacheDebugMethodTypeRead type:SPTPersistentCacheDebugTimingTypeStarting];
         NSString *path = [self.dataCacheFileManager subDirectoryPathForKey:prefix];
         NSMutableArray * __block keys = [NSMutableArray array];
 
@@ -183,6 +188,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
         }
         
         [self loadDataForKeySync:keyToOpen withCallback:callback onQueue:queue];
+        [self logTimingForKey:prefix method:SPTPersistentCacheDebugMethodTypeRead type:SPTPersistentCacheDebugTimingTypeFinished];
     }];
 
     return YES;
@@ -211,8 +217,11 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
     }
 
     callback = [callback copy];
+    [self logTimingForKey:key method:SPTPersistentCacheDebugMethodTypeStore type:SPTPersistentCacheDebugTimingTypeQueued];
     [self doWork:^{
+        [self logTimingForKey:key method:SPTPersistentCacheDebugMethodTypeStore type:SPTPersistentCacheDebugTimingTypeStarting];
         [self storeDataSync:data forKey:key ttl:ttl locked:locked withCallback:callback onQueue:queue];
+        [self logTimingForKey:key method:SPTPersistentCacheDebugMethodTypeStore type:SPTPersistentCacheDebugTimingTypeFinished];
     }];
     return YES;
 }
@@ -227,8 +236,9 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
         NSAssert(queue, @"You must specify the queue");
     }
 
-
+    [self logTimingForKey:key method:SPTPersistentCacheDebugMethodTypeStore type:SPTPersistentCacheDebugTimingTypeQueued];
     [self doWork:^{
+        [self logTimingForKey:key method:SPTPersistentCacheDebugMethodTypeStore type:SPTPersistentCacheDebugTimingTypeStarting];
         NSString *filePath = [self.dataCacheFileManager pathForKey:key];
 
         BOOL __block expired = NO;
@@ -260,6 +270,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
                 callback(response);
             });
         }
+        [self logTimingForKey:key method:SPTPersistentCacheDebugMethodTypeStore type:SPTPersistentCacheDebugTimingTypeFinished];
     }];
 }
 
@@ -272,8 +283,11 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
 
 - (void)removeDataForKeys:(NSArray<NSString *> *)keys
 {
+    [self logTimingForKey:[keys description] method:SPTPersistentCacheDebugMethodTypeRemove type:SPTPersistentCacheDebugTimingTypeQueued];
     dispatch_barrier_async(self.workQueue, ^{
+        [self logTimingForKey:[keys description] method:SPTPersistentCacheDebugMethodTypeRemove type:SPTPersistentCacheDebugTimingTypeStarting];
         [self removeDataForKeysSync:keys];
+        [self logTimingForKey:[keys description] method:SPTPersistentCacheDebugMethodTypeRemove type:SPTPersistentCacheDebugTimingTypeFinished];
     });
 }
 
@@ -284,8 +298,9 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
     if ((callback != nil && queue == nil) || keys.count == 0) {
         return NO;
     }
-
+    [self logTimingForKey:[keys description] method:SPTPersistentCacheDebugMethodTypeLock type:SPTPersistentCacheDebugTimingTypeQueued];
     [self doWork:^{
+        [self logTimingForKey:[keys description] method:SPTPersistentCacheDebugMethodTypeLock type:SPTPersistentCacheDebugTimingTypeStarting];
         for (NSString *key in keys) {
             NSString *filePath = [self.dataCacheFileManager pathForKey:key];
             BOOL __block expired = NO;
@@ -314,6 +329,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
             }
             
         } // for
+        [self logTimingForKey:[keys description] method:SPTPersistentCacheDebugMethodTypeLock type:SPTPersistentCacheDebugTimingTypeFinished];
     }];
     return YES;
 }
@@ -325,8 +341,9 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
     if ((callback != nil && queue == nil) || keys.count == 0) {
         return NO;
     }
-
+    [self logTimingForKey:[keys description] method:SPTPersistentCacheDebugMethodTypeUnlock type:SPTPersistentCacheDebugTimingTypeQueued];
     [self doWork:^{
+        [self logTimingForKey:[keys description] method:SPTPersistentCacheDebugMethodTypeUnlock type:SPTPersistentCacheDebugTimingTypeStarting];
         for (NSString *key in keys) {
             NSString *filePath = [self.dataCacheFileManager pathForKey:key];
             SPTPersistentCacheResponse *response = [self alterHeaderForFileAtPath:filePath
@@ -345,6 +362,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
                 });
             }
         } // for
+        [self logTimingForKey:[keys description] method:SPTPersistentCacheDebugMethodTypeUnlock type:SPTPersistentCacheDebugTimingTypeFinished];
     }];
     return YES;
 }
@@ -361,21 +379,30 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
 
 - (void)prune
 {
+    [self logTimingForKey:@"prune" method:SPTPersistentCacheDebugMethodTypeRemove type:SPTPersistentCacheDebugTimingTypeQueued];
     dispatch_barrier_async(self.workQueue, ^{
+        [self logTimingForKey:@"prune" method:SPTPersistentCacheDebugMethodTypeRemove type:SPTPersistentCacheDebugTimingTypeStarting];
         [self.dataCacheFileManager removeAllData];
+        [self logTimingForKey:@"prune" method:SPTPersistentCacheDebugMethodTypeRemove type:SPTPersistentCacheDebugTimingTypeFinished];
     });
 }
 
 - (void)wipeLockedFiles
 {
+    [self logTimingForKey:@"wipeLocked" method:SPTPersistentCacheDebugMethodTypeRemove type:SPTPersistentCacheDebugTimingTypeQueued];
     dispatch_barrier_async(self.workQueue, ^{
+        [self logTimingForKey:@"wipeLocked" method:SPTPersistentCacheDebugMethodTypeRemove type:SPTPersistentCacheDebugTimingTypeStarting];
         [self collectGarbageForceExpire:NO forceLocked:YES];
+        [self logTimingForKey:@"wipeLocked" method:SPTPersistentCacheDebugMethodTypeRemove type:SPTPersistentCacheDebugTimingTypeFinished];
     });
 }
 
 - (void)wipeNonLockedFiles{
+    [self logTimingForKey:@"wipeNonLocked" method:SPTPersistentCacheDebugMethodTypeRemove type:SPTPersistentCacheDebugTimingTypeQueued];
     dispatch_barrier_async(self.workQueue, ^{
+        [self logTimingForKey:@"wipeNonLocked" method:SPTPersistentCacheDebugMethodTypeRemove type:SPTPersistentCacheDebugTimingTypeStarting];
         [self collectGarbageForceExpire:YES forceLocked:NO];
+        [self logTimingForKey:@"wipeNonLocked" method:SPTPersistentCacheDebugMethodTypeRemove type:SPTPersistentCacheDebugTimingTypeFinished];
     });
 }
 
@@ -1001,6 +1028,15 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
 - (void)doWork:(dispatch_block_t)block
 {
     SPTPersistentCacheSafeDispatch(self.workQueue, block);
+}
+
+- (void)logTimingForKey:(NSString *)key method:(SPTPersistentCacheDebugMethodType)method type:(SPTPersistentCacheDebugTimingType)type
+{
+    if (self.options.timingCallback) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.options.timingCallback(key, method, type, mach_absolute_time());
+        });
+    }
 }
 
 @end

@@ -32,6 +32,22 @@ NS_ASSUME_NONNULL_BEGIN
  */
 typedef void (^SPTPersistentCacheDebugCallback)(NSString *message);
 
+typedef NS_ENUM(NSUInteger, SPTPersistentCacheDebugTimingType) {
+    SPTPersistentCacheDebugTimingTypeQueued = 0,
+    SPTPersistentCacheDebugTimingTypeStarting = 1,
+    SPTPersistentCacheDebugTimingTypeFinished = 2
+};
+
+typedef NS_ENUM(NSUInteger, SPTPersistentCacheDebugMethodType) {
+    SPTPersistentCacheDebugMethodTypeStore = 0,
+    SPTPersistentCacheDebugMethodTypeLock = 1,
+    SPTPersistentCacheDebugMethodTypeUnlock = 2,
+    SPTPersistentCacheDebugMethodTypeRemove = 3,
+    SPTPersistentCacheDebugMethodTypeRead = 4
+};
+
+typedef void (^SPTPersistentCacheDebugTimingCallback)(NSString *key, SPTPersistentCacheDebugMethodType method, SPTPersistentCacheDebugTimingType type, uint64_t machTime);
+
 
 #pragma mark - Garbage Collection Constants
 
@@ -126,6 +142,8 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
  *  to a thread safe for you.
  */
 @property (nonatomic, copy, nullable) SPTPersistentCacheDebugCallback debugOutput;
+
+@property (nonatomic, copy, nullable) SPTPersistentCacheDebugTimingCallback timingCallback;
 
 @end
 
