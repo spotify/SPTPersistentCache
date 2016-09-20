@@ -38,7 +38,7 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
 
 - (instancetype)initWithCache:(SPTPersistentCache *)cache
                       options:(SPTPersistentCacheOptions *)options
-                        queue:(dispatch_queue_t)queue
+                        queue:(NSOperationQueue *)queue
 {
     self = [super init];
     if (self) {
@@ -64,7 +64,7 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
 - (void)enqueueGarbageCollection:(NSTimer *)timer
 {
     __weak __typeof(self) const weakSelf = self;
-    dispatch_barrier_async(self.queue, ^{
+    NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
         // We want to shadow `self` in this case.
         _Pragma("clang diagnostic push");
         _Pragma("clang diagnostic ignored \"-Wshadow\"");
@@ -75,7 +75,10 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
 
         [cache runRegularGC];
         [cache pruneBySize];
-    });
+    }];
+    operation.queuePriority = self.options.garbageCollectionPriority;
+    operation.qualityOfService = self.options.garbageCollectionQualityOfService;
+    [self.queue addOperation:operation];
 }
 
 - (void)schedule

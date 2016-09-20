@@ -55,6 +55,15 @@ static NSUInteger SPTGuardedPropertyValue(NSUInteger proposedValue, NSUInteger m
         _garbageCollectionInterval = SPTPersistentCacheDefaultGCIntervalSec;
         _defaultExpirationPeriod = SPTPersistentCacheDefaultExpirationTimeSec;
         _sizeConstraintBytes = SPTPersistentCacheDefaultCacheSizeInBytes;
+        _maxConcurrentOperations = NSOperationQueueDefaultMaxConcurrentOperationCount;
+        _writePriority = NSOperationQueuePriorityNormal;
+        _writeQualityOfService = NSQualityOfServiceDefault;
+        _readPriority = NSOperationQueuePriorityNormal;
+        _readQualityOfService = NSQualityOfServiceDefault;
+        _deletePriority = NSOperationQueuePriorityNormal;
+        _deleteQualityOfService = NSQualityOfServiceDefault;
+        _garbageCollectionPriority = NSOperationQueuePriorityLow;
+        _garbageCollectionQualityOfService = NSQualityOfServiceBackground;
     }
 
     return self;
