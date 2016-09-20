@@ -37,7 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy, readonly, nullable) SPTPersistentCacheDebugCallback debugOutput;
 
 /// Serial queue used to run all internal stuff
-@property (nonatomic, strong, readonly) dispatch_queue_t workQueue;
+@property (nonatomic, strong, readonly) NSOperationQueue *workQueue;
 
 @property (nonatomic, strong, readonly) NSFileManager *fileManager;
 @property (nonatomic, strong, readonly) SPTPersistentCacheFileManager *dataCacheFileManager;
@@ -65,7 +65,7 @@ NS_ASSUME_NONNULL_BEGIN
              callback:(SPTPersistentCacheResponseCallback _Nullable)callback
               onQueue:(dispatch_queue_t _Nullable)queue;
 
-- (void)doWork:(dispatch_block_t)block;
+- (void)doWork:(void (^)(void))block priority:(NSOperationQueuePriority)priority qos:(NSQualityOfService)qos;
 
 - (void)logTimingForKey:(NSString *)key method:(SPTPersistentCacheDebugMethodType)method type:(SPTPersistentCacheDebugTimingType)type;
 

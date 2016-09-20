@@ -27,25 +27,38 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - Callback Types
 
 /**
- *  Type of callback that can be used ot get debug messages from cache.
+ *  Type of callback that can be used to get debug messages from cache.
  *  @param message The debug message.
  */
 typedef void (^SPTPersistentCacheDebugCallback)(NSString *message);
 
+/**
+ * The different states that provide recording of timing.
+ */
 typedef NS_ENUM(NSUInteger, SPTPersistentCacheDebugTimingType) {
-    SPTPersistentCacheDebugTimingTypeQueued = 0,
-    SPTPersistentCacheDebugTimingTypeStarting = 1,
-    SPTPersistentCacheDebugTimingTypeFinished = 2
+    SPTPersistentCacheDebugTimingTypeQueued,
+    SPTPersistentCacheDebugTimingTypeStarting,
+    SPTPersistentCacheDebugTimingTypeFinished
 };
 
+/**
+ * The operation types that support recording of timing.
+ */
 typedef NS_ENUM(NSUInteger, SPTPersistentCacheDebugMethodType) {
-    SPTPersistentCacheDebugMethodTypeStore = 0,
-    SPTPersistentCacheDebugMethodTypeLock = 1,
-    SPTPersistentCacheDebugMethodTypeUnlock = 2,
-    SPTPersistentCacheDebugMethodTypeRemove = 3,
-    SPTPersistentCacheDebugMethodTypeRead = 4
+    SPTPersistentCacheDebugMethodTypeStore,
+    SPTPersistentCacheDebugMethodTypeLock,
+    SPTPersistentCacheDebugMethodTypeUnlock,
+    SPTPersistentCacheDebugMethodTypeRemove,
+    SPTPersistentCacheDebugMethodTypeRead
 };
 
+/**
+ *  Type of callback that can be used to get information on the execution time of various methods.
+ *  @param key The cache key for the item
+ *  @param method Which cache method this callback is refering to
+ *  @param type Which state at which this timing was recorded
+ *  @param machTime The absolute mach time
+ */
 typedef void (^SPTPersistentCacheDebugTimingCallback)(NSString *key, SPTPersistentCacheDebugMethodType method, SPTPersistentCacheDebugTimingType type, uint64_t machTime);
 
 
@@ -111,6 +124,38 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
  */
 @property (nonatomic, assign) BOOL useDirectorySeparation;
 
+#pragma mark Priority Options
+
+/**
+ * Max concurrent operations that the cache can perform. Defaults to NSOperationQueueDefaultMaxConcurrentOperationCount.
+ */
+@property (nonatomic) NSInteger maxConcurrentOperations;
+/**
+ * The queue priority for writes. Will also be used for touch and lock. Defaults to NSOperationQueuePriorityNormal.
+ */
+@property (nonatomic) NSOperationQueuePriority writePriority;
+/**
+ * The queue priority for reads. Defaults to NSOperationQueuePriorityNormal.
+ */
+@property (nonatomic) NSOperationQueuePriority readPriority;
+/**
+ * The queue priority for deletes. Will also be used for unlock, prune, and wipe. Defaults to NSOperationQueuePriorityNormal.
+ */
+@property (nonatomic) NSOperationQueuePriority deletePriority;
+
+/**
+ * The queue quality of service for writes. Will also be used for touch and lock. Defaults to NSQualityOfServiceDefault.
+ */
+@property (nonatomic) NSQualityOfService writeQualityOfService;
+/**
+ * The queue quality of service for reads. Defaults to NSQualityOfServiceDefault.
+ */
+@property (nonatomic) NSQualityOfService readQualityOfService;
+/**
+ * The queue quality of service for deletes. Will also be used for unlock, prune, and wipe. Defaults to NSQualityOfServiceDefault.
+ */
+@property (nonatomic) NSQualityOfService deleteQualityOfService;
+
 #pragma mark Garbage Collection Options
 
 /**
@@ -133,6 +178,14 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
  *  @note Defaults to `0` (unbounded).
  */
 @property (nonatomic, assign) NSUInteger sizeConstraintBytes;
+/**
+ * The queue priority for garbage collection. Defaults to NSOperationQueuePriorityLow.
+ */
+@property (nonatomic) NSOperationQueuePriority garbageCollectionPriority;
+/**
+ * The queue quality of service for garbage collection. Defaults to NSQualityOfServiceBackground.
+ */
+@property (nonatomic) NSQualityOfService garbageCollectionQualityOfService;
 
 #pragma mark Debugging
 
@@ -143,6 +196,11 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
  */
 @property (nonatomic, copy, nullable) SPTPersistentCacheDebugCallback debugOutput;
 
+/**
+ *  Callback used to supply debug/internal information on queue and execution times for caching operations.
+ *  @warning The block might be executed on any thread or queue. Make sure your code is thread-safe or dispatches out
+ *  to a thread safe for you.
+ */
 @property (nonatomic, copy, nullable) SPTPersistentCacheDebugTimingCallback timingCallback;
 
 @end

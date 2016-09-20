@@ -138,7 +138,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         NSUInteger row = (NSUInteger)indexPath.row;
 
-        [self.cache removeDataForKeys:@[ self.objects[row] ]];
+        [self.cache removeDataForKeys:@[ self.objects[row] ] callback:nil onQueue:nil];
         [self.objects removeObjectAtIndex:row];
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
     } else if (editingStyle == UITableViewCellEditingStyleInsert) {
