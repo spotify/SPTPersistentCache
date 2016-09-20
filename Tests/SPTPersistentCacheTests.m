@@ -116,7 +116,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 @interface SPTPersistentCacheForUnitTests : SPTPersistentCache
 @property (nonatomic, copy) SPTPersistentCacheCurrentTimeSecCallback timeIntervalCallback;
 
-@property (nonatomic, strong, readwrite) dispatch_queue_t test_workQueue;
+@property (nonatomic, strong, readwrite) NSOperationQueue *test_workQueue;
 @property (nonatomic, strong, readwrite) NSFileManager *test_fileManager;
 @property (nonatomic, strong, readwrite) SPTPersistentCachePosixWrapper *test_posixWrapper;
 @property (nonatomic, copy, readwrite) SPTPersistentCacheDebugCallback test_debugOutput;
@@ -126,7 +126,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
 @implementation SPTPersistentCacheForUnitTests
 
-- (dispatch_queue_t)workQueue
+- (NSOperationQueue *)workQueue
 {
     return self.test_workQueue ?: super.workQueue;
 }
@@ -155,9 +155,9 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     }
 }
 
-- (void)doWork:(dispatch_block_t)block
+- (void)doWork:(void (^)(void))block priority:(NSOperationQueuePriority)priority qos:(NSQualityOfService)qos
 {
-    [super doWork:block];
+    [super doWork:block priority:priority qos:qos];
     self.test_didWork = YES;
 }
 
@@ -205,10 +205,10 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     }
 
     @autoreleasepool {
-        NSUInteger count = self.imageNames.count;
-        if (count > 1) {
-            for (NSUInteger oldIdx = 0; oldIdx < count - 1; ++oldIdx) {
-                NSUInteger remainingCount = count - oldIdx;
+        NSUInteger imageCount = self.imageNames.count;
+        if (imageCount > 1) {
+            for (NSUInteger oldIdx = 0; oldIdx < imageCount - 1; ++oldIdx) {
+                NSUInteger remainingCount = imageCount - oldIdx;
                 NSUInteger exchangeIdx = oldIdx + arc4random_uniform((u_int32_t)remainingCount);
                 [self.imageNames exchangeObjectAtIndex:oldIdx withObjectAtIndex:exchangeIdx];
             }
@@ -543,33 +543,42 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
         return kTestEpochTime + SPTPersistentCacheDefaultExpirationTimeSec - 1;
     }
                                                        expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
-
-    [cache removeDataForKeys:self.imageNames];
-
+    __weak XCTestExpectation *removeExpectation = [self expectationWithDescription:@"remove"];
     NSUInteger __block calls = 0;
+    const NSUInteger imageCount = self.imageNames.count;
 
-    const NSUInteger count = self.imageNames.count;
-
-    for (NSUInteger i = 0; i < count; ++i) {
-
+    NSMutableArray *expectations = [NSMutableArray arrayWithCapacity:imageCount];
+    for (NSUInteger i = 0; i < imageCount; ++i) {
         NSString *cacheKey = self.imageNames[i];
         __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
-
-        // This just give us guarantee that files should be deleted
-        [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
-            calls += 1;
-            XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeNotFound, @"We expect file wouldn't be found after removing");
-            XCTAssertNil(response.record, @"Expected valid nil record");
-            XCTAssertNil(response.error, @"error is not expected to be here");
-            [exp fulfill];
-        } onQueue:dispatch_get_main_queue()];
+        [expectations addObject:exp];
     }
+
+    [cache removeDataForKeys:self.imageNames callback:^(SPTPersistentCacheResponse * _Nonnull response) {
+        [removeExpectation fulfill];
+        const NSUInteger count = self.imageNames.count;
+
+        for (NSUInteger i = 0; i < count; ++i) {
+
+            NSString *cacheKey = self.imageNames[i];
+
+            // This just give us guarantee that files should be deleted
+            [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *loadResponse) {
+                calls += 1;
+                XCTAssertEqual(loadResponse.result, SPTPersistentCacheResponseCodeNotFound, @"We expect file wouldn't be found after removing");
+                XCTAssertNil(loadResponse.record, @"Expected valid nil record");
+                XCTAssertNil(loadResponse.error, @"error is not expected to be here");
+                [expectations[i] fulfill];
+            } onQueue:dispatch_get_main_queue()];
+        }
+    } onQueue:dispatch_get_main_queue()];
+
 
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
     XCTAssert(calls == self.imageNames.count, @"Number of checked files must match");
 
-    // Check file syste, that there are no files left
+    // Check file system, that there are no files left
     NSUInteger files = [self getFilesNumberAtPath:self.cachePath];
     XCTAssertEqual(files, 0u, @"There shouldn't be files left");
 }
@@ -586,30 +595,35 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
         return kTestEpochTime + SPTPersistentCacheDefaultExpirationTimeSec - 1;
     }
                                                        expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
-
-    [cache prune];
-
-    NSUInteger __block calls = 0;
-
     const NSUInteger count = self.imageNames.count;
 
+    NSMutableArray *expectations = [NSMutableArray arrayWithCapacity:count];
     for (NSUInteger i = 0; i < count; ++i) {
-
         NSString *cacheKey = self.imageNames[i];
         __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
-
-        // This just give us guarantee that files should be deleted
-        [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
-
-            calls += 1;
-
-            XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeNotFound, @"We expect file wouldn't be found after removing");
-            XCTAssertNil(response.record, @"Expected valid nil record");
-            XCTAssertNil(response.error, @"error is not expected to be here");
-
-            [exp fulfill];
-        } onQueue:dispatch_get_main_queue()];
+        [expectations addObject:exp];
     }
+    NSUInteger __block calls = 0;
+    [cache pruneWithCallback:^(SPTPersistentCacheResponse * _Nonnull response) {
+        for (NSUInteger i = 0; i < count; ++i) {
+
+            NSString *cacheKey = self.imageNames[i];
+
+            // This just give us guarantee that files should be deleted
+            [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *loadResponse) {
+
+                calls += 1;
+
+                XCTAssertEqual(loadResponse.result, SPTPersistentCacheResponseCodeNotFound, @"We expect file wouldn't be found after removing");
+                XCTAssertNil(loadResponse.record, @"Expected valid nil record");
+                XCTAssertNil(loadResponse.error, @"error is not expected to be here");
+                
+                [expectations[i] fulfill];
+            } onQueue:dispatch_get_main_queue()];
+        }
+    } onQueue:dispatch_get_main_queue()];
+
+
 
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
@@ -636,9 +650,13 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
         return kTestEpochTime;
     }
                                                        expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
-
-    [cache wipeLockedFiles];
-
+    const NSUInteger count = self.imageNames.count;
+    NSMutableArray *expectations = [NSMutableArray arrayWithCapacity:count];
+    for (NSUInteger i = 0; i < count; ++i) {
+        NSString *cacheKey = self.imageNames[i];
+        __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
+        [expectations addObject:exp];
+    }
     NSUInteger __block calls = 0;
     NSUInteger __block notFoundCalls = 0;
     NSUInteger __block errorCalls = 0;
@@ -646,41 +664,41 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     BOOL __block locked = NO;
     const NSUInteger reallyLocked = params_GetFilesNumber(YES);
 
-    const NSUInteger count = self.imageNames.count;
+    [cache wipeLockedFilesWithCallback:^(SPTPersistentCacheResponse * _Nonnull response) {
+        for (unsigned i = 0; i < count; ++i) {
+            NSString *cacheKey = self.imageNames[i];
 
-    for (unsigned i = 0; i < count; ++i) {
-        NSString *cacheKey = self.imageNames[i];
-        __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
+            [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *loadResponse) {
+                calls += 1;
 
-        [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
-            calls += 1;
+                if (loadResponse.result == SPTPersistentCacheResponseCodeOperationSucceeded) {
+                    XCTAssertNotNil(loadResponse.record, @"Expected valid not nil record");
+                    ImageClass *image = [[ImageClass alloc] initWithData:loadResponse.record.data];
+                    XCTAssertNotNil(image, @"Expected valid not nil image");
+                    XCTAssertNil(loadResponse.error, @"error is not expected to be here");
 
-            if (response.result == SPTPersistentCacheResponseCodeOperationSucceeded) {
-                XCTAssertNotNil(response.record, @"Expected valid not nil record");
-                ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
-                XCTAssertNotNil(image, @"Expected valid not nil image");
-                XCTAssertNil(response.error, @"error is not expected to be here");
+                    locked = loadResponse.record.refCount > 0;
+                    XCTAssertEqual(kParams[i].locked, locked, @"Same files must be locked");
+                    XCTAssertEqual(kParams[i].ttl, loadResponse.record.ttl, @"Same files must have same TTL");
+                    XCTAssertEqualObjects(self.imageNames[i], loadResponse.record.key, @"Same files must have same key");
+                } else if (loadResponse.result == SPTPersistentCacheResponseCodeNotFound) {
+                    XCTAssertNil(loadResponse.record, @"Expected valid nil record");
+                    XCTAssertNil(loadResponse.error, @"error is not expected to be here");
+                    notFoundCalls += 1;
+                } else if (loadResponse.result == SPTPersistentCacheResponseCodeOperationError) {
+                    XCTAssertNil(loadResponse.record, @"Expected valid nil record");
+                    XCTAssertNotNil(loadResponse.error, @"Valid error is expected to be here");
+                    errorCalls += 1;
 
-                locked = response.record.refCount > 0;
-                XCTAssertEqual(kParams[i].locked, locked, @"Same files must be locked");
-                XCTAssertEqual(kParams[i].ttl, response.record.ttl, @"Same files must have same TTL");
-                XCTAssertEqualObjects(self.imageNames[i], response.record.key, @"Same files must have same key");
-            } else if (response.result == SPTPersistentCacheResponseCodeNotFound) {
-                XCTAssertNil(response.record, @"Expected valid nil record");
-                XCTAssertNil(response.error, @"error is not expected to be here");
-                notFoundCalls += 1;
-            } else if (response.result == SPTPersistentCacheResponseCodeOperationError) {
-                XCTAssertNil(response.record, @"Expected valid nil record");
-                XCTAssertNotNil(response.error, @"Valid error is expected to be here");
-                errorCalls += 1;
+                } else {
+                    XCTAssert(NO, @"Unexpected result code on LOAD");
+                }
+                
+                [expectations[i] fulfill];
+            } onQueue:dispatch_get_main_queue()];
+        }
 
-            } else {
-                XCTAssert(NO, @"Unexpected result code on LOAD");
-            }
-
-            [exp fulfill];
-        } onQueue:dispatch_get_main_queue()];
-    }
+    } onQueue:dispatch_get_main_queue()];
 
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
@@ -707,7 +725,13 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     }
                                                        expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
 
-    [cache wipeNonLockedFiles];
+    const NSUInteger count = self.imageNames.count;
+    NSMutableArray *expectations = [NSMutableArray arrayWithCapacity:count];
+    for (NSUInteger i = 0; i < count; ++i) {
+        NSString *cacheKey = self.imageNames[i];
+        __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
+        [expectations addObject:exp];
+    }
 
     NSUInteger __block calls = 0;
     NSUInteger __block notFoundCalls = 0;
@@ -716,44 +740,43 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     // +1 stands for SPTPersistentCacheLoadingErrorWrongPayloadSize since technically it has corrent header.
     const NSUInteger reallyUnlocked = params_GetFilesNumber(NO) + 1;
 
-    const NSUInteger count = self.imageNames.count;
+    [cache wipeNonLockedFilesWithCallback:^(SPTPersistentCacheResponse * _Nonnull response) {
+        for (unsigned i = 0; i < count; ++i) {
 
-    for (unsigned i = 0; i < count; ++i) {
-        
-        NSString *cacheKey = self.imageNames[i];
-        __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
+            NSString *cacheKey = self.imageNames[i];
 
-        [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *response) {
-            calls += 1;
+            [cache loadDataForKey:cacheKey withCallback:^(SPTPersistentCacheResponse *loadResponse) {
+                calls += 1;
 
-            if (response.result == SPTPersistentCacheResponseCodeOperationSucceeded) {
-                XCTAssertNotNil(response.record, @"Expected valid not nil record");
-                ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
-                XCTAssertNotNil(image, @"Expected valid not nil image");
-                XCTAssertNil(response.error, @"error is not expected to be here");
+                if (loadResponse.result == SPTPersistentCacheResponseCodeOperationSucceeded) {
+                    XCTAssertNotNil(loadResponse.record, @"Expected valid not nil record");
+                    ImageClass *image = [[ImageClass alloc] initWithData:loadResponse.record.data];
+                    XCTAssertNotNil(image, @"Expected valid not nil image");
+                    XCTAssertNil(loadResponse.error, @"error is not expected to be here");
 
-                unlocked = response.record.refCount == 0;
-                XCTAssertEqual(kParams[i].locked, !unlocked, @"Same files must be locked");
-                XCTAssertEqual(kParams[i].ttl, response.record.ttl, @"Same files must have same TTL");
-                XCTAssertEqualObjects(self.imageNames[i], response.record.key, @"Same files must have same key");
-            } else if (response.result == SPTPersistentCacheResponseCodeNotFound) {
-                XCTAssertNil(response.record, @"Expected valid nil record");
-                XCTAssertNil(response.error, @"error is not expected to be here");
-                notFoundCalls += 1;
+                    unlocked = loadResponse.record.refCount == 0;
+                    XCTAssertEqual(kParams[i].locked, !unlocked, @"Same files must be locked");
+                    XCTAssertEqual(kParams[i].ttl, loadResponse.record.ttl, @"Same files must have same TTL");
+                    XCTAssertEqualObjects(self.imageNames[i], loadResponse.record.key, @"Same files must have same key");
+                } else if (loadResponse.result == SPTPersistentCacheResponseCodeNotFound) {
+                    XCTAssertNil(loadResponse.record, @"Expected valid nil record");
+                    XCTAssertNil(loadResponse.error, @"error is not expected to be here");
+                    notFoundCalls += 1;
 
-            } else if (response.result == SPTPersistentCacheResponseCodeOperationError) {
-                XCTAssertNil(response.record, @"Expected valid nil record");
-                XCTAssertNotNil(response.error, @"Valid error is expected to be here");
+                } else if (loadResponse.result == SPTPersistentCacheResponseCodeOperationError) {
+                    XCTAssertNil(loadResponse.record, @"Expected valid nil record");
+                    XCTAssertNotNil(loadResponse.error, @"Valid error is expected to be here");
+
+                    errorCalls += 1;
+
+                } else {
+                    XCTAssert(NO, @"Unexpected result code on LOAD");
+                }
                 
-                errorCalls += 1;
-
-            } else {
-                XCTAssert(NO, @"Unexpected result code on LOAD");
-            }
-
-            [exp fulfill];
-        } onQueue:dispatch_get_main_queue()];
-    }
+                [expectations[i] fulfill];
+            } onQueue:dispatch_get_main_queue()];
+        }
+    } onQueue:dispatch_get_main_queue()];
 
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 
@@ -1270,46 +1293,43 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     NSFileManagerMock *fileManager = [NSFileManagerMock new];
     fileManager.mock_contentsOfDirectoryAtPaths = @{};
     self.cache.test_fileManager = fileManager;
-    self.cache.test_workQueue = dispatch_get_main_queue();
 
-    __block BOOL called = NO;
+    __weak XCTestExpectation * const expectation = [self expectationWithDescription:@"callback expectation"];
     [self.cache loadDataForKeysWithPrefix:@"T"
                         chooseKeyCallback:^ NSString *(NSArray *keys) {
                             return keys.firstObject;
                         }
                              withCallback:^(SPTPersistentCacheResponse *response) {
                                  XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationError);
-                                 called = YES;
+                                 [expectation fulfill];
                              }
                                   onQueue:dispatch_get_main_queue()];
-    XCTAssertTrue(called);
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 }
 
 - (void)testNotFoundIfCacheDirectoryIsDeleted
 {
-    self.cache.test_workQueue = dispatch_get_main_queue();
     [[NSFileManager defaultManager] removeItemAtPath:self.cachePath error:nil];
-    __block BOOL called = NO;
+    __weak XCTestExpectation * const expectation = [self expectationWithDescription:@"callback expectation"];
     [self.cache loadDataForKeysWithPrefix:@"T" chooseKeyCallback:^ NSString *(NSArray *keys) {
         return keys.firstObject;
     } withCallback:^ (SPTPersistentCacheResponse *response) {
         XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeNotFound);
-        called = YES;
+        [expectation fulfill];
     } onQueue:dispatch_get_main_queue()];
-    XCTAssertTrue(called);
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 }
 
 - (void)testNoValidKeys
 {
-    self.cache.test_workQueue = dispatch_get_main_queue();
-    __block BOOL called = NO;
+    __weak XCTestExpectation * const expectation = [self expectationWithDescription:@"callback expectation"];
     [self.cache loadDataForKeysWithPrefix:@"T" chooseKeyCallback:^ NSString *(NSArray *keys) {
         return keys.firstObject;
     } withCallback:^ (SPTPersistentCacheResponse *response) {
         XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeNotFound);
-        called = YES;
+        [expectation fulfill];
     } onQueue:dispatch_get_main_queue()];
-    XCTAssertTrue(called);
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 }
 
 - (void)testTouchDataWithExpiredHeader
@@ -1401,7 +1421,6 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
 - (void)testErrorWhenCannotReadFile
 {
-    self.cache.test_workQueue = dispatch_get_main_queue();
     NSString *key = self.imageNames.firstObject;
     Method originalMethod = class_getClassMethod(NSMutableData.class, @selector(dataWithContentsOfFile:options:error:));
     IMP originalMethodImplementation = method_getImplementation(originalMethod);
@@ -1409,12 +1428,12 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
         return nil;
     });
     method_setImplementation(originalMethod, fakeMethodImplementation);
-    __block BOOL called = NO;
+    __weak XCTestExpectation * const expectation = [self expectationWithDescription:@"callback expectation"];
     [self.cache loadDataForKey:key withCallback:^(SPTPersistentCacheResponse *response) {
-        called = YES;
         XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationError);
+        [expectation fulfill];
     } onQueue:dispatch_get_main_queue()];
-    XCTAssertTrue(called);
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
     method_setImplementation(originalMethod, originalMethodImplementation);
 }
 
@@ -1426,7 +1445,6 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
 - (void)testWriteToHeaderFailed
 {
-    self.cache.test_workQueue = dispatch_get_main_queue();
     NSString *key = self.imageNames.firstObject;
     Method originalMethod = class_getInstanceMethod(NSData.class, @selector(writeToFile:options:error:));
     IMP originalMethodImplementation = method_getImplementation(originalMethod);
@@ -1434,31 +1452,30 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
         return nil;
     });
     method_setImplementation(originalMethod, fakeMethodImplementation);
-    __block BOOL called = NO;
+    __weak XCTestExpectation * const expectation = [self expectationWithDescription:@"callback expectation"];
     [self.cache loadDataForKey:key withCallback:^(SPTPersistentCacheResponse *response) {
-        called = YES;
         XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationSucceeded);
+        [expectation fulfill];
     } onQueue:dispatch_get_main_queue()];
-    XCTAssertTrue(called);
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
     method_setImplementation(originalMethod, originalMethodImplementation);
 }
 
 - (void)testWriteFailedOnStoreData
 {
-    self.cache.test_workQueue = dispatch_get_main_queue();
     Method originalMethod = class_getInstanceMethod(NSData.class, @selector(writeToFile:options:error:));
     IMP originalMethodImplementation = method_getImplementation(originalMethod);
     IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
         return nil;
     });
     method_setImplementation(originalMethod, fakeMethodImplementation);
-    __block BOOL called = NO;
+    __weak XCTestExpectation * const expectation = [self expectationWithDescription:@"callback expectation"];
     NSData *tmpData = [@"TEST" dataUsingEncoding:NSUTF8StringEncoding];
     [self.cache storeData:tmpData forKey:@"TEST" locked:NO withCallback:^(SPTPersistentCacheResponse *response) {
-        called = YES;
         XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeOperationError);
+        [expectation fulfill];
     } onQueue:dispatch_get_main_queue()];
-    XCTAssertTrue(called);
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
     method_setImplementation(originalMethod, originalMethodImplementation);
 }
 
@@ -1551,21 +1568,26 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
 - (void)testStoreLargeTTL
 {
-    self.cache.test_workQueue = dispatch_get_main_queue();
-    __block BOOL called = NO;
-    self.cache.test_debugOutput = ^(NSString *output) {
-        called = YES;
-    };
+    __weak XCTestExpectation * const expectation = [self expectationWithDescription:@"callback expectation"];
     NSString *key = @"TEST";
     NSData *testData = [@"TEST" dataUsingEncoding:NSUTF8StringEncoding];
     [self.cache storeData:testData
                    forKey:key
                       ttl:86400 * 31 * 2 * 2
                    locked:NO
-             withCallback:nil
-                  onQueue:nil];
+             withCallback:^(SPTPersistentCacheResponse *response) {
+                 [expectation fulfill];
+             }
+                  onQueue:dispatch_get_main_queue()];
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+    
+    __weak XCTestExpectation * const debugExpectation = [self expectationWithDescription:@"debug expectation"];
+    self.cache.test_debugOutput = ^(NSString *output) {
+        [debugExpectation fulfill];
+    };
     [self.cache touchDataForKey:key callback:nil onQueue:nil];
-    XCTAssertTrue(called);
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
+
 }
 
 - (void)testWipeAllFiles
@@ -1607,7 +1629,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     self.cache.test_debugOutput = ^(NSString *output) {
         called = YES;
     };
-    self.cache.test_workQueue = dispatch_get_main_queue();
+    //TODO not sure why self.cache.test_workQueue = dispatch_get_main_queue();
     NSData *data = [@"TEST" dataUsingEncoding:NSUTF8StringEncoding];
     [self.cache storeData:data
                    forKey:@"TEST"
@@ -1624,7 +1646,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
 - (void)testStatFailure
 {
-    self.cache.test_workQueue = dispatch_get_main_queue();
+    //TODO not sure why self.cache.test_workQueue = dispatch_get_main_queue();
     NSData *data = [@"TEST" dataUsingEncoding:NSUTF8StringEncoding];
     [self.cache storeData:data
                    forKey:@"TEST"
