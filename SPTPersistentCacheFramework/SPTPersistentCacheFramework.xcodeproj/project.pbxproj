@@ -294,7 +294,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = SPTPersistentCache;
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = Spotify;
 				TargetAttributes = {
 					0520219B1C737DBE003A4FB4 = {
