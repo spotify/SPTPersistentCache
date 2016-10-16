@@ -11,7 +11,7 @@
 
 Everyone tries to implement a cache at some point in their app’s lifecycle, and this is ours. This is a library that allows people to cache `NSData` with time to live (TTL) values and semantics for disk management.
 
-- [x] 📱 iOS 7.0+
+- [x] 📱 iOS 8.0+
 - [x] 💻 OS X 10.9+
 
 ## Architecture :triangular_ruler:
