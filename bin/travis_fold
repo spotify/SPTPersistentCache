@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2016 Spotify AB.
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+# Make sure we can execute this even if the `TRAVIS` variable isn’t set. It should default to false.
+: "${TRAVIS:=false}"
+
+# Manipulate a Travis-CI group folding.
+#
+# @param $1 The type of fold action. Valid options are "start" and "end".
+# @param $2 The name of the fold, needs to match an already opened fold.
+# @param $3 The header which should be shown on the first line of the group.
+travis_fold() {
+	if [ "$TRAVIS" == "true" ]; then
+		local action="$1"
+		local name="$2"
+		local heading="$3"
+		echo -en "travis_fold:${action}:${name}\r\033[0K${heading}\n"
+	fi
+}
+
+travis_fold "$1" "$2" "$3"
