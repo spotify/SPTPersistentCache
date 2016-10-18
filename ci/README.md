@@ -35,9 +35,11 @@ To bring in upstream changes later:
 
 ```shell
 $ git fetch -p ios-ci
-$ git merge -Xsubtree=ci/ ios-ci/master
+$ git merge --squash -s subtree --no-commit -Xsubtree=ci/ ios-ci/master
 $ git reset
 ```
+
+You might have to fix some merge conflicts. If so resolve the conflicts like any other git merge conflicts and then `git add` the file to mark it as resolved.
 
 ## Configuring
 First of all you’ll need to copy the provided sample [`Gemfile`](sample/Gemfile) to the repository root, or append it’s list of gem’s to your existing one. And then update them so the CI system will know which version to use.
@@ -56,6 +58,7 @@ The important environment variables you need to have set are:
 
 | **Environment variable**      	| **Description**                                                                            	|
 |--------------------------------	|--------------------------------------------------------------------------------------------	|
+| `PROJECT_NAME`                  | The name of the project/module, used for deployment.                                       	|
 | `PROJECT`                      	| Which Xcode project file to use when building.                                             	|
 | `SCHEME`                       	| Which Xcode scheme to use.                                                                 	|
 | `BUILD_ACTIONS`                	| The build actions that should be passed to `xcodebuild`, e.g. `build` or `build test`.     	|

@@ -29,5 +29,5 @@ brew install carthage
 travis_fold_close "Install dependencies"
 
 travis_fold_open "Archive" "Creating release archive…"
-carthage build --no-skip-current && carthage archive SPTDataLoader
+carthage build --no-skip-current && carthage archive "$PROJECT_NAME"
 travis_fold_close "Archive"
