@@ -1,13 +1,11 @@
 language: bash
 sudo: required
 os:
+  - linux
   - osx
-branches:
-  only:
-    - master
 install:
-  - ./ci/install.sh
+  - ./build/install.sh
 script:
-  - ./ci/build.sh
+  - ./build/build.sh
 notifications:
   email: false
