@@ -42,15 +42,13 @@
 
 - (void)runRegularGC
 {
-    NSString *queueName = [NSOperationQueue currentQueue].name;
-    self.wasCalledFromIncorrectQueue = queueName ? ![queueName isEqualToString:self.queue.name] : YES;
+    self.wasCalledFromIncorrectQueue = ![[NSOperationQueue currentQueue].name isEqual:self.queue.name];
     self.wasRunRegularGCCalled = (YES && !self.wasPruneBySizeCalled);
 }
 
 - (void)pruneBySize
 {
-    NSString *queueName = [NSOperationQueue currentQueue].name;
-    self.wasCalledFromIncorrectQueue = queueName ? ![queueName isEqualToString:self.queue.name] : YES;
+    self.wasCalledFromIncorrectQueue = ![[NSOperationQueue currentQueue].name isEqual:self.queue.name];
     self.wasPruneBySizeCalled = (YES && self.wasRunRegularGCCalled);
     [self.testExpectation fulfill];
 }
