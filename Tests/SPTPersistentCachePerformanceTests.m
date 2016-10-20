@@ -134,13 +134,15 @@ static const int SPTPersistentCachePerformanceIterationCount = 200;
             case SPTPersistentCacheDebugMethodTypeRead:
                 timings = self.readTimings;
                 break;
-            default:
+            case SPTPersistentCacheDebugMethodTypeRemove:
+            case SPTPersistentCacheDebugMethodTypeStore:
+            case SPTPersistentCacheDebugMethodTypeLock:
                 break;
         }
         if (timings == nil) {
             return;
         }
-        NSUInteger index = [[key stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\n(),"]] intValue];
+        NSUInteger index = (NSUInteger)[[key stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\n(),"]] integerValue];
         SPTPersistentCacheTiming *timing = timings[index];
         if ([[NSNull null] isEqual:timing]) {
             timing = [[SPTPersistentCacheTiming alloc] init];
@@ -156,8 +158,6 @@ static const int SPTPersistentCachePerformanceIterationCount = 200;
                 break;
             case SPTPersistentCacheDebugTimingTypeFinished:
                 timing.endTime = machTime;
-                break;
-            default:
                 break;
         }
     };
