@@ -101,7 +101,11 @@ static const int SPTPersistentCachePerformanceIterationCount = 200;
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     for (NSString *fileName in fileNames) {
         NSString *filePath = [bundle pathForResource:fileName ofType:nil];
-        [self.fileContents addObject:[NSData dataWithContentsOfFile:filePath]];
+        NSData *fileData = [NSData dataWithContentsOfFile:filePath];
+        if (!fileData) {
+            fileData = [NSData data];
+        }
+        [self.fileContents addObject:fileData];
     }
 
 
@@ -136,7 +140,7 @@ static const int SPTPersistentCachePerformanceIterationCount = 200;
         if (timings == nil) {
             return;
         }
-        int index = [[key stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\n(),"]] intValue];
+        NSUInteger index = [[key stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\n(),"]] intValue];
         SPTPersistentCacheTiming *timing = timings[index];
         if ([[NSNull null] isEqual:timing]) {
             timing = [[SPTPersistentCacheTiming alloc] init];
@@ -152,6 +156,8 @@ static const int SPTPersistentCachePerformanceIterationCount = 200;
                 break;
             case SPTPersistentCacheDebugTimingTypeFinished:
                 timing.endTime = machTime;
+                break;
+            default:
                 break;
         }
     };
@@ -171,10 +177,10 @@ static const int SPTPersistentCachePerformanceIterationCount = 200;
 - (void)testUnlockPlusReads
 {
     //Load with data & lock
-    for (int i = 0; i < SPTPersistentCachePerformanceIterationCount; i++) {
-        int fileIndex = i % self.fileContents.count;
+    for (NSUInteger i = 0; i < SPTPersistentCachePerformanceIterationCount; i++) {
+        NSUInteger fileIndex = i % self.fileContents.count;
         NSData *data = self.fileContents[fileIndex];
-        NSString *key = [NSString stringWithFormat:@"%d", i];
+        NSString *key = [NSString stringWithFormat:@"%lu", (unsigned long)i];
         __weak XCTestExpectation *expectation = [self expectationWithDescription:[NSString stringWithFormat:@"%@ store", key]];
         [self.dataCache storeData:data forKey:key locked:YES withCallback:^(SPTPersistentCacheResponse * _Nonnull response) {
             [expectation fulfill];
