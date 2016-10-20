@@ -36,6 +36,7 @@
 		698B70721C7538B000BDBFEA /* f50512901688b79a7852999d384d097a71fad788 in Resources */ = {isa = PBXBuildFile; fileRef = 698B70611C7538B000BDBFEA /* f50512901688b79a7852999d384d097a71fad788 */; };
 		698B70731C7538B000BDBFEA /* f7501f27f70162a9a7da196c5d2ece3151a2d80a in Resources */ = {isa = PBXBuildFile; fileRef = 698B70621C7538B000BDBFEA /* f7501f27f70162a9a7da196c5d2ece3151a2d80a */; };
 		698B70741C7538B000BDBFEA /* fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c in Resources */ = {isa = PBXBuildFile; fileRef = 698B70631C7538B000BDBFEA /* fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c */; };
+		772B8BF11D6DE879008E7347 /* SPTPersistentCachePerformanceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 772B8BF01D6DE879008E7347 /* SPTPersistentCachePerformanceTests.m */; };
 		9C9E70711C78D39900E1CBE6 /* SPTPersistentCacheObjectDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C9E70701C78D39900E1CBE6 /* SPTPersistentCacheObjectDescription.m */; };
 		9C9E70731C78D5AA00E1CBE6 /* SPTPersistentCacheObjectDescriptionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C9E70721C78D5AA00E1CBE6 /* SPTPersistentCacheObjectDescriptionTests.m */; };
 		9C9E70761C78FD9700E1CBE6 /* SPTPersistentCacheObjectDescriptionStyleValidator.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C9E70751C78FD9700E1CBE6 /* SPTPersistentCacheObjectDescriptionStyleValidator.m */; };
@@ -103,7 +104,7 @@
 		696CD7841C4707E20071DD18 /* crc32iso3309.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = crc32iso3309.c; sourceTree = "<group>"; };
 		696CD7851C4707E20071DD18 /* crc32iso3309.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crc32iso3309.h; sourceTree = "<group>"; };
 		696CD7861C4707E20071DD18 /* SPTPersistentCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCache.m; sourceTree = "<group>"; };
-		696CD7871C4707E20071DD18 /* SPTPersistentCacheOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = SPTPersistentCacheOptions.m; sourceTree = "<group>"; };
+		696CD7871C4707E20071DD18 /* SPTPersistentCacheOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = SPTPersistentCacheOptions.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		696CD7911C4707EA0071DD18 /* SPTPersistentCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = SPTPersistentCache.h; sourceTree = "<group>"; };
 		696CD7931C4707EA0071DD18 /* SPTPersistentCacheOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = SPTPersistentCacheOptions.h; sourceTree = "<group>"; };
 		696CD7941C4707EA0071DD18 /* SPTPersistentCacheHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheHeader.h; sourceTree = "<group>"; };
@@ -124,6 +125,7 @@
 		698B70611C7538B000BDBFEA /* f50512901688b79a7852999d384d097a71fad788 */ = {isa = PBXFileReference; lastKnownFileType = file; path = f50512901688b79a7852999d384d097a71fad788; sourceTree = "<group>"; };
 		698B70621C7538B000BDBFEA /* f7501f27f70162a9a7da196c5d2ece3151a2d80a */ = {isa = PBXFileReference; lastKnownFileType = file; path = f7501f27f70162a9a7da196c5d2ece3151a2d80a; sourceTree = "<group>"; };
 		698B70631C7538B000BDBFEA /* fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c */ = {isa = PBXFileReference; lastKnownFileType = file; path = fc22d4f65c1ba875f6bb5ba7d35a7fd12851ed5c; sourceTree = "<group>"; };
+		772B8BF01D6DE879008E7347 /* SPTPersistentCachePerformanceTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCachePerformanceTests.m; sourceTree = "<group>"; };
 		9C882A801C65422700D463BB /* project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = project.xcconfig; sourceTree = "<group>"; };
 		9C882A811C65422700D463BB /* spotify_os.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = spotify_os.xcconfig; sourceTree = "<group>"; };
 		9C96612C1CC0FC7B00E6F04D /* SPTPersistentCacheFileManager+Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SPTPersistentCacheFileManager+Private.h"; sourceTree = "<group>"; };
@@ -216,6 +218,7 @@
 				0510FF6A1BA3073D00ED0766 /* SPTPersistentCacheTests.m */,
 				C41237071C6A29FB00C1E9B8 /* SPTPersistentCacheGarbageCollectorTests.m */,
 				C4B98D1A1C7B5CB900E1B9A3 /* SPTPersistentCacheDebugUtilitiesTests.m */,
+				772B8BF01D6DE879008E7347 /* SPTPersistentCachePerformanceTests.m */,
 				050076A71C7A2B57000819B5 /* Mocks */,
 				698B70521C7538B000BDBFEA /* Resources */,
 				0510FF231BA2FF7A00ED0766 /* Supporting Files */,
@@ -465,6 +468,7 @@
 				9C9E70761C78FD9700E1CBE6 /* SPTPersistentCacheObjectDescriptionStyleValidator.m in Sources */,
 				C41237081C6A29FB00C1E9B8 /* SPTPersistentCacheGarbageCollectorTests.m in Sources */,
 				C413BA071C71E2DC002D41FB /* NSError+SPTPersistentCacheDomainErrorsTests.m in Sources */,
+				772B8BF11D6DE879008E7347 /* SPTPersistentCachePerformanceTests.m in Sources */,
 				C4B4148F1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m in Sources */,
 				C48AE7411C75BB8300814D7D /* SPTPersistentCacheFileManagerTests.m in Sources */,
 				9C9E70731C78D5AA00E1CBE6 /* SPTPersistentCacheObjectDescriptionTests.m in Sources */,

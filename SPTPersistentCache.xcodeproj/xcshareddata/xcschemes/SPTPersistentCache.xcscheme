@@ -51,6 +51,11 @@
                BlueprintName = "SPTPersistentCacheTests"
                ReferencedContainer = "container:SPTPersistentCache.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "SPTPersistentCachePerformanceTests">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
       <MacroExpansion>
