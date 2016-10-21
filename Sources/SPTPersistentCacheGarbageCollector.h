@@ -33,7 +33,7 @@
 /**
  *  Dispatch queue where the operations will take place.
  */
-@property (nonatomic, strong, readonly) dispatch_queue_t queue;
+@property (nonatomic, strong, readonly) NSOperationQueue *queue;
 
 /**
  *  Returns YES if the internal timer of proxy is scheduled to perform garbage collection of the cache.
@@ -45,11 +45,11 @@
  *  
  *  @param cache Persistent Cache that will be used for garbage collection operations.
  *  @param options Cache options to configure this garbage collector.
- *  @param queue Dispatch queue where the operations will take place.
+ *  @param queue NSOperation queue where the operations will take place.
  */
 - (instancetype)initWithCache:(SPTPersistentCache *)cache
                       options:(SPTPersistentCacheOptions *)options
-                        queue:(dispatch_queue_t)queue;
+                        queue:(NSOperationQueue *)queue;
 
 /**
  *  Schedules the garbage collection operation.

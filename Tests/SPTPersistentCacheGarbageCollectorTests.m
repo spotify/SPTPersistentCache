@@ -31,7 +31,7 @@
 
 
 @interface SPTPersistentCacheForTimerProxyUnitTests : SPTPersistentCache
-@property (nonatomic, strong) dispatch_queue_t queue;
+@property (nonatomic, strong) NSOperationQueue *queue;
 @property (nonatomic, weak) XCTestExpectation *testExpectation;
 @property (nonatomic, assign) BOOL wasCalledFromIncorrectQueue;
 @property (nonatomic, assign) BOOL wasRunRegularGCCalled;
@@ -42,13 +42,13 @@
 
 - (void)runRegularGC
 {
-    self.wasCalledFromIncorrectQueue = (dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL) != dispatch_queue_get_label(self.queue));
+    self.wasCalledFromIncorrectQueue = ![[NSOperationQueue currentQueue].name isEqual:self.queue.name];
     self.wasRunRegularGCCalled = (YES && !self.wasPruneBySizeCalled);
 }
 
 - (void)pruneBySize
 {
-    self.wasCalledFromIncorrectQueue = (dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL) != dispatch_queue_get_label(self.queue));
+    self.wasCalledFromIncorrectQueue = ![[NSOperationQueue currentQueue].name isEqual:self.queue.name];
     self.wasPruneBySizeCalled = (YES && self.wasRunRegularGCCalled);
     [self.testExpectation fulfill];
 }
@@ -59,7 +59,7 @@
 @property (nonatomic, strong) SPTPersistentCacheOptions *options;
 @property (nonatomic, strong) SPTPersistentCacheGarbageCollector *garbageCollector;
 @property (nonatomic, strong) SPTPersistentCache *cache;
-@property (nonatomic, strong) dispatch_queue_t dispatchQueue;
+@property (nonatomic, strong) NSOperationQueue *operationQueue;
 @end
 
 @implementation SPTPersistentCacheGarbageCollectorTests
@@ -72,18 +72,19 @@
     
     self.options = [SPTPersistentCacheOptions new];
     
-    self.dispatchQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
+    self.operationQueue = [[NSOperationQueue alloc] init];
+    self.operationQueue.name = @"cacheQueue";
     
     self.garbageCollector = [[SPTPersistentCacheGarbageCollector alloc] initWithCache:self.cache
                                                                               options:self.options
-                                                                                queue:self.dispatchQueue];
+                                                                                queue:self.operationQueue];
 }
 
 - (void)testDesignatedInitializer
 {
     __strong SPTPersistentCache *strongCache = self.garbageCollector.cache;
     
-    XCTAssertEqual(self.garbageCollector.queue, self.dispatchQueue);
+    XCTAssertEqual(self.garbageCollector.queue, self.operationQueue);
     XCTAssertEqualObjects(strongCache, self.cache);
     XCTAssertNil(self.garbageCollector.timer);
 }
