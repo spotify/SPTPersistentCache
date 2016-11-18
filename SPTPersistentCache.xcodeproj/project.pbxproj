@@ -101,6 +101,7 @@
 		0595F3381C50117B0052328B /* SPTPersistentCacheGarbageCollector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheGarbageCollector.h; sourceTree = "<group>"; };
 		0595F3391C50117B0052328B /* SPTPersistentCacheGarbageCollector.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheGarbageCollector.m; sourceTree = "<group>"; };
 		0595F33B1C5011E30052328B /* SPTPersistentCache+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SPTPersistentCache+Private.h"; sourceTree = "<group>"; };
+		05C0B6531DDF7F9C00DDC99A /* CHANGELOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		696CD7841C4707E20071DD18 /* crc32iso3309.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = crc32iso3309.c; sourceTree = "<group>"; };
 		696CD7851C4707E20071DD18 /* crc32iso3309.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crc32iso3309.h; sourceTree = "<group>"; };
 		696CD7861C4707E20071DD18 /* SPTPersistentCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCache.m; sourceTree = "<group>"; };
@@ -250,6 +251,7 @@
 				055725EE1C651EF200EF6787 /* CONTRIBUTING.md */,
 				055725ED1C651ED600EF6787 /* LICENSE */,
 				055725EB1C6519B700EF6787 /* README.md */,
+				05C0B6531DDF7F9C00DDC99A /* CHANGELOG.md */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
