@@ -12,7 +12,7 @@
 Everyone tries to implement a cache at some point in their app’s lifecycle, and this is ours. This is a library that allows people to cache `NSData` with time to live (TTL) values and semantics for disk management.
 
 - [x] 📱 iOS 8.0+
-- [x] 💻 OS X 10.9+
+- [x] 💻 OS X 10.10+
 
 ## Architecture :triangular_ruler:
 `SPTPersistentCache` is designed as an LRU cache which makes use of the file system to store files as well as inserting a cache header into each file. This cache header allows us to track the TTL, last updated time, the redundancy check and more. This allows the cache to know how often a file is accessed, when it was made, whether it has become corrupt and allows decisions to be made on whether the cache is stale.
@@ -34,7 +34,7 @@ $ gem install cocoapods
 ```
 Then simply add `SPTPersistentCache` to your `Podfile`.
 ```
-pod 'SPTPersistentCache', '~> 1.0'
+pod 'SPTPersistentCache', '~> 1.1.0'
 ```
 Lastly let CocoaPods do its thing by running:
 ```shell
@@ -49,7 +49,7 @@ $ brew install carthage
 ```
 You will also need to add `SPTPersistentCache` to your `Cartfile`:
 ```
-github 'spotify/SPTPersistentCache' ~> 1.0
+github 'spotify/SPTPersistentCache' ~> 1.1.0
 ```
 After that is all said and done, let Carthage pull in SPTPersistentCache like so:
 ```shell

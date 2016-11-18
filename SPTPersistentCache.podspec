@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
     s.name         = "SPTPersistentCache"
-    s.version      = "1.0.0"
+    s.version      = "1.1.0"
     s.summary      = "SPTPersistentCache is a fast, binary, LRU cache used in the Spotify iOS app"
 
     s.description  = <<-DESC
@@ -10,8 +10,8 @@ Pod::Spec.new do |s|
                         with TTL values and semantics for disk management.
                      DESC
 
-    s.ios.deployment_target = "7.0"
-    s.osx.deployment_target = "10.8"
+    s.ios.deployment_target = "8.0"
+    s.osx.deployment_target = "10.10"
 
     s.homepage          = "https://github.com/spotify/SPTPersistentCache"
     s.social_media_url  = "https://twitter.com/spotifyeng"
