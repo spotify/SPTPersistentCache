@@ -53,7 +53,7 @@ typedef NS_ENUM(NSInteger, SPTPersistentCacheResponseCode) {
 @interface SPTPersistentCacheResponse : NSObject
 
 /**
- * @see SPTPersistentCacheResponseCode
+ * @seealso SPTPersistentCacheResponseCode
  */
 @property (nonatomic, assign, readonly) SPTPersistentCacheResponseCode result;
 /**
@@ -62,7 +62,7 @@ typedef NS_ENUM(NSInteger, SPTPersistentCacheResponseCode) {
 @property (nonatomic, strong, readonly, nullable) NSError *error;
 /**
  * The record of the cached data, if found.
- * @see SPTPersistentCacheRecord
+ * @seealso SPTPersistentCacheRecord
  */
 @property (nonatomic, strong, readonly, nullable) SPTPersistentCacheRecord *record;
 
