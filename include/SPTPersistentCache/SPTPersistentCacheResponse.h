@@ -58,7 +58,7 @@ typedef NS_ENUM(NSInteger, SPTPersistentCacheResponseCode) {
  */
 @property (nonatomic, assign, readonly) SPTPersistentCacheResponseCode result;
 /**
- * Defines error of response, if appliable.
+ * Defines error of response, if applicable.
  */
 @property (nonatomic, strong, readonly, nullable) NSError *error;
 /**
