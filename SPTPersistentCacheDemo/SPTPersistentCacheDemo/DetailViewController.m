@@ -52,7 +52,8 @@
                                             NSLog(@"Failed: %@", response.error);
                                             return;
                                         }
-                                        self.detailImageView.image = [UIImage imageWithData:response.record.data];
+                                        NSData *imageData = response.record.data;
+                                        self.detailImageView.image = [UIImage imageWithData:imageData];
                                     }
                                          onQueue:dispatch_get_main_queue()];
     }

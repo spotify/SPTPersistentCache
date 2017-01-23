@@ -111,7 +111,7 @@ static const int SPTPersistentCachePerformanceIterationCount = 200;
 
     self.unLockTimings = [NSMutableArray arrayWithCapacity:SPTPersistentCachePerformanceIterationCount];
     self.readTimings = [NSMutableArray arrayWithCapacity:SPTPersistentCachePerformanceIterationCount];
-    for (int i = 0; i < SPTPersistentCachePerformanceIterationCount; i++) {
+    for (NSUInteger i = 0; i < SPTPersistentCachePerformanceIterationCount; i++) {
         self.unLockTimings[i] = (SPTPersistentCacheTiming *)[NSNull null];
         self.readTimings[i] = (SPTPersistentCacheTiming *)[NSNull null];
     }

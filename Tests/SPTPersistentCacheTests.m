@@ -287,7 +287,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
             if (response.result == SPTPersistentCacheResponseCodeOperationSucceeded) {
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
-                ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
+                ImageClass *image = [[ImageClass alloc] initWithData:(NSData *)response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
                 XCTAssertNil(response.error, @"error is not expected to be here");
 
@@ -364,7 +364,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
         if (response.result == SPTPersistentCacheResponseCodeOperationSucceeded) {
             XCTAssertNotNil(response.record, @"Expected valid not nil record");
-            ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
+            ImageClass *image = [[ImageClass alloc] initWithData:(NSData *)response.record.data];
             XCTAssertNotNil(image, @"Expected valid not nil image");
             XCTAssertNil(response.error, @"error is not expected to be here");
 
@@ -500,7 +500,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
             if (response.result == SPTPersistentCacheResponseCodeOperationSucceeded) {
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
-                ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
+                ImageClass *image = [[ImageClass alloc] initWithData:(NSData *)response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
                 XCTAssertNil(response.error, @"error is not expected to be here");
 
@@ -673,7 +673,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
                 if (loadResponse.result == SPTPersistentCacheResponseCodeOperationSucceeded) {
                     XCTAssertNotNil(loadResponse.record, @"Expected valid not nil record");
-                    ImageClass *image = [[ImageClass alloc] initWithData:loadResponse.record.data];
+                    ImageClass *image = [[ImageClass alloc] initWithData:(NSData *)loadResponse.record.data];
                     XCTAssertNotNil(image, @"Expected valid not nil image");
                     XCTAssertNil(loadResponse.error, @"error is not expected to be here");
 
@@ -750,7 +750,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
                 if (loadResponse.result == SPTPersistentCacheResponseCodeOperationSucceeded) {
                     XCTAssertNotNil(loadResponse.record, @"Expected valid not nil record");
-                    ImageClass *image = [[ImageClass alloc] initWithData:loadResponse.record.data];
+                    ImageClass *image = [[ImageClass alloc] initWithData:(NSData *)loadResponse.record.data];
                     XCTAssertNotNil(image, @"Expected valid not nil image");
                     XCTAssertNil(loadResponse.error, @"error is not expected to be here");
 
@@ -899,7 +899,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
             if (response.result == SPTPersistentCacheResponseCodeOperationSucceeded) {
                 ++successCalls;
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
-                ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
+                ImageClass *image = [[ImageClass alloc] initWithData:(NSData *)response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
                 XCTAssertNil(response.error, @"error is not expected to be here");
 
@@ -963,7 +963,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
             if (response.result == SPTPersistentCacheResponseCodeOperationSucceeded) {
                 ++successCalls;
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
-                ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
+                ImageClass *image = [[ImageClass alloc] initWithData:(NSData *)response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
                 XCTAssertNil(response.error, @"error is not expected to be here");
 
@@ -1055,7 +1055,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
             if (response.result == SPTPersistentCacheResponseCodeOperationSucceeded) {
                 ++successCalls;
                 XCTAssertNotNil(response.record, @"Expected valid not nil record");
-                ImageClass *image = [[ImageClass alloc] initWithData:response.record.data];
+                ImageClass *image = [[ImageClass alloc] initWithData:(NSData *)response.record.data];
                 XCTAssertNotNil(image, @"Expected valid not nil image");
                 XCTAssertNil(response.error, @"error is not expected to be here");
 
