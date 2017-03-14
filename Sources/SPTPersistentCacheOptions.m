@@ -27,6 +27,7 @@
 const NSUInteger SPTPersistentCacheDefaultExpirationTimeSec = 10 * 60;
 const NSUInteger SPTPersistentCacheDefaultGCIntervalSec = 6 * 60 + 3;
 const NSUInteger SPTPersistentCacheDefaultCacheSizeInBytes = 0; // unbounded
+const double SPTPersistentCacheDefaultMinFreeDiskSpaceFraction = 0.1; // 10% of total disk size
 
 const NSUInteger SPTPersistentCacheMinimumGCIntervalLimit = 60;
 const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
@@ -55,6 +56,7 @@ static NSUInteger SPTGuardedPropertyValue(NSUInteger proposedValue, NSUInteger m
         _garbageCollectionInterval = SPTPersistentCacheDefaultGCIntervalSec;
         _defaultExpirationPeriod = SPTPersistentCacheDefaultExpirationTimeSec;
         _sizeConstraintBytes = SPTPersistentCacheDefaultCacheSizeInBytes;
+        _minimumFreeDiskSpaceFraction = SPTPersistentCacheDefaultMinFreeDiskSpaceFraction;
         _maxConcurrentOperations = NSOperationQueueDefaultMaxConcurrentOperationCount;
         _writePriority = NSOperationQueuePriorityNormal;
         _writeQualityOfService = NSQualityOfServiceDefault;
@@ -117,6 +119,7 @@ static NSUInteger SPTGuardedPropertyValue(NSUInteger proposedValue, NSUInteger m
     copy.garbageCollectionInterval = self.garbageCollectionInterval;
     copy.defaultExpirationPeriod = self.defaultExpirationPeriod;
     copy.sizeConstraintBytes = self.sizeConstraintBytes;
+    copy.minimumFreeDiskSpaceFraction = self.minimumFreeDiskSpaceFraction;
 
     copy.debugOutput = self.debugOutput;
     copy.timingCallback = self.timingCallback;
