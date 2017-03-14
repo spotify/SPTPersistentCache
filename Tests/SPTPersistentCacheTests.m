@@ -871,6 +871,18 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     XCTAssertFalse(cache.garbageCollector.isGarbageCollectionScheduled);
 }
 
+- (void)testEnqueueGargabeCollection
+{
+    SPTPersistentCache *cache = [self createCacheWithTimeCallback:^NSTimeInterval{
+        // Exceed expiration interval by 1 sec
+        return kTestEpochTime + SPTPersistentCacheDefaultExpirationTimeSec + 1;
+    }
+                                                   expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
+
+    [cache.garbageCollector enqueueGarbageCollection];
+    XCTAssertFalse(cache.garbageCollector.isGarbageCollectionScheduled);
+}
+
 /**
  * This test also checks Req.#1.2 of cache API.
  */

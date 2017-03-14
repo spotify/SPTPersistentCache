@@ -61,7 +61,7 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
 
 #pragma mark -
 
-- (void)enqueueGarbageCollection:(NSTimer *)timer
+- (void)enqueueGarbageCollection
 {
     __weak __typeof(self) const weakSelf = self;
     NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
@@ -79,6 +79,11 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
     operation.queuePriority = self.options.garbageCollectionPriority;
     operation.qualityOfService = self.options.garbageCollectionQualityOfService;
     [self.queue addOperation:operation];
+}
+
+- (void)garbageCollectionTimerFired:(NSTimer *)timer
+{
+    [self enqueueGarbageCollection];
 }
 
 - (void)schedule
@@ -100,7 +105,7 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
 
     self.timer = [NSTimer timerWithTimeInterval:self.options.garbageCollectionInterval
                                          target:self
-                                       selector:@selector(enqueueGarbageCollection:)
+                                       selector:@selector(garbageCollectionTimerFired:)
                                        userInfo:nil
                                         repeats:YES];
     
