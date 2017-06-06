@@ -1010,12 +1010,14 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
         if ([theURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL]) {
 
             if ([isDirectory boolValue] == NO) {
+                const char *filePath = theURL.fileSystemRepresentation;
+                NSString *filePathString = [NSString stringWithUTF8String:filePath];
 
                 // We skip locked files always
                 BOOL __block locked = NO;
-
+                
                 // WARNING: We may skip return result here bcuz in that case we will remove unknown file as unlocked trash
-                [self alterHeaderForFileAtPath:[NSString stringWithUTF8String:theURL.fileSystemRepresentation]
+                [self alterHeaderForFileAtPath:filePathString
                                      withBlock:^(SPTPersistentCacheRecordHeader *header) {
                                          locked = (header->refCount > 0);
                                      } writeBack:NO
@@ -1029,7 +1031,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
                  which is described in apple doc and its our case here */
 
                 struct stat fileStat;
-                int ret = [self.posixWrapper stat:[theURL fileSystemRepresentation] statStruct:&fileStat];
+                int ret = [self.posixWrapper stat:filePath statStruct:&fileStat];
                 if (ret == -1) {
                     [self debugOutput:@"Cannot find the stats of file: %@", theURL.absoluteString];
                     continue;
@@ -1043,7 +1045,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
                 NSNumber *fsize = [NSNumber numberWithLongLong:fileStat.st_size];
                 NSDictionary *values = @{NSFileModificationDate : mdate, NSFileSize: fsize};
 
-                [images addObject:@{ SPTDataCacheFileNameKey : [NSString stringWithUTF8String:[theURL fileSystemRepresentation]],
+                [images addObject:@{ SPTDataCacheFileNameKey : filePathString,
                                      SPTDataCacheFileAttributesKey : values }];
             }
         } else {
