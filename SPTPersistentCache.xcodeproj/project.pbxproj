@@ -378,7 +378,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = SPTPersistentCache;
-				LastUpgradeCheck = 0830;
+				LastUpgradeCheck = 0900;
 				ORGANIZATIONNAME = Spotify;
 				TargetAttributes = {
 					0510FF121BA2FF7A00ED0766 = {
@@ -555,15 +555,9 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SPT_PC_NON_ERROR_WARNINGS_0720 = "";
-				SPT_PC_NON_ERROR_WARNINGS_0730 = "$(SPT_PC_NON_ERROR_WARNING_0720) -Wno-error=partial-availability";
-				SPT_PC_NON_ERROR_WARNINGS_0800 = "$(SPT_PC_NON_ERROR_WARNINGS_0730)";
-				SPT_PC_NON_ERROR_WARNINGS_0810 = "$(SPT_PC_NON_ERROR_WARNINGS_0800)";
-				SPT_PC_NON_ERROR_WARNINGS_0820 = "$(SPT_PC_NON_ERROR_WARNINGS_0810)";
-				SPT_PC_NON_ERROR_WARNINGS_0830 = "$(SPT_PC_NON_ERROR_WARNINGS_0820)";
 				WARNING_CFLAGS = (
 					"$(inherited)",
-					"$(SPT_PC_NON_ERROR_WARNINGS_$(XCODE_VERSION_MINOR))",
+					"-Wno-partial-availability",
 				);
 			};
 			name = Debug;
@@ -586,15 +580,9 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.spotify.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SPT_PC_NON_ERROR_WARNINGS_0720 = "";
-				SPT_PC_NON_ERROR_WARNINGS_0730 = "$(SPT_PC_NON_ERROR_WARNING_0720) -Wno-error=partial-availability";
-				SPT_PC_NON_ERROR_WARNINGS_0800 = "$(SPT_PC_NON_ERROR_WARNINGS_0730)";
-				SPT_PC_NON_ERROR_WARNINGS_0810 = "$(SPT_PC_NON_ERROR_WARNINGS_0800)";
-				SPT_PC_NON_ERROR_WARNINGS_0820 = "$(SPT_PC_NON_ERROR_WARNINGS_0810)";
-				SPT_PC_NON_ERROR_WARNINGS_0830 = "$(SPT_PC_NON_ERROR_WARNINGS_0820)";
 				WARNING_CFLAGS = (
 					"$(inherited)",
-					"$(SPT_PC_NON_ERROR_WARNINGS_$(XCODE_VERSION_MINOR))",
+					"-Wno-partial-availability",
 				);
 			};
 			name = Release;
