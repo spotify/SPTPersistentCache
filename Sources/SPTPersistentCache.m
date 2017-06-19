@@ -1048,7 +1048,8 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
                 NSNumber *fsize = [NSNumber numberWithLongLong:fileStat.st_size];
                 NSDictionary *values = @{NSFileModificationDate : mdate, NSFileSize: fsize};
 
-                [images addObject:@{ SPTDataCacheFileNameKey : [NSString stringWithUTF8String:[theURL fileSystemRepresentation]],
+                NSString *cacheFilename = [NSString stringWithUTF8String:[theURL fileSystemRepresentation]];
+                [images addObject:@{ SPTDataCacheFileNameKey : cacheFilename,
                                      SPTDataCacheFileAttributesKey : values }];
             }
         } else {
