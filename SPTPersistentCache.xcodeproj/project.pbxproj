@@ -508,6 +508,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				VALID_ARCHS = "armv7 arm64 armv7k";
 			};
 			name = Debug;
 		};
@@ -528,6 +529,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
 				VALIDATE_PRODUCT = YES;
+				VALID_ARCHS = "armv7 arm64 armv7k";
 			};
 			name = Release;
 		};
