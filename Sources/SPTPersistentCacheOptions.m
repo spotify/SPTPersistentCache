@@ -121,6 +121,16 @@ static NSUInteger SPTGuardedPropertyValue(NSUInteger proposedValue, NSUInteger m
     copy.debugOutput = self.debugOutput;
     copy.timingCallback = self.timingCallback;
 
+    copy.maxConcurrentOperations = self.maxConcurrentOperations;
+    copy.writePriority = self.writePriority;
+    copy.writeQualityOfService = self.writeQualityOfService;
+    copy.readPriority = self.readPriority;
+    copy.readQualityOfService = self.readQualityOfService;
+    copy.deletePriority = self.deletePriority;
+    copy.deleteQualityOfService = self.deleteQualityOfService;
+    copy.garbageCollectionPriority = self.garbageCollectionPriority;
+    copy.garbageCollectionQualityOfService = self.garbageCollectionQualityOfService;
+
     return copy;
 }
 
