@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file. SPTPersistentCache adheres to [Semantic Versioning](http://semver.org/).
 
 --
+## [1.1.1](https://github.com/spotify/SPTPersistentCache/releases/tag/1.1.1)
+_Released on 2017-08-15._
+
+### Fixed
+* SPTPersistentCacheOptions properties are now copied corrently when using `-copy`. 
 
 ## [1.1.0](https://github.com/spotify/SPTPersistentCache/releases/tag/1.1.0)
 _Released on 2016-11-18._
@@ -17,7 +22,7 @@ _Released on 2016-11-18._
 * Removed support for OSX 10.9.x.
 
 ### Changed
-* Now uses NSOperationQueues rather than GCD for prioritisation reasons.
+* Now uses NSOperationQueues rather than GCD for prioritization reasons.
 * Large removes, prunes and garbage collection routines are now asynchronous (this is an API breakage).
 
 ## [1.0.0](https://github.com/spotify/SPTPersistentCache/releases/tag/1.0.0)
