@@ -34,7 +34,7 @@ $ gem install cocoapods
 ```
 Then simply add `SPTPersistentCache` to your `Podfile`.
 ```
-pod 'SPTPersistentCache', '~> 1.1.0'
+pod 'SPTPersistentCache', '~> 1.1.1'
 ```
 Lastly let CocoaPods do its thing by running:
 ```shell
@@ -49,7 +49,7 @@ $ brew install carthage
 ```
 You will also need to add `SPTPersistentCache` to your `Cartfile`:
 ```
-github 'spotify/SPTPersistentCache' ~> 1.1.0
+github 'spotify/SPTPersistentCache' ~> 1.1.1
 ```
 After that is all said and done, let Carthage pull in SPTPersistentCache like so:
 ```shell
