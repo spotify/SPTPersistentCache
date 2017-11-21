@@ -1344,12 +1344,16 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
             return kTestEpochTime * 100.0;
         };
         __block BOOL called = NO;
+
+        __weak XCTestExpectation * const expectation = [self expectationWithDescription:@"callback expectation"];
         [self.cache touchDataForKey:key callback:^(SPTPersistentCacheResponse *response) {
             called = YES;
             XCTAssertEqual(response.result, SPTPersistentCacheResponseCodeNotFound);
+            [expectation fulfill];
         } onQueue:dispatch_get_main_queue()];
         break;
     }
+    [self waitForExpectationsWithTimeout:0.5 handler:nil];
 }
 
 - (void)testLockDataWithExpiredHeader
