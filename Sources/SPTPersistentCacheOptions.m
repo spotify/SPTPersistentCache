@@ -26,7 +26,7 @@
 
 const NSUInteger SPTPersistentCacheDefaultExpirationTimeSec = 10 * 60;
 const NSUInteger SPTPersistentCacheDefaultGCIntervalSec = 6 * 60 + 3;
-const NSUInteger SPTPersistentCacheDefaultCacheSizeInBytes = 0; // unbounded
+static const NSUInteger SPTPersistentCacheDefaultCacheSizeInBytes = 0; // unbounded
 
 const NSUInteger SPTPersistentCacheMinimumGCIntervalLimit = 60;
 const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
