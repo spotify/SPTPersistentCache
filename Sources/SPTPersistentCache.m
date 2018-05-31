@@ -24,7 +24,6 @@
 
 #import "SPTPersistentCacheRecord+Private.h"
 #import "SPTPersistentCacheResponse+Private.h"
-#import "SPTPersistentCache+Private.h"
 #import "SPTPersistentCacheGarbageCollector.h"
 #import "NSError+SPTPersistentCacheDomainErrors.h"
 #import "SPTPersistentCacheFileManager.h"

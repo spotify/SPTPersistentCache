@@ -38,7 +38,6 @@
 #import "SPTPersistentCacheFileManager.h"
 #import "NSFileManagerMock.h"
 #import "SPTPersistentCachePosixWrapperMock.h"
-#import "SPTPersistentCache+Private.h"
 
 #include <sys/time.h>
 #include <sys/stat.h>

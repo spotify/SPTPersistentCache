@@ -20,8 +20,6 @@
  */
 #import <Foundation/Foundation.h>
 
-@class SPTPersistentCacheResponse;
-
 NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Callback Types
