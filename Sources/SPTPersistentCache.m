@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Spotify AB.
+ * Copyright (c) 2018 Spotify AB.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -24,7 +24,6 @@
 
 #import "SPTPersistentCacheRecord+Private.h"
 #import "SPTPersistentCacheResponse+Private.h"
-#import "SPTPersistentCache+Private.h"
 #import "SPTPersistentCacheGarbageCollector.h"
 #import "NSError+SPTPersistentCacheDomainErrors.h"
 #import "SPTPersistentCacheFileManager.h"

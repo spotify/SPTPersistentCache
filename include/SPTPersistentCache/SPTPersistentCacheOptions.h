@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Spotify AB.
+ * Copyright (c) 2018 Spotify AB.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,8 +19,6 @@
  * under the License.
  */
 #import <Foundation/Foundation.h>
-
-@class SPTPersistentCacheResponse;
 
 NS_ASSUME_NONNULL_BEGIN
 
