@@ -139,22 +139,17 @@
         return;
     }
 
-    NSString *fullFilePath = [self.cacheFiles objectAtIndex:idx];
-    NSData *rawData = [NSData dataWithContentsOfFile:fullFilePath];
+    NSString *fullFilePath = [[self.cacheFiles objectAtIndex:idx] path];
 
-    SPTPersistentCacheRecordHeader *h = SPTPersistentCacheGetHeaderFromData(__DECONST(void*, [rawData bytes]), [rawData length]);
+    SPTPersistentCacheRecordHeader header;
+    NSError* headerGetError = SPTPersistentCacheGetHeaderFromFileWithPath(fullFilePath, &header);
 
-    if (h == NULL) {
-        // TODO: error
+    if (headerGetError != nil) {
+        [NSApp presentError:headerGetError];
         return;
     }
 
-    if (-1 != SPTPersistentCacheValidateHeader(h)) {
-        // TODO: error
-        return;
-    }
-
-    memcpy(&_currHeader, h, SPTPersistentCacheRecordHeaderSize);
+    memcpy(&_currHeader, &header, SPTPersistentCacheRecordHeaderSize);
 
     self.magic = [NSString stringWithFormat:@"0x%X", _currHeader.magic];
     self.headerSize = [NSString stringWithFormat:@"%u", _currHeader.headerSize];
@@ -167,8 +162,7 @@
                                                        dateStyle:NSDateFormatterMediumStyle
                                                        timeStyle:NSDateFormatterLongStyle];
 
-    NSRange payloadRange = NSMakeRange(SPTPersistentCacheRecordHeaderSize, _currHeader.payloadSizeBytes);
-    self.payload = [rawData subdataWithRange:payloadRange];
+    self.payload = [NSData dataWithContentsOfFile:fullFilePath];
 
     self.object = [[NSImage alloc] initWithData:self.payload];
 
