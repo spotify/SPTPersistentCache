@@ -733,7 +733,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
                 const char *errorString = strerror(errorNumber);
                 error = [NSError errorWithDomain:NSPOSIXErrorDomain
                                             code:errorNumber
-                                        userInfo:@{ NSLocalizedDescriptionKey: @(errorString) }];
+                                        userInfo:@{ NSLocalizedDescriptionKey: (NSString*)@(errorString) }];
             }
 
             [self debugOutput:@"PersistentDataCache: Error not enough data to read the header of file path:%@ , error:%@",
