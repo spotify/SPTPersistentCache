@@ -48,21 +48,6 @@ static NSString * const SPTPersistentCacheOptionsPathComponent = @"com.spotify.t
     XCTAssertNotNil(self.dataCacheOptions.identifierForQueue, @"The identifier for queue shouldn't be nil");
 }
 
-- (void)testMinimumGarbageCollectorIntervalForDeprecatedInit
-{
-    _Pragma("clang diagnostic push");
-    _Pragma("clang diagnostic ignored \"-Wdeprecated\"");
-    SPTPersistentCacheOptions *dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:[NSTemporaryDirectory() stringByAppendingPathComponent:SPTPersistentCacheOptionsPathComponent]
-                                                                                            identifier:@"test"
-                                                                             defaultExpirationInterval:1
-                                                                              garbageCollectorInterval:1
-                                                                                                 debug:nil];
-    _Pragma("clang diagnostic pop");
-
-    XCTAssertEqual(dataCacheOptions.garbageCollectionInterval,
-                   SPTPersistentCacheMinimumGCIntervalLimit);
-}
-
 - (void)testMinimumGarbageCollectorInterval
 {
     __weak XCTestExpectation *expectation = [self expectationWithDescription:@"debugOuput is executed"];
@@ -80,21 +65,6 @@ static NSString * const SPTPersistentCacheOptionsPathComponent = @"com.spotify.t
 
     XCTAssertEqual(options.garbageCollectionInterval,
                    SPTPersistentCacheMinimumGCIntervalLimit);
-}
-
-- (void)testMinimumDefaultExpirationIntervalForDeprecatedInit
-{
-    _Pragma("clang diagnostic push");
-    _Pragma("clang diagnostic ignored \"-Wdeprecated\"");
-    SPTPersistentCacheOptions *dataCacheOptions = [[SPTPersistentCacheOptions alloc] initWithCachePath:[NSTemporaryDirectory() stringByAppendingPathComponent:SPTPersistentCacheOptionsPathComponent]
-                                                                                            identifier:@"test"
-                                                                             defaultExpirationInterval:1
-                                                                              garbageCollectorInterval:1
-                                                                                                 debug:nil];
-    _Pragma("clang diagnostic pop");
-
-    XCTAssertEqual(dataCacheOptions.defaultExpirationPeriod,
-                   SPTPersistentCacheMinimumExpirationLimit);
 }
 
 - (void)testMinimumDefaultExpiration
@@ -148,50 +118,6 @@ static NSString * const SPTPersistentCacheOptionsPathComponent = @"com.spotify.t
     XCTAssertEqual(original.garbageCollectionInterval, copy.garbageCollectionInterval, @"The values of the property \"garbageCollectionInterval\" should be equal");
     XCTAssertEqual(original.defaultExpirationPeriod, copy.defaultExpirationPeriod, @"The values of the property \"defaultExpirationPeriod\" should be equal");
     XCTAssertEqual(original.sizeConstraintBytes, copy.sizeConstraintBytes, @"The values of the property \"sizeConstraintBytes\" should be equal");
-}
-
-#pragma mark Compatibility Properties for Deprecated Properties
-
-- (void)testFolderSeparationEnabled
-{
-    _Pragma("clang diagnostic push");
-    _Pragma("clang diagnostic ignored \"-Wdeprecated\"");
-
-    SPTPersistentCacheOptions * const options = [SPTPersistentCacheOptions new];
-
-    XCTAssertEqual(options.folderSeparationEnabled, options.useDirectorySeparation);
-
-    options.folderSeparationEnabled = NO;
-    XCTAssertFalse(options.useDirectorySeparation, @"Setting the compatibility property should update the real property");
-    XCTAssertEqual(options.folderSeparationEnabled, options.useDirectorySeparation);
-
-    _Pragma("clang diagnostic pop");
-}
-
-- (void)testGcIntervalSec
-{
-    _Pragma("clang diagnostic push");
-    _Pragma("clang diagnostic ignored \"-Wdeprecated\"");
-
-    SPTPersistentCacheOptions * const options = [SPTPersistentCacheOptions new];
-    options.garbageCollectionInterval = SPTPersistentCacheDefaultGCIntervalSec + 37;
-
-    XCTAssertEqual(options.gcIntervalSec, options.garbageCollectionInterval);
-
-    _Pragma("clang diagnostic pop");
-}
-
-- (void)testDefaultExpirationPeriodSec
-{
-    _Pragma("clang diagnostic push");
-    _Pragma("clang diagnostic ignored \"-Wdeprecated\"");
-
-    SPTPersistentCacheOptions * const options = [SPTPersistentCacheOptions new];
-    options.defaultExpirationPeriod = SPTPersistentCacheDefaultExpirationTimeSec + 37;
-
-    XCTAssertEqual(options.defaultExpirationPeriodSec, options.defaultExpirationPeriod);
-
-    _Pragma("clang diagnostic pop");
 }
 
 #pragma mark Describing objects

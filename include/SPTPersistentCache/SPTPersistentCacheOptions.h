@@ -203,48 +203,4 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
 
 @end
 
-
-#pragma mark - Deprecation Category
-
-/**
- * Methods on `SPTPersistentCacheOptions` that are deprecated and will be removed in a later release.
- */
-@interface SPTPersistentCacheOptions (Deprectated)
-
-/**
- *  Returns a new instance of the class setup with specific values.
- *  @deprecated
- *  @param cachePath Path in the system file for the cache.
- *  @param cacheIdentifier An identifier for the cache.
- *  @param defaultExpirationInterval Default time which have to pass since last file access so file could be candidate
- *  for pruning on next GC.
- *  @param garbageCollectorInterval It is guaranteed that once started GC runs with this interval.
- *  @param debugCallback A callback used for debugging purposes. May be nil.
- */
-- (instancetype)initWithCachePath:(NSString *)cachePath
-                       identifier:(NSString *)cacheIdentifier
-        defaultExpirationInterval:(NSUInteger)defaultExpirationInterval
-         garbageCollectorInterval:(NSUInteger)garbageCollectorInterval
-                            debug:(nullable SPTPersistentCacheDebugCallback)debugCallback DEPRECATED_MSG_ATTRIBUTE("Configure the option instance’s properties instead.");
-
-/**
- *  Compatibility alias for `useDirectorySeparation`.
- *  @seealso useDirectorySeparation
- */
-@property (nonatomic, assign) BOOL folderSeparationEnabled DEPRECATED_MSG_ATTRIBUTE("Use the useDirectorySeparation property instead");
-/**
- *  Compatibility alias for `garbageCollectionInterval`.
- *  @deprecated
- *  @seealso garbageCollectionInterval
- */
-@property (nonatomic, assign, readonly) NSUInteger gcIntervalSec DEPRECATED_MSG_ATTRIBUTE("Use the garbageCollectionInterval property instead");
-/**
- *  Compatibility alias for `defaultExpirationPeriod`.
- *  @deprecated
- *  @seealso defaultExpirationPeriod
- */
-@property (nonatomic, assign, readonly) NSUInteger defaultExpirationPeriodSec DEPRECATED_MSG_ATTRIBUTE("Use the defaultExpirationPeriod property instead");
-
-@end
-
 NS_ASSUME_NONNULL_END
