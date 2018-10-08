@@ -25,7 +25,7 @@
 
 @interface SPTPersistentCacheGarbageCollector ()
 @property (nonatomic, strong) NSTimer *timer;
-- (void)enqueueGarbageCollection:(NSTimer *)timer;
+- (void)garbageCollectionTimerFired:(NSTimer *)timer;
 @end
     
 
@@ -97,8 +97,25 @@
     dataCacheForUnitTests.queue = self.garbageCollector.queue;
 
     dataCacheForUnitTests.testExpectation = expectation;
-    [self.garbageCollector enqueueGarbageCollection:nil];
+    [self.garbageCollector enqueueGarbageCollection];
     
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error) {
+        XCTAssertTrue(dataCacheForUnitTests.wasRunRegularGCCalled);
+        XCTAssertTrue(dataCacheForUnitTests.wasPruneBySizeCalled);
+        XCTAssertFalse(dataCacheForUnitTests.wasCalledFromIncorrectQueue);
+    }];
+}
+
+- (void)testGarbageCollectorTimerFired
+{
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"testGarbageCollectorEnqueue"];
+
+    SPTPersistentCacheForTimerProxyUnitTests *dataCacheForUnitTests = (SPTPersistentCacheForTimerProxyUnitTests *)self.garbageCollector.cache;
+    dataCacheForUnitTests.queue = self.garbageCollector.queue;
+
+    dataCacheForUnitTests.testExpectation = expectation;
+    [self.garbageCollector garbageCollectionTimerFired:nil];
+
     [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error) {
         XCTAssertTrue(dataCacheForUnitTests.wasRunRegularGCCalled);
         XCTAssertTrue(dataCacheForUnitTests.wasPruneBySizeCalled);

@@ -390,6 +390,11 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
     [self.garbageCollector unschedule];
 }
 
+- (void)enqueueGarbageCollector
+{
+    [self.garbageCollector enqueueGarbageCollection];
+}
+
 - (void)pruneWithCallback:(SPTPersistentCacheResponseCallback _Nullable)callback
                   onQueue:(dispatch_queue_t _Nullable)queue
 {
@@ -731,9 +736,13 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
             if (readBytes == -1) {
                 const int errorNumber = errno;
                 const char *errorString = strerror(errorNumber);
+                NSString *errorNSString = [NSString stringWithUTF8String:errorString];
+                if (errorNSString.length == 0) {
+                    errorNSString = @"";
+                }
                 error = [NSError errorWithDomain:NSPOSIXErrorDomain
                                             code:errorNumber
-                                        userInfo:@{ NSLocalizedDescriptionKey: @(errorString) }];
+                                        userInfo:@{ NSLocalizedDescriptionKey: errorNSString }];
             }
 
             [self debugOutput:@"PersistentDataCache: Error not enough data to read the header of file path:%@ , error:%@",

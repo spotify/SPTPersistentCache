@@ -68,4 +68,9 @@
  */
 - (void)unschedule;
 
+/**
+ *  Enqueues the garbage collector. Called automatically if scheduled by the above functions.
+ */
+- (void)enqueueGarbageCollection;
+
 @end

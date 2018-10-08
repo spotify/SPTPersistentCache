@@ -69,6 +69,7 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_dir
     SPTPersistentCacheOptions *options = [SPTPersistentCacheOptions new];
     options.cachePath = SPTPersistentCacheFileManagerTestsCachePath;
     options.cacheIdentifier = @"test";
+    options.sizeConstraintBytes = (SPTPersistentCacheDiskSize)1024 * 1024 * 1024 * 3; // 3 GiB
     self.options = options;
     
     self.cacheFileManager = [[SPTPersistentCacheFileManagerForTests alloc] initWithOptions:self.options];
@@ -166,6 +167,33 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_dir
     SPTPersistentCacheDiskSize optimizedSize = [self.cacheFileManager optimizedDiskSizeForCacheSize:smallCacheSize];
     
     XCTAssertEqual(optimizedSize, (SPTPersistentCacheDiskSize)0);
+}
+
+- (void)testMinimumFreeDiskSpaceFraction
+{
+    const SPTPersistentCacheDiskSize diskSize = (SPTPersistentCacheDiskSize)1024 * 1024 * 1024 * 16; // 16GiB
+    const SPTPersistentCacheDiskSize freeSpace = (SPTPersistentCacheDiskSize)1024 * 1024 * 1024 * 8; // 8GiB
+    NSFileManagerMock *fileManager = [NSFileManagerMock new];
+    fileManager.mock_attributesOfFileSystemForPaths = @{SPTPersistentCacheFileManagerTestsCachePath: @{NSFileSystemSize: @(diskSize),
+                                                                                                       NSFileSystemFreeSize: @(freeSpace)}};
+    self.cacheFileManager.test_fileManager = fileManager;
+
+    self.cacheFileManager.options.minimumFreeDiskSpaceFraction = 1.0;
+    SPTPersistentCacheDiskSize optimizedSize = [self.cacheFileManager optimizedDiskSizeForCacheSize:0];
+    XCTAssertEqual(optimizedSize, (SPTPersistentCacheDiskSize)0);
+
+    self.cacheFileManager.options.minimumFreeDiskSpaceFraction = 0.0;
+    optimizedSize = [self.cacheFileManager optimizedDiskSizeForCacheSize:0];
+    XCTAssertEqual(optimizedSize, (SPTPersistentCacheDiskSize)self.options.sizeConstraintBytes);
+
+    self.cacheFileManager.options.minimumFreeDiskSpaceFraction = 0.5;
+    optimizedSize = [self.cacheFileManager optimizedDiskSizeForCacheSize:0];
+    XCTAssertEqual(optimizedSize, (SPTPersistentCacheDiskSize)0);
+
+    const SPTPersistentCacheDiskSize twoGiB = (SPTPersistentCacheDiskSize)1024 * 1024 * 1024 * 2;
+    self.cacheFileManager.options.minimumFreeDiskSpaceFraction = (freeSpace - twoGiB) / (double)diskSize;
+    optimizedSize = [self.cacheFileManager optimizedDiskSizeForCacheSize:0];
+    XCTAssertEqual(optimizedSize, twoGiB);
 }
 
 - (void)testRemoveAllDataButKeysWithoutKeys
