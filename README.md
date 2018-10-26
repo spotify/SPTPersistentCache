@@ -49,7 +49,7 @@ $ brew install carthage
 ```
 You will also need to add `SPTPersistentCache` to your `Cartfile`:
 ```
-github 'spotify/SPTPersistentCache' ~> 1.1.1
+github "spotify/SPTPersistentCache" ~> 1.1.1
 ```
 After that is all said and done, let Carthage pull in SPTPersistentCache like so:
 ```shell
