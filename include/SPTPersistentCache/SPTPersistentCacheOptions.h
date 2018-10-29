@@ -177,6 +177,13 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
  */
 @property (nonatomic, assign) NSUInteger sizeConstraintBytes;
 /**
+ *  The minimum fraction of free disk space required for caching. If there is less disk space
+ *  available than this, the cache will be purged during garbage collection until the treshold
+ *  is met. This could mean that the whole cache is evicted if the device is low on space.
+ *  @note Defaults to `0.1`, 10% of the total disk size.
+ */
+@property (nonatomic, assign) double minimumFreeDiskSpaceFraction;
+/**
  * The queue priority for garbage collection. Defaults to NSOperationQueuePriorityLow.
  */
 @property (nonatomic) NSOperationQueuePriority garbageCollectionPriority;

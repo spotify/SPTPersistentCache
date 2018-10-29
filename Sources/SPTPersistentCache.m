@@ -390,6 +390,11 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
     [self.garbageCollector unschedule];
 }
 
+- (void)enqueueGarbageCollector
+{
+    [self.garbageCollector enqueueGarbageCollection];
+}
+
 - (void)pruneWithCallback:(SPTPersistentCacheResponseCallback _Nullable)callback
                   onQueue:(dispatch_queue_t _Nullable)queue
 {

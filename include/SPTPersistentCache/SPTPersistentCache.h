@@ -230,6 +230,11 @@ typedef NSString * _Nonnull(^SPTPersistentCacheChooseKeyCallback)(NSArray<NSStri
  */
 - (void)unscheduleGarbageCollector;
 /**
+ * Run the garbage collector right now. Use this if scheduling isn't appropriate,
+ * for example in applicationWillResignActive:
+ */
+- (void)enqueueGarbageCollector;
+/**
  * Delete all files files in managed folder unconditionaly.
  * @param callback May be nil if not interested in result.
  * @param queue Queue on which to run the callback. If callback is nil this is ignored otherwise mustn't be nil.
