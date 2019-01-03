@@ -38,3 +38,4 @@ Carthage/Build
 
 # Ignore changes to our project.xcconfig that gets overridden by the build system
 project.xcconfig
+*.coverage.txt
