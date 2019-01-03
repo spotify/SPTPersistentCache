@@ -156,52 +156,6 @@ static NSUInteger SPTGuardedPropertyValue(NSUInteger proposedValue, NSUInteger m
 @end
 
 
-@implementation SPTPersistentCacheOptions (Deprectated)
-
-- (instancetype)initWithCachePath:(NSString *)cachePath
-                       identifier:(NSString *)cacheIdentifier
-        defaultExpirationInterval:(NSUInteger)defaultExpirationInterval
-         garbageCollectorInterval:(NSUInteger)garbageCollectorInterval
-                            debug:(nullable SPTPersistentCacheDebugCallback)debugCallback
-{
-    self = [self init];
-
-    if (self) {
-        _cachePath = [cachePath copy];
-        _cacheIdentifier = [cacheIdentifier copy];
-
-        _defaultExpirationPeriod = SPTGuardedPropertyValue(defaultExpirationInterval, SPTPersistentCacheMinimumExpirationLimit, @selector(defaultExpirationPeriod), debugCallback);
-        _garbageCollectionInterval = SPTGuardedPropertyValue(garbageCollectorInterval, SPTPersistentCacheMinimumGCIntervalLimit, @selector(garbageCollectionInterval), debugCallback);
-
-        _debugOutput = [debugCallback copy];
-    }
-
-    return self;
-}
-
-- (BOOL)folderSeparationEnabled
-{
-    return self.useDirectorySeparation;
-}
-
-- (void)setFolderSeparationEnabled:(BOOL)folderSeparationEnabled
-{
-    self.useDirectorySeparation = folderSeparationEnabled;
-}
-
-- (NSUInteger)gcIntervalSec
-{
-    return self.garbageCollectionInterval;
-}
-
-- (NSUInteger)defaultExpirationPeriodSec
-{
-    return self.defaultExpirationPeriod;
-}
-
-@end
-
-
 static NSUInteger SPTGuardedPropertyValue(NSUInteger proposedValue, NSUInteger minimumValue, SEL propertySelector, SPTPersistentCacheDebugCallback debugCallback)
 {
     if (proposedValue >= minimumValue) {
