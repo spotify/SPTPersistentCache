@@ -1,22 +1,22 @@
 /*
- * Copyright (c) 2018 Spotify AB.
- *
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ Copyright (c) 2019 Spotify AB.
+
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
  */
 #import <XCTest/XCTest.h>
 
@@ -171,8 +171,8 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 @end
 
 /** DO NOT DELETE:
- * Failed seeds: 1417002282, 1417004699, 1417005389, 1417006103
- * Prune size failed: 1417004677, 1417004725, 1417003704
+ Failed seeds: 1417002282, 1417004699, 1417005389, 1417006103
+ Prune size failed: 1417004677, 1417004725, 1417003704
  */
 @implementation SPTPersistentCacheTests
 
@@ -260,8 +260,8 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 }
 
 /*
- * Use read
- * Check data is ok.
+ Use read
+ Check data is ok.
  */
 - (void)testCorrectWriteAndRead
 {
@@ -333,7 +333,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 }
 
 /**
- * This test also checks Req.#1.1a of cache API
+ This test also checks Req.#1.1a of cache API
  WARNING: This test depend on hardcoded data
 - Do 1
 - find keys with same prefix
@@ -390,7 +390,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 }
 
 /**
- * This test also checks Req.#1.1b of cache API
+ This test also checks Req.#1.1b of cache API
  */
 - (void)testLoadWithPrefixesFail
 {
@@ -872,7 +872,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 }
 
 /**
- * This test also checks Req.#1.2 of cache API.
+ This test also checks Req.#1.2 of cache API.
  */
 - (void)testExpirationWithDefaultTimeout
 {
@@ -1002,7 +1002,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 }
 
 /**
- * This test also checks Req.#1.2 for cache API
+ This test also checks Req.#1.2 for cache API
  */
 - (void)testTouchOnlyRecordsWithDefaultExpiration
 {
@@ -1204,9 +1204,9 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 }
 
 /**
- * At least 2 serial stores with lock for same key doesn't increment refCount.
- * Detect change in TTL and in refCount when parameters changed.
- * This is for Req.#1.0 of cache API
+ At least 2 serial stores with lock for same key doesn't increment refCount.
+ Detect change in TTL and in refCount when parameters changed.
+ This is for Req.#1.0 of cache API
  */
 - (void)testSerialStoreWithLockDoesntIncrementRefCount
 {

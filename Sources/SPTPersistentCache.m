@@ -1,22 +1,22 @@
 /*
- * Copyright (c) 2018 Spotify AB.
- *
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ Copyright (c) 2019 Spotify AB.
+
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
  */
 #import "SPTPersistentCache+Private.h"
 
@@ -498,7 +498,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
 }
 
 /**
- * Load method used internally to load data. Called on work queue.
+ Load method used internally to load data. Called on work queue.
  */
 - (void)loadDataForKeySync:(NSString *)key
               withCallback:(SPTPersistentCacheResponseCallback)callback
@@ -611,7 +611,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
 }
 
 /**
- * Store method used internaly. Called on work queue.
+ Store method used internaly. Called on work queue.
  */
 - (NSError *)storeDataSync:(NSData *)data
                     forKey:(NSString *)key
@@ -661,9 +661,9 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
 }
 
 /**
- * Method to work safely with opened file referenced by file descriptor. 
- * Method handles file closing properly in case of errors.
- * Descriptor is passed to a jobBlock for further usage.
+ Method to work safely with opened file referenced by file descriptor. 
+ Method handles file closing properly in case of errors.
+ Descriptor is passed to a jobBlock for further usage.
  */
 - (SPTPersistentCacheResponse *)guardOpenFileWithPath:(NSString *)filePath
                                              jobBlock:(SPTPersistentCacheFileProcessingBlockType)jobBlock
@@ -713,7 +713,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
 }
 
 /**
- * Method used to read/write file header.
+ Method used to read/write file header.
  */
 - (SPTPersistentCacheResponse *)alterHeaderForFileAtPath:(NSString *)filePath
                                                withBlock:(SPTPersistentCacheRecordHeaderGetCallbackType)modifyBlock
@@ -818,7 +818,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
 }
 
 /**
- * Only this method check data expiration. Past check is also supported.
+ Only this method check data expiration. Past check is also supported.
  */
 - (BOOL)isDataExpiredWithHeader:(SPTPersistentCacheRecordHeader *)header
 {
@@ -835,7 +835,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
 }
 
 /**
- * Methos checks whether data can be given to caller with accordance to API.
+ Methos checks whether data can be given to caller with accordance to API.
  */
 - (BOOL)isDataCanBeReturnedWithHeader:(SPTPersistentCacheRecordHeader *)header
 {
