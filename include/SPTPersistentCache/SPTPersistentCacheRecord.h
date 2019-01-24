@@ -47,7 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
 /*
  Data that was initially passed into storeData:...
  */
-@property (nonatomic, strong, readonly) NSData *data;
+@property (nonatomic, copy, readonly) NSData *data;
 
 @end
 
