@@ -35,7 +35,7 @@
         _refCount = refCount;
         _ttl = ttl;
         _key = [key copy];
-        _data = data;
+        _data = [data copy];
     }
     return self;
 }
