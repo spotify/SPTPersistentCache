@@ -18,7 +18,7 @@
  specific language governing permissions and limitations
  under the License.
  */
-#import "SPTPersistentCacheOptions.h"
+#import <SPTPersistentCache/SPTPersistentCacheOptions.h>
 #import "SPTPersistentCacheObjectDescription.h"
 #import "SPTPersistentCacheDebugUtilities.h"
 
@@ -156,7 +156,7 @@ static NSUInteger SPTGuardedPropertyValue(NSUInteger proposedValue, NSUInteger m
 @end
 
 
-@implementation SPTPersistentCacheOptions (Deprectated)
+@implementation SPTPersistentCacheOptions (Deprecated)
 
 - (instancetype)initWithCachePath:(NSString *)cachePath
                        identifier:(NSString *)cacheIdentifier

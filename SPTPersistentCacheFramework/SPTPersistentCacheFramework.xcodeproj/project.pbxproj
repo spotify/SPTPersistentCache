@@ -154,29 +154,30 @@
 		052021B61C737E3E003A4FB4 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				DD1D238B1C7785A900D0477A /* Categories */,
 				DD1D23901C7785A900D0477A /* crc32iso3309.c */,
 				DD1D23911C7785A900D0477A /* crc32iso3309.h */,
+				DD1D238C1C7785A900D0477A /* NSError+SPTPersistentCacheDomainErrors.h */,
+				DD1D238D1C7785A900D0477A /* NSError+SPTPersistentCacheDomainErrors.m */,
 				DD1D23921C7785A900D0477A /* SPTPersistentCache.m */,
 				DD1D23931C7785A900D0477A /* SPTPersistentCache+Private.h */,
+				C4EA65041C7A547000A6091A /* SPTPersistentCacheDebugUtilities.h */,
+				C4EA65051C7A547000A6091A /* SPTPersistentCacheDebugUtilities.m */,
 				DD1D23941C7785A900D0477A /* SPTPersistentCacheFileManager.h */,
 				DD1D23951C7785A900D0477A /* SPTPersistentCacheFileManager.m */,
+				DD1D239C1C7785A900D0477A /* SPTPersistentCacheGarbageCollector.h */,
+				DD1D239D1C7785A900D0477A /* SPTPersistentCacheGarbageCollector.m */,
 				DD1D23961C7785A900D0477A /* SPTPersistentCacheHeader.m */,
 				9C9E707A1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h */,
 				9C9E70791C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m */,
 				DD1D23971C7785A900D0477A /* SPTPersistentCacheOptions.m */,
+				050076B11C7A4354000819B5 /* SPTPersistentCachePosixWrapper.h */,
+				050076B21C7A4354000819B5 /* SPTPersistentCachePosixWrapper.m */,
 				DD1D23981C7785A900D0477A /* SPTPersistentCacheRecord.m */,
 				DD1D23991C7785A900D0477A /* SPTPersistentCacheRecord+Private.h */,
 				DD1D239A1C7785A900D0477A /* SPTPersistentCacheResponse.m */,
 				DD1D239B1C7785A900D0477A /* SPTPersistentCacheResponse+Private.h */,
-				DD1D239C1C7785A900D0477A /* SPTPersistentCacheGarbageCollector.h */,
-				DD1D239D1C7785A900D0477A /* SPTPersistentCacheGarbageCollector.m */,
 				C45526B21C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h */,
 				C45526B31C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.m */,
-				C4EA65041C7A547000A6091A /* SPTPersistentCacheDebugUtilities.h */,
-				C4EA65051C7A547000A6091A /* SPTPersistentCacheDebugUtilities.m */,
-				050076B11C7A4354000819B5 /* SPTPersistentCachePosixWrapper.h */,
-				050076B21C7A4354000819B5 /* SPTPersistentCachePosixWrapper.m */,
 			);
 			name = Sources;
 			path = ../Sources;
@@ -190,15 +191,6 @@
 				052022091C738637003A4FB4 /* spotify_os.xcconfig */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		DD1D238B1C7785A900D0477A /* Categories */ = {
-			isa = PBXGroup;
-			children = (
-				DD1D238C1C7785A900D0477A /* NSError+SPTPersistentCacheDomainErrors.h */,
-				DD1D238D1C7785A900D0477A /* NSError+SPTPersistentCacheDomainErrors.m */,
-			);
-			path = Categories;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
