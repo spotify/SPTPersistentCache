@@ -20,7 +20,7 @@
  */
 #import <XCTest/XCTest.h>
 
-#import "SPTPersistentCacheHeader.h"
+#import <SPTPersistentCache/SPTPersistentCacheHeader.h>
 #import <SPTPersistentCache/SPTPersistentCache.h>
 #import "SPTPersistentCacheTypeUtilities.h"
 

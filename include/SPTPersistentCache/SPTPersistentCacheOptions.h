@@ -209,7 +209,7 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
 /**
  Methods on `SPTPersistentCacheOptions` that are deprecated and will be removed in a later release.
  */
-@interface SPTPersistentCacheOptions (Deprectated)
+@interface SPTPersistentCacheOptions (Deprecated)
 
 /**
  Returns a new instance of the class setup with specific values.

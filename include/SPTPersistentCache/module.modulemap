@@ -1,0 +1,4 @@
+module SPTPersistentCache {
+    umbrella header "SPTPersistentCache.h"
+    export *
+}
