@@ -1,34 +1,15 @@
-cache:
-  - bundler
-sudo: false
+os: osx
+osx_image: xcode10.2
+language: objective-c
+
 branches:
   only:
     - master
-    - /^release-.*$/
-
-osx_image: xcode10.1
-language: objective-c
-
-bundler_args: --without documentation --without development --deployment --jobs=3 --retry=3
-
-script:
-  - bundle exec rake ci:build_and_test
-  # This is a workaround for a Travis-CI bug where the log might get cut-off.
-  # See the [Travis-CI issue #4716](https://github.com/travis-ci/travis-ci/issues/4716).
-  - sleep 3
-
-deploy:
-  provider: releases
-  api_key:
-    secure: ANvlZh4vgRuTeUE9IenqsiKU0iqHVVJGDmqjvqmg0PMcN6QgR7leAAf45cQvPwKeJqS7DeXHFLq7gs0c7gfofBluFpt/UdCcHb1L7aXG+14uPVp6f5ggK5ZUxXwWfkW4s1xtAvDvQmGo7qB9Q/EaUSHJvH2vOBPlaaFc+h6C7M4=
-  file:
-    SPTPersistentCache.framework.zip
-  on:
-    repo: spotify/SPTPersistentCache
-    tags: true
-  script: bundle exec rake ci:package
 
 env:
   global:
-    - LC_CTYPE=en_US.UTF-8
-    - LANG=en_US.UTF-8
+  - LC_CTYPE=en_US.UTF-8
+  - LANG=en_US.UTF-8
+
+script:
+  - ci/run.sh
