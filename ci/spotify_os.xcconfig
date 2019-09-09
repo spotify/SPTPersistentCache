@@ -87,6 +87,7 @@ OTHER_LDFLAGS = -ObjC
 WARNING_CFLAGS = -Weverything -Wno-error=deprecated -Wno-objc-missing-property-synthesis -Wno-gnu-conditional-omitted-operand -Wno-gnu -Wno-documentation-unknown-command -Wno-reserved-id-macro -Wno-auto-import -Wno-missing-variable-declarations -Wno-c++98-compat -Werror -Wno-direct-ivar-access -Wno-padded $(WARNING_CFLAGS_XCODE_$(XCODE_VERSION_MAJOR))
 
 WARNING_CFLAGS_XCODE_1000 = -Wno-objc-messaging-id
+WARNING_CFLAGS_XCODE_1100 = $(WARNING_CFLAGS_XCODE_1000)
 
 // Warnings
 CLANG_WARN__ARC_BRIDGE_CAST_NONARC = YES
