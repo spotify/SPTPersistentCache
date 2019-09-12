@@ -7,15 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		050076AA1C7A2B6D000819B5 /* NSFileManagerMock.m in Sources */ = {isa = PBXBuildFile; fileRef = 050076A91C7A2B6D000819B5 /* NSFileManagerMock.m */; };
 		050076AD1C7A2FF7000819B5 /* SPTPersistentCachePosixWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 050076AC1C7A2FF7000819B5 /* SPTPersistentCachePosixWrapper.m */; };
-		050076B01C7A3137000819B5 /* SPTPersistentCachePosixWrapperMock.m in Sources */ = {isa = PBXBuildFile; fileRef = 050076AF1C7A3137000819B5 /* SPTPersistentCachePosixWrapperMock.m */; };
 		0510FF1F1BA2FF7A00ED0766 /* libSPTPersistentCache.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0510FF131BA2FF7A00ED0766 /* libSPTPersistentCache.a */; };
 		0510FF6B1BA3073D00ED0766 /* SPTPersistentCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0510FF6A1BA3073D00ED0766 /* SPTPersistentCacheTests.m */; };
 		057AFD5B1C70F99A00350C9F /* SPTPersistentCacheHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 057AFD5A1C70F99A00350C9F /* SPTPersistentCacheHeader.m */; };
 		0595F0A91C5008060052328B /* SPTPersistentCacheRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 0595F0A81C5008060052328B /* SPTPersistentCacheRecord.m */; };
 		0595F0B01C5009800052328B /* SPTPersistentCacheResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 0595F0AF1C5009800052328B /* SPTPersistentCacheResponse.m */; };
 		0595F33A1C50117B0052328B /* SPTPersistentCacheGarbageCollector.m in Sources */ = {isa = PBXBuildFile; fileRef = 0595F3391C50117B0052328B /* SPTPersistentCacheGarbageCollector.m */; };
+		691DF30E232AF2C500163E0C /* NSFileManagerMock.m in Sources */ = {isa = PBXBuildFile; fileRef = 050076A91C7A2B6D000819B5 /* NSFileManagerMock.m */; };
+		691DF30F232AF2D500163E0C /* SPTPersistentCachePosixWrapperMock.m in Sources */ = {isa = PBXBuildFile; fileRef = 050076AF1C7A3137000819B5 /* SPTPersistentCachePosixWrapperMock.m */; };
 		696CD78A1C4707E20071DD18 /* crc32iso3309.c in Sources */ = {isa = PBXBuildFile; fileRef = 696CD7841C4707E20071DD18 /* crc32iso3309.c */; };
 		696CD78B1C4707E20071DD18 /* SPTPersistentCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 696CD7861C4707E20071DD18 /* SPTPersistentCache.m */; };
 		696CD78C1C4707E20071DD18 /* SPTPersistentCacheOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = 696CD7871C4707E20071DD18 /* SPTPersistentCacheOptions.m */; };
@@ -424,10 +424,8 @@
 				057AFD5B1C70F99A00350C9F /* SPTPersistentCacheHeader.m in Sources */,
 				696CD78A1C4707E20071DD18 /* crc32iso3309.c in Sources */,
 				C45526AF1C77D7ED008D5570 /* SPTPersistentCacheTypeUtilities.m in Sources */,
-				050076AA1C7A2B6D000819B5 /* NSFileManagerMock.m in Sources */,
 				696CD78B1C4707E20071DD18 /* SPTPersistentCache.m in Sources */,
 				0595F0B01C5009800052328B /* SPTPersistentCacheResponse.m in Sources */,
-				050076B01C7A3137000819B5 /* SPTPersistentCachePosixWrapperMock.m in Sources */,
 				050076AD1C7A2FF7000819B5 /* SPTPersistentCachePosixWrapper.m in Sources */,
 				696CD78C1C4707E20071DD18 /* SPTPersistentCacheOptions.m in Sources */,
 			);
@@ -445,8 +443,10 @@
 				9C9E70761C78FD9700E1CBE6 /* SPTPersistentCacheObjectDescriptionStyleValidator.m in Sources */,
 				C41237081C6A29FB00C1E9B8 /* SPTPersistentCacheGarbageCollectorTests.m in Sources */,
 				C413BA071C71E2DC002D41FB /* NSError+SPTPersistentCacheDomainErrorsTests.m in Sources */,
+				691DF30E232AF2C500163E0C /* NSFileManagerMock.m in Sources */,
 				772B8BF11D6DE879008E7347 /* SPTPersistentCachePerformanceTests.m in Sources */,
 				C4B4148F1C6A1BED0099FECD /* SPTPersistentCacheResponseTests.m in Sources */,
+				691DF30F232AF2D500163E0C /* SPTPersistentCachePosixWrapperMock.m in Sources */,
 				C48AE7411C75BB8300814D7D /* SPTPersistentCacheFileManagerTests.m in Sources */,
 				9C9E70731C78D5AA00E1CBE6 /* SPTPersistentCacheObjectDescriptionTests.m in Sources */,
 			);
