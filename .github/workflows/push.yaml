@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  build:
+    runs-on: macOS-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build and Test
+      run: ci/run.sh
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
