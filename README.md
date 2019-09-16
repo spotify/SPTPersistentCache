@@ -1,6 +1,5 @@
 <img alt="SPTPersistentCache" src="banner@2x.png" width="100%" max-width="888">
 
-[![Build Status](https://api.travis-ci.org/spotify/SPTPersistentCache.svg)](https://travis-ci.org/spotify/SPTPersistentCache)
 [![Coverage Status](https://codecov.io/github/spotify/SPTPersistentCache/coverage.svg?branch=master)](https://codecov.io/github/spotify/SPTPersistentCache?branch=master)
 [![Documentation](https://img.shields.io/cocoapods/metrics/doc-percent/SPTPersistentCache.svg)](http://cocoadocs.org/docsets/SPTPersistentCache/)
 [![License](https://img.shields.io/github/license/spotify/SPTPersistentCache.svg)](LICENSE)
