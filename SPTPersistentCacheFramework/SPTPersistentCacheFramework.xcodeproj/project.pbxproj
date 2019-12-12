@@ -10,6 +10,8 @@
 		050076B31C7A4354000819B5 /* SPTPersistentCachePosixWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 050076B11C7A4354000819B5 /* SPTPersistentCachePosixWrapper.h */; };
 		050076B41C7A4354000819B5 /* SPTPersistentCachePosixWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 050076B21C7A4354000819B5 /* SPTPersistentCachePosixWrapper.m */; };
 		050076B51C7A4DC7000819B5 /* SPTPersistentCachePosixWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 050076B21C7A4354000819B5 /* SPTPersistentCachePosixWrapper.m */; };
+		2DD197EF23A25A8100177369 /* SPTPersistentCacheImplementation.h in Headers */ = {isa = PBXBuildFile; fileRef = 2DD197EE23A25A8100177369 /* SPTPersistentCacheImplementation.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2DD197F023A25A9600177369 /* SPTPersistentCacheImplementation.h in Headers */ = {isa = PBXBuildFile; fileRef = 2DD197EE23A25A8100177369 /* SPTPersistentCacheImplementation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C9E707B1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C9E70791C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m */; };
 		9C9E707C1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C9E707A1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h */; };
 		9C9E707D1C790F3700E1CBE6 /* SPTPersistentCacheObjectDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C9E70791C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m */; };
@@ -72,6 +74,7 @@
 		052021FB1C7382C6003A4FB4 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		052022061C738600003A4FB4 /* project.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = project.xcconfig; path = ../project.xcconfig; sourceTree = "<group>"; };
 		052022091C738637003A4FB4 /* spotify_os.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = spotify_os.xcconfig; path = ../spotify_os.xcconfig; sourceTree = "<group>"; };
+		2DD197EE23A25A8100177369 /* SPTPersistentCacheImplementation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheImplementation.h; sourceTree = "<group>"; };
 		9C9E70791C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheObjectDescription.m; sourceTree = "<group>"; };
 		9C9E707A1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheObjectDescription.h; sourceTree = "<group>"; };
 		C45526B21C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheTypeUtilities.h; sourceTree = "<group>"; };
@@ -143,6 +146,7 @@
 			children = (
 				DD1D23791C77857900D0477A /* SPTPersistentCache.h */,
 				DD1D237A1C77857900D0477A /* SPTPersistentCacheHeader.h */,
+				2DD197EE23A25A8100177369 /* SPTPersistentCacheImplementation.h */,
 				DD1D237B1C77857900D0477A /* SPTPersistentCacheOptions.h */,
 				DD1D237C1C77857900D0477A /* SPTPersistentCacheRecord.h */,
 				DD1D237D1C77857900D0477A /* SPTPersistentCacheResponse.h */,
@@ -211,6 +215,7 @@
 				C4EA65061C7A547000A6091A /* SPTPersistentCacheDebugUtilities.h in Headers */,
 				DD1D23821C77857900D0477A /* SPTPersistentCacheRecord.h in Headers */,
 				DD1D23A31C7785A900D0477A /* crc32iso3309.h in Headers */,
+				2DD197EF23A25A8100177369 /* SPTPersistentCacheImplementation.h in Headers */,
 				DD1D23AE1C7785A900D0477A /* SPTPersistentCacheGarbageCollector.h in Headers */,
 				DD1D23A51C7785A900D0477A /* SPTPersistentCache+Private.h in Headers */,
 				9C9E707C1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h in Headers */,
@@ -237,6 +242,7 @@
 				C45526B51C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h in Headers */,
 				DD1D23861C77857E00D0477A /* SPTPersistentCacheHeader.h in Headers */,
 				DD1D23881C77857E00D0477A /* SPTPersistentCacheRecord.h in Headers */,
+				2DD197F023A25A9600177369 /* SPTPersistentCacheImplementation.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
