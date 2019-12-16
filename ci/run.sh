@@ -55,9 +55,8 @@ build_library iphoneos
 build_library iphonesimulator
 build_library appletvos
 build_library appletvsimulator
-# TODO: support watchOS
-# build_library watchos
-# build_library watchsimulator
+build_library watchos
+build_library watchsimulator
 
 #
 # BUILD FRAMEWORKS
@@ -75,9 +74,8 @@ build_framework SPTPersistentCache-iOS iphoneos
 build_framework SPTPersistentCache-iOS iphonesimulator
 build_framework SPTPersistentCache-TV appletvos
 build_framework SPTPersistentCache-TV appletvsimulator
-# TODO: support watchOS
-# build_framework SPTPersistentCache-Watch watchos
-# build_framework SPTPersistentCache-Watch watchsimulator
+build_framework SPTPersistentCache-Watch watchos
+build_framework SPTPersistentCache-Watch watchsimulator
 
 #
 # BUILD DEMO APP
