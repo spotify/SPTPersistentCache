@@ -50,30 +50,32 @@ build_library() {
     -configuration Release
 }
 
+build_library macosx
 build_library iphoneos
 build_library iphonesimulator
-build_library macosx
-# TODO: support TV/watch
-# build_library watchos
-# build_library watchsimulator
-# build_library appletvos
-# build_library appletvsimulator
+build_library appletvos
+build_library appletvsimulator
+build_library watchos
+build_library watchsimulator
 
 #
 # BUILD FRAMEWORKS
 #
 
 build_framework() {
-  xcb "Build Framework [$1]" \
+  xcb "Build Framework [$1 for $2]" \
     build -scheme "$1" \
+    -sdk "$2" \
     -configuration Release
 }
 
-build_framework SPTPersistentCache-iOS
-build_framework SPTPersistentCache-OSX
-# TODO: support TV/watch
-# build_framework SPTPersistentCache-TV
-# build_framework SPTPersistentCache-Watch
+build_framework SPTPersistentCache-OSX macosx
+build_framework SPTPersistentCache-iOS iphoneos
+build_framework SPTPersistentCache-iOS iphonesimulator
+build_framework SPTPersistentCache-TV appletvos
+build_framework SPTPersistentCache-TV appletvsimulator
+build_framework SPTPersistentCache-Watch watchos
+build_framework SPTPersistentCache-Watch watchsimulator
 
 #
 # BUILD DEMO APP
@@ -93,18 +95,21 @@ xcb "Run tests for macOS" test \
   -enableCodeCoverage YES \
   -sdk macosx
 
-LATEST_IOS_SDK="$(/usr/libexec/PlistBuddy -c "Print :Version" "$(xcrun --show-sdk-path --sdk iphonesimulator)/SDKSettings.plist")"
+LATEST_IOS_RUNTIME=`xcrun simctl list runtimes | egrep "^iOS" | sort | tail -n 1 | awk '{print $NF}'`
+IOS_UDID=`xcrun simctl create ios-tester com.apple.CoreSimulator.SimDeviceType.iPhone-8 "$LATEST_IOS_RUNTIME"`
+
 xcb "Run tests for iOS" test \
   -scheme "SPTPersistentCache" \
   -enableCodeCoverage YES \
-  -destination "platform=iOS Simulator,name=iPhone 8,OS=$LATEST_IOS_SDK"
+  -destination "platform=iOS Simulator,id=$IOS_UDID"
 
-# TODO: support TV
-# LATEST_TVOS_SDK="$(/usr/libexec/PlistBuddy -c "Print :Version" "$(xcrun --show-sdk-path --sdk iphonesimulator)/SDKSettings.plist")"
-# xcb "Run tests for tvOS" test \
-#   -scheme "SPTDataLoader" \
-#   -enableCodeCoverage YES \
-#   -destination "platform=tvOS Simulator,name=Apple TV,OS=$LATEST_TVOS_SDK"
+LATEST_TVOS_RUNTIME=`xcrun simctl list runtimes | egrep "^tvOS" | sort | tail -n 1 | awk '{print $NF}'`
+TVOS_UDID=`xcrun simctl create tvos-tester com.apple.CoreSimulator.SimDeviceType.Apple-TV-1080p "$LATEST_TVOS_RUNTIME"`
+
+xcb "Run tests for tvOS" test \
+  -scheme "SPTPersistentCache" \
+  -enableCodeCoverage YES \
+  -destination "platform=tvOS Simulator,id=$TVOS_UDID"
 
 #
 # CODECOV
