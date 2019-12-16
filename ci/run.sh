@@ -95,17 +95,21 @@ xcb "Run tests for macOS" test \
   -enableCodeCoverage YES \
   -sdk macosx
 
-LATEST_IOS_SDK="$(/usr/libexec/PlistBuddy -c "Print :Version" "$(xcrun --show-sdk-path --sdk iphonesimulator)/SDKSettings.plist")"
+LATEST_IOS_RUNTIME=`xcrun simctl list runtimes | egrep "^iOS" | sort | tail -n 1 | awk '{print $NF}'`
+IOS_UDID=`xcrun simctl create ios-tester com.apple.CoreSimulator.SimDeviceType.iPhone-8 "$LATEST_IOS_RUNTIME"`
+
 xcb "Run tests for iOS" test \
   -scheme "SPTPersistentCache" \
   -enableCodeCoverage YES \
-  -destination "platform=iOS Simulator,name=iPhone 8,OS=$LATEST_IOS_SDK"
+  -destination "platform=iOS Simulator,id=$IOS_UDID"
 
-LATEST_TVOS_SDK="$(/usr/libexec/PlistBuddy -c "Print :Version" "$(xcrun --show-sdk-path --sdk iphonesimulator)/SDKSettings.plist")"
+LATEST_TVOS_RUNTIME=`xcrun simctl list runtimes | egrep "^tvOS" | sort | tail -n 1 | awk '{print $NF}'`
+TVOS_UDID=`xcrun simctl create tvos-tester com.apple.CoreSimulator.SimDeviceType.Apple-TV-1080p "$LATEST_TVOS_RUNTIME"`
+
 xcb "Run tests for tvOS" test \
   -scheme "SPTPersistentCache" \
   -enableCodeCoverage YES \
-  -destination "platform=tvOS Simulator,name=Apple TV,OS=$LATEST_TVOS_SDK"
+  -destination "platform=tvOS Simulator,id=$TVOS_UDID"
 
 #
 # CODECOV
