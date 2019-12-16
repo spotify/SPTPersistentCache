@@ -68,6 +68,10 @@
 		6921FF9D23A7E2F9005B5162 /* SPTPersistentCacheObjectDescription.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C9E707A1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h */; };
 		6921FF9E23A7E2F9005B5162 /* SPTPersistentCachePosixWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 050076B11C7A4354000819B5 /* SPTPersistentCachePosixWrapper.h */; };
 		6921FF9F23A7E2F9005B5162 /* SPTPersistentCacheOptions.h in Headers */ = {isa = PBXBuildFile; fileRef = DD1D237B1C77857900D0477A /* SPTPersistentCacheOptions.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		6921FFA823A7E422005B5162 /* SPTPersistentCacheImplementation.h in Headers */ = {isa = PBXBuildFile; fileRef = 6921FFA623A7E3EE005B5162 /* SPTPersistentCacheImplementation.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		6921FFA923A7E423005B5162 /* SPTPersistentCacheImplementation.h in Headers */ = {isa = PBXBuildFile; fileRef = 6921FFA623A7E3EE005B5162 /* SPTPersistentCacheImplementation.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		6921FFAA23A7E423005B5162 /* SPTPersistentCacheImplementation.h in Headers */ = {isa = PBXBuildFile; fileRef = 6921FFA623A7E3EE005B5162 /* SPTPersistentCacheImplementation.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		6921FFAB23A7E424005B5162 /* SPTPersistentCacheImplementation.h in Headers */ = {isa = PBXBuildFile; fileRef = 6921FFA623A7E3EE005B5162 /* SPTPersistentCacheImplementation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C9E707B1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C9E70791C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m */; };
 		9C9E707C1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C9E707A1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h */; };
 		9C9E707D1C790F3700E1CBE6 /* SPTPersistentCacheObjectDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C9E70791C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m */; };
@@ -132,6 +136,7 @@
 		052022091C738637003A4FB4 /* spotify_os.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = spotify_os.xcconfig; path = ../spotify_os.xcconfig; sourceTree = "<group>"; };
 		6921FF7D23A7E1D7005B5162 /* SPTPersistentCache.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SPTPersistentCache.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6921FFA423A7E2F9005B5162 /* SPTPersistentCache.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SPTPersistentCache.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		6921FFA623A7E3EE005B5162 /* SPTPersistentCacheImplementation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheImplementation.h; sourceTree = "<group>"; };
 		9C9E70791C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheObjectDescription.m; sourceTree = "<group>"; };
 		9C9E707A1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheObjectDescription.h; sourceTree = "<group>"; };
 		C45526B21C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheTypeUtilities.h; sourceTree = "<group>"; };
@@ -219,6 +224,7 @@
 			children = (
 				DD1D23791C77857900D0477A /* SPTPersistentCache.h */,
 				DD1D237A1C77857900D0477A /* SPTPersistentCacheHeader.h */,
+				6921FFA623A7E3EE005B5162 /* SPTPersistentCacheImplementation.h */,
 				DD1D237B1C77857900D0477A /* SPTPersistentCacheOptions.h */,
 				DD1D237C1C77857900D0477A /* SPTPersistentCacheRecord.h */,
 				DD1D237D1C77857900D0477A /* SPTPersistentCacheResponse.h */,
@@ -287,6 +293,7 @@
 				C4EA65061C7A547000A6091A /* SPTPersistentCacheDebugUtilities.h in Headers */,
 				DD1D23821C77857900D0477A /* SPTPersistentCacheRecord.h in Headers */,
 				DD1D23A31C7785A900D0477A /* crc32iso3309.h in Headers */,
+				6921FFAB23A7E424005B5162 /* SPTPersistentCacheImplementation.h in Headers */,
 				DD1D23AE1C7785A900D0477A /* SPTPersistentCacheGarbageCollector.h in Headers */,
 				DD1D23A51C7785A900D0477A /* SPTPersistentCache+Private.h in Headers */,
 				9C9E707C1C790F0B00E1CBE6 /* SPTPersistentCacheObjectDescription.h in Headers */,
@@ -313,6 +320,7 @@
 				C45526B51C77DCCC008D5570 /* SPTPersistentCacheTypeUtilities.h in Headers */,
 				DD1D23861C77857E00D0477A /* SPTPersistentCacheHeader.h in Headers */,
 				DD1D23881C77857E00D0477A /* SPTPersistentCacheRecord.h in Headers */,
+				6921FFAA23A7E423005B5162 /* SPTPersistentCacheImplementation.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -331,6 +339,7 @@
 				6921FF7123A7E1D7005B5162 /* SPTPersistentCacheDebugUtilities.h in Headers */,
 				6921FF7223A7E1D7005B5162 /* SPTPersistentCacheRecord.h in Headers */,
 				6921FF7323A7E1D7005B5162 /* crc32iso3309.h in Headers */,
+				6921FFA923A7E423005B5162 /* SPTPersistentCacheImplementation.h in Headers */,
 				6921FF7423A7E1D7005B5162 /* SPTPersistentCacheGarbageCollector.h in Headers */,
 				6921FF7523A7E1D7005B5162 /* SPTPersistentCache+Private.h in Headers */,
 				6921FF7623A7E1D7005B5162 /* SPTPersistentCacheObjectDescription.h in Headers */,
@@ -354,6 +363,7 @@
 				6921FF9823A7E2F9005B5162 /* SPTPersistentCacheDebugUtilities.h in Headers */,
 				6921FF9923A7E2F9005B5162 /* SPTPersistentCacheRecord.h in Headers */,
 				6921FF9A23A7E2F9005B5162 /* crc32iso3309.h in Headers */,
+				6921FFA823A7E422005B5162 /* SPTPersistentCacheImplementation.h in Headers */,
 				6921FF9B23A7E2F9005B5162 /* SPTPersistentCacheGarbageCollector.h in Headers */,
 				6921FF9C23A7E2F9005B5162 /* SPTPersistentCache+Private.h in Headers */,
 				6921FF9D23A7E2F9005B5162 /* SPTPersistentCacheObjectDescription.h in Headers */,
