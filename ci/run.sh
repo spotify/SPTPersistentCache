@@ -64,16 +64,20 @@ build_library macosx
 #
 
 build_framework() {
-  xcb "Build Framework [$1]" \
+  xcb "Build Framework [$1 for $2]" \
     build -scheme "$1" \
+    -sdk "$2" \
     -configuration Release
 }
 
-build_framework SPTPersistentCache-iOS
-build_framework SPTPersistentCache-OSX
+build_framework SPTPersistentCache-OSX macosx
+build_framework SPTPersistentCache-iOS iphoneos
+build_framework SPTPersistentCache-iOS iphonesimulator
 # TODO: support TV/watch
-# build_framework SPTPersistentCache-TV
-# build_framework SPTPersistentCache-Watch
+# build_framework SPTPersistentCache-TV appletvos
+# build_framework SPTPersistentCache-TV appletvsimulator
+# build_framework SPTPersistentCache-Watch watchos
+# build_framework SPTPersistentCache-Watch watchsimulator
 
 #
 # BUILD DEMO APP
