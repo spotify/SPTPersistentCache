@@ -299,7 +299,7 @@
 			};
 			buildConfigurationList = 052021961C737DBD003A4FB4 /* Build configuration list for PBXProject "SPTPersistentCacheFramework" */;
 			compatibilityVersion = "Xcode 6.3";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,

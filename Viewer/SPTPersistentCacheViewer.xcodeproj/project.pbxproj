@@ -160,7 +160,7 @@
 			};
 			buildConfigurationList = 0510FF0E1BA2FF7A00ED0766 /* Build configuration list for PBXProject "SPTPersistentCacheViewer" */;
 			compatibilityVersion = "Xcode 6.3";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
