@@ -50,14 +50,14 @@ build_library() {
     -configuration Release
 }
 
+build_library macosx
 build_library iphoneos
 build_library iphonesimulator
-build_library macosx
-# TODO: support TV/watch
+build_library appletvos
+build_library appletvsimulator
+# TODO: support watchOS
 # build_library watchos
 # build_library watchsimulator
-# build_library appletvos
-# build_library appletvsimulator
 
 #
 # BUILD FRAMEWORKS
@@ -73,9 +73,9 @@ build_framework() {
 build_framework SPTPersistentCache-OSX macosx
 build_framework SPTPersistentCache-iOS iphoneos
 build_framework SPTPersistentCache-iOS iphonesimulator
-# TODO: support TV/watch
-# build_framework SPTPersistentCache-TV appletvos
-# build_framework SPTPersistentCache-TV appletvsimulator
+build_framework SPTPersistentCache-TV appletvos
+build_framework SPTPersistentCache-TV appletvsimulator
+# TODO: support watchOS
 # build_framework SPTPersistentCache-Watch watchos
 # build_framework SPTPersistentCache-Watch watchsimulator
 
@@ -103,12 +103,11 @@ xcb "Run tests for iOS" test \
   -enableCodeCoverage YES \
   -destination "platform=iOS Simulator,name=iPhone 8,OS=$LATEST_IOS_SDK"
 
-# TODO: support TV
-# LATEST_TVOS_SDK="$(/usr/libexec/PlistBuddy -c "Print :Version" "$(xcrun --show-sdk-path --sdk iphonesimulator)/SDKSettings.plist")"
-# xcb "Run tests for tvOS" test \
-#   -scheme "SPTDataLoader" \
-#   -enableCodeCoverage YES \
-#   -destination "platform=tvOS Simulator,name=Apple TV,OS=$LATEST_TVOS_SDK"
+LATEST_TVOS_SDK="$(/usr/libexec/PlistBuddy -c "Print :Version" "$(xcrun --show-sdk-path --sdk iphonesimulator)/SDKSettings.plist")"
+xcb "Run tests for tvOS" test \
+  -scheme "SPTPersistentCache" \
+  -enableCodeCoverage YES \
+  -destination "platform=tvOS Simulator,name=Apple TV,OS=$LATEST_TVOS_SDK"
 
 #
 # CODECOV
