@@ -59,6 +59,13 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
             
             return NO;
         }
+
+        [[NSURL fileURLWithPath:self.options.cachePath] setResourceValue:@(self.options.shouldExcludeFromBackup) forKey:NSURLIsExcludedFromBackupKey error:&error];
+        if (error) {
+            SPTPersistentCacheSafeDebugCallback([NSString stringWithFormat:
+                                                 @"PersistentDataCache: Resource value: %@ could not be set for key 'NSURLIsExcludedFromBackupKey' because: %@",
+                                                 @(self.options.shouldExcludeFromBackup), error], self.debugOutput);
+        }
     }
     
     return YES;
