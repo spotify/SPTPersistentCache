@@ -117,8 +117,8 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
 /**
  Excludes the cache directory from backup.
  @discussion Some users may wish to have the cache directory excluded from backup.
- @note This will only affect the first time the cache directory is created. Changing this value later will have no effect and would require the removal of the
- cache directory in order to change.
+ @note This will only affect the first time the cache directory is created. Changing this value later will have no effect and would require a new cache directory
+ to be created in order to change.
  */
 @property (nonatomic, assign) BOOL shouldExcludeFromBackup;
 
