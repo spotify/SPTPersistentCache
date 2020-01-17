@@ -148,6 +148,7 @@ static NSUInteger SPTGuardedPropertyValue(NSUInteger proposedValue, NSUInteger m
     return SPTPersistentCacheObjectDescription(self,
                                                self.cacheIdentifier, @"cache-identifier",
                                                self.cachePath, @"cache-path",
+                                               self.shouldExcludeFromBackup, @"exclude-from-backup",
                                                self.identifierForQueue, @"identifier-for-queue",
                                                @(self.useDirectorySeparation), @"use-directory-separation",
                                                @(self.garbageCollectionInterval), @"garbage-collection-interval",
