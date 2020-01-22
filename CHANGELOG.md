@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file. SPTPersistentCache adheres to [Semantic Versioning](http://semver.org/).
 
 --
+## [1.1.2](https://github.com/spotify/SPTPersistentCache/releases/tag/1.1.2)
+
+### Added
+* SPTPersistentCacheOptions property allowing users to opt out of system backup. 
+
 ## [1.1.1](https://github.com/spotify/SPTPersistentCache/releases/tag/1.1.1)
 _Released on 2017-08-15._
 
