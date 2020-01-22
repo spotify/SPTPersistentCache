@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
     s.name         = "SPTPersistentCache"
-    s.version      = "1.1.1"
+    s.version      = "1.1.2"
     s.summary      = "SPTPersistentCache is a fast, binary, LRU cache used in the Spotify iOS app"
 
     s.description  = <<-DESC
