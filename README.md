@@ -62,7 +62,7 @@ For an example of this framework's usage, see the demo application `SPTPersisten
 ### Creating the SPTPersistentCache
 It is best to use different caches for different types of data you want to store, and not just one big cache for your entire application. However, only create one `SPTPersistentCache` instance for each cache, otherwise you might encounter anomalies when the two different caches end up writing to the same file.
 ```objc
-NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject stringByAppendingString:@"com.spotify.demo.image.cache"];
+NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:@"com.spotify.demo.image.cache"];
 
 SPTPersistentCacheOptions *options = [SPTPersistentCacheOptions new];
 options.cachePath = cachePath;
