@@ -158,6 +158,7 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
 
 /**
  Garbage collection (GC) interval in seconds. It is guaranteed that once started the GC runs with this interval.
+ @note To start GC call `scheduleGarbageCollector` on `SPTPersistentCache` object.
  @discussion Its recommended to use `SPTPersistentCacheDefaultGCIntervalSec` constant if unsure. The
  implementation will make sure the value isn’t below the minimum (`SPTPersistentCacheMinimumGCIntervalLimit`).
  @note Defaults to `SPTPersistentCacheDefaultGCIntervalSec`.
