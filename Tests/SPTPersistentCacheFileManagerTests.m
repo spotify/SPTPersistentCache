@@ -26,7 +26,7 @@
 #import <objc/runtime.h>
 
 
-static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test_directory";
+static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test directory";
 
 
 #pragma mark -

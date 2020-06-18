@@ -216,7 +216,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     }
 
     self.cachePath = [NSTemporaryDirectory() stringByAppendingPathComponent:
-                              [NSString stringWithFormat:@"pdc-%@.tmp", [[NSProcessInfo processInfo] globallyUniqueString]]];
+                              [NSString stringWithFormat:@"pdc %@.tmp", [[NSProcessInfo processInfo] globallyUniqueString]]];
 
     NSLog(@"%@", self.cachePath);
 
@@ -1975,7 +1975,7 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
 - (NSUInteger)getFilesNumberAtPath:(NSString *)path
 {
     NSUInteger count = 0;
-    NSURL *urlPath = [NSURL URLWithString:path];
+    NSURL *urlPath = [NSURL fileURLWithPath:path];
     NSDirectoryEnumerator *dirEnumerator = [[NSFileManager defaultManager] enumeratorAtURL:urlPath
                                                                 includingPropertiesForKeys:@[NSURLIsDirectoryKey]
                                                                                    options:NSDirectoryEnumerationSkipsHiddenFiles
