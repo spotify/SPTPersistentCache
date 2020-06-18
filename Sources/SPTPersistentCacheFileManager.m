@@ -89,7 +89,7 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
 
 - (void)removeAllData
 {
-    NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
+    NSURL *urlPath = [NSURL fileURLWithPath:self.options.cachePath];
     
     NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
                                                   includingPropertiesForKeys:@[NSURLIsDirectoryKey]
@@ -136,7 +136,7 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
 - (NSUInteger)totalUsedSizeInBytes
 {
     NSUInteger size = 0;
-    NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
+    NSURL *urlPath = [NSURL fileURLWithPath:self.options.cachePath];
     NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
                                                   includingPropertiesForKeys:@[NSURLIsDirectoryKey]
                                                                      options:NSDirectoryEnumerationSkipsHiddenFiles

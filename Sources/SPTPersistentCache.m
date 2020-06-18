@@ -459,7 +459,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
 - (NSUInteger)lockedItemsSizeInBytes
 {
     NSUInteger size = 0;
-    NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
+    NSURL *urlPath = [NSURL fileURLWithPath:self.options.cachePath];
     NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
                                                   includingPropertiesForKeys:@[NSURLIsDirectoryKey]
                                                                      options:NSDirectoryEnumerationSkipsHiddenFiles
@@ -854,7 +854,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
 {
     [self debugOutput:@"PersistentDataCache: Run GC with forceExpire:%d forceLock:%d", forceExpire, forceLocked];
 
-    NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
+    NSURL *urlPath = [NSURL fileURLWithPath:self.options.cachePath];
     NSDirectoryEnumerator *dirEnumerator = [self.fileManager enumeratorAtURL:urlPath
                                                   includingPropertiesForKeys:@[NSURLIsDirectoryKey]
                                                                      options:NSDirectoryEnumerationSkipsHiddenFiles
@@ -990,7 +990,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
 
 - (NSMutableArray *)storedImageNamesAndAttributes
 {
-    NSURL *urlPath = [NSURL URLWithString:self.options.cachePath];
+    NSURL *urlPath = [NSURL fileURLWithPath:self.options.cachePath];
 
     // Enumerate the directory (specified elsewhere in your code)
     // Ignore hidden files

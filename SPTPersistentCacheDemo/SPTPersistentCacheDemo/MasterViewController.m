@@ -156,7 +156,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     }
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration];
-    NSURL *url = [NSURL URLWithString:imageURL];
+    NSURL *url = [NSURL fileURLWithPath:imageURL];
 
     NSAssert(url != nil, @"Couldn’t create a wellformed URL from the image URL string \"%@\"", imageURL);
 
