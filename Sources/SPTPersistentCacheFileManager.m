@@ -47,8 +47,15 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
 {
     BOOL isDirectory = NO;
     
-    BOOL didFileExist = [self.fileManager fileExistsAtPath:self.options.cachePath isDirectory:&isDirectory];
-    if (didFileExist == NO) {
+    BOOL exists = [self.fileManager fileExistsAtPath:self.options.cachePath isDirectory:&isDirectory];
+    if (exists && !isDirectory) {
+        SPTPersistentCacheSafeDebugCallback(
+            [NSString stringWithFormat:@"PersistentDataCache: Unable to create dir: %@ - file exists at path", self.options.cachePath],
+            self.debugOutput);
+        return NO;
+    }
+
+    if (exists == NO) {
         NSError *error = nil;
         BOOL didCreateDirectory = [self.fileManager createDirectoryAtPath:self.options.cachePath
                                               withIntermediateDirectories:YES
