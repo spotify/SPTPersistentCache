@@ -211,7 +211,7 @@
     XCTAssertTrue(called);
 }
 
-- (void)testTotalUsedSizeInBytesFailWithNSURLGetResourceValue
+- (void)DISABLED_testTotalUsedSizeInBytesFailWithNSURLGetResourceValue
 {
     __block BOOL called = NO;
     self.cacheFileManager.test_debugOutput = ^(NSString *string) {
