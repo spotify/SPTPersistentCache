@@ -25,10 +25,6 @@
 
 #import <objc/runtime.h>
 
-
-static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test directory";
-
-
 #pragma mark -
 
 @interface SPTPersistentCacheFileManagerForTests : SPTPersistentCacheFileManager
@@ -56,6 +52,7 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test dir
 #pragma mark -
 
 @interface SPTPersistentCacheFileManagerTests : XCTestCase
+@property (nonatomic, copy) NSString *cachePath;
 @property (nonatomic, strong) SPTPersistentCacheOptions *options;
 @property (nonatomic, strong) SPTPersistentCacheFileManagerForTests *cacheFileManager;
 @end
@@ -66,12 +63,23 @@ static NSString * const SPTPersistentCacheFileManagerTestsCachePath = @"test dir
 {
     [super setUp];
 
+    NSString *testName = NSStringFromSelector(self.invocation.selector ?: _cmd);
+    NSString *uniqCachePart = [NSString stringWithFormat:@"/pcache-%@", testName];
+    self.cachePath = [NSTemporaryDirectory() stringByAppendingPathComponent:uniqCachePart];
+
     SPTPersistentCacheOptions *options = [SPTPersistentCacheOptions new];
-    options.cachePath = SPTPersistentCacheFileManagerTestsCachePath;
+    options.cachePath = self.cachePath;
     options.cacheIdentifier = @"test";
     self.options = options;
     
     self.cacheFileManager = [[SPTPersistentCacheFileManagerForTests alloc] initWithOptions:self.options];
+}
+
+- (void)tearDown
+{
+    [super tearDown];
+
+    [[NSFileManager defaultManager] removeItemAtPath:self.cachePath error:nil];
 }
 
 - (void)testCreateCacheDirectory
