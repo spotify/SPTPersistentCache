@@ -964,7 +964,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
     // Find the free space on the disk
     SPTPersistentCacheDiskSize currentCacheSize = (SPTPersistentCacheDiskSize)[self lockedItemsSizeInBytes];
     for (NSDictionary *image in images) {
-        currentCacheSize += [image[SPTDataCacheFileAttributesKey][NSFileSize] integerValue];
+        currentCacheSize += [(NSString *)image[SPTDataCacheFileAttributesKey][NSFileSize] integerValue];
     }
 
     SPTPersistentCacheDiskSize optimalCacheSize = [self.dataCacheFileManager optimizedDiskSizeForCacheSize:currentCacheSize];
@@ -983,7 +983,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
             [self debugOutput:@"PersistentDataCache: evicting by size key:%@", fileName.lastPathComponent];
         }
 
-        currentCacheSize -= [image[SPTDataCacheFileAttributesKey][NSFileSize] integerValue];
+        currentCacheSize -= [(NSString *)image[SPTDataCacheFileAttributesKey][NSFileSize] integerValue];
     }
     return YES;
 }

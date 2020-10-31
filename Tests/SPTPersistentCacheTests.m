@@ -568,7 +568,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
                 XCTAssertEqual(loadResponse.result, SPTPersistentCacheResponseCodeNotFound, @"We expect file wouldn't be found after removing");
                 XCTAssertNil(loadResponse.record, @"Expected valid nil record");
                 XCTAssertNil(loadResponse.error, @"error is not expected to be here");
-                [expectations[i] fulfill];
+                [(XCTestExpectation *)expectations[i] fulfill];
             } onQueue:dispatch_get_main_queue()];
         }
     } onQueue:dispatch_get_main_queue()];
@@ -618,7 +618,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
                 XCTAssertNil(loadResponse.record, @"Expected valid nil record");
                 XCTAssertNil(loadResponse.error, @"error is not expected to be here");
                 
-                [expectations[i] fulfill];
+                [(XCTestExpectation *)expectations[i] fulfill];
             } onQueue:dispatch_get_main_queue()];
         }
     } onQueue:dispatch_get_main_queue()];
@@ -694,7 +694,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
                     XCTAssert(NO, @"Unexpected result code on LOAD");
                 }
                 
-                [expectations[i] fulfill];
+                [(XCTestExpectation *)expectations[i] fulfill];
             } onQueue:dispatch_get_main_queue()];
         }
 
@@ -773,7 +773,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
                     XCTAssert(NO, @"Unexpected result code on LOAD");
                 }
                 
-                [expectations[i] fulfill];
+                [(XCTestExpectation *)expectations[i] fulfill];
             } onQueue:dispatch_get_main_queue()];
         }
     } onQueue:dispatch_get_main_queue()];
@@ -1371,6 +1371,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
         } onQueue:dispatch_get_main_queue()];
         break;
     }
+    
     [self waitForExpectationsWithTimeout:kDefaultWaitTime handler:nil];
 }
 

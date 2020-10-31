@@ -18,7 +18,7 @@
 // under the License.
 // A set of configurations used for Spotify Objective-C Open Source Projects
 
-IPHONEOS_DEPLOYMENT_TARGET = 8.0
+IPHONEOS_DEPLOYMENT_TARGET = 9.0
 WATCHOS_DEPLOYMENT_TARGET = 2.0
 TVOS_DEPLOYMENT_TARGET = 9.0
 MACOSX_DEPLOYMENT_TARGET = 10.10
