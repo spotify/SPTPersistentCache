@@ -84,7 +84,9 @@ build_framework SPTPersistentCache-Watch watchsimulator
 xcb "Build Demo App for Simulator" \
   build -scheme "SPTPersistentCacheDemo" \
   -sdk iphonesimulator \
-  -configuration Release
+  -configuration Release \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO
 
 #
 # RUN TESTS
