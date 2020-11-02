@@ -70,6 +70,11 @@
 #pragma mark - Menu items
 - (void)openDocument:(id)sender
 {
+    NSWindow *window = self.window;
+    if (window == nil) {
+        return;
+    }
+
     NSOpenPanel *panel = [NSOpenPanel openPanel];
     panel.allowsMultipleSelection = NO;
     panel.canChooseDirectories = YES;
@@ -79,7 +84,7 @@
     panel.message = @"Select cache folder";
     panel.directoryURL = self.cacheURL;
 
-    [panel beginSheetModalForWindow:self.window completionHandler:^(NSInteger result) {
+    [panel beginSheetModalForWindow:window completionHandler:^(NSInteger result) {
         if (NSFileHandlingPanelCancelButton == result) {
             return;
         }
@@ -123,12 +128,12 @@
 #pragma mark - TableView datasource
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
 {
-    return [self.cacheFiles count];
+    return (NSInteger)[self.cacheFiles count];
 }
 
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-    return [[[self.cacheFiles objectAtIndex:row] pathComponents] lastObject];
+    return [[[self.cacheFiles objectAtIndex:(NSUInteger)row] pathComponents] lastObject];
 }
 
 - (void)tableViewSelectionDidChange:(NSNotification *)aNotification
@@ -139,7 +144,7 @@
         return;
     }
 
-    NSString *fullFilePath = [self.cacheFiles objectAtIndex:idx];
+    NSString *fullFilePath = [self.cacheFiles objectAtIndex:(NSUInteger)idx];
     NSData *rawData = [NSData dataWithContentsOfFile:fullFilePath];
 
     SPTPersistentCacheRecordHeader *h = SPTPersistentCacheGetHeaderFromData(__DECONST(void*, [rawData bytes]), [rawData length]);
