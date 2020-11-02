@@ -157,7 +157,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = SPT;
-				LastUpgradeCheck = 0900;
+				LastUpgradeCheck = 1210;
 				ORGANIZATIONNAME = Spotify;
 				TargetAttributes = {
 					055725F91C65280000EF6787 = {
@@ -257,9 +257,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DD1D23C21C779BAE00D0477A /* project.xcconfig */;
 			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				COPY_PHASE_STRIP = "$(YES_FOR_RELEASE)";
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -268,11 +268,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DD1D23C21C779BAE00D0477A /* project.xcconfig */;
 			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				COPY_PHASE_STRIP = "$(YES_FOR_RELEASE)";
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};

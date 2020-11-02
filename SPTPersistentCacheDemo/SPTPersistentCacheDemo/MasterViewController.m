@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2019 Spotify AB.
+ Copyright (c) 2020 Spotify AB.
 
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -80,13 +80,30 @@
 
 - (void)addButtonAction:(UIBarButtonItem *)addButton
 {
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Image"
-                                                        message:@"Add an image:"
-                                                       delegate:self
-                                              cancelButtonTitle:@"Cancel"
-                                              otherButtonTitles:@"OK", nil];
-    alertView.alertViewStyle = UIAlertViewStylePlainTextInput;
-    [alertView show];
+    UIAlertController *ac = [UIAlertController alertControllerWithTitle:@"Image"
+                                                                message:@"Add an image:"
+                                                         preferredStyle:UIAlertControllerStyleAlert];
+
+    [ac addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+        // configure text field
+    }];
+
+    __weak UIAlertController *weakAC = ac;
+    __weak MasterViewController *weakSelf = self;
+    [ac addAction:[UIAlertAction actionWithTitle:@"OK"
+                                           style:UIAlertActionStyleDefault
+                                         handler:^(UIAlertAction * _Nonnull action) {
+        UITextField *tf = weakAC.textFields.firstObject;
+        if (tf.text.length > 0) {
+            [weakSelf addImageWithURLString:tf.text];
+        }
+    }]];
+
+    [ac addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                           style:UIAlertActionStyleCancel
+                                         handler:nil]];
+
+    [self presentViewController:ac animated:YES completion:nil];
 }
 
 #pragma mark UIStoryboardSegue
@@ -146,14 +163,10 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     }
 }
 
-#pragma mark UIAlertViewDelegate
+#pragma mark - Handle Alert
 
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+- (void)addImageWithURLString:(NSString *)imageURL
 {
-    NSString *imageURL = [alertView textFieldAtIndex:0].text;
-    if (!imageURL.length) {
-        return;
-    }
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration];
     NSURL *url = [NSURL fileURLWithPath:imageURL];
