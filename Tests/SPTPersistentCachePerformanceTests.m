@@ -120,11 +120,11 @@ static const int SPTPersistentCachePerformanceIterationCount = 200;
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] init];
     options.cachePath = self.cachePath;
     options.readPriority = NSOperationQueuePriorityVeryHigh;
-    options.readPriority = NSOperationQualityOfServiceUserInteractive;
+    options.readQualityOfService = NSOperationQualityOfServiceUserInteractive;
     options.writePriority = NSOperationQueuePriorityNormal;
-    options.writePriority = NSOperationQualityOfServiceUserInitiated;
+    options.writeQualityOfService = NSOperationQualityOfServiceUserInitiated;
     options.deletePriority = NSOperationQueuePriorityLow;
-    options.deletePriority = NSOperationQualityOfServiceUtility;
+    options.deleteQualityOfService = NSOperationQualityOfServiceUtility;
     options.timingCallback = ^(NSString *key, SPTPersistentCacheDebugMethodType method, SPTPersistentCacheDebugTimingType type, uint64_t machTime){
         NSMutableArray<SPTPersistentCacheTiming *> *timings = nil;
         switch (method) {
