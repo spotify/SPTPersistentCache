@@ -51,6 +51,7 @@ static NSUInteger SPTGuardedPropertyValue(NSUInteger proposedValue, NSUInteger m
         _cachePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"/com.spotify.temppersistent.image.cache"];
         _cacheIdentifier = @"persistent.cache";
         _useDirectorySeparation = YES;
+        _shouldExcludeFromBackup = NO;
 
         _garbageCollectionInterval = SPTPersistentCacheDefaultGCIntervalSec;
         _defaultExpirationPeriod = SPTPersistentCacheDefaultExpirationTimeSec;
@@ -113,6 +114,7 @@ static NSUInteger SPTGuardedPropertyValue(NSUInteger proposedValue, NSUInteger m
     copy.cacheIdentifier = self.cacheIdentifier;
     copy.cachePath = self.cachePath;
     copy.useDirectorySeparation = self.useDirectorySeparation;
+    copy.shouldExcludeFromBackup = self.shouldExcludeFromBackup;
 
     copy.garbageCollectionInterval = self.garbageCollectionInterval;
     copy.defaultExpirationPeriod = self.defaultExpirationPeriod;
@@ -146,6 +148,7 @@ static NSUInteger SPTGuardedPropertyValue(NSUInteger proposedValue, NSUInteger m
     return SPTPersistentCacheObjectDescription(self,
                                                self.cacheIdentifier, @"cache-identifier",
                                                self.cachePath, @"cache-path",
+                                               self.shouldExcludeFromBackup, @"exclude-from-backup",
                                                self.identifierForQueue, @"identifier-for-queue",
                                                @(self.useDirectorySeparation), @"use-directory-separation",
                                                @(self.garbageCollectionInterval), @"garbage-collection-interval",

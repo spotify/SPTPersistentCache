@@ -42,7 +42,7 @@
     NSString *cacheIdentifier = @"com.spotify.demo.image.cache";
     NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory,
                                                                NSUserDomainMask,
-                                                               YES).firstObject stringByAppendingString:cacheIdentifier];
+                                                               YES).firstObject stringByAppendingPathComponent:cacheIdentifier];
     
     SPTPersistentCacheOptions *options = [SPTPersistentCacheOptions new];
     options.cachePath = cachePath;

@@ -33,7 +33,7 @@ $ gem install cocoapods
 ```
 Then simply add `SPTPersistentCache` to your `Podfile`.
 ```
-pod 'SPTPersistentCache', '~> 1.1.1'
+pod 'SPTPersistentCache', '~> 1.1.2'
 ```
 Lastly let CocoaPods do its thing by running:
 ```shell
@@ -48,7 +48,7 @@ $ brew install carthage
 ```
 You will also need to add `SPTPersistentCache` to your `Cartfile`:
 ```
-github "spotify/SPTPersistentCache" ~> 1.1.1
+github "spotify/SPTPersistentCache" ~> 1.1.2
 ```
 After that is all said and done, let Carthage pull in SPTPersistentCache like so:
 ```shell
@@ -62,7 +62,7 @@ For an example of this framework's usage, see the demo application `SPTPersisten
 ### Creating the SPTPersistentCache
 It is best to use different caches for different types of data you want to store, and not just one big cache for your entire application. However, only create one `SPTPersistentCache` instance for each cache, otherwise you might encounter anomalies when the two different caches end up writing to the same file.
 ```objc
-NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject stringByAppendingString:@"com.spotify.demo.image.cache"];
+NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:@"com.spotify.demo.image.cache"];
 
 SPTPersistentCacheOptions *options = [SPTPersistentCacheOptions new];
 options.cachePath = cachePath;
