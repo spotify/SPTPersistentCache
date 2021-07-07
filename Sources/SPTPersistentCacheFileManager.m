@@ -22,8 +22,6 @@
 #import "SPTPersistentCacheDebugUtilities.h"
 #import <SPTPersistentCache/SPTPersistentCacheOptions.h>
 
-static const double SPTPersistentCacheFileManagerMinFreeDiskSpace = 0.1;
-
 const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
 
 @implementation SPTPersistentCacheFileManager
@@ -185,8 +183,7 @@ const NSUInteger SPTPersistentCacheFileManagerSubDirNameLength = 2;
         
         SPTPersistentCacheDiskSize totalSpace = fileSystemSize.longLongValue;
         SPTPersistentCacheDiskSize freeSpace = fileSystemFreeSpace.longLongValue + currentCacheSize;
-        SPTPersistentCacheDiskSize proposedCacheSize = freeSpace - llrint(totalSpace *
-                                                                              SPTPersistentCacheFileManagerMinFreeDiskSpace);
+        SPTPersistentCacheDiskSize proposedCacheSize = freeSpace - llrint(totalSpace * self.options.minFreeDiskSpacePortion);
         
         tempCacheSize = MAX(0, proposedCacheSize);
         
