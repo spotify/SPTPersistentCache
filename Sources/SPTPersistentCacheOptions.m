@@ -27,6 +27,7 @@
 const NSUInteger SPTPersistentCacheDefaultExpirationTimeSec = 10 * 60;
 const NSUInteger SPTPersistentCacheDefaultGCIntervalSec = 6 * 60 + 3;
 static const NSUInteger SPTPersistentCacheDefaultCacheSizeInBytes = 0; // unbounded
+static const double SPTPersistentCacheDefaultMinFreeDiskSpacePortion = 0.1;
 
 const NSUInteger SPTPersistentCacheMinimumGCIntervalLimit = 60;
 const NSUInteger SPTPersistentCacheMinimumExpirationLimit = 60;
@@ -55,6 +56,7 @@ static NSUInteger SPTGuardedPropertyValue(NSUInteger proposedValue, NSUInteger m
         _garbageCollectionInterval = SPTPersistentCacheDefaultGCIntervalSec;
         _defaultExpirationPeriod = SPTPersistentCacheDefaultExpirationTimeSec;
         _sizeConstraintBytes = SPTPersistentCacheDefaultCacheSizeInBytes;
+        _minFreeDiskSpacePortion = SPTPersistentCacheDefaultMinFreeDiskSpacePortion;
         _maxConcurrentOperations = NSOperationQueueDefaultMaxConcurrentOperationCount;
         _writePriority = NSOperationQueuePriorityNormal;
         _writeQualityOfService = NSQualityOfServiceDefault;
@@ -117,6 +119,7 @@ static NSUInteger SPTGuardedPropertyValue(NSUInteger proposedValue, NSUInteger m
     copy.garbageCollectionInterval = self.garbageCollectionInterval;
     copy.defaultExpirationPeriod = self.defaultExpirationPeriod;
     copy.sizeConstraintBytes = self.sizeConstraintBytes;
+    copy.minFreeDiskSpacePortion = self.minFreeDiskSpacePortion;
 
     copy.debugOutput = self.debugOutput;
     copy.timingCallback = self.timingCallback;
@@ -150,7 +153,8 @@ static NSUInteger SPTGuardedPropertyValue(NSUInteger proposedValue, NSUInteger m
                                                @(self.useDirectorySeparation), @"use-directory-separation",
                                                @(self.garbageCollectionInterval), @"garbage-collection-interval",
                                                @(self.defaultExpirationPeriod), @"default-expiration-period",
-                                               @(self.sizeConstraintBytes), @"size-constraint-bytes");
+                                               @(self.sizeConstraintBytes), @"size-constraint-bytes",
+                                               @(self.minFreeDiskSpacePortion), @"min-free-disk-space-portion");
 }
 
 @end

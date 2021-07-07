@@ -178,6 +178,11 @@ FOUNDATION_EXPORT const NSUInteger SPTPersistentCacheMinimumExpirationLimit;
  */
 @property (nonatomic, assign) NSUInteger sizeConstraintBytes;
 /**
+ Portion of the total disk space to always leave free on the device. Only works if `sizeConstraintBytes` is not `0`.
+ @note Defaults to `0.1`.
+ */
+@property (nonatomic, assign) double minFreeDiskSpacePortion;
+/**
  The queue priority for garbage collection. Defaults to NSOperationQueuePriorityLow.
  */
 @property (nonatomic) NSOperationQueuePriority garbageCollectionPriority;
