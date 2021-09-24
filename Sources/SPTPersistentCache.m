@@ -61,6 +61,13 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
     }
 }
 
+@interface SPTPersistentCacheFileInfo : NSObject
+@property (nonatomic, strong, readonly) NSString *fileName;
+@property (nonatomic, strong, readonly) NSDate *mdate;
+@property (nonatomic, assign, readonly) off_t fileSize;
+- (instancetype)initWithFileName:(NSString *)fileName mdate:(NSDate *)mdate fileSize:(off_t)fileSize;
+@end
+
 // Class extension exists in SPTPersistentCache+Private.h
 
 #pragma mark - SPTPersistentCache
@@ -959,22 +966,22 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
     }
 
     // Find all the image names and attributes and sort oldest last
-    NSMutableArray *images = [self storedImageNamesAndAttributes];
+    NSMutableArray<SPTPersistentCacheFileInfo *> *files = [self storedFileNamesAndAttributes];
 
     // Find the free space on the disk
     SPTPersistentCacheDiskSize currentCacheSize = (SPTPersistentCacheDiskSize)[self lockedItemsSizeInBytes];
-    for (NSDictionary *image in images) {
-        currentCacheSize += [image[SPTDataCacheFileAttributesKey][NSFileSize] integerValue];
+    for (SPTPersistentCacheFileInfo *file in files) {
+        currentCacheSize += file.fileSize;
     }
 
     SPTPersistentCacheDiskSize optimalCacheSize = [self.dataCacheFileManager optimizedDiskSizeForCacheSize:currentCacheSize];
 
     // Remove oldest data until we reach acceptable cache size
-    while (currentCacheSize > optimalCacheSize && images.count) {
-        NSDictionary *image = images.lastObject;
-        [images removeLastObject];
+    while (currentCacheSize > optimalCacheSize && files.count) {
+        SPTPersistentCacheFileInfo *file = files.lastObject;
+        [files removeLastObject];
 
-        NSString *fileName = image[SPTDataCacheFileNameKey];
+        NSString *fileName = file.fileName;
         NSError *localError = nil;
         if (fileName.length > 0 && ![self.fileManager removeItemAtPath:fileName error:&localError]) {
             [self debugOutput:@"PersistentDataCache: %@ ERROR %@", @(__PRETTY_FUNCTION__), [localError localizedDescription]];
@@ -983,12 +990,12 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
             [self debugOutput:@"PersistentDataCache: evicting by size key:%@", fileName.lastPathComponent];
         }
 
-        currentCacheSize -= [image[SPTDataCacheFileAttributesKey][NSFileSize] integerValue];
+        currentCacheSize -= file.fileSize;
     }
     return YES;
 }
 
-- (NSMutableArray *)storedImageNamesAndAttributes
+- (NSMutableArray<SPTPersistentCacheFileInfo *> *)storedFileNamesAndAttributes
 {
     NSURL *urlPath = [NSURL fileURLWithPath:self.options.cachePath];
 
@@ -1001,7 +1008,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
                                                                 errorHandler:nil];
 
     // An array to store the all the enumerated file names in
-    NSMutableArray *images = [NSMutableArray array];
+    NSMutableArray<SPTPersistentCacheFileInfo *> *files = [NSMutableArray array];
 
     // Enumerate the dirEnumerator results, each value is stored in allURLs
     NSURL *theURL = nil;
@@ -1043,12 +1050,12 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
                  Use modification time even for files with TTL
                  Files with TTL have updateTime set once on creation.
                  */
-                NSDate *mdate = [NSDate dateWithTimeIntervalSince1970:(fileStat.st_mtimespec.tv_sec + fileStat.st_mtimespec.tv_nsec*1e9)];
-                NSNumber *fsize = [NSNumber numberWithLongLong:fileStat.st_size];
-                NSDictionary *values = @{NSFileModificationDate : mdate, NSFileSize: fsize};
 
-                [images addObject:@{ SPTDataCacheFileNameKey : filePathString,
-                                     SPTDataCacheFileAttributesKey : values }];
+                NSDate *mdate = [NSDate dateWithTimeIntervalSince1970:(fileStat.st_mtimespec.tv_sec + fileStat.st_mtimespec.tv_nsec*1e9)];
+                SPTPersistentCacheFileInfo *info = [[SPTPersistentCacheFileInfo alloc] initWithFileName:filePathString
+                                                                                                  mdate:mdate
+                                                                                               fileSize:fileStat.st_size];
+                [files addObject:info];
             }
         } else {
             [self debugOutput:@"Unable to fetch isDir#5 attribute:%@", theURL];
@@ -1056,15 +1063,13 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
     }
 
     // Oldest goes last
-    NSComparisonResult(^SPTSortFilesByModificationDate)(id, id) = ^NSComparisonResult(NSDictionary *file1, NSDictionary *file2) {
-        NSDate *date1 = file1[SPTDataCacheFileAttributesKey][NSFileModificationDate];
-        NSDate *date2 = file2[SPTDataCacheFileAttributesKey][NSFileModificationDate];
-        return [date2 compare:date1];
+    NSComparisonResult(^SPTSortFilesByModificationDate)(id, id) = ^NSComparisonResult(SPTPersistentCacheFileInfo *file1, SPTPersistentCacheFileInfo *file2) {
+        return [file2.mdate compare:file1.mdate];
     };
 
-    NSArray *sortedImages = [images sortedArrayUsingComparator:SPTSortFilesByModificationDate];
+    [files sortUsingComparator:SPTSortFilesByModificationDate];
 
-    return [sortedImages mutableCopy];
+    return files;
 }
 
 - (NSTimeInterval)currentDateTimeInterval
@@ -1087,6 +1092,21 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
             self.options.timingCallback(key, method, type, mach_absolute_time());
         });
     }
+}
+
+@end
+
+@implementation SPTPersistentCacheFileInfo
+
+- (instancetype)initWithFileName:(NSString *)fileName mdate:(NSDate *)mdate fileSize:(off_t)fileSize
+{
+    self = [super init];
+    if (self) {
+        _fileName = fileName;
+        _mdate = mdate;
+        _fileSize = fileSize;
+    }
+    return self;
 }
 
 @end

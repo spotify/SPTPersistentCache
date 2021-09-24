@@ -547,7 +547,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     NSUInteger __block calls = 0;
     const NSUInteger imageCount = self.imageNames.count;
 
-    NSMutableArray *expectations = [NSMutableArray arrayWithCapacity:imageCount];
+    NSMutableArray<XCTestExpectation *> *expectations = [NSMutableArray arrayWithCapacity:imageCount];
     for (NSUInteger i = 0; i < imageCount; ++i) {
         NSString *cacheKey = self.imageNames[i];
         __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
@@ -597,7 +597,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
                                                        expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
     const NSUInteger count = self.imageNames.count;
 
-    NSMutableArray *expectations = [NSMutableArray arrayWithCapacity:count];
+    NSMutableArray<XCTestExpectation *> *expectations = [NSMutableArray arrayWithCapacity:count];
     for (NSUInteger i = 0; i < count; ++i) {
         NSString *cacheKey = self.imageNames[i];
         __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
@@ -651,7 +651,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     }
                                                        expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
     const NSUInteger count = self.imageNames.count;
-    NSMutableArray *expectations = [NSMutableArray arrayWithCapacity:count];
+    NSMutableArray<XCTestExpectation *> *expectations = [NSMutableArray arrayWithCapacity:count];
     for (NSUInteger i = 0; i < count; ++i) {
         NSString *cacheKey = self.imageNames[i];
         __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
@@ -726,7 +726,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
                                                        expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
 
     const NSUInteger count = self.imageNames.count;
-    NSMutableArray *expectations = [NSMutableArray arrayWithCapacity:count];
+    NSMutableArray<XCTestExpectation *> *expectations = [NSMutableArray arrayWithCapacity:count];
     for (NSUInteger i = 0; i < count; ++i) {
         NSString *cacheKey = self.imageNames[i];
         __weak XCTestExpectation *exp = [self expectationWithDescription:cacheKey];
