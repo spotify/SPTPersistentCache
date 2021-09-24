@@ -22,7 +22,7 @@
 #import <SPTPersistentCache/SPTPersistentCache.h>
 
 @interface MainWindowController () <NSTableViewDataSource, NSTableViewDelegate>
-@property (nonatomic, strong) NSMutableArray *cacheFiles;
+@property (nonatomic, strong) NSMutableArray<NSURL *> *cacheFiles;
 
 @property (nonatomic, strong) NSString *magic;
 @property (nonatomic, strong) NSString *headerSize;
@@ -112,10 +112,10 @@
 - (void)loadFilesAtURL:(NSURL *)url
 {
     NSError *error = nil;
-    NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtURL:url
-                                                   includingPropertiesForKeys:nil
-                                                                      options:NSDirectoryEnumerationSkipsHiddenFiles
-                                                                        error:&error];
+    NSArray<NSURL *> *files = [[NSFileManager defaultManager] contentsOfDirectoryAtURL:url
+                                                            includingPropertiesForKeys:nil
+                                                                               options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                                 error:&error];
     if (files == nil) {
         [NSApp presentError:error];
         return;
@@ -144,8 +144,8 @@
         return;
     }
 
-    NSString *fullFilePath = [self.cacheFiles objectAtIndex:(NSUInteger)idx];
-    NSData *rawData = [NSData dataWithContentsOfFile:fullFilePath];
+    NSURL *fileURL = [self.cacheFiles objectAtIndex:(NSUInteger)idx];
+    NSData *rawData = [NSData dataWithContentsOfURL:fileURL];
 
     SPTPersistentCacheRecordHeader *h = SPTPersistentCacheGetHeaderFromData(__DECONST(void*, [rawData bytes]), [rawData length]);
 
@@ -177,8 +177,9 @@
 
     self.object = [[NSImage alloc] initWithData:self.payload];
 
-    self.imageView.image = self.object;
-    self.imageSize = NSStringFromSize([self.object size]);
+    NSImage *image = self.object;
+    self.imageView.image = image;
+    self.imageSize = NSStringFromSize([image size]);
 }
 
 @end

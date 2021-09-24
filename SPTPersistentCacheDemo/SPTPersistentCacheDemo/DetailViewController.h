@@ -25,7 +25,7 @@
 @interface DetailViewController : UIViewController
 
 @property (nonatomic, strong) SPTPersistentCache *persistentDataCache;
-@property (strong, nonatomic) id detailItem;
+@property (strong, nonatomic) NSObject *detailItem;
 @property (nonatomic, weak, readwrite) IBOutlet UIImageView *detailImageView;
 
 @end
