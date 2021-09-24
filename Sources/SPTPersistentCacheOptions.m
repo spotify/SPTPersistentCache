@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 Spotify AB.
+ Copyright (c) 2015-2021 Spotify AB.
 
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -108,7 +108,7 @@ static NSUInteger SPTGuardedPropertyValue(NSUInteger proposedValue, NSUInteger m
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    SPTPersistentCacheOptions * const copy = [[self.class allocWithZone:zone] init];
+    SPTPersistentCacheOptions * const copy = [(SPTPersistentCacheOptions *)[self.class allocWithZone:zone] init];
 
     copy.cacheIdentifier = self.cacheIdentifier;
     copy.cachePath = self.cachePath;

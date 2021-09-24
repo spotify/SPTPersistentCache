@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2020 Spotify AB.
+// Copyright (c) 2015-2021 Spotify AB.
 //
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
@@ -18,10 +18,10 @@
 // under the License.
 // A set of configurations used for Spotify Objective-C Open Source Projects
 
-IPHONEOS_DEPLOYMENT_TARGET = 9.0
-WATCHOS_DEPLOYMENT_TARGET = 2.0
-TVOS_DEPLOYMENT_TARGET = 9.0
-MACOSX_DEPLOYMENT_TARGET = 10.10
+IPHONEOS_DEPLOYMENT_TARGET = 12.0
+WATCHOS_DEPLOYMENT_TARGET = 3.0
+TVOS_DEPLOYMENT_TARGET = 12.0
+MACOSX_DEPLOYMENT_TARGET = 10.12
 
 ENABLE_NS_ASSERTIONS = $(YES_FOR_DEBUG)
 ENABLE_TESTABILITY = $(YES_FOR_DEBUG)
@@ -75,11 +75,7 @@ YES_FOR_RELEASE = $(YES_FOR_RELEASE_$(CONFIGURATION))
 // Warnings:
 // Attribution: https://github.com/jonreid/XcodeWarnings
 
-WARNING_CFLAGS = -Weverything -Wno-error=deprecated -Wno-objc-missing-property-synthesis -Wno-gnu-conditional-omitted-operand -Wno-gnu -Wno-documentation-unknown-command -Wno-reserved-id-macro -Wno-auto-import -Wno-missing-variable-declarations -Wno-c++98-compat -Werror -Wno-direct-ivar-access -Wno-padded $(WARNING_CFLAGS_XCODE_$(XCODE_VERSION_MAJOR))
-
-WARNING_CFLAGS_XCODE_1000 = -Wno-objc-messaging-id
-WARNING_CFLAGS_XCODE_1100 = $(WARNING_CFLAGS_XCODE_1000)
-WARNING_CFLAGS_XCODE_1200 = $(WARNING_CFLAGS_XCODE_1000)
+WARNING_CFLAGS = -Weverything -Wno-error=deprecated -Wno-objc-missing-property-synthesis -Wno-gnu-conditional-omitted-operand -Wno-gnu -Wno-documentation-unknown-command -Wno-reserved-id-macro -Wno-auto-import -Wno-missing-variable-declarations -Wno-c++98-compat -Werror -Wno-direct-ivar-access -Wno-padded
 
 // Warnings
 CLANG_WARN__ARC_BRIDGE_CAST_NONARC = YES

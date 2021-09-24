@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020 Spotify AB.
+ Copyright (c) 2015-2021 Spotify AB.
 
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -25,7 +25,7 @@
 @interface DetailViewController : UIViewController
 
 @property (nonatomic, strong) SPTPersistentCache *persistentDataCache;
-@property (strong, nonatomic) id detailItem;
+@property (strong, nonatomic) NSObject *detailItem;
 @property (nonatomic, weak, readwrite) IBOutlet UIImageView *detailImageView;
 
 @end
