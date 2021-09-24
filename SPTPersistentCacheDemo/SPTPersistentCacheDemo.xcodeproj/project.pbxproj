@@ -157,7 +157,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = SPT;
-				LastUpgradeCheck = 1210;
+				LastUpgradeCheck = 1300;
 				ORGANIZATIONNAME = Spotify;
 				TargetAttributes = {
 					055725F91C65280000EF6787 = {
