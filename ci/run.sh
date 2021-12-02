@@ -20,7 +20,15 @@ xcb() {
     -workspace SPTPersistentCache.xcworkspace \
     -UseSanitizedBuildSystemEnvironment=YES \
     CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY= \
-    "$@" | xcpretty || fail "$LOG failed"
+    "$@" | xcbeautify || fail "$LOG failed"
+}
+
+build_target() {
+  xcb "Build Target [$1] [$2]" build \
+    -scheme "$1" \
+    -destination "$2" \
+    -configuration Release \
+    -derivedDataPath "$DERIVED_DATA_COMMON"
 }
 
 DERIVED_DATA_COMMON="build/DerivedData/common"
@@ -28,7 +36,8 @@ DERIVED_DATA_TEST="build/DerivedData/test"
 
 if [[ -n "$TRAVIS_BUILD_ID" || -n "$GITHUB_WORKFLOW" ]]; then
   heading "Installing Tools"
-  gem install xcpretty cocoapods
+  gem install cocoapods
+  brew install xcbeautify
   export IS_CI=1
 fi
 
@@ -45,41 +54,25 @@ git ls-files | egrep "\\.(h|m|mm)$" | \
 # BUILD LIBRARIES
 #
 
-build_library() {
-  xcb "Build Library [$1]" \
-    build -scheme SPTPersistentCache \
-    -sdk "$1" \
-    -configuration Release \
-    -derivedDataPath "$DERIVED_DATA_COMMON"
-}
-
-build_library macosx
-build_library iphoneos
-build_library iphonesimulator
-build_library appletvos
-build_library appletvsimulator
-build_library watchos
-build_library watchsimulator
+build_target SPTPersistentCache "generic/platform=macOS"
+build_target SPTPersistentCache "generic/platform=iOS"
+build_target SPTPersistentCache "generic/platform=iOS Simulator"
+build_target SPTPersistentCache "generic/platform=tvOS"
+build_target SPTPersistentCache "generic/platform=tvOS Simulator"
+build_target SPTPersistentCache "generic/platform=watchOS"
+build_target SPTPersistentCache "generic/platform=watchOS Simulator"
 
 #
 # BUILD FRAMEWORKS
 #
 
-build_framework() {
-  xcb "Build Framework [$1 for $2]" \
-    build -scheme "$1" \
-    -sdk "$2" \
-    -configuration Release \
-    -derivedDataPath "$DERIVED_DATA_COMMON"
-}
-
-build_framework SPTPersistentCache-OSX macosx
-build_framework SPTPersistentCache-iOS iphoneos
-build_framework SPTPersistentCache-iOS iphonesimulator
-build_framework SPTPersistentCache-TV appletvos
-build_framework SPTPersistentCache-TV appletvsimulator
-build_framework SPTPersistentCache-Watch watchos
-build_framework SPTPersistentCache-Watch watchsimulator
+build_target SPTPersistentCache-OSX "generic/platform=macOS"
+build_target SPTPersistentCache-iOS "generic/platform=iOS"
+build_target SPTPersistentCache-iOS "generic/platform=iOS Simulator"
+build_target SPTPersistentCache-TV "generic/platform=tvOS"
+build_target SPTPersistentCache-TV "generic/platform=tvOS Simulator"
+build_target SPTPersistentCache-Watch "generic/platform=watchOS"
+build_target SPTPersistentCache-Watch "generic/platform=watchOS Simulator"
 
 #
 # BUILD DEMO APP
@@ -87,7 +80,7 @@ build_framework SPTPersistentCache-Watch watchsimulator
 
 xcb "Build Demo App for Simulator" \
   build -scheme "SPTPersistentCacheDemo" \
-  -sdk iphonesimulator \
+  -destination "generic/platform=iOS Simulator" \
   -configuration Release \
   -derivedDataPath "$DERIVED_DATA_COMMON" \
   CODE_SIGNING_ALLOWED=NO \
@@ -100,7 +93,7 @@ xcb "Build Demo App for Simulator" \
 xcb "Run tests for macOS" test \
   -scheme "SPTPersistentCache" \
   -enableCodeCoverage YES \
-  -sdk macosx \
+  -destination "platform=macOS" \
   -derivedDataPath "$DERIVED_DATA_TEST/macos"
 
 LATEST_IOS_RUNTIME=`xcrun simctl list runtimes | egrep "^iOS" | sort | tail -n 1 | awk '{print $NF}'`
