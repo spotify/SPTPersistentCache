@@ -100,7 +100,7 @@ static const int SPTPersistentCachePerformanceIterationCount = 200;
 
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     for (NSString *fileName in fileNames) {
-        NSString *filePath = [bundle pathForResource:fileName ofType:nil];
+        NSString *filePath = [bundle pathForResource:fileName ofType:@"dat"];
         NSData *fileData = [NSData dataWithContentsOfFile:filePath];
         if (!fileData) {
             fileData = [NSData data];

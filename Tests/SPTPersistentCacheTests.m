@@ -231,7 +231,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
     for (NSUInteger i = 0; i < count; ++i) {
         XCTAssert(kParams[i].last != YES, @"Last param element reached");
-        NSString *fileName = [self.thisBundle pathForResource:self.imageNames[i] ofType:nil];
+        NSString *fileName = [self.thisBundle pathForResource:self.imageNames[i] ofType:@"dat"];
         __weak XCTestExpectation *expectation = [self expectationWithDescription:fileName];
         [self putFile:fileName inCache:self.cache withKey:self.imageNames[i] ttl:kParams[i].ttl locked:kParams[i].locked expectation:expectation];
         NSData *data = [NSData dataWithContentsOfFile:fileName];
@@ -824,7 +824,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
 
         if (kParams[i].locked) {
 
-            NSString *fileName = [self.thisBundle pathForResource:self.imageNames[i] ofType:nil];
+            NSString *fileName = [self.thisBundle pathForResource:self.imageNames[i] ofType:@"dat"];
             NSData *data = [NSData dataWithContentsOfFile:fileName];
             XCTAssertNotNil(data, @"Data must be valid");
             expectedSize += ([data length] + (NSUInteger)SPTPersistentCacheRecordHeaderSize);
@@ -1218,7 +1218,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     // Index of file to put. It should be file without any problems.
     const NSUInteger putIndex = 2;
     NSString *key = self.imageNames[putIndex];
-    NSString *fileName = [self.thisBundle pathForResource:key ofType:nil];
+    NSString *fileName = [self.thisBundle pathForResource:key ofType:@"dat"];
     NSString *path = [fileManager pathForKey:key];
 
     // Check that image is valid just in case
@@ -1397,6 +1397,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     SPTPersistentCache *cache = [self createCacheWithTimeCallback:nil expirationTime:0];
     
     NSTimeInterval firstTimeInterval = [cache currentDateTimeInterval];
+    [NSThread sleepForTimeInterval:0.1]; // sleep a beat
     NSTimeInterval secondTimeInterval = [cache currentDateTimeInterval];
     
     XCTAssertGreaterThan(secondTimeInterval, firstTimeInterval);
@@ -2008,7 +2009,7 @@ SPTPersistentCacheLoadingErrorNotEnoughDataToGetHeader,
 
 - (NSUInteger)dataSizeForItem:(NSString *)item
 {
-    NSString *fileName = [self.thisBundle pathForResource:item ofType:nil];
+    NSString *fileName = [self.thisBundle pathForResource:item ofType:@"dat"];
     NSData *data = [NSData dataWithContentsOfFile:fileName];
     XCTAssertNotNil(data, @"Data must be valid");
     return [data length];
