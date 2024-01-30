@@ -26,5 +26,6 @@ Pod::Spec.new do |s|
     s.xcconfig              = {
         "OTHER_LDFLAGS" => "-lObjC"
     }
+    s.resource_bundle       = { 'SPTPersistentCache_Privacy' => ['Resources/PrivacyInfo.xcprivacy'] }
 
 end

@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		050076B41C7A4354000819B5 /* SPTPersistentCachePosixWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 050076B21C7A4354000819B5 /* SPTPersistentCachePosixWrapper.m */; };
 		050076B51C7A4DC7000819B5 /* SPTPersistentCachePosixWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 050076B21C7A4354000819B5 /* SPTPersistentCachePosixWrapper.m */; };
+		245889142B502A8000E63287 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 245889132B502A7600E63287 /* PrivacyInfo.xcprivacy */; };
+		245889152B502A8100E63287 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 245889132B502A7600E63287 /* PrivacyInfo.xcprivacy */; };
+		245889162B502A8100E63287 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 245889132B502A7600E63287 /* PrivacyInfo.xcprivacy */; };
+		245889172B502A8200E63287 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 245889132B502A7600E63287 /* PrivacyInfo.xcprivacy */; };
 		6921FF5A23A7E1D7005B5162 /* SPTPersistentCacheDebugUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = C4EA65051C7A547000A6091A /* SPTPersistentCacheDebugUtilities.m */; };
 		6921FF5B23A7E1D7005B5162 /* SPTPersistentCacheRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = DD1D23981C7785A900D0477A /* SPTPersistentCacheRecord.m */; };
 		6921FF5C23A7E1D7005B5162 /* crc32iso3309.c in Sources */ = {isa = PBXBuildFile; fileRef = DD1D23901C7785A900D0477A /* crc32iso3309.c */; };
@@ -91,7 +95,8 @@
 		052021F21C738048003A4FB4 /* SPTPersistentCache.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SPTPersistentCache.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		052021FB1C7382C6003A4FB4 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		052022061C738600003A4FB4 /* project.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = project.xcconfig; path = ../project.xcconfig; sourceTree = "<group>"; };
-		052022091C738637003A4FB4 /* spotify_os.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = spotify_os.xcconfig; path = ../spotify_os.xcconfig; sourceTree = "<group>"; };
+		052022091C738637003A4FB4 /* spotify_os.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = spotify_os.xcconfig; path = ../ci/spotify_os.xcconfig; sourceTree = "<group>"; };
+		245889132B502A7600E63287 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		6921FF7D23A7E1D7005B5162 /* SPTPersistentCache.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SPTPersistentCache.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6921FFA423A7E2F9005B5162 /* SPTPersistentCache.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SPTPersistentCache.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6921FFA623A7E3EE005B5162 /* SPTPersistentCacheImplementation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheImplementation.h; sourceTree = "<group>"; };
@@ -161,6 +166,7 @@
 			children = (
 				052021A81C737E1E003A4FB4 /* API */,
 				052021B61C737E3E003A4FB4 /* Sources */,
+				245889122B502A7600E63287 /* Resources */,
 				052021FA1C7382B5003A4FB4 /* Supporting Files */,
 				0520219D1C737DBE003A4FB4 /* Products */,
 			);
@@ -231,6 +237,15 @@
 				052022091C738637003A4FB4 /* spotify_os.xcconfig */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		245889122B502A7600E63287 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				245889132B502A7600E63287 /* PrivacyInfo.xcprivacy */,
+			);
+			name = Resources;
+			path = ../Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -407,6 +422,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				245889142B502A8000E63287 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -414,6 +430,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				245889152B502A8100E63287 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -421,6 +438,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				245889162B502A8100E63287 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -428,6 +446,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				245889172B502A8200E63287 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
