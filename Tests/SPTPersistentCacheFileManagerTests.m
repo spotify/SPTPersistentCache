@@ -176,6 +176,66 @@
     XCTAssertEqual(optimizedSize, (SPTPersistentCacheDiskSize)0);
 }
 
+- (void)testOptimizedDiskSizeWhenCacheSizeBiggerThanSizeConstraint
+{
+    SPTPersistentCacheDiskSize cacheSize = LONG_LONG_MAX;
+    self.options.sizeConstraintBytes = 1024 * 1024;
+    SPTPersistentCacheFileManager *manager = [[SPTPersistentCacheFileManagerForTests alloc] initWithOptions:self.options];
+    
+    SPTPersistentCacheDiskSize optimizedSize = [manager optimizedDiskSizeForCacheSize:cacheSize];
+    
+    XCTAssertEqual(optimizedSize, (SPTPersistentCacheDiskSize)self.options.sizeConstraintBytes);
+}
+
+- (void)testOptimizedDiskSizeWhenCacheSizeSmallerThanSizeConstraint
+{
+    SPTPersistentCacheDiskSize cacheSize = 1024 * 1024;
+    self.options.sizeConstraintBytes = 1024 * 1024 * 10;
+    SPTPersistentCacheFileManager *manager = [[SPTPersistentCacheFileManagerForTests alloc] initWithOptions:self.options];
+    
+    SPTPersistentCacheDiskSize optimizedSize = [manager optimizedDiskSizeForCacheSize:cacheSize];
+    
+    XCTAssertEqual(optimizedSize, (SPTPersistentCacheDiskSize)self.options.sizeConstraintBytes);
+}
+
+- (void)testOptimizedDiskSizeWithLowMinFreeDiskSpacePortion
+{
+    SPTPersistentCacheDiskSize cacheSize = 2000;
+    self.options.sizeConstraintBytes = 10000;
+    self.options.minFreeDiskSpacePortion = 0.1;
+    NSDictionary *fileSystemAttributes = @{NSFileSystemSize: @10000,
+                                           NSFileSystemFreeSize: @5000};
+    
+    SPTPersistentCacheFileManagerForTests *manager = [[SPTPersistentCacheFileManagerForTests alloc] initWithOptions:self.options];
+    
+    NSFileManagerMock *fileManager = [[NSFileManagerMock alloc] init];
+    fileManager.mock_attributesOfFileSystemForPaths = @{self.options.cachePath: fileSystemAttributes};
+    manager.test_fileManager = fileManager;
+    
+    SPTPersistentCacheDiskSize optimizedSize = [manager optimizedDiskSizeForCacheSize:cacheSize];
+    
+    XCTAssertEqual(optimizedSize, 6000);
+}
+
+- (void)testOptimizedDiskSizeWithHighMinFreeDiskSpacePortion
+{
+    SPTPersistentCacheDiskSize cacheSize = 2000;
+    self.options.sizeConstraintBytes = 10000;
+    self.options.minFreeDiskSpacePortion = 0.6;
+    NSDictionary *fileSystemAttributes = @{NSFileSystemSize: @10000,
+                                           NSFileSystemFreeSize: @5000};
+    
+    SPTPersistentCacheFileManagerForTests *manager = [[SPTPersistentCacheFileManagerForTests alloc] initWithOptions:self.options];
+    
+    NSFileManagerMock *fileManager = [[NSFileManagerMock alloc] init];
+    fileManager.mock_attributesOfFileSystemForPaths = @{self.options.cachePath: fileSystemAttributes};
+    manager.test_fileManager = fileManager;
+    
+    SPTPersistentCacheDiskSize optimizedSize = [manager optimizedDiskSizeForCacheSize:cacheSize];
+    
+    XCTAssertEqual(optimizedSize, 1000);
+}
+
 - (void)testRemoveAllDataButKeysWithoutKeys
 {
     NSString *keyOne = @"AA";
