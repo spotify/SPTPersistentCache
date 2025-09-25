@@ -589,7 +589,8 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
             SPTPersistentCacheRecord *record = [[SPTPersistentCacheRecord alloc] initWithData:payload
                                                                                           key:key
                                                                                      refCount:refCount
-                                                                                          ttl:ttl];
+                                                                                          ttl:ttl
+                                                                                   updateTime:localHeader.updateTimeSec];
 
             SPTPersistentCacheResponse *response = [[SPTPersistentCacheResponse alloc] initWithResult:SPTPersistentCacheResponseCodeOperationSucceeded
                                                                                                 error:nil

@@ -48,6 +48,10 @@ NS_ASSUME_NONNULL_BEGIN
  Data that was initially passed into storeData:...
  */
 @property (nonatomic, strong, readonly) NSData *data;
+/*
+ * Update time of the record (when it was last stored or accessed)
+ */
+@property (nonatomic, assign, readonly) NSUInteger updateTime;
 
 @end
 
