@@ -27,4 +27,9 @@
                     refCount:(NSUInteger)refCount
                          ttl:(NSUInteger)ttl;
 
+- (instancetype)initWithData:(NSData *)data
+                         key:(NSString *)key
+                    refCount:(NSUInteger)refCount
+                         ttl:(NSUInteger)ttl
+                  updateTime:(NSUInteger)updateTime;
 @end

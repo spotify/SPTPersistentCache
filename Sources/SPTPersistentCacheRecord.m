@@ -30,12 +30,22 @@
                     refCount:(NSUInteger)refCount
                          ttl:(NSUInteger)ttl
 {
+    return [self initWithData:data key:key refCount:refCount ttl:ttl updateTime:0];
+}
+
+- (instancetype)initWithData:(NSData *)data
+                         key:(NSString *)key
+                    refCount:(NSUInteger)refCount
+                         ttl:(NSUInteger)ttl
+                  updateTime:(NSUInteger)updateTime
+{
     self = [super init];
     if (self) {
         _refCount = refCount;
         _ttl = ttl;
         _key = [key copy];
         _data = data;
+        _updateTime = updateTime;
     }
     return self;
 }
@@ -49,7 +59,7 @@
 
 - (NSString *)debugDescription
 {
-    return SPTPersistentCacheObjectDescription(self, self.key, @"key", @(self.ttl), @"ttl", @(self.refCount), @"ref-count");
+    return SPTPersistentCacheObjectDescription(self, self.key, @"key", @(self.ttl), @"ttl", @(self.updateTime), @"updated", @(self.refCount), @"ref-count");
 }
 
 @end
