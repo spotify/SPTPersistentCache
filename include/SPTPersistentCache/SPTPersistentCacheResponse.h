@@ -40,7 +40,7 @@ typedef NS_ENUM(NSInteger, SPTPersistentCacheResponseCode) {
      */
     SPTPersistentCacheResponseCodeNotFound,
     /**
-     Indicates error occured during requested operation. The record field of SPTPersistentCacheResponse would be nil.
+     Indicates error occurred during requested operation. The record field of SPTPersistentCacheResponse would be nil.
      The error mustn't be nil and specify exact error.
      */
     SPTPersistentCacheResponseCodeOperationError
