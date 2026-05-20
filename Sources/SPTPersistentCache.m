@@ -98,9 +98,7 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
                                                                                 queue:_workQueue];
 
 
-        if (![_dataCacheFileManager createCacheDirectory]) {
-            return nil;
-        }
+        [_dataCacheFileManager createCacheDirectory];
     }
     return self;
 }

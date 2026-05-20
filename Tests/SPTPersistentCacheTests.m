@@ -1258,22 +1258,19 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     XCTAssertEqual(header.refCount, 0u, @"refCount must match");
 }
 
-- (void)testInitNilWhenCannotCreateCacheDirectory
+- (void)testInitSucceedsWhenCannotCreateCacheDirectory
 {
     SPTPersistentCacheOptions *options = [SPTPersistentCacheOptions new];
-    options.cachePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"/com.spotify.temppersistent.image.cache"];
+    NSString *filePathBlockingCacheDirectoryCreation = [NSTemporaryDirectory() stringByAppendingPathComponent:@"/com.spotify.temppersistent.image.cache"];
+    options.cachePath = filePathBlockingCacheDirectoryCreation;
     options.cacheIdentifier = @"test";
 
-    Method originalMethod = class_getClassMethod(NSFileManager.class, @selector(defaultManager));
-    IMP originalMethodImplementation = method_getImplementation(originalMethod);
-    IMP fakeMethodImplementation = imp_implementationWithBlock(^ {
-        return nil;
-    });
-    method_setImplementation(originalMethod, fakeMethodImplementation);
+    BOOL didCreateFileThatWillPreventCacheDirectoryCreation = [[NSFileManager defaultManager] createFileAtPath:filePathBlockingCacheDirectoryCreation contents:nil attributes:nil];
+    XCTAssertTrue(didCreateFileThatWillPreventCacheDirectoryCreation);
     SPTPersistentCache *cache = [[SPTPersistentCache alloc] initWithOptions:options];
-    method_setImplementation(originalMethod, originalMethodImplementation);
+    [[NSFileManager defaultManager] removeItemAtPath:filePathBlockingCacheDirectoryCreation error:nil];
 
-    XCTAssertNil(cache, @"The cache should be nil if it could not create the directory");
+    XCTAssertNotNil(cache, @"The cache should initialise even if it could not create the directory");
 }
 
 - (void)testFailToLoadDataWhenCallbackAbsent
