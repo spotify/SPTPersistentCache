@@ -108,6 +108,13 @@ typedef NSString * _Nonnull(^SPTPersistentCacheChooseKeyCallback)(NSArray<NSStri
 - (instancetype)initWithOptions:(SPTPersistentCacheOptions *)options NS_DESIGNATED_INITIALIZER;
 
 /**
+ Failable initialiser.
+ @param options The options to use for the cache parameters.
+ @return An initialised cache, or `nil` if the cache directory cannot be created.
+ */
+- (nullable instancetype)initFailableWithOptions:(SPTPersistentCacheOptions *)options;
+
+/**
  @discussion Load data from cache for specified key.
  Req.#1.2. Expired records treated as not found on load. (And open stream)
  @param key Key used to access the data. It MUST MUST MUST be unique for different data.
