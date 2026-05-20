@@ -79,6 +79,11 @@ void SPTPersistentCacheSafeDispatch(_Nullable dispatch_queue_t queue, _Nonnull d
     return [self initWithOptions:[SPTPersistentCacheOptions new]];
 }
 
+- (nullable instancetype)initFailableWithOptions:(SPTPersistentCacheOptions *)options
+{
+    return [self initWithOptions:options];
+}
+
 - (instancetype)initWithOptions:(SPTPersistentCacheOptions *)options
 {
     self = [super init];

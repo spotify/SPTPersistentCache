@@ -1270,7 +1270,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
         return nil;
     });
     method_setImplementation(originalMethod, fakeMethodImplementation);
-    SPTPersistentCache *cache = [[SPTPersistentCache alloc] initWithOptions:options];
+    SPTPersistentCache *cache = [[SPTPersistentCache alloc] initFailableWithOptions:options];
     method_setImplementation(originalMethod, originalMethodImplementation);
 
     XCTAssertNil(cache, @"The cache should be nil if it could not create the directory");
