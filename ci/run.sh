@@ -17,16 +17,15 @@ xcb() {
   shift
   export NSUnbufferedIO=YES
   set -o pipefail && xcodebuild \
-    -project SPTPersistentCache.xcodeproj \
     -UseSanitizedBuildSystemEnvironment=YES \
     CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY= \
     "$@" | xcbeautify || fail "$LOG failed"
 }
 
 build_target() {
-  xcb "Build Target [$1] [$2]" build \
-    -scheme "$1" \
-    -destination "$2" \
+  xcb "Build SPTPersistentCache [$1]" build \
+    -scheme SPTPersistentCache \
+    -destination "$1" \
     -configuration Release \
     -derivedDataPath "$DERIVED_DATA_COMMON"
 }
@@ -51,22 +50,22 @@ git ls-files | egrep "\\.(h|m|mm)$" | \
   fail "License Validation Failed"
 
 #
-# BUILD LIBRARIES (Xcode)
-#
-
-build_target SPTPersistentCache "generic/platform=macOS"
-build_target SPTPersistentCache "generic/platform=iOS"
-build_target SPTPersistentCache "generic/platform=iOS Simulator"
-build_target SPTPersistentCache "generic/platform=tvOS"
-build_target SPTPersistentCache "generic/platform=tvOS Simulator"
-build_target SPTPersistentCache "generic/platform=watchOS"
-build_target SPTPersistentCache "generic/platform=watchOS Simulator"
-
-#
-# RUN TESTS (spm)
+# RUN TESTS (spm + macos)
 #
 
 swift test || fail "spm tests failed"
+
+#
+# BUILD LIBRARIES (xcodebuild)
+#
+
+build_target "generic/platform=macOS"
+build_target "generic/platform=iOS"
+build_target "generic/platform=iOS Simulator"
+build_target "generic/platform=tvOS"
+build_target "generic/platform=tvOS Simulator"
+build_target "generic/platform=watchOS"
+build_target "generic/platform=watchOS Simulator"
 
 #
 # RUN TESTS (Xcode)
