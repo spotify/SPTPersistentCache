@@ -17,7 +17,7 @@ let package = Package(
         .target(
             name: "SPTPersistentCache",
             path: "Sources",
-            cSettings: []
+            resources: [.process("Resources/PrivacyInfo.xcprivacy")]
         ),
         .testTarget(
             name: "SPTPersistentCacheTests",

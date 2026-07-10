@@ -17,7 +17,7 @@ xcb() {
   shift
   export NSUnbufferedIO=YES
   set -o pipefail && xcodebuild \
-    -workspace SPTPersistentCache.xcworkspace \
+    -project SPTPersistentCache.xcodeproj \
     -UseSanitizedBuildSystemEnvironment=YES \
     CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY= \
     "$@" | xcbeautify || fail "$LOG failed"
@@ -51,7 +51,7 @@ git ls-files | egrep "\\.(h|m|mm)$" | \
   fail "License Validation Failed"
 
 #
-# BUILD LIBRARIES
+# BUILD LIBRARIES (Xcode)
 #
 
 build_target SPTPersistentCache "generic/platform=macOS"
@@ -63,7 +63,13 @@ build_target SPTPersistentCache "generic/platform=watchOS"
 build_target SPTPersistentCache "generic/platform=watchOS Simulator"
 
 #
-# RUN TESTS
+# RUN TESTS (spm)
+#
+
+swift test || fail "spm tests failed"
+
+#
+# RUN TESTS (Xcode)
 #
 
 xcb "Run tests for macOS" test \
