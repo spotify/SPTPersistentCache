@@ -150,7 +150,7 @@
     self.crc = [NSString stringWithFormat:@"0x%X", _currHeader.crc];
     self.updateTime = [NSString stringWithFormat:@"%llu", _currHeader.updateTimeSec];
     self.ttl = [NSString stringWithFormat:@"%llu", _currHeader.ttl];
-    self.refCount = [NSString stringWithFormat:@"%d", _currHeader.refCount];
+    self.refCount = [NSString stringWithFormat:@"%u", _currHeader.refCount];
     self.hrUpdateTime = [NSDateFormatter localizedStringFromDate:[NSDate dateWithTimeIntervalSince1970:_currHeader.updateTimeSec]
                                                        dateStyle:NSDateFormatterMediumStyle
                                                        timeStyle:NSDateFormatterLongStyle];

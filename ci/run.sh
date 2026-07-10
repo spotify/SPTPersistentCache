@@ -75,18 +75,6 @@ build_target SPTPersistentCache-Watch "generic/platform=watchOS"
 build_target SPTPersistentCache-Watch "generic/platform=watchOS Simulator"
 
 #
-# BUILD DEMO APP
-#
-
-xcb "Build Demo App for Simulator" \
-  build -scheme "SPTPersistentCacheDemo" \
-  -destination "generic/platform=iOS Simulator" \
-  -configuration Release \
-  -derivedDataPath "$DERIVED_DATA_COMMON" \
-  CODE_SIGNING_ALLOWED=NO \
-  CODE_SIGNING_REQUIRED=NO
-
-#
 # RUN TESTS
 #
 

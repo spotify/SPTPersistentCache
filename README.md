@@ -55,9 +55,6 @@ $ carthage update
 ```
 Next up, you need to add the framework to the Xcode project of your App. Lastly link the framework with your App and copy it to the App’s Frameworks directory under the “Build Phases”.
 
-## Usage example :eyes:
-For an example of this framework's usage, see the demo application `SPTPersistentCacheDemo` in `SPTPersistentCache.xcworkspace`.
-
 ### Creating the SPTPersistentCache
 It is best to use different caches for different types of data you want to store, and not just one big cache for your entire application. However, only create one `SPTPersistentCache` instance for each cache, otherwise you might encounter anomalies when the two different caches end up writing to the same file.
 ```objc
