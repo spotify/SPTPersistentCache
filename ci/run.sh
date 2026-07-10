@@ -73,7 +73,7 @@ xcb "Run tests for macOS" test \
   -derivedDataPath "$DERIVED_DATA_TEST/macos"
 
 LATEST_IOS_RUNTIME=`xcrun simctl list runtimes | egrep "^iOS" | sort | tail -n 1 | awk '{print $NF}'`
-IOS_UDID=`xcrun simctl create ios-tester com.apple.CoreSimulator.SimDeviceType.iPhone-8 "$LATEST_IOS_RUNTIME"`
+IOS_UDID=`xcrun simctl create sptpc-ios-tester com.apple.CoreSimulator.SimDeviceType.iPhone-13 "$LATEST_IOS_RUNTIME"`
 
 xcb "Run tests for iOS" test \
   -scheme "SPTPersistentCache" \
@@ -82,7 +82,7 @@ xcb "Run tests for iOS" test \
   -derivedDataPath "$DERIVED_DATA_TEST/ios"
 
 LATEST_TVOS_RUNTIME=`xcrun simctl list runtimes | egrep "^tvOS" | sort | tail -n 1 | awk '{print $NF}'`
-TVOS_UDID=`xcrun simctl create tvos-tester com.apple.CoreSimulator.SimDeviceType.Apple-TV-1080p "$LATEST_TVOS_RUNTIME"`
+TVOS_UDID=`xcrun simctl create sptpc-tvos-tester com.apple.CoreSimulator.SimDeviceType.Apple-TV-1080p "$LATEST_TVOS_RUNTIME"`
 
 xcb "Run tests for tvOS" test \
   -scheme "SPTPersistentCache" \
@@ -93,6 +93,10 @@ xcb "Run tests for tvOS" test \
 #
 # CODECOV
 #
+
+if [[ "$NO_COVERAGE" == "1" ]]; then
+  exit 0
+fi
 
 # output a bunch of stuff that codecov might recognize
 if [[ -n "$GITHUB_WORKFLOW" ]]; then
