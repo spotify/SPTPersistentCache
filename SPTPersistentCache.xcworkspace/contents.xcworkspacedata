@@ -7,7 +7,4 @@
    <FileRef
       location = "group:Viewer/SPTPersistentCacheViewer.xcodeproj">
    </FileRef>
-   <FileRef
-      location = "group:SPTPersistentCacheFramework/SPTPersistentCacheFramework.xcodeproj">
-   </FileRef>
 </Workspace>

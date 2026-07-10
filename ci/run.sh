@@ -63,18 +63,6 @@ build_target SPTPersistentCache "generic/platform=watchOS"
 build_target SPTPersistentCache "generic/platform=watchOS Simulator"
 
 #
-# BUILD FRAMEWORKS
-#
-
-build_target SPTPersistentCache-OSX "generic/platform=macOS"
-build_target SPTPersistentCache-iOS "generic/platform=iOS"
-build_target SPTPersistentCache-iOS "generic/platform=iOS Simulator"
-build_target SPTPersistentCache-TV "generic/platform=tvOS"
-build_target SPTPersistentCache-TV "generic/platform=tvOS Simulator"
-build_target SPTPersistentCache-Watch "generic/platform=watchOS"
-build_target SPTPersistentCache-Watch "generic/platform=watchOS Simulator"
-
-#
 # RUN TESTS
 #
 
