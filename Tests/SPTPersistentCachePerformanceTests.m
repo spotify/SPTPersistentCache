@@ -5,6 +5,7 @@
 #import <mach/mach_time.h>
 
 #import <SPTPersistentCache/SPTPersistentCache.h>
+#import "SPTTestBundle.h"
 double convertMachToMilliSeconds(uint64_t mach_time);
 
 static const int SPTPersistentCachePerformanceIterationCount = 200;
@@ -80,7 +81,7 @@ static const int SPTPersistentCachePerformanceIterationCount = 200;
 
     NSLog(@"%@", self.cachePath);
 
-    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSBundle *bundle = SPTTestBundle();
     for (NSString *fileName in fileNames) {
         NSString *filePath = [bundle pathForResource:fileName ofType:@"dat"];
         NSData *fileData = [NSData dataWithContentsOfFile:filePath];

@@ -21,6 +21,7 @@
 #import "SPTPersistentCacheFileManager.h"
 #import "NSFileManagerMock.h"
 #import "SPTPersistentCachePosixWrapperMock.h"
+#import "SPTTestBundle.h"
 
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -208,7 +209,7 @@ typedef NSTimeInterval (^SPTPersistentCacheCurrentTimeSecCallback)(void);
     } expirationTime:SPTPersistentCacheDefaultExpirationTimeSec];
     SPTPersistentCacheFileManager *fileManager = [[SPTPersistentCacheFileManager alloc] initWithOptions:self.cache.options];
 
-    self.thisBundle = [NSBundle bundleForClass:[self class]];
+    self.thisBundle = SPTTestBundle();
 
     const NSUInteger count = self.imageNames.count;
 

@@ -81,24 +81,23 @@
 		057AF8531C6E18AC00350C9F /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		057AFD5A1C70F99A00350C9F /* SPTPersistentCacheHeader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheHeader.m; sourceTree = "<group>"; };
 		0595F0A81C5008060052328B /* SPTPersistentCacheRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheRecord.m; sourceTree = "<group>"; };
-		0595F0AA1C50081C0052328B /* SPTPersistentCacheRecord.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheRecord.h; sourceTree = "<group>"; };
 		0595F0AB1C5008AB0052328B /* SPTPersistentCacheRecord+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SPTPersistentCacheRecord+Private.h"; sourceTree = "<group>"; };
 		0595F0AF1C5009800052328B /* SPTPersistentCacheResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheResponse.m; sourceTree = "<group>"; };
-		0595F0B11C5009920052328B /* SPTPersistentCacheResponse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheResponse.h; sourceTree = "<group>"; };
 		0595F0B21C500A540052328B /* SPTPersistentCacheResponse+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SPTPersistentCacheResponse+Private.h"; sourceTree = "<group>"; };
 		0595F3381C50117B0052328B /* SPTPersistentCacheGarbageCollector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheGarbageCollector.h; sourceTree = "<group>"; };
 		0595F3391C50117B0052328B /* SPTPersistentCacheGarbageCollector.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCacheGarbageCollector.m; sourceTree = "<group>"; };
 		0595F33B1C5011E30052328B /* SPTPersistentCache+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SPTPersistentCache+Private.h"; sourceTree = "<group>"; };
 		05C0B6531DDF7F9C00DDC99A /* CHANGELOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
-		693521E02224C61D0098F8E3 /* SPTPersistentCacheImplementation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheImplementation.h; sourceTree = "<group>"; };
-		693521E12224C6240098F8E3 /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
+		694722BD300158BF0007BF76 /* SPTPersistentCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCache.h; sourceTree = "<group>"; };
+		694722BE300158BF0007BF76 /* SPTPersistentCacheHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheHeader.h; sourceTree = "<group>"; };
+		694722BF300158BF0007BF76 /* SPTPersistentCacheImplementation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheImplementation.h; sourceTree = "<group>"; };
+		694722C0300158BF0007BF76 /* SPTPersistentCacheOptions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheOptions.h; sourceTree = "<group>"; };
+		694722C1300158BF0007BF76 /* SPTPersistentCacheRecord.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheRecord.h; sourceTree = "<group>"; };
+		694722C2300158BF0007BF76 /* SPTPersistentCacheResponse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheResponse.h; sourceTree = "<group>"; };
 		696CD7841C4707E20071DD18 /* crc32iso3309.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = crc32iso3309.c; sourceTree = "<group>"; };
 		696CD7851C4707E20071DD18 /* crc32iso3309.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crc32iso3309.h; sourceTree = "<group>"; };
 		696CD7861C4707E20071DD18 /* SPTPersistentCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SPTPersistentCache.m; sourceTree = "<group>"; };
 		696CD7871C4707E20071DD18 /* SPTPersistentCacheOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = SPTPersistentCacheOptions.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
-		696CD7911C4707EA0071DD18 /* SPTPersistentCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = SPTPersistentCache.h; sourceTree = "<group>"; };
-		696CD7931C4707EA0071DD18 /* SPTPersistentCacheOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = SPTPersistentCacheOptions.h; sourceTree = "<group>"; };
-		696CD7941C4707EA0071DD18 /* SPTPersistentCacheHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTPersistentCacheHeader.h; sourceTree = "<group>"; };
 		698B70531C7538B000BDBFEA /* aad0e75ab0a6828d0a9b37a68198cc9d70d84850.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = aad0e75ab0a6828d0a9b37a68198cc9d70d84850.dat; sourceTree = "<group>"; };
 		698B70541C7538B000BDBFEA /* ab3d97d4d7b3df5417490aa726c5a49b9ee98038.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = ab3d97d4d7b3df5417490aa726c5a49b9ee98038.dat; sourceTree = "<group>"; };
 		698B70551C7538B000BDBFEA /* b02c1be08c00bac5f4f1a62c6f353a24487bb024.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = b02c1be08c00bac5f4f1a62c6f353a24487bb024.dat; sourceTree = "<group>"; };
@@ -168,7 +167,6 @@
 		0510FF0A1BA2FF7A00ED0766 = {
 			isa = PBXGroup;
 			children = (
-				696CD78E1C4707EA0071DD18 /* API */,
 				696CD7831C4707E20071DD18 /* Sources */,
 				0510FF221BA2FF7A00ED0766 /* Tests */,
 				0510FF141BA2FF7A00ED0766 /* Products */,
@@ -237,9 +235,31 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		694722C3300158BF0007BF76 /* SPTPersistentCache */ = {
+			isa = PBXGroup;
+			children = (
+				694722BD300158BF0007BF76 /* SPTPersistentCache.h */,
+				694722BE300158BF0007BF76 /* SPTPersistentCacheHeader.h */,
+				694722BF300158BF0007BF76 /* SPTPersistentCacheImplementation.h */,
+				694722C0300158BF0007BF76 /* SPTPersistentCacheOptions.h */,
+				694722C1300158BF0007BF76 /* SPTPersistentCacheRecord.h */,
+				694722C2300158BF0007BF76 /* SPTPersistentCacheResponse.h */,
+			);
+			path = SPTPersistentCache;
+			sourceTree = "<group>";
+		};
+		694722C4300158BF0007BF76 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				694722C3300158BF0007BF76 /* SPTPersistentCache */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
 		696CD7831C4707E20071DD18 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				694722C4300158BF0007BF76 /* include */,
 				C413BA031C71E1A0002D41FB /* NSError+SPTPersistentCacheDomainErrors.h */,
 				C413BA041C71E1A0002D41FB /* NSError+SPTPersistentCacheDomainErrors.m */,
 				696CD7841C4707E20071DD18 /* crc32iso3309.c */,
@@ -267,21 +287,6 @@
 				050076AC1C7A2FF7000819B5 /* SPTPersistentCachePosixWrapper.m */,
 			);
 			path = Sources;
-			sourceTree = "<group>";
-		};
-		696CD78E1C4707EA0071DD18 /* API */ = {
-			isa = PBXGroup;
-			children = (
-				693521E12224C6240098F8E3 /* module.modulemap */,
-				696CD7911C4707EA0071DD18 /* SPTPersistentCache.h */,
-				696CD7931C4707EA0071DD18 /* SPTPersistentCacheOptions.h */,
-				696CD7941C4707EA0071DD18 /* SPTPersistentCacheHeader.h */,
-				0595F0AA1C50081C0052328B /* SPTPersistentCacheRecord.h */,
-				0595F0B11C5009920052328B /* SPTPersistentCacheResponse.h */,
-				693521E02224C61D0098F8E3 /* SPTPersistentCacheImplementation.h */,
-			);
-			name = API;
-			path = include/SPTPersistentCache;
 			sourceTree = "<group>";
 		};
 		698B70521C7538B000BDBFEA /* Resources */ = {
@@ -466,7 +471,7 @@
 			baseConfigurationReference = 9C882A801C65422700D463BB /* project.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
-					include,
+					Sources/include,
 					"$(inherited)",
 				);
 				ONLY_ACTIVE_ARCH = YES;
@@ -478,7 +483,7 @@
 			baseConfigurationReference = 9C882A801C65422700D463BB /* project.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
-					include,
+					Sources/include,
 					"$(inherited)",
 				);
 				VALIDATE_PRODUCT = YES;
