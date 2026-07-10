@@ -95,7 +95,6 @@
 		052021F21C738048003A4FB4 /* SPTPersistentCache.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SPTPersistentCache.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		052021FB1C7382C6003A4FB4 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		052022061C738600003A4FB4 /* project.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = project.xcconfig; path = ../project.xcconfig; sourceTree = "<group>"; };
-		052022091C738637003A4FB4 /* spotify_os.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = spotify_os.xcconfig; path = ../ci/spotify_os.xcconfig; sourceTree = "<group>"; };
 		245889132B502A7600E63287 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		6921FF7D23A7E1D7005B5162 /* SPTPersistentCache.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SPTPersistentCache.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6921FFA423A7E2F9005B5162 /* SPTPersistentCache.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SPTPersistentCache.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -234,7 +233,6 @@
 			children = (
 				052021FB1C7382C6003A4FB4 /* Info.plist */,
 				052022061C738600003A4FB4 /* project.xcconfig */,
-				052022091C738637003A4FB4 /* spotify_os.xcconfig */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
