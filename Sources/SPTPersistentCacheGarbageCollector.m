@@ -65,14 +65,8 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
 {
     __weak __typeof(self) const weakSelf = self;
     NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
-        // We want to shadow `self` in this case.
-        _Pragma("clang diagnostic push");
-        _Pragma("clang diagnostic ignored \"-Wshadow\"");
-        __typeof(weakSelf) const self = weakSelf;
-        _Pragma("clang diagnostic pop");
-
-        SPTPersistentCache * const cache = self.cache;
-
+        __typeof(weakSelf) const strongSelf = weakSelf;
+        SPTPersistentCache * const cache = strongSelf.cache;
         [cache runRegularGC];
         [cache pruneBySize];
     }];
@@ -98,7 +92,7 @@ static const NSTimeInterval SPTPersistentCacheGarbageCollectorSchedulerTimerTole
         return;
     }
 
-    self.timer = [NSTimer timerWithTimeInterval:self.options.garbageCollectionInterval
+    self.timer = [NSTimer timerWithTimeInterval:(NSTimeInterval)self.options.garbageCollectionInterval
                                          target:self
                                        selector:@selector(enqueueGarbageCollection:)
                                        userInfo:nil
