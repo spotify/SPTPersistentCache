@@ -4,7 +4,6 @@
 [![Documentation](https://img.shields.io/cocoapods/metrics/doc-percent/SPTPersistentCache.svg)](http://cocoadocs.org/docsets/SPTPersistentCache/)
 [![License](https://img.shields.io/github/license/spotify/SPTPersistentCache.svg)](LICENSE)
 [![CocoaPods](https://img.shields.io/cocoapods/v/SPTPersistentCache.svg)](https://cocoapods.org/?q=SPTPersistentCache)
-[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 [![Readme Score](http://readme-score-api.herokuapp.com/score.svg?url=https://github.com/spotify/sptpersistentcache)](http://clayallsopp.github.io/readme-score?url=https://github.com/spotify/sptpersistentcache)
 
 Everyone tries to implement a cache at some point in their app’s lifecycle, and this is ours. This is a library that allows people to cache `NSData` with time to live (TTL) values and semantics for disk management.
@@ -38,25 +37,6 @@ Lastly let CocoaPods do its thing by running:
 ```shell
 $ pod install
 ```
-
-### Carthage
-We support [Carthage](https://github.com/Carthage/Carthage) and provide pre-built binary frameworks for all new releases. Start by making sure you have the latest version of Carthage installed, e.g. using [Homebrew](http://brew.sh/):
-```shell
-$ brew update
-$ brew install carthage
-```
-You will also need to add `SPTPersistentCache` to your `Cartfile`:
-```
-github "spotify/SPTPersistentCache" ~> 1.1.1
-```
-After that is all said and done, let Carthage pull in SPTPersistentCache like so:
-```shell
-$ carthage update
-```
-Next up, you need to add the framework to the Xcode project of your App. Lastly link the framework with your App and copy it to the App’s Frameworks directory under the “Build Phases”.
-
-## Usage example :eyes:
-For an example of this framework's usage, see the demo application `SPTPersistentCacheDemo` in `SPTPersistentCache.xcworkspace`.
 
 ### Creating the SPTPersistentCache
 It is best to use different caches for different types of data you want to store, and not just one big cache for your entire application. However, only create one `SPTPersistentCache` instance for each cache, otherwise you might encounter anomalies when the two different caches end up writing to the same file.
@@ -138,11 +118,6 @@ NSLog(@"Size = %@", @(self.cache.totalUsedSizeInBytes));
 At Spotify we began to standardise the way we handled images in a centralised way, and in doing so we initially created a component that was handling images and their caching. But then our requirements changed, and we began to need caching for our backend calls and preview MP3 downloads as well. In doing so, we managed to separate out our caching logic into a generic component that can be used for any piece of data.
 
 Thus we boiled down what we needed in a cache, the key features being TTL on specific pieces of data, disk management to make sure we don't use too much, and protections against data corruption. It also became very useful to separate different caches into separate files (such as images and mp3s), in order to easily measure how much space each item is taking up.
-
-## Tools :hammer:
-Having a nice GUI tool to inspect the contents of an `SPTPersistentCache` directory would be nice, so we made one. In this repository we have a project called `SPTPersistentCacheViewer.xcodeproj` which is part of the `SPTPersistentCache.xcworkspace`. When you open it and build it for OS X, you will see a GUI that allows you to inspect the contents of a cache, including individual items TTL and payload size.
-
-<img alt="SPTPersistentCacheViewer" src="SPTPersistentCacheViewer.png">
 
 ## Contributing :mailbox_with_mail:
 Contributions are welcomed, have a look at the [CONTRIBUTING.md](CONTRIBUTING.md) document for more information.

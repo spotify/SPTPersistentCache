@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
     s.name         = "SPTPersistentCache"
-    s.version      = "1.1.1"
+    s.version      = "1.2.0"
     s.summary      = "SPTPersistentCache is a fast, binary, LRU cache used in the Spotify iOS app"
 
     s.description  = <<-DESC
@@ -10,8 +10,10 @@ Pod::Spec.new do |s|
                         with TTL values and semantics for disk management.
                      DESC
 
-    s.ios.deployment_target = "8.0"
-    s.osx.deployment_target = "10.10"
+    s.ios.deployment_target = "13.0"
+    s.tvos.deployment_target = "13.0"
+    s.osx.deployment_target = "10.13"
+    s.watchos.deployment_target = "4.0"
 
     s.homepage          = "https://github.com/spotify/SPTPersistentCache"
     s.social_media_url  = "https://twitter.com/spotifyeng"
@@ -21,11 +23,11 @@ Pod::Spec.new do |s|
     }
 
     s.source                = { :git => "https://github.com/spotify/SPTPersistentCache.git", :tag => s.version }
-    s.source_files          = "include/SPTPersistentCache/*.h", "Sources/**/*.{h,m,c}"
-    s.public_header_files   = "include/SPTPersistentCache/*.h"
+    s.source_files          = "Sources/**/*.{h,m,c}"
+    s.public_header_files   = "Sources/include/*.{h,m,c}"
     s.xcconfig              = {
         "OTHER_LDFLAGS" => "-lObjC"
     }
-    s.resource_bundle       = { 'SPTPersistentCache_Privacy' => ['Resources/PrivacyInfo.xcprivacy'] }
+    s.resource_bundle       = { 'SPTPersistentCache_Privacy' => ['Sources/Resources/PrivacyInfo.xcprivacy'] }
 
 end

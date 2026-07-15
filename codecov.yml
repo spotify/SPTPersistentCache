@@ -3,7 +3,6 @@ coverage:
   - Pods/.*
   - Applications/Xcode.app/.*
   - ci/.*
-  - Carthage/.*
   - build/.*
   - Tests/.*
   - .*Tests.m
